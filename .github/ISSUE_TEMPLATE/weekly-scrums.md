@@ -3,7 +3,7 @@ name: Weekly Scrums
 about: A template for all of our weekly scrums for each milestone.
 title: 'Weekly Scrum - '
 labels: weekly-scrum
-assignees: Sabin-Pla, GolanHassin, vikiru
+assignees: Sabin-Pla, GolanHassin, vikiru, martin509, KshitijSawhney
 
 ---
 
