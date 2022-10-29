@@ -24,16 +24,50 @@ class Rectangle {
     }
 }
 
+class Layout {
+    private ArrayList<Rectangle> classes;
+    private ArrayList<ArrayList<IntPair>> connectionArrowRoutes;
+
+    public Layout() {
+        ArrayList classes = new ArrayList<Rectangle>();
+        ArrayList connectionArrowRoutes = new ArrayList<ArrayList<IntPair>>();
+    }
+
+    public void addClass(Rectangle classRectangleBounds) {
+        classes.add(classRectangleBounds);
+    }
+
+    /** 
+     * adds an element to the list of arrows connecting showing relationships
+     * (multiplicity/inheritence/dependence) between classes 
+     * 
+     * @param connectionRoute a list of points, (x, y) coordinate pairs,
+     * which a given multiplicity connection line will run through
+     */
+    public void addConnection(IntPair connecting, ArrayList<IntPair> connectionRoute) {
+        connectionArrowRoutes.add(connectionRoute);
+    }
+}
+
 class LayoutEngine {
-    public static ArrayList<Rectangle> determineLayout(Iterable<IntPair> classes, 
+
+    /** 
+     * Generates a layout for the main gui. Determines the position for
+     * a bunch of rectangles that represent classes of known sizes.
+     * @param classes A list of rectangles represented by (width, height) pairs
+     * @param connections A list of which connections (i.e, multiplicity relationships)
+     * that exist between each class.
+     * 
+     * @return a layout class whose iterable elements represent the same
+     * items that were passed to this function in order
+     * */
+    public static Layout determineLayout(Iterable<IntPair> classes, 
             Iterable<IntPair> connections) {
         for (IntPair c : classes) {
             System.out.println(c);
         }
-        Rectangle r = new Rectangle(0, 0, 0, 0);
-        ArrayList al = new ArrayList<Rectangle>();
-        al.add(r);
-        return al;
+        Layout layout = new Layout();
+        return layout;
     }
 }
 
