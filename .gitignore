@@ -1,3 +1,9 @@
+# Extra
+.idea
+.vscode
+*.iml
+target
+
 # Compiled class file
 *.class
 
