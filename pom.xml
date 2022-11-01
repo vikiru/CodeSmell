@@ -1,14 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.example</groupId>
-    <artifactId>testapp2</artifactId>
+    <groupId>com.CodeSmell</groupId>
+    <artifactId>CodeSmell</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>CodeSmell</name>
+    <description>A tool for detection and visualization of code smells for object-oriented languages.</description>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -25,7 +29,20 @@
             <artifactId>javafx-web</artifactId>
             <version>19</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-core</artifactId>
+            <version>4.0.16-alpha</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -46,7 +63,7 @@
                         <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.CodeSmell.App</mainClass>
+                            <mainClass>com.CodeSmell.MainApp</mainClass>
                         </configuration>
                     </execution>
                 </executions>
