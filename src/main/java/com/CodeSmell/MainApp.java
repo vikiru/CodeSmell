@@ -36,22 +36,22 @@ public class MainApp extends Application {
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
-        WebControl controller = new WebControl(engine);
-        LayoutManager lm = new LayoutManager();
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
-                UMLClass c = new UMLClass(controller);
+                UMLClass.setWebControl(new WebControl(engine));
+                UMLClass.setLayoutManager(new LayoutManager());
+                UMLClass c = new UMLClass();
                 c.addField(true, "methodOne(int x, int y): int");
                 c.addField(true, "methodTwo(int x, int y): int");
-                UMLClass c2 = new UMLClass(controller);
+                UMLClass c2 = new UMLClass();
                 c2.addField(true, "c2MethodOne(int x, int y): int");
                 c2.addField(true, "c2MethodTwo(int x, int y): int");
-                c.render(lm);
-                c2.render(lm);
-                // controller.renderClass(c);
-                // controller.renderClass(c2);
+                c2.addField(true, "c2MethodThree(int x, int y): int");
+                c2.addField(true, "c2MethodFour(int x, int y): int");
+                c.render();
+                c2.render();
                 // engine.executeScript("init()");
             }
         });

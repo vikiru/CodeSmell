@@ -13,17 +13,26 @@ class UMLClass {
 	// private ArrayList<Smell> smells;
 	private int[] position;
 	private int[] size;
-	private WebControl controller;
+	private static WebControl webControl;
+	private static LayoutManager layoutManager;
 
-	UMLClass(WebControl controller) {
+	UMLClass() {
 		this.id = -1; // id is set on render
 		this.methods = new ArrayList<String>();
 		this.attributes = new ArrayList<String>();
 		this.connections = new ArrayList<ClassRelation>();
 		this.position = new int[2];
 		this.size = new int[2];
-		this.controller = controller;
 	}
+
+	public static void setWebControl(WebControl webControl) {
+		UMLClass.webControl = webControl;
+	}
+
+	public static void setLayoutManager(LayoutManager webControl) {
+		UMLClass.layoutManager = layoutManager;
+	}
+
 
 	public void addField(boolean isMethod, String s) {
 		if (isMethod) {
@@ -40,24 +49,21 @@ class UMLClass {
 	public void setPosition(int x, int y) {
 		position[0] = x;
 		position[1] = y;
-		this.controller.repositionClass(this.id, x, y);
+		webControl.repositionClass(this.id, x, y);
 	}
 
-	public void render(LayoutManager lm) {
+	public void render() {
 		/**
 		 * Draws the class rectangle to the webView 
 		 * page, rendering all the other classes which moved as
 		 * necessary
-		 * 
-		 @param lm the layout manager to use to determine
-		 class position 
 		*/
 
 		// first render the object to get its dimensions
-		this.id = this.controller.renderClass(this);
-		this.size = this.controller.getClassDimensions(this.id);
+		this.id = webControl.renderClass(this);
+		this.size = webControl.getClassDimensions(this.id);
 		// add class to the layout
-		lm.addClass(this);
+		layoutManager.addClass(this);
 	}
 
 	public String[] getMethods() {

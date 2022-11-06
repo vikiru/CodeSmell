@@ -16,18 +16,22 @@ class LayoutManager {
 	public void addClass(UMLClass c) {
 		/**
 		 * given a class with a defined size attribute,
-		 * call the controller to 
+		 * set its position (and the position of any other)
+		 * class whose position had to change to maintain the layout
 		 */
 		this.classes.add(c);
 
 		// determine coordinates for c
 		int x = 0;
 		int y = 0;
+
+		// all this layout manager does is
+		// set the classes's ith class' 
+		// x position to be after i-1th's with
+		// some padding. 
 		if (this.classes.size() > 1) {
 			int s = classes.get(classes.size() - 1).getSize()[0];
 			x = s + (int) s/2;
-			System.out.println("X: ");
-			System.out.println(x);
 		}
 		c.setPosition(x, y);
 
