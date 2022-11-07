@@ -1,9 +1,10 @@
 package com.CodeSmell;
 
-import javafx.util.Pair;
 import java.util.ArrayList;
 import com.CodeSmell.WebControl;
 import com.CodeSmell.Position;
+import com.CodeSmell.RenderEvent;
+import com.CodeSmell.Pair;
 
 class UMLClass {
 	
@@ -15,7 +16,7 @@ class UMLClass {
 	private Position position;
 	private int width;
 	private int height;
-	private static WebControl webControl;
+	private static ArrayList<RenderEventListener> rel = new ArrayList<>();
 
 	UMLClass() {
 		this.id = -1; // id is set on render
@@ -27,8 +28,8 @@ class UMLClass {
 		this.height = 0;
 	}
 
-	public static void setWebControl(WebControl webControl) {
-		UMLClass.webControl = webControl;
+	public static void addRenderEventListener(RenderEventListener rel) {
+		UMLClass.rel.add(rel);
 	}
 
 	public void addField(boolean isMethod, String s) {
@@ -45,7 +46,8 @@ class UMLClass {
 
 	public void setPosition(int x, int y) {
 		this.position = new  Position(x, y);
-		webControl.repositionClass(this.id, x, y);
+		RenderEvent fe = new RenderEvent(RenderEvent.Type.REPOSITION, this);
+		dispatchToRenderEventListeners(fe);
 	}
 
 	public void render() {
@@ -56,10 +58,19 @@ class UMLClass {
 		*/
 
 		// first render the object to get its dimensions
-		this.id = webControl.renderClass(this);
-		int[] size = webControl.getClassDimensions(this.id);
-		this.width = size[0];
-		this.height = size[1];
+		RenderEvent fe = new RenderEvent(RenderEvent.Type.RENDER, this);
+		dispatchToRenderEventListeners(fe);
+		Pair<Integer, Pair<Integer, Integer>> p;
+		p = (Pair<Integer, Pair<Integer, Integer>>) fe.getResponse();
+		this.id = p.first;
+		this.width = p.second.first;
+		this.height = p.second.second;
+	}
+
+	public void dispatchToRenderEventListeners(RenderEvent e) {
+		for (RenderEventListener rel : this.rel) {
+			rel.renderEventPerformed(e);
+		}
 	}
 
 	public String[] getMethods() {
@@ -70,11 +81,19 @@ class UMLClass {
 		return s;
 	}
 
+	public int getId() {
+		return this.id;
+	}
+
 	public int getWidth() {
 		return this.width;
 	}
 
 	public int getHeight() {
 		return this.height;
+	}
+
+	public Position getPosition() {
+		return this.position;
 	}
 }

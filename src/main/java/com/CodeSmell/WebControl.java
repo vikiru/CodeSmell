@@ -2,10 +2,12 @@ package com.CodeSmell;
 
 import javafx.scene.web.WebEngine;
 import com.CodeSmell.UMLClass;
+import com.CodeSmell.RenderEvent;
+import com.CodeSmell.Pair;
 // todo: support this in maven run configuration
 //import com.sun.webkit.dom.JSObject;
 
-public class WebControl {
+public class WebControl implements RenderEventListener {
 
     private WebEngine engine;
 
@@ -20,7 +22,7 @@ public class WebControl {
         return (Integer) this.engine.executeScript(js);
     }
 
-    public void repositionClass(int id, int x, int y) {
+    private void repositionClass(int id, int x, int y) {
         // reposition a box with given id 
         // todo: make considerations for dpi-scaling solution
         String js = String.format("repositionBox(%d, %d, %d);", 
@@ -28,7 +30,7 @@ public class WebControl {
         this.engine.executeScript(js);
     }
 
-    public int renderClass(UMLClass c) {
+    private Integer renderClass(UMLClass c) {
         // renders a class box at the origin and return its id
         String[] methods = c.getMethods();
 
@@ -48,7 +50,7 @@ public class WebControl {
         return drawBox(0, 0, width, height);
     }
 
-    public int[] getClassDimensions(int id) {
+    private Pair<Integer, Integer> getClassDimensions(int id) {
         /*
         Gets the dimensions (width, height) in units
         (the unit scale may have to be converted to be proportional to
@@ -67,7 +69,23 @@ public class WebControl {
         String w, h;
         w = (String) this.engine.executeScript(getWidth);
         h =  (String) this.engine.executeScript(getHeight);
-        return new int[] { Integer.parseInt(w.substring(0, w.length() - 2)), 
-                 Integer.parseInt(h.substring(0, h.length() - 2)) };
+        return new Pair(Integer.parseInt(w.substring(0, w.length() - 2)), 
+                 Integer.parseInt(h.substring(0, h.length() - 2)));
     }
+
+    public void renderEventPerformed(RenderEvent e) {
+        if (e.type == RenderEvent.Type.RENDER) {
+            Integer id = renderClass((UMLClass) e.getSource());
+            Pair<Integer, Integer>  size = getClassDimensions(id);
+            Pair<Integer, Pair<Integer, Integer>> p = new Pair(id, size);
+            // add id and size to response
+            e.setResponse((Object) p);
+
+        } else if (e.type == RenderEvent.Type.REPOSITION) {
+            UMLClass c =  (UMLClass) e.getSource();
+            repositionClass(c.getId(), c.getPosition().x, c.getPosition().y);
+        } else if (e.type == RenderEvent.Type.RENDER_CONNECTIONS) {
+            // todo
+        }
+    } 
 }

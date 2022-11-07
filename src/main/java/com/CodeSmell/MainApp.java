@@ -42,7 +42,7 @@ public class MainApp extends Application {
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
-                UMLClass.setWebControl(new WebControl(engine));
+                UMLClass.addRenderEventListener(new WebControl(engine));
                 UMLClass c = new UMLClass();
                 c.addField(true, "methodOne(int x, int y): int");
                 c.addField(true, "methodTwo(int x, int y): int");
