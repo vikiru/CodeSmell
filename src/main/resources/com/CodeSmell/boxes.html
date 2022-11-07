@@ -1,20 +1,78 @@
-
 <head>
+
+<script>
+let box_count = 0;
+
+function drawBox(x, y, width, height) 
+{
+    let main_panel = document.getElementById("main");
+    let box = document.createElement('div');
+    box.className = 'box';
+    box.id = box_count;
+    box_count += 1;
+
+    // for now take width and height directly
+    // should be changed to calculate an EM
+    // value based on the monitor size later
+    box.style.width = width;
+    box.style.height = height;
+    box.style.left = x;
+    box.style.top = y;
+    main_panel.appendChild(box);
+    return box_count - 1;
+}
+
+function repositionBox(id, x, y) {
+    let box = document.getElementById(id);
+    box.style.left =  x;
+    box.style.top = y;
+}
+
+function boxDimensions(id) {
+    let box = document.getElementById(id);
+    let r = {};
+    r.width = box.style.width;
+    r.height = box.style.height;
+    return r;
+}
+
+function boxDimW(id) {
+    let box = document.getElementById(id);
+    return box.style.width;
+}
+
+function boxDimH(id) {
+    let box = document.getElementById(id);
+    return box.style.height;
+}
+
+function init() {
+   // drawBox(0, 0, 100, 200);
+  //  drawBox(800, 400, 250, 300);
+    // let main_panel = document.getElementById("main");
+    return 1;
+}
+</script>
+
 <style type="text/css">
-.main {
-	position: absolute;
+#main {
+	position: relative;
+    width: 100%;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    scrollbar-width: none;  /* Firefox */
 }
 
 .box {
     border: 2px solid black;
-    position: relative;
-    width: 300px;
-    height: 200px;
+    position: absolute;
 }
 </style>
 </head>
-<body>
-
-<div id="main_panel" class="main"></div>
-<div id="1" class="box" style="top: 50px; left: 0px;"></div>
-<div id="2" class="box" style="top: 80px; left: 300px;"></div>
+<body onload="init()">
+<div id="main">
+</div>
+</body>
