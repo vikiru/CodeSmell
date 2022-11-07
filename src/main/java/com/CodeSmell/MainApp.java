@@ -5,6 +5,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ListResourceBundle;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -21,8 +22,56 @@ import javafx.collections.ListChangeListener.Change;
 import com.CodeSmell.WebControl;
 import com.CodeSmell.UMLClass;
 import com.CodeSmell.LayoutManager;
+import com.CodeSmell.CPGClass;
+import com.CodeSmell.CodePropertyGraph;
+import com.CodeSmell.RenderObject;
 
 public class MainApp extends Application {
+
+    public void initializeMainView(CodePropertyGraph cpg) {
+        /** 
+         *  Renders the UML diagram
+         * 
+         * */
+
+        // Build the UMLClass objects from the CPGClass objects
+        // Get a hashmap to associate the latter with the former.
+        HashMap<CPGClass, UMLClass> classMap = new HashMap<CPGClass, UMLClass>();
+
+        for ( CPGClass graphClass : cpg.getClasses() ) {
+            UMLClass c = new UMLClass(graphClass.name);
+            classMap.put(graphClass, c);
+            for (CPGClass.Method m : graphClass.getMethods()) {
+                c.addField(true, m.name);
+            }
+            for (CPGClass.Attribute a : graphClass.getAttributes()) {
+                c.addField(false, a.name);
+            }
+
+            //for (Smell s : SmellDetector.getSmells(cpg)) {
+            //    c.addSmell(s);
+            //}
+            // Render the class at (0, 0) so that it can be sized.
+            // Will be moved later when lm.positionClasses() is called.
+            c.render(); 
+        }
+
+        // Build the ClassRelation objects from the CPGClass.Relation objects
+        ArrayList<ClassRelation> relations = new ArrayList<ClassRelation>();
+        for ( CodePropertyGraph.Relation r : cpg.getRelations() ) {
+            UMLClass source, target;
+            source = classMap.get(r.source);
+            target = classMap.get(r.destination);
+            ClassRelation cr = new ClassRelation(source, target, r.type);
+            source.addRelationship(cr);
+            target.addRelationship(cr);
+            relations.add(cr);
+        }
+
+        LayoutManager lm = new LayoutManager();
+        lm.positionClasses(new ArrayList<UMLClass>(classMap.values()));
+        lm.setRelationPaths(relations);
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -37,28 +86,14 @@ public class MainApp extends Application {
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
-        LayoutManager lm = new LayoutManager();
+        RenderObject.addRenderEventListener(new WebControl(engine));
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
-                UMLClass.addRenderEventListener(new WebControl(engine));
-                UMLClass c = new UMLClass();
-                c.addField(true, "methodOne(int x, int y): int");
-                c.addField(true, "methodTwo(int x, int y): int");
-                UMLClass c2 = new UMLClass();
-                c2.addField(true, "c2MethodOne(int x, int y): int");
-                c2.addField(true, "c2MethodTwo(int x, int y): int");
-                c2.addField(true, "c2MethodThree(int x, int y): int");
-                c2.addField(true, "c2MethodFour(int x, int y): int");
-                c.render();
-                c2.render();
-                ArrayList<UMLClass> classes = new ArrayList<>();
-                classes.add(c);
-                classes.add(c2);
-                lm.positionClasses(classes);
-                lm.setConnectionRoutes(classes);
-                // engine.executeScript("init()");
+                Parser p = new Parser();
+                CodePropertyGraph cpg = p.buildCPG("");
+                initializeMainView(cpg);
             }
         });
 
@@ -75,9 +110,7 @@ public class MainApp extends Application {
 
         VBox vBox = new VBox(webView);
         Scene scene = new Scene(vBox, 960, 600);
-        
         primaryStage.setScene(scene);
-        primaryStage.show();
         primaryStage.show();
     }
 

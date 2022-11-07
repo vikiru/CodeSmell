@@ -3,6 +3,7 @@ package com.CodeSmell;
 import javafx.scene.web.WebEngine;
 import com.CodeSmell.UMLClass;
 import com.CodeSmell.RenderEvent;
+import com.CodeSmell.ClassRelation;
 import com.CodeSmell.Pair;
 // todo: support this in maven run configuration
 //import com.sun.webkit.dom.JSObject;
@@ -50,6 +51,12 @@ public class WebControl implements RenderEventListener {
         return drawBox(0, 0, width, height);
     }
 
+    private Integer renderPath(ClassRelation cr) {
+        // render a path and return the number after the 
+        // 'P' in the path's element's id
+        return 0;
+    }
+
     private Pair<Integer, Integer> getClassDimensions(int id) {
         /*
         Gets the dimensions (width, height) in units
@@ -74,18 +81,24 @@ public class WebControl implements RenderEventListener {
     }
 
     public void renderEventPerformed(RenderEvent e) {
+        Object source = e.source; 
+        if (( source instanceof RenderObject ) == false) {
+            throw new RuntimeException("Bad RenderEvent dispatcher.");
+        }
         if (e.type == RenderEvent.Type.RENDER) {
-            Integer id = renderClass((UMLClass) e.getSource());
-            Pair<Integer, Integer>  size = getClassDimensions(id);
-            Pair<Integer, Pair<Integer, Integer>> p = new Pair(id, size);
-            // add id and size to response
-            e.setResponse((Object) p);
-
+            if ( source instanceof UMLClass) {
+                Integer id = renderClass((UMLClass) source);
+                Pair<Integer, Integer>  size = getClassDimensions(id);
+                Pair<Integer, Pair<Integer, Integer>> p = new Pair(id, size);
+                // add id and size to response
+                e.setResponse((Object) p);
+            } else {
+                Integer id = renderPath((ClassRelation) source);
+                e.setResponse((Object) id);
+            }
         } else if (e.type == RenderEvent.Type.REPOSITION) {
-            UMLClass c =  (UMLClass) e.getSource();
+            UMLClass c =  (UMLClass) source;
             repositionClass(c.getId(), c.getPosition().x, c.getPosition().y);
-        } else if (e.type == RenderEvent.Type.RENDER_CONNECTIONS) {
-            // todo
         }
     } 
 }

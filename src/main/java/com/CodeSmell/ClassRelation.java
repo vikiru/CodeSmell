@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.CodeSmell.UMLClass;
 import com.CodeSmell.Position;
 
-class ClassRelation {
+class ClassRelation extends RenderObject {
 
 	public enum Type {
 		DEPENDENCY,
@@ -19,13 +19,23 @@ class ClassRelation {
 	public final Type type;
 	public final UMLClass source;
 	public final UMLClass target;
-	public ArrayList<Position> route;
+	public static ArrayList<RenderEventListener> rel = new ArrayList<>();
+	private ArrayList<Position> path;
 
 	public ClassRelation(UMLClass source, 
 			UMLClass target, Type type) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
-		this.route = route;
+	}
+
+	public void setPath(ArrayList<Position> path) {
+		this.path = path;
+		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
+		re.dispatch();
+	}
+
+	public ArrayList<Position> copyPath() {
+		return new ArrayList<Position>(this.path); 
 	}
 }

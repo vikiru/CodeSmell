@@ -6,8 +6,9 @@ import com.CodeSmell.Position;
 import com.CodeSmell.RenderEvent;
 import com.CodeSmell.Pair;
 
-class UMLClass {
+class UMLClass extends RenderObject {
 	
+	public final String name;
 	private int id;
 	private ArrayList<String> methods;
 	private ArrayList<String> attributes;
@@ -16,9 +17,10 @@ class UMLClass {
 	private Position position;
 	private int width;
 	private int height;
-	private static ArrayList<RenderEventListener> rel = new ArrayList<>();
+	public static ArrayList<RenderEventListener> rel = new ArrayList<>();
 
-	UMLClass() {
+	UMLClass(String name) {
+		this.name = name;
 		this.id = -1; // id is set on render
 		this.methods = new ArrayList<String>();
 		this.attributes = new ArrayList<String>();
@@ -26,10 +28,6 @@ class UMLClass {
 		this.position = new Position(0, 0);
 		this.width = 0;
 		this.height = 0;
-	}
-
-	public static void addRenderEventListener(RenderEventListener rel) {
-		UMLClass.rel.add(rel);
 	}
 
 	public void addField(boolean isMethod, String s) {
@@ -46,8 +44,8 @@ class UMLClass {
 
 	public void setPosition(int x, int y) {
 		this.position = new  Position(x, y);
-		RenderEvent fe = new RenderEvent(RenderEvent.Type.REPOSITION, this);
-		dispatchToRenderEventListeners(fe);
+		RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this);
+		re.dispatch();
 	}
 
 	public void render() {
@@ -58,19 +56,13 @@ class UMLClass {
 		*/
 
 		// first render the object to get its dimensions
-		RenderEvent fe = new RenderEvent(RenderEvent.Type.RENDER, this);
-		dispatchToRenderEventListeners(fe);
+		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
+		re.dispatch();
 		Pair<Integer, Pair<Integer, Integer>> p;
-		p = (Pair<Integer, Pair<Integer, Integer>>) fe.getResponse();
+		p = (Pair<Integer, Pair<Integer, Integer>>) re.getResponse();
 		this.id = p.first;
 		this.width = p.second.first;
 		this.height = p.second.second;
-	}
-
-	public void dispatchToRenderEventListeners(RenderEvent e) {
-		for (RenderEventListener rel : this.rel) {
-			rel.renderEventPerformed(e);
-		}
 	}
 
 	public String[] getMethods() {
