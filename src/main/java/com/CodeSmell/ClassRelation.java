@@ -1,9 +1,13 @@
 package com.CodeSmell;
 
+import java.util.ArrayList;
+
 import com.CodeSmell.UMLClass;
+import com.CodeSmell.Position;
+
 class ClassRelation {
 
-	enum Type {
+	public enum Type {
 		DEPENDENCY,
 		ASSOCIATION,
 		AGGREGATION,
@@ -12,13 +16,16 @@ class ClassRelation {
 		INTERFACE
 	}
 
-	final Type type;
-	final UMLClass source;
-	final UMLClass target;
+	public final Type type;
+	public final UMLClass source;
+	public final UMLClass target;
+	public ArrayList<Position> route;
 
-	public ClassRelation(UMLClass source, UMLClass target, Type type) {
+	public ClassRelation(UMLClass source, 
+			UMLClass target, Type type) {
 		this.type = type;
 		this.source = source;
 		this.target = target;
+		this.route = route;
 	}
 }

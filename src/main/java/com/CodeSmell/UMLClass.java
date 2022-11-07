@@ -3,6 +3,7 @@ package com.CodeSmell;
 import javafx.util.Pair;
 import java.util.ArrayList;
 import com.CodeSmell.WebControl;
+import com.CodeSmell.Position;
 
 class UMLClass {
 	
@@ -11,28 +12,24 @@ class UMLClass {
 	private ArrayList<String> attributes;
 	private ArrayList<ClassRelation> connections;
 	// private ArrayList<Smell> smells;
-	private int[] position;
-	private int[] size;
+	private Position position;
+	private int width;
+	private int height;
 	private static WebControl webControl;
-	private static LayoutManager layoutManager;
 
 	UMLClass() {
 		this.id = -1; // id is set on render
 		this.methods = new ArrayList<String>();
 		this.attributes = new ArrayList<String>();
 		this.connections = new ArrayList<ClassRelation>();
-		this.position = new int[2];
-		this.size = new int[2];
+		this.position = new Position(0, 0);
+		this.width = 0;
+		this.height = 0;
 	}
 
 	public static void setWebControl(WebControl webControl) {
 		UMLClass.webControl = webControl;
 	}
-
-	public static void setLayoutManager(LayoutManager webControl) {
-		UMLClass.layoutManager = layoutManager;
-	}
-
 
 	public void addField(boolean isMethod, String s) {
 		if (isMethod) {
@@ -47,8 +44,7 @@ class UMLClass {
 	}
 
 	public void setPosition(int x, int y) {
-		position[0] = x;
-		position[1] = y;
+		this.position = new  Position(x, y);
 		webControl.repositionClass(this.id, x, y);
 	}
 
@@ -61,9 +57,9 @@ class UMLClass {
 
 		// first render the object to get its dimensions
 		this.id = webControl.renderClass(this);
-		this.size = webControl.getClassDimensions(this.id);
-		// add class to the layout
-		layoutManager.addClass(this);
+		int[] size = webControl.getClassDimensions(this.id);
+		this.width = size[0];
+		this.height = size[1];
 	}
 
 	public String[] getMethods() {
@@ -74,7 +70,11 @@ class UMLClass {
 		return s;
 	}
 
-	public int[] getSize() {
-		return this.size;
+	public int getWidth() {
+		return this.width;
+	}
+
+	public int getHeight() {
+		return this.height;
 	}
 }

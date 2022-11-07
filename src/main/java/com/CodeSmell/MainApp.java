@@ -4,6 +4,7 @@ import java.util.Set;
 import java.io.File;
 import java.net.URL;
 import java.util.ListResourceBundle;
+import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -36,12 +37,12 @@ public class MainApp extends Application {
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
+        LayoutManager lm = new LayoutManager();
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
                 UMLClass.setWebControl(new WebControl(engine));
-                UMLClass.setLayoutManager(new LayoutManager());
                 UMLClass c = new UMLClass();
                 c.addField(true, "methodOne(int x, int y): int");
                 c.addField(true, "methodTwo(int x, int y): int");
@@ -52,6 +53,11 @@ public class MainApp extends Application {
                 c2.addField(true, "c2MethodFour(int x, int y): int");
                 c.render();
                 c2.render();
+                ArrayList<UMLClass> classes = new ArrayList<>();
+                classes.add(c);
+                classes.add(c2);
+                lm.positionClasses(classes);
+                lm.setConnectionRoutes(classes);
                 // engine.executeScript("init()");
             }
         });

@@ -4,43 +4,39 @@ import java.util.ArrayList;
 
 import com.CodeSmell.UMLClass;
 
-class LayoutManager {
 
+class LayoutManager implements LayoutManagerInterface {
 
-	private ArrayList<UMLClass> classes;
+	public LayoutManager() {}
 
-	LayoutManager() {
-		this.classes = new ArrayList<UMLClass>();
-	}
-
-	public void addClass(UMLClass c) {
+	public void positionClasses(ArrayList<UMLClass> classes) {
 		/**
-		 * given a class with a defined size attribute,
-		 * set its position (and the position of any other)
-		 * class whose position had to change to maintain the layout
+		 * given a list of classes with a defined size attribute,
+		 * set their position with the classes setPosition() method
 		 */
-		this.classes.add(c);
 
-		// determine coordinates for c
+		// determine coordinates for starting c
 		int x = 0;
 		int y = 0;
 
-		// all this layout manager does is
-		// set the classes's ith class' 
-		// x position to be after i-1th's with
-		// some padding. 
-		if (this.classes.size() > 1) {
-			int s = classes.get(classes.size() - 1).getSize()[0];
-			x = s + (int) s/2;
+		for (int i=0; i < classes.size(); i++) {
+			// all this layout manager does is
+			// set the classes's ith class' 
+			// x position to be after i-1th's with
+			// some padding. 
+			if (i >= 1) {
+				int s = classes.get(i - 1).getWidth();
+				x = s + (int) s/2;
+			}
+			classes.get(i).setPosition(x, y);
 		}
-		c.setPosition(x, y);
+	}
 
-		// compute a list of all classes which were effected
-		// by adding c and need to be repositioned themselves
-		// (this may have to be done recursively)
-		ArrayList<UMLClass> effectedClasses = new ArrayList<>();
-		for (UMLClass e : effectedClasses) {
-			e.setPosition(x, y);
-		}
+	public void setConnectionRoutes(ArrayList<UMLClass> classes) {
+		/**
+		 * given a list of classes which have been rendered and 
+		 * positioned, set the route for their index of their connections
+		 * attribute 
+		 */
 	}
 }
