@@ -1,4 +1,4 @@
-package jfx;
+package com.CodeSmell;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

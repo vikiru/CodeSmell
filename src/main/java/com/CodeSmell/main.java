@@ -1,6 +1,6 @@
+package com.CodeSmell;
 
 import java.util.ArrayList;
-import java.awt.List;
 
 class IntPair {
     public int p1;
@@ -73,7 +73,7 @@ class LayoutEngine {
 
 class Main {
     public static void main(String[] args) {
-        System.out.println("Calling Layout Engine"); 
+        System.out.println("Calling com.CodeSmell.Layout Engine");
         IntPair class1_size = new IntPair(10, 10);
         IntPair class2_size = new IntPair(10, 10);
         ArrayList classes = new ArrayList<IntPair>();
