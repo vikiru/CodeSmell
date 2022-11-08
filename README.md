@@ -7,7 +7,7 @@
 - Golan Hassin
 - Visakan Kirubakaran
 - Sabin Plaiasu
-- Marin Rivard
+- Martin Rivard
 - Kshitj Sawhney
 
 ## Prerequisites
@@ -40,6 +40,8 @@ In order to run the program through the executable jar via the terminal, the fol
 `java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar`
 
 In order to do this the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
+
+## Usage
 
 ## Testing Instructions
 
