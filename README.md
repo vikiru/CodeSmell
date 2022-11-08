@@ -22,16 +22,23 @@ Make sure that the following prerequisites are successfully installed on your ma
 
 ## Build and Run Instructions
 
-0.) Ensure the relevant enviornment variables are set.
+0. Ensure the relevant enviornment variables are set:
+
 `export JAVA_HOME=/usr/lib/jvm/default-java/`
 
-1.) Run `mvn clean` followed by `mvn package`
+`MAVEN_HOME`
 
-2.) Build the project files with Maven:
+1. Run the following commands to clean and repackage the project:
+
+`mvn clean`
+
+`mvn package`
+
+2. Build the project files with Maven:
 
 `mvn install`
 
-3.) In order to execute the main program:
+3. In order to execute the main program via the terminal, run the following:
 
 `mvn clean javafx:run`
 
@@ -39,10 +46,12 @@ In order to run the program through the executable jar via the terminal, the fol
 
 `java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar`
 
-In order to do this the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
+In order to do this, the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
 
 ## Usage
 
 ## Testing Instructions
 
-Run `mvn test` to execute all of the tests.
+Run the following command to execute all of the tests:
+
+`mvn test`
