@@ -1,6 +1,6 @@
 from cpgqls_client import CPGQLSClient, import_code_query
 import os
-import re
+import json
 
 # Connect to the server
 server_endpoint = "localhost:8080"
@@ -19,15 +19,15 @@ result = client.execute(query)
 # Perform all defined queries and write all results to respective files.
 def writeAll():
     # Perform queries and write the result to a file, like so: getAndWriteJoernResults(query, filename)
-    getAndWriteJoernResults("cpg.argument.toJson", "allArguments.txt")
-    getAndWriteJoernResults("cpg.call.name.toJson", "allCalls.txt")
-    getAndWriteJoernResults("cpg.file.name.toJson", "allFiles.txt")
-    getAndWriteJoernResults("cpg.identifier.name.toJson", "allIdentifiers.txt")
-    getAndWriteJoernResults("cpg.literal.toJson", "allLiterals.txt")
-    getAndWriteJoernResults("cpg.local.name.toJson", "allLocalVars.txt")
-    getAndWriteJoernResults("cpg.member.code.toJson", "allMembers.txt")
-    getAndWriteJoernResults("cpg.method.fullName.toJson", "allMethods.txt")
-    getAndWriteJoernResults("cpg.parameter.name.toJson", "allParameters.txt")
+    getAndWriteJoernResults("cpg.argument.toJsonPretty", "allArguments.json")
+    getAndWriteJoernResults("cpg.call.name.toJsonPretty", "allCalls.json")
+    getAndWriteJoernResults("cpg.file.name.toJsonPretty", "allFiles.json")
+    getAndWriteJoernResults("cpg.identifier.name.toJsonPretty", "allIdentifiers.json")
+    getAndWriteJoernResults("cpg.literal.toJsonPretty", "allLiterals.json")
+    getAndWriteJoernResults("cpg.local.name.toJsonPretty", "allLocalVars.json")
+    getAndWriteJoernResults("cpg.member.code.toJsonPretty", "allMembers.json")
+    getAndWriteJoernResults("cpg.method.fullName.toJsonPretty", "allMethods.json")
+    getAndWriteJoernResults("cpg.parameter.name.toJsonPretty", "allParameters.json")
 
 
 # Write the joern output of a query to a specified filename
@@ -40,58 +40,33 @@ def writeToFile(joernResult, filename):
 
 
 # Execute joern queries, cleanup the result and write to a file.
-# todo: clean this up later
 def getAndWriteJoernResults(query, filename):
     # execute a simple CPGQuery
     result = client.execute(query)
     joernResult = result["stdout"]
+    joernResult = cleanJson(joernResult)
 
-    if "name" not in query and "fullName" not in query:
-        writeToFile(joernResult, filename)
-        return
-
-    # Cleanup joern result so everything is on a new line, without quotations
-    start = "= "
-    index = joernResult.find(start)
-    joernResult = joernResult[index + 1 : len(joernResult)]
-    joernResult = joernResult[3 : len(joernResult) - 3]
-
-    if filename != "allFiles.txt":
-        joernResult = joernResult.replace("\\", "")
-        joernResult = joernResult.replace('",', "\n")
-        joernResult = joernResult.replace('"', "")
-    else:
-        joernResult = joernResult.replace("\\", "")
-        joernResult = joernResult.replace('",', "\n")
-        joernResult = joernResult.replace('"', "")
-        resultArr = joernResult.splitlines()
-
-        # Ensure that only the class name and the file type is left (i.e. "Class.java")
-        searchStr = "joernTestProjectsrc"
-        for i in range(0, len(resultArr)):
-            index = resultArr[i].find(searchStr)
+    if "allFiles" in filename:
+        joernJsonData = json.loads(joernResult)
+        stringToFind = "joernTestProject\\src\\"
+        for i in range(0, len(joernJsonData)):
+            currItem = joernJsonData[i]
+            index = currItem.find(stringToFind)
+            print(index)
             if index != -1:
-                resultArr[i] = resultArr[i][index + len(searchStr) :]
-        joernResult = ("\n").join(resultArr)
+                currItem = currItem[index + len(stringToFind) :]
+                joernJsonData[i] = currItem
+    joernResult = json.dumps(joernJsonData)
+
     writeToFile(joernResult, filename)
 
 
+## todo: need to update this for jsonPretty format
 def getMethodsWithModifiers(query, filename):
-    query = "cpg.method.map(node => (node.code, node.fullName)).toJson"
+    query = "cpg.method.map(node => (node.code, node.fullName)).toJsonPretty"
     result = client.execute(query)
-
     joernResult = result["stdout"]
-    start = "= "
-    index = joernResult.find(start)
-    joernResult = joernResult[index + 1 : len(joernResult)]
-    joernResult = joernResult[3 : len(joernResult) - 3]
-
-    joernResult = joernResult.replace("\\", "")
-    joernResult = joernResult.replace('",', "\n")
-    joernResult = joernResult.replace('"', "")
-    joernResult = joernResult.replace("},", "\n")
-    joernResult = joernResult.replace("{", "")
-    resultArr = joernResult.splitlines()
+    joernResult = cleanJson(joernResult)
 
     finalArr = []
     for i in range(0, len(resultArr)):
@@ -113,10 +88,17 @@ def getMethodsWithModifiers(query, filename):
     writeToFile(joernResult, filename)
 
 
+# Cleans up jsonPretty output from joern so that it can be a proper JSON file.
+def cleanJson(joernResult):
+    stringToFind = "["
+    index = joernResult.find(stringToFind)
+    joernResult = joernResult[index : len(joernResult)]
+    stringToFind = ']"'
+    index = joernResult.find(stringToFind)
+    endLen = len(joernResult) - (index + 1)
+    joernResult = joernResult[0 : len(joernResult) - endLen]
+    return joernResult
+
+
 if __name__ == "__main__":
-    getMethodsWithModifiers(
-        "cpg.method.map(node => (node.code, node.fullName)).toJson",
-        "allMethodsWithModifiers.txt",
-    )
-    # todo: uncomment this later on.
-    # writeAll()
+    writeAll()
