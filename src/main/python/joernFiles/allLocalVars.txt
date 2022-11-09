@@ -1,1 +1,3 @@
-res108: List[Local] = List(Local( = 81L,  = None,  = "BuddyInfo bud",  = None,  = ArraySeq(),  = None,  = "bud",  = 1,  = "BuddyInfo"), Local( = 90L,  = None,  = "AddressBook addBook",  = None,  = ArraySeq(),  = None,  = "addBook",  = 4,  = "AddressBook"), Local( = 167L,  = None,  = "BuddyInfo friend1",  = None,  = ArraySeq(),  = None,  = "friend1",  = 1,  = "BuddyInfo"))
+bud
+addBook
+friend1

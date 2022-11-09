@@ -1,1 +1,4 @@
-res102: List[Member] = List(Member( = 18L,  = "java.util.ArrayList Addresses",  = Some(value = 35),  = ArraySeq(),  = Some(value = 5),  = "Addresses",  = 1,  = "java.util.ArrayList"), Member( = 130L,  = "java.lang.String name",  = Some(value = 20),  = ArraySeq(),  = Some(value = 3),  = "name",  = 1,  = "java.lang.String"), Member( = 132L,  = "java.lang.String address",  = Some(value = 20),  = ArraySeq(),  = Some(value = 4),  = "address",  = 2,  = "java.lang.String"), Member( = 134L,  = "java.lang.String phone_num",  = Some(value = 20),  = ArraySeq(),  = Some(value = 5),  = "phone_num",  = 3,  = "java.lang.String"))
+Addresses
+name
+address
+phone_num
