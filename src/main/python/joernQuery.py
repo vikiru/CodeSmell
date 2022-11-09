@@ -1,5 +1,6 @@
 from cpgqls_client import CPGQLSClient, import_code_query
 import os
+import re
 
 # Connect to the server
 server_endpoint = "localhost:8080"
@@ -7,26 +8,29 @@ client = CPGQLSClient(server_endpoint)
 
 # Eventually replace dirName with a directory which we decide upon
 # which will always store the imported source code
-dirName = "src/main/python/joernTestProject/src"
+directory = os.getcwd()
+directory = directory.replace("\\", "//")
+dirName = directory + "/src/main/python/joernTestProject/src"
 projectName = "analyzedProject"
 
-# Import the code from a specified dir and give it a name
 query = import_code_query(dirName, projectName)
 result = client.execute(query)
 
 # Perform all defined queries and write all results to respective files.
 def writeAll():
-    getAndWriteAllMethods()
-    getAndWriteAllLiterals()
-    getAndWriteAllParameters()
-    getAndWriteAllMembers()
-    getAndWriteAllCalls()
-    getAndWriteAllLocals()
-    getAndWriteAllIdentifiers()
-    getAndWriteAllArguments()
-    getAndWriteAllFiles()
+    # Perform queries and write the result to a file, like so: getAndWriteJoernResults(query, filename)
+    getAndWriteJoernResults("cpg.argument.toJson", "allArguments.txt")
+    getAndWriteJoernResults("cpg.call.name.toJson", "allCalls.txt")
+    getAndWriteJoernResults("cpg.file.name.toJson", "allFiles.txt")
+    getAndWriteJoernResults("cpg.identifier.name.toJson", "allIdentifiers.txt")
+    getAndWriteJoernResults("cpg.literal.toJson", "allLiterals.txt")
+    getAndWriteJoernResults("cpg.local.name.toJson", "allLocalVars.txt")
+    getAndWriteJoernResults("cpg.member.name.toJson", "allMembers.txt")
+    getAndWriteJoernResults("cpg.method.fullName.toJson", "allMethods.txt")
+    getAndWriteJoernResults("cpg.parameter.name.toJson", "allParameters.txt")
 
-# Write the joern output to a specified filename
+
+# Write the joern output of a query to a specified filename
 def writeToFile(joernResult, filename):
     dirName = "src/main/python/joernFiles/"
     finalName = dirName + filename
@@ -35,85 +39,40 @@ def writeToFile(joernResult, filename):
     file.close()
 
 
-# Perform a joern query to get all the methods within the source code and write to a file.
-def getAndWriteAllMethods():
-    # execute a simple CPGQuery to list all methods in the code
-    query = "cpg.method.toList"
+# Execute joern queries, cleanup the result and write to a file.
+def getAndWriteJoernResults(query, filename):
+    # execute a simple CPGQuery
     result = client.execute(query)
-    allMethods = result["stdout"]
-    writeToFile(allMethods, "allMethods.txt")
+    joernResult = result["stdout"]
 
+    if "name" not in query:
+        writeToFile(joernResult, filename)
+        return
 
-# Perform a joern query to get all the literals within the source code and write to a file.
-def getAndWriteAllLiterals():
-    # execute a simple CPGQuery to list all literals in the code
-    query = "cpg.literal.toList"
-    result = client.execute(query)
-    allLiterals = result["stdout"]
-    writeToFile(allLiterals, "allLiterals.txt")
+    # Cleanup joern result so everything is on a new line, without quotations
+    start = "= "
+    index = joernResult.find(start)
+    joernResult = joernResult[index + 1 : len(joernResult)]
+    joernResult = joernResult[3 : len(joernResult) - 3]
 
+    if filename != "allFiles.txt":
+        joernResult = joernResult.replace("\\", "")
+        joernResult = joernResult.replace('",', "\n")
+        joernResult = joernResult.replace('"', "")
+    else:
+        joernResult = joernResult.replace("\\", "")
+        joernResult = joernResult.replace('",', "\n")
+        joernResult = joernResult.replace('"', "")
+        resultArr = joernResult.splitlines()
 
-# Perform a joern query to get all the parameters within the source code and write to a file.
-def getAndWriteAllParameters():
-    # execute a simple CPGQuery to list all literals in the code
-    query = "cpg.parameter.toList"
-    result = client.execute(query)
-    allParameters = result["stdout"]
-    writeToFile(allParameters, "allParameters.txt")
-
-
-# Perform a joern query to get all the members within the source code and write to a file.
-def getAndWriteAllMembers():
-    # execute a simple CPGQuery to list all complex types such as classes, structs, etc
-    query = "cpg.member.toList"
-    result = client.execute(query)
-    allMembers = result["stdout"]
-    writeToFile(allMembers, "allMembers.txt")
-
-
-# Perform a joern query to get all the calls within the source code and write to a file.
-def getAndWriteAllCalls():
-    # execute a simple CPGQuery to list all calls in the code
-    query = "cpg.call.toList"
-    result = client.execute(query)
-    allCalls = result["stdout"]
-    writeToFile(allCalls, "allCalls.txt")
-
-
-# Perform a joern query to get all the local variables within the source code and write to a file.
-def getAndWriteAllLocals():
-    # execute a simple CPGQuery to list all local variables in the code
-    query = "cpg.local.toList"
-    result = client.execute(query)
-    allLocalVars = result["stdout"]
-    writeToFile(allLocalVars, "allLocalVars.txt")
-
-
-# Perform a joern query to get all the identifiers within the source code and write to a file.
-def getAndWriteAllIdentifiers():
-    # execute a simple CPGQuery to list all identifiers (local variables in methods) in the code
-    query = "cpg.identifier.toList"
-    result = client.execute(query)
-    allIdentifiers = result["stdout"]
-    writeToFile(allIdentifiers, "allIdentifiers.txt")
-
-
-# Perform a joern query to get all the arguments within the source code and write to a file.
-def getAndWriteAllArguments():
-    # execute a simple CPGQuery to list all arguments in the code
-    query = "cpg.argument.toList"
-    result = client.execute(query)
-    allArguments = result["stdout"]
-    writeToFile(allArguments, "allArguments.txt")
-
-
-# Perform a joern query to get all the files within the source code and write to a file.
-def getAndWriteAllFiles():
-    # execute a simple CPGQuery to list all source files in the code
-    query = "cpg.file.toList"
-    result = client.execute(query)
-    allFiles = result["stdout"]
-    writeToFile(allFiles, "allFiles.txt")
+        # Ensure that only the class name and the file type is left (i.e. "Class.java")
+        searchStr = "joernTestProjectsrc"
+        for i in range(0, len(resultArr)):
+            index = resultArr[i].find(searchStr)
+            if index != -1:
+                resultArr[i] = resultArr[i][index + len(searchStr) :]
+        joernResult = ("\n").join(resultArr)
+    writeToFile(joernResult, filename)
 
 
 if __name__ == "__main__":
