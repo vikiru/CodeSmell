@@ -25,7 +25,7 @@ def writeAll():
     getAndWriteJoernResults("cpg.identifier.name.toJson", "allIdentifiers.txt")
     getAndWriteJoernResults("cpg.literal.toJson", "allLiterals.txt")
     getAndWriteJoernResults("cpg.local.name.toJson", "allLocalVars.txt")
-    getAndWriteJoernResults("cpg.member.name.toJson", "allMembers.txt")
+    getAndWriteJoernResults("cpg.member.code.toJson", "allMembers.txt")
     getAndWriteJoernResults("cpg.method.fullName.toJson", "allMethods.txt")
     getAndWriteJoernResults("cpg.parameter.name.toJson", "allParameters.txt")
 
@@ -40,6 +40,7 @@ def writeToFile(joernResult, filename):
 
 
 # Execute joern queries, cleanup the result and write to a file.
+# todo: clean this up later
 def getAndWriteJoernResults(query, filename):
     # execute a simple CPGQuery
     result = client.execute(query)
@@ -75,5 +76,47 @@ def getAndWriteJoernResults(query, filename):
     writeToFile(joernResult, filename)
 
 
+def getMethodsWithModifiers(query, filename):
+    query = "cpg.method.map(node => (node.code, node.fullName)).toJson"
+    result = client.execute(query)
+
+    joernResult = result["stdout"]
+    start = "= "
+    index = joernResult.find(start)
+    joernResult = joernResult[index + 1 : len(joernResult)]
+    joernResult = joernResult[3 : len(joernResult) - 3]
+
+    joernResult = joernResult.replace("\\", "")
+    joernResult = joernResult.replace('",', "\n")
+    joernResult = joernResult.replace('"', "")
+    joernResult = joernResult.replace("},", "\n")
+    joernResult = joernResult.replace("{", "")
+    resultArr = joernResult.splitlines()
+
+    finalArr = []
+    for i in range(0, len(resultArr)):
+        currItem = resultArr[i]
+        currItemArr = currItem.split(":")
+        stringToClear = currItemArr[1]
+        stringToFind = "main.python.joernTestProject.src."
+        index = stringToClear.find(stringToFind)
+        if index != -1:
+
+            stringToClear = stringToClear[
+                index + len(stringToFind) : len(stringToClear)
+            ]
+
+            if "<empty>" not in currItemArr[0]:
+                finalStr = currItemArr[0] + ":" + stringToClear
+                finalArr.append(finalStr)
+    joernResult = ("\n").join(finalArr)
+    writeToFile(joernResult, filename)
+
+
 if __name__ == "__main__":
-    writeAll()
+    getMethodsWithModifiers(
+        "cpg.method.map(node => (node.code, node.fullName)).toJson",
+        "allMethodsWithModifiers.txt",
+    )
+    # todo: uncomment this later on.
+    # writeAll()

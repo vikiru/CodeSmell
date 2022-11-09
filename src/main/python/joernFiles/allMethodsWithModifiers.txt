@@ -1,0 +1,7 @@
+public AddressBook():AddressBook.<init>
+public void addBuddy(BuddyInfo newBuddy):AddressBook.addBuddy
+public BuddyInfo removeBuddy(int index):AddressBook.removeBuddy
+public static void main(String[] args):AddressBook.main
+public BuddyInfo(String name, String address, String phone_num):BuddyInfo.<init>
+public String getName():BuddyInfo.getName
+public static void main(String[] args):BuddyInfo.main
