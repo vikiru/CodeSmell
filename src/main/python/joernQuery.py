@@ -45,7 +45,7 @@ def getAndWriteJoernResults(query, filename):
     result = client.execute(query)
     joernResult = result["stdout"]
 
-    if "name" not in query:
+    if "name" not in query and "fullName" not in query:
         writeToFile(joernResult, filename)
         return
 
