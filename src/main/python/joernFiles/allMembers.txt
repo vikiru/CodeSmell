@@ -1,4 +1,0 @@
-Addresses
-name
-address
-phone_num

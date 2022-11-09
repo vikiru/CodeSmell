@@ -1,0 +1,6 @@
+[
+  "java.util.ArrayList<BuddyInfo> Addresses",
+  "java.lang.String name",
+  "java.lang.String address",
+  "java.lang.String phone_num"
+]
