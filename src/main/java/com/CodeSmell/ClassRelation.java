@@ -32,7 +32,7 @@ class ClassRelation extends RenderObject {
 	public void setPath(ArrayList<Position> path) {
 		this.path = path;
 		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
-		re.dispatch();
+		dispatchToRenderEventListeners(re);
 	}
 
 	public ArrayList<Position> copyPath() {
