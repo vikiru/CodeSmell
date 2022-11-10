@@ -31,7 +31,7 @@ public class Parser {
 
 		CPGClass jc1 = new CPGClass("FirstClass");
 		CPGClass jc2 = new CPGClass("SecondClass");
-		CPGClass jc3 = new CPGClass("ThirdClass");
+		CPGClass jc3 = new CPGClass("ThirdClassWithAReallyLongName");
 		Attribute a1 = new JavaAttribute("attributeOne", new Modifier[] {Modifier.PUBLIC});
 		Attribute a2 = new JavaAttribute("attributeTwo", new Modifier[] {Modifier.STATIC, Modifier.PRIVATE});
 		Method m1 = new JavaMethod("methodOne(void);", new String[] {"instruction one;", "instruction two"},

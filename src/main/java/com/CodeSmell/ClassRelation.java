@@ -19,7 +19,6 @@ class ClassRelation extends RenderObject {
 	public final Type type;
 	public final UMLClass source;
 	public final UMLClass target;
-	public static ArrayList<RenderEventListener> rel = new ArrayList<>();
 	private ArrayList<Position> path;
 
 	public ClassRelation(UMLClass source, 

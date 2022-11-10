@@ -15,9 +15,11 @@ class LayoutManager  {
 		 * set their position with the classes setPosition() method
 		 */
 
+		// 
 		// determine coordinates for starting c
-		int x = 0;
-		int y = 0;
+		// 
+		double x = 0;
+		double y = 0;
 
 		for (int i=0; i < classes.size(); i++) {
 			// all this layout manager does is
@@ -25,9 +27,9 @@ class LayoutManager  {
 			// x position to be after i-1th's with
 			// some padding. 
 			if (i >= 1) {
-				int lastX = classes.get(i - 1).getPosition().x;
-				int lastWidth = classes.get(i - 1).getWidth();
-				int padding = lastWidth / 2;
+				Double lastX = (Double) classes.get(i - 1).getPosition().x;
+				Double lastWidth = classes.get(i - 1).getWidth();
+				Double padding = lastWidth / 2;
 				x = lastX + lastWidth + padding;
 			}
 			classes.get(i).setPosition(x, y);
@@ -38,9 +40,10 @@ class LayoutManager  {
 		/**
 		 * given a list of classes which have been rendered and 
 		 * positioned, set the path for their index of their connections
-		 * attribute 
+		 * attribute.
+		 *  
 		 */
-		//ArrayList<Position> path = new ArrayList<Position>();
+		ArrayList<Position> path = new ArrayList<Position>();
 		//relations.get(0).setPath(path);
 	}
 }

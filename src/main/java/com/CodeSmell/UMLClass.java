@@ -15,8 +15,8 @@ class UMLClass extends RenderObject {
 	private ArrayList<ClassRelation> connections;
 	// private ArrayList<Smell> smells;
 	private Position position;
-	private int width;
-	private int height;
+	private double width;
+	private double height;
 
 	UMLClass(String name) {
 		this.name = name;
@@ -25,8 +25,8 @@ class UMLClass extends RenderObject {
 		this.attributes = new ArrayList<String>();
 		this.connections = new ArrayList<ClassRelation>();
 		this.position = new Position(0, 0);
-		this.width = 0;
-		this.height = 0;
+		this.width = 0.0;
+		this.height = 0.0;
 	}
 
 	public void addField(boolean isMethod, String s) {
@@ -41,7 +41,7 @@ class UMLClass extends RenderObject {
 		this.connections.add(r);
 	}
 
-	public void setPosition(int x, int y) {
+	public void setPosition(double x, double y) {
 		this.position = new  Position(x, y);
 		RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this);
 		dispatchToRenderEventListeners(re);
@@ -57,8 +57,8 @@ class UMLClass extends RenderObject {
 		// first render the object to get its dimensions
 		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
 		dispatchToRenderEventListeners(re);
-		Pair<Integer, Pair<Integer, Integer>> p;
-		p = (Pair<Integer, Pair<Integer, Integer>>) re.getResponse();
+		Pair<Integer, Pair<Double, Double>> p;
+		p = (Pair<Integer, Pair<Double, Double>>) re.getResponse();
 		this.id = p.first;
 		this.width = p.second.first;
 		this.height = p.second.second;
@@ -76,11 +76,11 @@ class UMLClass extends RenderObject {
 		return this.id;
 	}
 
-	public int getWidth() {
+	public Double getWidth() {
 		return this.width;
 	}
 
-	public int getHeight() {
+	public Double getHeight() {
 		return this.height;
 	}
 
