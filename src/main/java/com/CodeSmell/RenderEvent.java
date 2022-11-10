@@ -27,8 +27,4 @@ public class RenderEvent {
 	public Object getResponse() {
 		return this.response;
 	}
-
-	public void dispatch() {
-		this.source.dispatch(this);
-	}
 }

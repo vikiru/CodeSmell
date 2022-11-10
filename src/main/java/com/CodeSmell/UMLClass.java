@@ -17,7 +17,6 @@ class UMLClass extends RenderObject {
 	private Position position;
 	private int width;
 	private int height;
-	public static ArrayList<RenderEventListener> rel = new ArrayList<>();
 
 	UMLClass(String name) {
 		this.name = name;
@@ -45,7 +44,7 @@ class UMLClass extends RenderObject {
 	public void setPosition(int x, int y) {
 		this.position = new  Position(x, y);
 		RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this);
-		re.dispatch();
+		dispatchToRenderEventListeners(re);
 	}
 
 	public void render() {
@@ -57,7 +56,7 @@ class UMLClass extends RenderObject {
 
 		// first render the object to get its dimensions
 		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
-		re.dispatch();
+		dispatchToRenderEventListeners(re);
 		Pair<Integer, Pair<Integer, Integer>> p;
 		p = (Pair<Integer, Pair<Integer, Integer>>) re.getResponse();
 		this.id = p.first;
