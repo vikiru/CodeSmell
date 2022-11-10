@@ -46,6 +46,7 @@ def getAndWriteJoernResults(query, filename):
     joernResult = result["stdout"]
     joernResult = cleanJson(joernResult)
 
+    # Clean up file names to exclude the path and only contain, for example "AddressBook.java"
     if "allFiles" in filename:
         joernJsonData = json.loads(joernResult)
         stringToFind = "joernTestProject\\src\\"
@@ -57,7 +58,6 @@ def getAndWriteJoernResults(query, filename):
                 currItem = currItem[index + len(stringToFind) :]
                 joernJsonData[i] = currItem
     joernResult = json.dumps(joernJsonData)
-
     writeToFile(joernResult, filename)
 
 
@@ -124,15 +124,15 @@ def getFieldsWithModifiers():
             privateArr[i] = "private " + privateArr[i]
     if len(publicArr) != 0:
         for i in range(0, len(privateArr)):
-            privateArr[i] = "private " + privateArr[i]
+            publicArr[i] = "public " + privateArr[i]
     if len(protectedArr) != 0:
         for i in range(0, len(privateArr)):
-            privateArr[i] = "private " + privateArr[i]
+            protectedArr[i] = "protected " + privateArr[i]
     if len(staticArr) != 0:
         for i in range(0, len(privateArr)):
-            privateArr[i] = "private " + privateArr[i]
+            staticArr[i] = "static " + privateArr[i]
 
-    # Combine lists and seperate by new line and write to a file
+    # Combine lists and separate by new line and write to a file
     finalArr = privateArr + publicArr + protectedArr + staticArr
     joernResult = ("\n").join(finalArr)
     writeToFile(joernResult, "allFieldsWithModifiers.txt")
@@ -150,6 +150,73 @@ def cleanJson(joernResult):
     return joernResult
 
 
+# Create a custom JSON object of the source code and save it to a JSON file.
+def sourceCodeJsonCreation():
+    # Initial query to get all of the classes within the source code
+    query = "cpg.typeDecl.isExternal(false).toJsonPretty"
+    result = client.execute(query)
+    data = result["stdout"]
+    allClasses = json.loads(cleanJson(data))
+
+    # Dictionary which will store everything about the source code.
+    sourceCodeJSON = {}
+    sourceCodeJSON["classes"] = []
+
+    # Go class by class populating sourceCodeJSON
+    for i in range(0, len(allClasses)):
+
+        # Define a dict for each class in the source code
+        currClassDict = {}
+        currClass = allClasses[i]
+        className = currClass["name"]
+        currClassDict["name"] = className
+        currClassDict["fields"] = []
+        currClassDict["methods"] = []
+
+        # Perform queries to get all of the fields and methods of the class
+        query = (
+            "cpg.typeDecl("
+            + '"'
+            + className
+            + '"'
+            + ").astChildren.isMember.toJsonPretty"
+        )
+        result = client.execute(query)
+        data = result["stdout"]
+        allFields = json.loads(cleanJson(data))
+
+        query = (
+            "cpg.typeDecl("
+            + '"'
+            + className
+            + '"'
+            + ").astChildren.isMethod.toJsonPretty"
+        )
+        result = client.execute(query)
+        data = result["stdout"]
+        allMethods = json.loads(cleanJson(data))
+
+        # Create dicts for each field and method of each class
+        for j in range(len(allFields)):
+            currFieldDict = {}
+            currFieldDict["name"] = allFields[j]["name"]
+            currFieldDict["type"] = allFields[j]["typeFullName"]
+            currClassDict["fields"].append(currFieldDict)
+        for k in range(len(allMethods)):
+            currMethodDict = {}
+            currMethodDict["code"] = allMethods[k]["code"]
+            currClassDict["methods"].append(currMethodDict)
+
+        # Add the class dict to the main sourceCodeJSON dict
+        sourceCodeJSON["classes"].append(currClassDict)
+        
+    # Finally, write everything to a file.
+    joernResult = json.dumps(sourceCodeJSON)
+    writeToFile(joernResult, "sourceCode.json")
+
+
 if __name__ == "__main__":
     # writeAll()
-    getFieldsWithModifiers()
+    # getFieldsWithModifiers()
+    # sourceCodeJsonCreation()
+    

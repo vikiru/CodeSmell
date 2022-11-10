@@ -1,0 +1,31 @@
+{
+  "classes": [
+    {
+      "name": "AddressBook",
+      "fields": [
+        { "name": "Addresses", "type": "java.util.ArrayList<BuddyInfo>" }
+      ],
+      "methods": [
+        { "code": "public AddressBook()" },
+        { "code": "public void addBuddy(BuddyInfo newBuddy)" },
+        { "code": "public BuddyInfo removeBuddy(int index)" },
+        { "code": "public static void main(String[] args)" }
+      ]
+    },
+    {
+      "name": "BuddyInfo",
+      "fields": [
+        { "name": "name", "type": "java.lang.String" },
+        { "name": "address", "type": "java.lang.String" },
+        { "name": "phone_num", "type": "java.lang.String" }
+      ],
+      "methods": [
+        {
+          "code": "public BuddyInfo(String name, String address, String phone_num)"
+        },
+        { "code": "public String getName()" },
+        { "code": "public static void main(String[] args)" }
+      ]
+    }
+  ]
+}
