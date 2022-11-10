@@ -1,10 +1,17 @@
 package com.CodeSmell;
 
+import java.util.ArrayList;
 import javafx.scene.web.WebEngine;
+
 import com.CodeSmell.UMLClass;
 import com.CodeSmell.RenderEvent;
 import com.CodeSmell.ClassRelation;
 import com.CodeSmell.Pair;
+
+import com.CodeSmell.CPGClass.Method;
+import com.CodeSmell.CPGClass.Modifier;
+import com.CodeSmell.CPGClass.Attribute;
+
 // todo: support this in maven run configuration
 //import com.sun.webkit.dom.JSObject;
 
@@ -19,35 +26,43 @@ public class WebControl implements RenderEventListener {
 
     private Integer renderClass(UMLClass c) {
         // renders a class box at the origin and return its id
-        String[] methods = c.getMethods();
 
-        // start with a default width
-        // todo: replace this with a configurable constant
-        // once we have a class for UI parameters
-        int width = 200;
+        // draw the box
+        String js = String.format("renderClassBox(\"%s\");", c.name);
+        Integer id = (Integer) this.engine.executeScript(js);
+        ArrayList<String> modStrings = new ArrayList<String>();
 
-        // for now assume each method will take
-        // up 20 pixels worth of line height
-        int height = 25 * methods.length;
-        // later this value would not be calculated,
-        // it would be read from the DOM
-        // after everything which needs to be drawn
-        // to the class box is drawn.
+        // add the methods
+        for (Method m: c.getMethods()) {
+            for (Modifier m2 : m.modifiers) {
+                modStrings.add(m2.name());
+            }
+            String modifiers = String.join(" ", modStrings).toLowerCase();
+            js = String.format("addField(false, %d, \"%s\", \"%s\");",
+                    id, m.name, modifiers);
+            this.engine.executeScript(js);
+            modStrings.clear();
+        }
 
-        return drawClassBox(0, 0, width, height, c.name);
+        // add the attributes
+        for (Attribute a: c.getAttributes()) {
+            for (Modifier m2 : a.modifiers) {
+                modStrings.add(m2.name());
+            }
+            String modifiers = String.join(" ", modStrings).toLowerCase();
+            js = String.format("addField(false, %d, \"%s\", \"%s\");", 
+                    id, a.name, modifiers);
+            this.engine.executeScript(js);
+            modStrings.clear();
+        }
+
+        return id;
     }
 
     private Integer renderPath(ClassRelation cr) {
         // render a path and return the number after the 
         // 'P' in the path's element's id
         return 0;
-    }
-
-    private Integer drawClassBox(int x, int y, int width, int height, String name) {
-        // draws a box and returns its id
-        String js = String.format("renderClassBox(%d, %d, %d, %d, \"%s\");", 
-                x, y, width, height, name);
-        return (Integer) this.engine.executeScript(js);
     }
 
     private void repositionClass(int id, double x, double y) {

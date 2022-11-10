@@ -1,57 +1,83 @@
 <head>
 
 <script>
-let box_count = 0;
+let classCount = 0;
 
-function drawBox(x, y, width, height) 
-{
-    let main_panel = document.getElementById("main");
-    let box = document.createElement('div');
-    box.className = 'box';
-    box.id = box_count;
-    box_count += 1;
+function renderClassBox(name) {
+    let mainPanel = document.getElementById("main");
 
-    // for now take width and height directly
-    // should be changed to calculate an EM
-    // value based on the monitor size later
-    box.style.width = width;
-    box.style.height = height;
-    box.style.left = x;
-    box.style.top = y;
-    main_panel.appendChild(box);
-    return box_count - 1;
+    // create a box to represent the class
+    // and assign its ID sequentially
+    let classBox = document.createElement('div');
+    classBox.className = 'classBox';
+    classBox.id = 'class' + classCount;
+    mainPanel.appendChild(classBox);
+    
+    // add class name to classBox
+    let h = document.createElement('h2');
+    h.innerHTML = name;
+    classBox.appendChild(h);
+
+    // add attributes divider to classBox
+    let attributesContainer = document.createElement('div');
+    attributesContainer.id = 'attributeContainer' + classCount;
+    classBox.appendChild(attributesContainer);
+
+    // add methods divider to classBox
+    let methodsContainer = document.createElement('div');
+    attributesContainer.id = 'methodContainer' + classCount;
+    classBox.appendChild(methodsContainer);
+
+    classCount += 1;
+    return classCount - 1;
 }
 
-function repositionBox(id, x, y) {
-    let box = document.getElementById(id);
-    box.style.left =  x;
-    box.style.top = y;
+function repositionClass(id, x, y) {
+    let classBox = document.getElementById('class' + id);
+    classBox.style.left =  x;
+    classBox.style.top = y;
 }
 
-function boxDimensions(id) {
-    let box = document.getElementById(id);
-    let r = {};
-    r.width = box.style.width;
-    r.height = box.style.height;
-    return r;
+function getClassWidth(id) {
+    let classBox = document.getElementById('class' + id);
+    let w = window.getComputedStyle(classBox).width;
+    if (w) {
+        return w;
+    }
+    return '0px';
 }
 
-function boxDimW(id) {
-    let box = document.getElementById(id);
-    return box.style.width;
+function getClassHeight(id) {
+    let classBox = document.getElementById('class' + id);
+    let h = window.getComputedStyle(classBox).height;
+    if (h) {
+        return h;
+    }
+    return '0px';
 }
 
-function boxDimH(id) {
-    let box = document.getElementById(id);
-    return box.style.height;
+function addField(isAttribute, classId, name, modifier) {
+    let fieldType = ((isAttribute) ? 'attributeContainer' :  'methodContainer');
+    let fieldBox = document.getElementById(fieldType + classId);
+    let p = document.createElement('p');
+    p.className = 'field';
+    
+    if (modifier.includes('static')) {
+        p.style.fontStyle = "italic";
+    }
+    
+    if (modifier.includes('pub')) {
+        p.style.color = '#658D9C';
+    }
+    
+    if (modifier.includes('private')) {
+        p.style.color = '#E95F65';
+    }
+
+    p.innerHTML = name;
+    fieldBox.appendChild(p);
 }
 
-function init() {
-   // drawBox(0, 0, 100, 200);
-  //  drawBox(800, 400, 250, 300);
-    // let main_panel = document.getElementById("main");
-    return 1;
-}
 </script>
 
 <style type="text/css">
@@ -63,16 +89,36 @@ function init() {
 }
 
 body {
-    scrollbar-width: none;  /* Firefox */
+    scrollbar-width: none; 
+    background: #303841;
 }
 
-.box {
+.classBox {
     border: 2px solid black;
     position: absolute;
+    text-align: center;
+    font-family: sans-serif;
+    color: white;
+    max-width: 20em;
+    min-height: 10em;
+    overflow:  hidden;
+    padding: 0em 1em 0em 1em;
 }
+
+h2 {
+    cursor: pointer;
+    text-decoration-line: underline;
+ }
+
+.field:hover {
+    cursor: pointer;
+}
+
 </style>
 </head>
-<body onload="init()">
-<div id="main">
-</div>
+
+
+<body>
+    <div id="main">
+    </div>
 </body>

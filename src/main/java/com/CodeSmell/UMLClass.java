@@ -5,13 +5,15 @@ import com.CodeSmell.WebControl;
 import com.CodeSmell.Position;
 import com.CodeSmell.RenderEvent;
 import com.CodeSmell.Pair;
+import com.CodeSmell.CPGClass.Method;
+import com.CodeSmell.CPGClass.Attribute;
 
 class UMLClass extends RenderObject {
 	
 	public final String name;
 	private int id;
-	private ArrayList<String> methods;
-	private ArrayList<String> attributes;
+	private ArrayList<Method> methods;
+	private ArrayList<Attribute> attributes;
 	private ArrayList<ClassRelation> connections;
 	// private ArrayList<Smell> smells;
 	private Position position;
@@ -21,20 +23,20 @@ class UMLClass extends RenderObject {
 	UMLClass(String name) {
 		this.name = name;
 		this.id = -1; // id is set on render
-		this.methods = new ArrayList<String>();
-		this.attributes = new ArrayList<String>();
+		this.methods = new ArrayList<Method>();
+		this.attributes = new ArrayList<Attribute>();
 		this.connections = new ArrayList<ClassRelation>();
 		this.position = new Position(0, 0);
 		this.width = 0.0;
 		this.height = 0.0;
 	}
 
-	public void addField(boolean isMethod, String s) {
-		if (isMethod) {
-			this.methods.add(s);
-		} else {
-			this.attributes.add(s);
-		}
+	public void addMethod(Method m) {
+		this.methods.add(m);
+	}
+
+	public void addAttribute(Attribute a) {
+		this.attributes.add(a);
 	}
 
 	public void addRelationship(ClassRelation r) {
@@ -64,12 +66,12 @@ class UMLClass extends RenderObject {
 		this.height = p.second.second;
 	}
 
-	public String[] getMethods() {
-		String[] s = new String[this.methods.size()];
-		for (int i=0; i < methods.size(); i++) {
-			s[i] = (String) this.methods.get(i);
-		}  
-		return s;
+	public ArrayList<Attribute> getAttributes() {
+		return this.attributes;
+	}
+
+	public ArrayList<Method> getMethods() {
+		return this.methods;
 	}
 
 	public int getId() {
