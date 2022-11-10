@@ -6,10 +6,95 @@
         { "name": "Addresses", "type": "java.util.ArrayList<BuddyInfo>" }
       ],
       "methods": [
-        { "code": "public AddressBook()" },
-        { "code": "public void addBuddy(BuddyInfo newBuddy)" },
-        { "code": "public BuddyInfo removeBuddy(int index)" },
-        { "code": "public static void main(String[] args)" }
+        {
+          "code": "public AddressBook()",
+          "instructions": [
+            {
+              "code": "this.Addresses = new ArrayList<>()",
+              "_label": "CALL",
+              "lineNumber": 9
+            },
+            { "code": "this.name = name", "_label": "CALL", "lineNumber": 9 },
+            {
+              "code": "this.address = address",
+              "_label": "CALL",
+              "lineNumber": 10
+            },
+            {
+              "code": "this.phone_num = phone_num",
+              "_label": "CALL",
+              "lineNumber": 11
+            }
+          ]
+        },
+        {
+          "code": "public void addBuddy(BuddyInfo newBuddy)",
+          "instructions": [
+            {
+              "code": "if (newBuddy != null)",
+              "_label": "CONTROL_STRUCTURE",
+              "lineNumber": 14
+            }
+          ]
+        },
+        {
+          "code": "public BuddyInfo removeBuddy(int index)",
+          "instructions": [
+            {
+              "code": "if (index >= 0 && index < Addresses.size())",
+              "_label": "CONTROL_STRUCTURE",
+              "lineNumber": 22
+            },
+            { "code": "return null;", "_label": "RETURN", "lineNumber": 26 }
+          ]
+        },
+        {
+          "code": "public static void main(String[] args)",
+          "instructions": [
+            {
+              "code": "ANY bud = new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 31
+            },
+            {
+              "code": "BuddyInfo friend1 = new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 21
+            },
+            {
+              "code": "new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 31
+            },
+            {
+              "code": "new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 21
+            },
+            {
+              "code": "System.out.println(\"Hello \" + friend1.getName())",
+              "_label": "CALL",
+              "lineNumber": 22
+            },
+            {
+              "code": "AddressBook addBook = new AddressBook()",
+              "_label": "CALL",
+              "lineNumber": 32
+            },
+            { "code": "new AddressBook()", "_label": "CALL", "lineNumber": 32 },
+            { "code": "addBuddy(bud)", "_label": "CALL", "lineNumber": 33 },
+            {
+              "code": "addBook.removeBuddy(0)",
+              "_label": "CALL",
+              "lineNumber": 34
+            },
+            {
+              "code": "println(bud.getName())",
+              "_label": "CALL",
+              "lineNumber": 35
+            }
+          ]
+        }
       ]
     },
     {
@@ -21,10 +106,79 @@
       ],
       "methods": [
         {
-          "code": "public BuddyInfo(String name, String address, String phone_num)"
+          "code": "public BuddyInfo(String name, String address, String phone_num)",
+          "instructions": [
+            {
+              "code": "this.Addresses = new ArrayList<>()",
+              "_label": "CALL",
+              "lineNumber": 9
+            },
+            { "code": "this.name = name", "_label": "CALL", "lineNumber": 9 },
+            {
+              "code": "this.address = address",
+              "_label": "CALL",
+              "lineNumber": 10
+            },
+            {
+              "code": "this.phone_num = phone_num",
+              "_label": "CALL",
+              "lineNumber": 11
+            }
+          ]
         },
-        { "code": "public String getName()" },
-        { "code": "public static void main(String[] args)" }
+        {
+          "code": "public String getName()",
+          "instructions": [
+            { "code": "return name;", "_label": "RETURN", "lineNumber": 16 }
+          ]
+        },
+        {
+          "code": "public static void main(String[] args)",
+          "instructions": [
+            {
+              "code": "ANY bud = new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 31
+            },
+            {
+              "code": "BuddyInfo friend1 = new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 21
+            },
+            {
+              "code": "new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 31
+            },
+            {
+              "code": "new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
+              "_label": "CALL",
+              "lineNumber": 21
+            },
+            {
+              "code": "System.out.println(\"Hello \" + friend1.getName())",
+              "_label": "CALL",
+              "lineNumber": 22
+            },
+            {
+              "code": "AddressBook addBook = new AddressBook()",
+              "_label": "CALL",
+              "lineNumber": 32
+            },
+            { "code": "new AddressBook()", "_label": "CALL", "lineNumber": 32 },
+            { "code": "addBuddy(bud)", "_label": "CALL", "lineNumber": 33 },
+            {
+              "code": "addBook.removeBuddy(0)",
+              "_label": "CALL",
+              "lineNumber": 34
+            },
+            {
+              "code": "println(bud.getName())",
+              "_label": "CALL",
+              "lineNumber": 35
+            }
+          ]
+        }
       ]
     }
   ]

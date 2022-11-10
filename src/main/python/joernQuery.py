@@ -53,7 +53,6 @@ def getAndWriteJoernResults(query, filename):
         for i in range(0, len(joernJsonData)):
             currItem = joernJsonData[i]
             index = currItem.find(stringToFind)
-            print(index)
             if index != -1:
                 currItem = currItem[index + len(stringToFind) :]
                 joernJsonData[i] = currItem
@@ -204,12 +203,39 @@ def sourceCodeJsonCreation():
             currClassDict["fields"].append(currFieldDict)
         for k in range(len(allMethods)):
             currMethodDict = {}
+            methodName = allMethods[k]["name"]
             currMethodDict["code"] = allMethods[k]["code"]
+            currMethodDict["instructions"] = []
+
+            # Execute a query to get the children of each method (aka the instructions and calls)
+            query = (
+                "cpg.method("
+                + '"'
+                + methodName
+                + '"'
+                + ").astChildren.astChildren.where(node => node.lineNumber).toJsonPretty"
+            )
+
+            result = client.execute(query)
+            data = result["stdout"]
+
+            # Add the instructions to the currMethodDict
+            allInstructions = json.loads(cleanJson(data))
+
+            # Go instruction by instruction for each method and append to currMethodDict
+            for l in range(len(allInstructions)):
+                currInstructionDict = {}
+                currInstructionDict["code"] = allInstructions[l]["code"]
+                currInstructionDict["_label"] = allInstructions[l]["_label"]
+                currInstructionDict["lineNumber"] = allInstructions[l]["lineNumber"]
+                currMethodDict["instructions"].append(currInstructionDict)
+
+            # Append the currMethodDict to currClassDict["methods"] list
             currClassDict["methods"].append(currMethodDict)
 
         # Add the class dict to the main sourceCodeJSON dict
         sourceCodeJSON["classes"].append(currClassDict)
-        
+
     # Finally, write everything to a file.
     joernResult = json.dumps(sourceCodeJSON)
     writeToFile(joernResult, "sourceCode.json")
@@ -218,5 +244,4 @@ def sourceCodeJsonCreation():
 if __name__ == "__main__":
     # writeAll()
     # getFieldsWithModifiers()
-    # sourceCodeJsonCreation()
-    
+    sourceCodeJsonCreation()
