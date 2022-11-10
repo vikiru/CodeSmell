@@ -17,9 +17,13 @@ public class Parser {
 	}
 
 	private class JavaMethod extends Method {
-		JavaMethod(String name, String[] instructions) {
-			super(name, instructions);
+		
+		JavaMethod(String name, String[] instructions, Modifier[] modifiers) {
+			super(name, instructions, modifiers);
 		}
+
+
+
 	}
 
 	public CodePropertyGraph buildCPG(String destination) {
@@ -27,17 +31,25 @@ public class Parser {
 
 		CPGClass jc1 = new CPGClass("FirstClass");
 		CPGClass jc2 = new CPGClass("SecondClass");
-		CPGClass jc3 = new CPGClass("SecondClass");
+		CPGClass jc3 = new CPGClass("ThirdClass");
 		Attribute a1 = new JavaAttribute("attributeOne", new Modifier[] {Modifier.PUBLIC});
 		Attribute a2 = new JavaAttribute("attributeTwo", new Modifier[] {Modifier.STATIC, Modifier.PRIVATE});
-		Method m1 = new JavaMethod("methodOne(void);", new String[] {"instruction one;", "instruction two"});
-		Method m2 = new JavaMethod("methodTwo(int x, int y);", new String[] {"return x + y;"});
-		Method m3 = new JavaMethod("methodThree(void);", new String[] {"return 0;"});
-		Method m4 = new JavaMethod("methodFour(void);", new String[] {"return 0;"});
-		Method m5 = new JavaMethod("methodFive(void);", new String[] {"return 0;"});
-		Method m6 = new JavaMethod("methodSix(void);", new String[] {"return 0;"});
-		Method m7 = new JavaMethod("methodSeven(void);", new String[] {"return 0;"});
-		Method m8 = new JavaMethod("methodEight(void);", new String[] {"return 0;"});
+		Method m1 = new JavaMethod("methodOne(void);", new String[] {"instruction one;", "instruction two"},
+				new Modifier[] {Modifier.PRIVATE});
+		Method m2 = new JavaMethod("methodTwo(int x, int y);",
+				new String[] {"return x + y;"}, new Modifier[] {Modifier.PRIVATE});
+		Method m3 = new JavaMethod("methodThree(void);", new String[] {"return 0;"}, 
+			new Modifier[] {Modifier.PRIVATE});
+		Method m4 = new JavaMethod("methodFour(void);", new String[] {"return 0;"}, 
+			new Modifier[] {Modifier.PRIVATE});
+		Method m5 = new JavaMethod("methodFive(void);", new String[] {"return 0;"}, 
+			new Modifier[] {Modifier.PRIVATE});
+		Method m6 = new JavaMethod("methodSix(void);", new String[] {"return 0;"}, 
+			new Modifier[] {Modifier.PRIVATE});
+		Method m7 = new JavaMethod("methodSeven(void);", new String[] {"return 0;"}, 
+			new Modifier[] {Modifier.PRIVATE});
+		Method m8 = new JavaMethod("methodEight(void);", new String[] {"return 0;"}, 
+			new Modifier[] {Modifier.PRIVATE});
 		m1.addCall(m2);
 		jc1.addMethod(m1);
 		Modifier[] m = new Modifier[] {Modifier.PUBLIC};

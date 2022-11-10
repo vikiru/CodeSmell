@@ -13,7 +13,7 @@ public abstract class RenderObject {
 		renderEventListeners.add(rel);
 	}
 
-	public void dispatch(RenderEvent re) {
+	public void dispatchToRenderEventListeners(RenderEvent re) {
 		for (RenderEventListener rel : renderEventListeners) {
 			rel.renderEventPerformed(re);
 		}

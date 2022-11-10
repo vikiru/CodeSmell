@@ -11,12 +11,16 @@ public class CPGClass {
 		// a print out of the method instructions
 		public final String[] instructions;
 
+		// list of modifiers the method has (0 or more)
+		public final Modifier[] modifiers;
+
 		// return a list of methods which this calls
 		private ArrayList<Method> calls;
 
-		protected Method(String name, String[] instructions) {
+		protected Method(String name, String[] instructions, Modifier[] modifiers) {
 			this.name = name;
 			this.instructions = instructions;
+			this.modifiers = modifiers;
 			this.calls = new ArrayList<Method>();
 		}
 
@@ -33,7 +37,6 @@ public class CPGClass {
 	}
 
 	public static class Attribute {
-
 		// the name of the attribute
 		public final String name;
 
@@ -47,8 +50,6 @@ public class CPGClass {
 	}
 
 	public final String name;
-	
-
 	private ArrayList<Method> methods;
 	private ArrayList<Attribute> attributes;
 
