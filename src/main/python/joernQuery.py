@@ -75,8 +75,8 @@ def getMethodsWithModifiers(query, filename):
         stringToClear = currItemArr[1]
         stringToFind = "main.python.joernTestProject.src."
         index = stringToClear.find(stringToFind)
-        if index != -1:
 
+        if index != -1:
             stringToClear = stringToClear[
                 index + len(stringToFind) : len(stringToClear)
             ]
@@ -86,6 +86,56 @@ def getMethodsWithModifiers(query, filename):
                 finalArr.append(finalStr)
     joernResult = ("\n").join(finalArr)
     writeToFile(joernResult, filename)
+
+
+# Execute joern queries to get all the fields of classes with their access modifiers and write to a file.
+def getFieldsWithModifiers():
+
+    # Perform queries to get private, public, protected, and static fields.
+    query = "cpg.member.isPrivate.code.toJsonPretty"
+    result = client.execute(query)
+    data = result["stdout"]
+    privateFields = cleanJson(data)
+
+    query = "cpg.member.isPublic.code.toJsonPretty"
+    result = client.execute(query)
+    data = result["stdout"]
+    publicFields = cleanJson(data)
+
+    query = "cpg.member.isProtected.code.toJsonPretty"
+    result = client.execute(query)
+    data = result["stdout"]
+    protectedFields = cleanJson(data)
+
+    query = "cpg.member.isStatic.code.toJsonPretty"
+    result = client.execute(query)
+    data = result["stdout"]
+    staticFields = cleanJson(data)
+
+    # Load JSON into a python list for each field
+    privateArr = json.loads(privateFields)
+    publicArr = json.loads(publicFields)
+    protectedArr = json.loads(protectedFields)
+    staticArr = json.loads(staticFields)
+
+    # Add the access modifier in front of the field
+    if len(privateArr) != 0:
+        for i in range(0, len(privateArr)):
+            privateArr[i] = "private " + privateArr[i]
+    if len(publicArr) != 0:
+        for i in range(0, len(privateArr)):
+            privateArr[i] = "private " + privateArr[i]
+    if len(protectedArr) != 0:
+        for i in range(0, len(privateArr)):
+            privateArr[i] = "private " + privateArr[i]
+    if len(staticArr) != 0:
+        for i in range(0, len(privateArr)):
+            privateArr[i] = "private " + privateArr[i]
+
+    # Combine lists and seperate by new line and write to a file
+    finalArr = privateArr + publicArr + protectedArr + staticArr
+    joernResult = ("\n").join(finalArr)
+    writeToFile(joernResult, "allFieldsWithModifiers.txt")
 
 
 # Cleans up jsonPretty output from joern so that it can be a proper JSON file.
@@ -101,4 +151,5 @@ def cleanJson(joernResult):
 
 
 if __name__ == "__main__":
-    writeAll()
+    # writeAll()
+    getFieldsWithModifiers()
