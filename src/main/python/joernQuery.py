@@ -213,9 +213,12 @@ def sourceCodeJsonCreation():
                 + '"'
                 + methodName
                 + '"'
-                + ").astChildren.astChildren.where(node => node.lineNumber).toJsonPretty"
+                + ").where(node => node.astParent.isTypeDecl.name("
+                + '"'
+                + className
+                + '"'
+                + ")).astChildren.astChildren.where(node => node.lineNumber).toJsonPretty"
             )
-
             result = client.execute(query)
             data = result["stdout"]
 
