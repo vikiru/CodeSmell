@@ -8,7 +8,7 @@
 - Visakan Kirubakaran
 - Sabin Plaiasu
 - Martin Rivard
-- Kshitj Sawhney
+- Kshitij Sawhney
 
 ## Prerequisites
 

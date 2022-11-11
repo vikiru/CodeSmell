@@ -8,66 +8,82 @@
       "methods": [
         {
           "code": "public AddressBook()",
+          "methodBody": "AddressBook()",
+          "modifiers": ["public"],
+          "name": "AddressBook",
           "instructions": [
             {
-              "code": "this.Addresses = new ArrayList<>()",
               "_label": "CALL",
+              "code": "this.Addresses = new ArrayList<>()",
               "lineNumber": 9
             }
-          ]
+          ],
+          "returnType": ""
         },
         {
           "code": "public void addBuddy(BuddyInfo newBuddy)",
+          "methodBody": "addBuddy(BuddyInfo newBuddy)",
+          "modifiers": ["public"],
+          "name": "addBuddy",
           "instructions": [
             {
-              "code": "if (newBuddy != null)",
               "_label": "CONTROL_STRUCTURE",
+              "code": "if (newBuddy != null)",
               "lineNumber": 14
             }
-          ]
+          ],
+          "returnType": "void"
         },
         {
           "code": "public BuddyInfo removeBuddy(int index)",
+          "methodBody": "removeBuddy(int index)",
+          "modifiers": ["public"],
+          "name": "removeBuddy",
           "instructions": [
             {
-              "code": "if (index >= 0 && index < Addresses.size())",
               "_label": "CONTROL_STRUCTURE",
+              "code": "if (index >= 0 && index < Addresses.size())",
               "lineNumber": 22
             },
-            { "code": "return null;", "_label": "RETURN", "lineNumber": 26 }
-          ]
+            { "_label": "RETURN", "code": "return null;", "lineNumber": 26 }
+          ],
+          "returnType": "BuddyInfo"
         },
         {
           "code": "public static void main(String[] args)",
+          "methodBody": "main(String[] args)",
+          "modifiers": ["public", "static"],
+          "name": "main",
           "instructions": [
             {
+              "_label": "CALL",
               "code": "ANY bud = new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
-              "_label": "CALL",
               "lineNumber": 31
             },
             {
+              "_label": "CALL",
               "code": "new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
-              "_label": "CALL",
               "lineNumber": 31
             },
             {
-              "code": "AddressBook addBook = new AddressBook()",
               "_label": "CALL",
+              "code": "AddressBook addBook = new AddressBook()",
               "lineNumber": 32
             },
-            { "code": "new AddressBook()", "_label": "CALL", "lineNumber": 32 },
-            { "code": "addBuddy(bud)", "_label": "CALL", "lineNumber": 33 },
+            { "_label": "CALL", "code": "new AddressBook()", "lineNumber": 32 },
+            { "_label": "CALL", "code": "addBuddy(bud)", "lineNumber": 33 },
             {
-              "code": "addBook.removeBuddy(0)",
               "_label": "CALL",
+              "code": "addBook.removeBuddy(0)",
               "lineNumber": 34
             },
             {
-              "code": "println(bud.getName())",
               "_label": "CALL",
+              "code": "println(bud.getName())",
               "lineNumber": 35
             }
-          ]
+          ],
+          "returnType": "void"
         }
       ]
     },
@@ -81,45 +97,57 @@
       "methods": [
         {
           "code": "public BuddyInfo(String name, String address, String phone_num)",
+          "methodBody": "BuddyInfo(String name, String address, String phone_num)",
+          "modifiers": ["public"],
+          "name": "BuddyInfo",
           "instructions": [
-            { "code": "this.name = name", "_label": "CALL", "lineNumber": 9 },
+            { "_label": "CALL", "code": "this.name = name", "lineNumber": 9 },
             {
-              "code": "this.address = address",
               "_label": "CALL",
+              "code": "this.address = address",
               "lineNumber": 10
             },
             {
-              "code": "this.phone_num = phone_num",
               "_label": "CALL",
+              "code": "this.phone_num = phone_num",
               "lineNumber": 11
             }
-          ]
+          ],
+          "returnType": ""
         },
         {
           "code": "public String getName()",
+          "methodBody": "getName()",
+          "modifiers": ["public"],
+          "name": "getName",
           "instructions": [
-            { "code": "return name;", "_label": "RETURN", "lineNumber": 16 }
-          ]
+            { "_label": "RETURN", "code": "return name;", "lineNumber": 16 }
+          ],
+          "returnType": "String"
         },
         {
           "code": "public static void main(String[] args)",
+          "methodBody": "main(String[] args)",
+          "modifiers": ["public", "static"],
+          "name": "main",
           "instructions": [
             {
+              "_label": "CALL",
               "code": "BuddyInfo friend1 = new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
-              "_label": "CALL",
               "lineNumber": 21
             },
             {
+              "_label": "CALL",
               "code": "new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
-              "_label": "CALL",
               "lineNumber": 21
             },
             {
-              "code": "System.out.println(\"Hello \" + friend1.getName())",
               "_label": "CALL",
+              "code": "System.out.println(\"Hello \" + friend1.getName())",
               "lineNumber": 22
             }
-          ]
+          ],
+          "returnType": "void"
         }
       ]
     }

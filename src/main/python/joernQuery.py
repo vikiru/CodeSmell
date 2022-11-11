@@ -196,16 +196,49 @@ def sourceCodeJsonCreation():
         allMethods = json.loads(cleanJson(data))
 
         # Create dicts for each field and method of each class
-        for j in range(len(allFields)):
+        for j in range(0, len(allFields)):
             currFieldDict = {}
             currFieldDict["name"] = allFields[j]["name"]
             currFieldDict["type"] = allFields[j]["typeFullName"]
             currClassDict["fields"].append(currFieldDict)
-        for k in range(len(allMethods)):
+
+        for k in range(0, len(allMethods)):
             currMethodDict = {}
             methodName = allMethods[k]["name"]
+
             currMethodDict["code"] = allMethods[k]["code"]
+            currMethodDict["methodBody"] = ""
+            currMethodDict["modifiers"] = []
+            currMethodDict["name"] = methodName
             currMethodDict["instructions"] = []
+            currMethodDict["returnType"] = ""
+
+            modifiers = ["public", "private", "protected", "static", "final"]
+            fullMethodCodeDecl = allMethods[k]["code"]
+            index = fullMethodCodeDecl.find(methodName)
+
+            if index == -1 and methodName == "<init>":
+                newIndex = fullMethodCodeDecl.find("(")
+                result = fullMethodCodeDecl[0:newIndex].split()
+                currMethodDict["name"] = result[1]
+                index = fullMethodCodeDecl.find(currMethodDict["name"])
+
+            modifiersWithReturn = fullMethodCodeDecl[0:index]
+            methodBody = fullMethodCodeDecl[index : len(fullMethodCodeDecl)]
+            methodBodyArr = []
+            methodBodyArr.extend(modifiersWithReturn.split())
+            methodBodyArr.append(methodBody)
+
+            # Extract the modifiers, methodBody, and returnType of a method.
+            for m in range(0, len(methodBodyArr)):
+                currItem = methodBodyArr[m]
+                if currItem in modifiers:
+                    currMethodDict["modifiers"].append(currItem)
+                else:
+                    if "(" in currItem:
+                        currMethodDict["methodBody"] = currItem
+                    else:
+                        currMethodDict["returnType"] = currItem
 
             # Execute a query to get the children of each method (aka the instructions and calls)
             query = (
@@ -226,11 +259,11 @@ def sourceCodeJsonCreation():
             allInstructions = json.loads(cleanJson(data))
 
             # Go instruction by instruction for each method and append to currMethodDict
-            for l in range(len(allInstructions)):
+            for m in range(0, len(allInstructions)):
                 currInstructionDict = {}
-                currInstructionDict["code"] = allInstructions[l]["code"]
-                currInstructionDict["_label"] = allInstructions[l]["_label"]
-                currInstructionDict["lineNumber"] = allInstructions[l]["lineNumber"]
+                currInstructionDict["_label"] = allInstructions[m]["_label"]
+                currInstructionDict["code"] = allInstructions[m]["code"]
+                currInstructionDict["lineNumber"] = allInstructions[m]["lineNumber"]
                 currMethodDict["instructions"].append(currInstructionDict)
 
             # Append the currMethodDict to currClassDict["methods"] list
