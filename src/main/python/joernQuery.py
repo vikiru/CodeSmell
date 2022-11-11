@@ -88,7 +88,7 @@ def getMethodsWithModifiers(query, filename):
 
 
 # Execute joern queries to get all the fields of classes with their access modifiers and write to a file.
-def getFieldsWithModifiers():
+def getFieldsWithModifiers(write=False):
 
     # Perform queries to get private, public, protected, and static fields.
     query = "cpg.member.isPrivate.code.toJsonPretty"
@@ -117,24 +117,27 @@ def getFieldsWithModifiers():
     protectedArr = json.loads(protectedFields)
     staticArr = json.loads(staticFields)
 
-    # Add the access modifier in front of the field
-    if len(privateArr) != 0:
-        for i in range(0, len(privateArr)):
-            privateArr[i] = "private " + privateArr[i]
-    if len(publicArr) != 0:
-        for i in range(0, len(privateArr)):
-            publicArr[i] = "public " + privateArr[i]
-    if len(protectedArr) != 0:
-        for i in range(0, len(privateArr)):
-            protectedArr[i] = "protected " + privateArr[i]
-    if len(staticArr) != 0:
-        for i in range(0, len(privateArr)):
-            staticArr[i] = "static " + privateArr[i]
+    if write == True:
+        # Add the access modifier in front of the field
+        if len(privateArr) != 0:
+            for i in range(0, len(privateArr)):
+                privateArr[i] = "private " + privateArr[i]
+        if len(publicArr) != 0:
+            for i in range(0, len(privateArr)):
+                publicArr[i] = "public " + privateArr[i]
+        if len(protectedArr) != 0:
+            for i in range(0, len(privateArr)):
+                protectedArr[i] = "protected " + privateArr[i]
+        if len(staticArr) != 0:
+            for i in range(0, len(privateArr)):
+                staticArr[i] = "static " + privateArr[i]
 
-    # Combine lists and separate by new line and write to a file
-    finalArr = privateArr + publicArr + protectedArr + staticArr
-    joernResult = ("\n").join(finalArr)
-    writeToFile(joernResult, "allFieldsWithModifiers.txt")
+        # Combine lists and separate by new line and write to a file
+        finalArr = privateArr + publicArr + protectedArr + staticArr
+        joernResult = ("\n").join(finalArr)
+
+        writeToFile(joernResult, "allFieldsWithModifiers.txt")
+    return privateArr, publicArr, protectedArr, staticArr
 
 
 # Cleans up jsonPretty output from joern so that it can be a proper JSON file.
@@ -160,6 +163,8 @@ def sourceCodeJsonCreation():
     # Dictionary which will store everything about the source code.
     sourceCodeJSON = {}
     sourceCodeJSON["classes"] = []
+
+    privateArr, publicArr, protectedArr, staticArr = getFieldsWithModifiers(False)
 
     # Go class by class populating sourceCodeJSON
     for i in range(0, len(allClasses)):
@@ -198,8 +203,20 @@ def sourceCodeJsonCreation():
         # Create dicts for each field and method of each class
         for j in range(0, len(allFields)):
             currFieldDict = {}
+            fieldCode = allFields[j]["code"]
             currFieldDict["name"] = allFields[j]["name"]
+            currFieldDict["modifiers"] = []
             currFieldDict["type"] = allFields[j]["typeFullName"]
+
+            # Add the modifiers of the field
+            if fieldCode in privateArr:
+                currFieldDict["modifiers"].append("private")
+            if fieldCode in publicArr:
+                currFieldDict["modifiers"].append("public")
+            if fieldCode in protectedArr:
+                currFieldDict["modifiers"].append("protected")
+            if fieldCode in staticArr:
+                currFieldDict["modifiers"].append("static")
             currClassDict["fields"].append(currFieldDict)
 
         for k in range(0, len(allMethods)):
@@ -229,9 +246,9 @@ def sourceCodeJsonCreation():
             methodBodyArr.extend(modifiersWithReturn.split())
             methodBodyArr.append(methodBody)
 
-            # Extract the modifiers, methodBody, and returnType of a method.
-            for m in range(0, len(methodBodyArr)):
-                currItem = methodBodyArr[m]
+            # Extract the modifiers, methodBody, and returnType of a method
+            for l in range(0, len(methodBodyArr)):
+                currItem = methodBodyArr[l]
                 if currItem in modifiers:
                     currMethodDict["modifiers"].append(currItem)
                 else:
@@ -254,8 +271,6 @@ def sourceCodeJsonCreation():
             )
             result = client.execute(query)
             data = result["stdout"]
-
-            # Add the instructions to the currMethodDict
             allInstructions = json.loads(cleanJson(data))
 
             # Go instruction by instruction for each method and append to currMethodDict

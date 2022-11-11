@@ -3,7 +3,11 @@
     {
       "name": "AddressBook",
       "fields": [
-        { "name": "Addresses", "type": "java.util.ArrayList<BuddyInfo>" }
+        {
+          "name": "Addresses",
+          "modifiers": ["private"],
+          "type": "java.util.ArrayList<BuddyInfo>"
+        }
       ],
       "methods": [
         {
@@ -90,9 +94,21 @@
     {
       "name": "BuddyInfo",
       "fields": [
-        { "name": "name", "type": "java.lang.String" },
-        { "name": "address", "type": "java.lang.String" },
-        { "name": "phone_num", "type": "java.lang.String" }
+        {
+          "name": "name",
+          "modifiers": ["private"],
+          "type": "java.lang.String"
+        },
+        {
+          "name": "address",
+          "modifiers": ["private"],
+          "type": "java.lang.String"
+        },
+        {
+          "name": "phone_num",
+          "modifiers": ["private"],
+          "type": "java.lang.String"
+        }
       ],
       "methods": [
         {
