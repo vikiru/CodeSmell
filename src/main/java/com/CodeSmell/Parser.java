@@ -7,6 +7,8 @@ import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Modifier;
 import com.CodeSmell.CodePropertyGraph;
+import com.CodeSmell.ClassRelation;
+
 
 public class Parser {	
 
@@ -17,13 +19,9 @@ public class Parser {
 	}
 
 	private class JavaMethod extends Method {
-		
 		JavaMethod(String name, String[] instructions, Modifier[] modifiers) {
 			super(name, instructions, modifiers);
 		}
-
-
-
 	}
 
 	public CodePropertyGraph buildCPG(String destination) {
@@ -50,6 +48,7 @@ public class Parser {
 			new Modifier[] {Modifier.PRIVATE});
 		Method m8 = new JavaMethod("methodEight(void);", new String[] {"return 0;"}, 
 			new Modifier[] {Modifier.PRIVATE});
+
 		m1.addCall(m2);
 		jc1.addMethod(m1);
 		Modifier[] m = new Modifier[] {Modifier.PUBLIC};
@@ -65,6 +64,11 @@ public class Parser {
 		cpg.addClass(jc1);
 		cpg.addClass(jc2);
 		cpg.addClass(jc3);
+		CodePropertyGraph.Relation r = new CodePropertyGraph.Relation(
+				jc1, 
+				jc2, 
+				ClassRelation.Type.DEPENDENCY);
+		cpg.addRelation(r);
 		return cpg;
 	}
 }

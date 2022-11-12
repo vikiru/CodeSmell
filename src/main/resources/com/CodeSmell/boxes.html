@@ -28,6 +28,37 @@ function renderClassBox(name) {
     attributesContainer.id = 'methodContainer' + classCount;
     classBox.appendChild(methodsContainer);
 
+    // add class relation divider to classBox
+    let relationContainer = document.createElement('div');
+    relationContainer.id = 'relationContainer' + classCount;
+    classBox.appendChild(relationContainer);
+
+    /**
+     * each div contained in relationContainer contains
+     * the lines which are used to draw class relationship arrows
+     */
+    /** example relationsContainer for the second class created
+    <div id="relationContainer1">
+        <div> path container 1
+            <div> node container
+                <div> 
+                <div>
+                <div> 
+            </div>
+            <div class=line/> 
+            <div class=line/>
+        </div>
+        <div> path container 2
+            <div> node container
+                <div> 
+                <div>
+            </div>
+            <div class=line/> 
+        </div>
+    <div> 
+    pathContainer.firstChild.children refers to the list of nodes
+    */
+
     classCount += 1;
     return classCount - 1;
 }
@@ -78,6 +109,89 @@ function addField(isAttribute, classId, name, modifier) {
     fieldBox.appendChild(p);
 }
 
+// check that coordinates (x, y) are inside the class bounds
+function classBoundCheck(id, x, y) {
+    let classBox = document.getElementById('class' + id);
+    classX =  classBox.style.left;
+    classY = classBox.style.top;
+    return (x > classX + getClassWidth(id)) || (x < classX) ||
+        (y > classY + getClassHeight(id)) || (y < classY);
+}
+
+function drawDot(x, y, color) {
+    let mainPanel = document.getElementById("main");
+    let dot = document.createElement('div');
+    if (!color) {
+        dot.style.backgroundColor = "red";
+    } else {
+        dot.style.backgroundColor = color;
+    }
+    dot.style.left = x;
+    dot.style.top = y;
+    dot.style.width = 4;
+    dot.style.height = 4;
+    dot.style.position = 'absolute';
+    mainPanel.appendChild(dot);
+}
+
+function createRelationPath(classBoxId, x, y) {
+    // adds a container to store nodes of a class
+    // relationship path and returns that classes' relationship
+    // sequence number
+    if (!classBoundCheck(classBoxId, x, y)) {
+        //showError(x, y);
+        //throw 'x ' + x + ' y ' + y;
+        //return -1;
+    }
+    let rc = document.getElementById('relationContainer' + classBoxId);
+    let nodeContainer = document.createElement('div');
+    let pathContainer = document.createElement('div');
+    let children = rc.childElementCount;
+    pathContainer.appendChild(nodeContainer);
+    rc.appendChild(pathContainer);
+    return children;
+}
+
+function appendPathNode(classId, pathContainerId, x, y) {
+    let relationContainer = document.getElementById('relationContainer' + classId);
+    let nodeContainer = relationContainer.children.item(pathContainerId).firstChild;
+    let node = document.createElement('div');
+    node.x = x;
+    node.y = y;
+    nodeContainer.appendChild(node);
+}
+
+function renderPath(classId, pathContainerId) {
+    let relationsContainer = document.getElementById('relationContainer' + classId);
+    let pathContainer = relationsContainer.children.item(pathContainerId);
+    let nodes = pathContainer.firstChild.children;
+
+    function rotateLine(line, angle) {
+      line.setAttribute("style", "transform: rotate(" + angle + "deg)");
+    }
+    
+    for (let i = 0; i < nodes.length - 1; i++) { 
+        let startX = nodes[i].x;
+        let endX = nodes[i+1].x;
+        let startY = nodes[i].y;
+        let endY = nodes[i+1].y;
+        let magnitude = ((startX - endX)**2 + (startY - endY)**2)**0.5;
+        // find angle to rotate a line by taking the dot product
+        // with the unit vector for horizontal direction 
+        // i = (1, 0)
+        // v =  (endX - startX, endY - startY))
+        // i・v = |i||v|cos0
+        let angle = Math.acos((endX - startX) / magnitude) * 180;
+
+        let line = document.createElement('div');
+        line.className = 'line';
+        line.style.left = startX + 'px';
+        line.style.top = startY + 'px';
+        rotateLine(line, angle);
+        pathContainer.appendChild(line);
+    }
+}
+
 </script>
 
 <style type="text/css">
@@ -90,11 +204,11 @@ function addField(isAttribute, classId, name, modifier) {
 
 body {
     scrollbar-width: none; 
-    background: #303841;
+    background: #22262A;
 }
 
 .classBox {
-    border: 2px solid black;
+    border: 2px solid grey;
     position: absolute;
     text-align: center;
     font-family: sans-serif;
@@ -103,6 +217,7 @@ body {
     min-height: 10em;
     overflow:  hidden;
     padding: 0em 1em 0em 1em;
+    background: #303841;
 }
 
 h2 {
@@ -112,6 +227,11 @@ h2 {
 
 .field:hover {
     cursor: pointer;
+}
+
+.line {
+    height: 1px;
+    border: 1px solid white;
 }
 
 </style>

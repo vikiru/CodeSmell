@@ -1,13 +1,15 @@
 package com.CodeSmell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import javafx.scene.web.WebEngine;
 
 import com.CodeSmell.UMLClass;
 import com.CodeSmell.RenderEvent;
 import com.CodeSmell.ClassRelation;
 import com.CodeSmell.Pair;
-
+import com.CodeSmell.Shape;
 import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Modifier;
 import com.CodeSmell.CPGClass.Attribute;
@@ -28,7 +30,7 @@ public class WebControl implements RenderEventListener {
         // renders a class box at the origin and return its id
 
         // draw the box
-        String js = String.format("renderClassBox(\"%s\");", c.name);
+        String js = String.format("renderClassBox('%s');", c.name);
         Integer id = (Integer) this.engine.executeScript(js);
         ArrayList<String> modStrings = new ArrayList<String>();
 
@@ -38,7 +40,7 @@ public class WebControl implements RenderEventListener {
                 modStrings.add(m2.name());
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
-            js = String.format("addField(false, %d, \"%s\", \"%s\");",
+            js = String.format("addField(false, %d, '%s', '%s');",
                     id, m.name, modifiers);
             this.engine.executeScript(js);
             modStrings.clear();
@@ -50,7 +52,7 @@ public class WebControl implements RenderEventListener {
                 modStrings.add(m2.name());
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
-            js = String.format("addField(false, %d, \"%s\", \"%s\");", 
+            js = String.format("addField(false, %d, '%s', 's');", 
                     id, a.name, modifiers);
             this.engine.executeScript(js);
             modStrings.clear();
@@ -60,9 +62,30 @@ public class WebControl implements RenderEventListener {
     }
 
     private Integer renderPath(ClassRelation cr) {
-        // render a path and return the number after the 
-        // 'P' in the path's element's id
-        return 0;
+        // renders the path of a class relation to the
+        // browser view and returns the index position
+        // of its DOM data
+
+        int classId = cr.source.getId();
+        ArrayList<Position> path = cr.getPath();
+        // Create the path DOM object and ensure the first 
+        // node of the path borders a class object
+        String js = String.format("createRelationPath(%d, %f, %f)", 
+               classId , path.get(0).x, path.get(0).y);
+        Integer pathContainerId = (Integer) this.engine.executeScript(js);
+        if (pathContainerId < 0) {
+            // the given coordinates cr.position.x, cr.position.y were
+            // not inside (or on the edge) of the drawing box
+            throw new RuntimeException("Bad starting location for path draw");
+        }
+
+        for (Position p : path) {
+            this.engine.executeScript(String.format(
+                    "appendPathNode(%d, %d, %f, %f)", classId, pathContainerId, p.x, p.y));
+        }
+        this.engine.executeScript(String.format(
+                "renderPath(%d, %d)", classId, pathContainerId));
+        return pathContainerId;
     }
 
     private void repositionClass(int id, double x, double y) {
@@ -96,6 +119,17 @@ public class WebControl implements RenderEventListener {
                  Double.parseDouble(h.substring(0, h.length() - 2)));
     }
 
+    private void drawShape(Shape s) {
+        String js;
+        Iterator<Position> i = Arrays.stream(s.vertex).iterator();
+        while (i.hasNext()) {
+            Position p = i.next();
+            js = String.format("drawDot(%f, %f, \"%s\");", 
+                    p.x, p.y, s.colour);
+            this.engine.executeScript(js);
+        }
+    }
+
     public void renderEventPerformed(RenderEvent e) {
         Object source = e.source; 
         if (( source instanceof RenderObject ) == false) {
@@ -108,9 +142,11 @@ public class WebControl implements RenderEventListener {
                 Pair<Integer, Pair<Double, Double>> p = new Pair(id, size);
                 // add id and size to response
                 e.setResponse((Object) p);
-            } else {
+            } else if (source instanceof ClassRelation) {
                 Integer id = renderPath((ClassRelation) source);
                 e.setResponse((Object) id);
+            }  else if (source instanceof Shape ) {
+                drawShape((Shape) source);
             }
         } else if (e.type == RenderEvent.Type.REPOSITION) {
             UMLClass c =  (UMLClass) source;

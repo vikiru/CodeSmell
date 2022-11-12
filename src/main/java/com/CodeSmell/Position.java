@@ -9,4 +9,8 @@ public class Position {
 		this.x = x;
 		this.y = y;
 	}
+
+	public String toString() {
+		return String.format("(%f, %f)", x, y);
+	}
 }

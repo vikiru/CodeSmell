@@ -14,7 +14,7 @@ class UMLClass extends RenderObject {
 	private int id;
 	private ArrayList<Method> methods;
 	private ArrayList<Attribute> attributes;
-	private ArrayList<ClassRelation> connections;
+	private ArrayList<ClassRelation> relations;
 	// private ArrayList<Smell> smells;
 	private Position position;
 	private double width;
@@ -25,7 +25,7 @@ class UMLClass extends RenderObject {
 		this.id = -1; // id is set on render
 		this.methods = new ArrayList<Method>();
 		this.attributes = new ArrayList<Attribute>();
-		this.connections = new ArrayList<ClassRelation>();
+		this.relations = new ArrayList<ClassRelation>();
 		this.position = new Position(0, 0);
 		this.width = 0.0;
 		this.height = 0.0;
@@ -40,11 +40,11 @@ class UMLClass extends RenderObject {
 	}
 
 	public void addRelationship(ClassRelation r) {
-		this.connections.add(r);
+		this.relations.add(r);
 	}
 
 	public void setPosition(double x, double y) {
-		this.position = new  Position(x, y);
+		this.position = new Position(x, y);
 		RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this);
 		dispatchToRenderEventListeners(re);
 	}
@@ -88,5 +88,9 @@ class UMLClass extends RenderObject {
 
 	public Position getPosition() {
 		return this.position;
+	}
+
+	public ArrayList<ClassRelation> getRelations() {
+		return this.relations;
 	}
 }

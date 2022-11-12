@@ -7,7 +7,7 @@ import com.CodeSmell.ClassRelation.Type;
 
 public class CodePropertyGraph {
 
-	public class Relation {
+	public static class Relation {
 		public final CPGClass source;
 		public final CPGClass destination;
 		public final Type type;
@@ -19,10 +19,8 @@ public class CodePropertyGraph {
 		}
 	}
 
-
 	private ArrayList<Relation> relations;
 	private ArrayList<CPGClass> classes;
-
 
 	protected ArrayList<CPGClass> getClasses() {
 		return this.classes;
