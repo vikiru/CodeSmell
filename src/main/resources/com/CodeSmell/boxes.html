@@ -162,12 +162,15 @@ function appendPathNode(classId, pathContainerId, x, y) {
 }
 
 function renderPath(classId, pathContainerId) {
+    let mainPanel = document.getElementById("main");
     let relationsContainer = document.getElementById('relationContainer' + classId);
     let pathContainer = relationsContainer.children.item(pathContainerId);
     let nodes = pathContainer.firstChild.children;
 
     function rotateLine(line, angle) {
-      line.setAttribute("style", "transform: rotate(" + angle + "deg)");
+      //line.setAttribute("style", "transform: rotate(" + angle + ")");
+        line.style.transform = 'rotate(' + angle + 'rad)';
+        line.style.transformOrigin = "0 0"; 
     }
     
     for (let i = 0; i < nodes.length - 1; i++) { 
@@ -181,14 +184,16 @@ function renderPath(classId, pathContainerId) {
         // i = (1, 0)
         // v =  (endX - startX, endY - startY))
         // i・v = |i||v|cos0
-        let angle = Math.acos((endX - startX) / magnitude) * 180;
+        let angle = Math.acos((endX - startX) / magnitude);
 
         let line = document.createElement('div');
         line.className = 'line';
         line.style.left = startX + 'px';
         line.style.top = startY + 'px';
+        line.style.width = magnitude + 'px';
         rotateLine(line, angle);
-        pathContainer.appendChild(line);
+        //pathContainer.appendChild(line);
+        mainPanel.appendChild(line);
     }
 }
 
@@ -218,6 +223,7 @@ body {
     overflow:  hidden;
     padding: 0em 1em 0em 1em;
     background: #303841;
+    box-sizing: border-box;
 }
 
 h2 {
@@ -230,8 +236,9 @@ h2 {
 }
 
 .line {
-    height: 1px;
+    height: 0px;
     border: 1px solid white;
+    position: absolute;
 }
 
 </style>

@@ -3,6 +3,7 @@ package com.CodeSmell;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
+import java.util.Arrays;
 
 import com.CodeSmell.UMLClass;
 import com.CodeSmell.Position;
@@ -85,11 +86,13 @@ class LayoutManager  {
 		return lines;
 	}
 
-	private boolean testCollision(Line line) {
+	private boolean testCollision(Line line, UMLClass[] exclude) {
 		/* returns true if the given line does not
 		 hit the bounding box of any class */
-
 		for (UMLClass c : classes) {
+			if (Arrays.asList(exclude).contains(c)) {
+				continue;
+			}
 			if (intersection(line, classBoxLines(c)) != null) {
 				return false;
 			}
@@ -133,18 +136,21 @@ class LayoutManager  {
 		Position p1 = c1.getPosition();
 		Position p2 = c2.getPosition();
 
+
 		// get mid point of each class
 		Position mid1 = new Position(p1.x + c1.getWidth() / 2, p1.y + c1.getHeight() / 2);
 		Position mid2 = new Position(p2.x + c2.getWidth() / 2, p2.y + c2.getHeight() / 2);
-
+		new Dot(mid1, "blue").render();
+		new Dot(mid2, "red").render();
 		// return the position of where a line connecting the midpoints
 		// intersects with the class box boundaries
 		Line line = new Line(mid1, mid2);
-		line.render();
+		new Dot(p1, "blue").render();
+		new Dot(p2, "red").render();
 		p1 = intersection(line, classBoxLines(c1));
 		p2 = intersection(line, classBoxLines(c2));
-		new Dot(p1, "#98BE75").render();
-		new Dot(p2, "#98BE75").render();
+		new Dot(p1, "green").render();
+		new Dot(p2, "green").render();
 		if (p1 == null || p2 == null) {
 			throw new RuntimeException("No intersection");
 		}
@@ -198,7 +204,8 @@ class LayoutManager  {
 			Pair<Position, Position> p = closetNodes(r.source, r.target);
 			Position terminal = p.second;
 			Position test = p.first; 
-			boolean collision = !testCollision(new Line(test, terminal));
+			boolean collision = !testCollision(
+					new Line(test, terminal), new UMLClass[]{r.source, r.target});
 			path.add(test);
 
 			if (collision) {
@@ -206,6 +213,7 @@ class LayoutManager  {
 						r.source.name, r.target.name);
 				Position bend = indirectConnection(r.source, r.target);
 				path.add(bend);
+				new Dot(bend, "pink").render();
 				path.add(terminal);
 				System.out.println(path);
 				r.setPath(path);
@@ -213,6 +221,7 @@ class LayoutManager  {
 				System.out.printf("Direct path from %s to %s\n", 
 						r.source.name, r.target.name);
 				path.add(terminal);
+				new Dot(test, "pink").render();
 				System.out.println(path);
 				r.setPath(path);
 			}
