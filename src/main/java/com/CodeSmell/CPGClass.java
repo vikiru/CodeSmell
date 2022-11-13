@@ -32,6 +32,7 @@ public class CPGClass {
 	public enum Modifier {
 		PUBLIC, 
 		PRIVATE,
+		PROTECTED,
 		STATIC,
 		FINAL
 	}

@@ -8,8 +8,8 @@ public class joernServer {
     public static void main(String[] args) {
 
         // Get the path to joern
-        String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
-
+        String joernPath = System.getProperty("user.home") + "\\bin\\joern\\joern-cli";
+        System.out.println(joernPath);
         // Start up a command prompt terminal (no popup) and start the joern server
         ProcessBuilder builder;
 

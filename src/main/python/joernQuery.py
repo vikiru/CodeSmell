@@ -66,7 +66,7 @@ def getMethodsWithModifiers(query, filename):
     result = client.execute(query)
     joernResult = result["stdout"]
     joernResult = cleanJson(joernResult)
-
+    resultArr = []
     finalArr = []
     for i in range(0, len(resultArr)):
         currItem = resultArr[i]
@@ -293,6 +293,6 @@ def sourceCodeJsonCreation():
 
 
 if __name__ == "__main__":
-    # writeAll()
-    # getFieldsWithModifiers()
+    #writeAll()
+    #getFieldsWithModifiers()
     sourceCodeJsonCreation()

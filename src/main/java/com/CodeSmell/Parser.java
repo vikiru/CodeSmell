@@ -1,14 +1,21 @@
 package com.CodeSmell;
 
+import java.io.File;
+import java.io.Reader;
+import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.CodeSmell.CPGClass;
 import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Modifier;
 import com.CodeSmell.CodePropertyGraph;
+import com.google.gson.Gson;
 
-public class Parser {	
+public class Parser {
 
 	private class JavaAttribute extends Attribute {
 		JavaAttribute(String name, Modifier[] m) {
@@ -17,54 +24,139 @@ public class Parser {
 	}
 
 	private class JavaMethod extends Method {
-		
 		JavaMethod(String name, String[] instructions, Modifier[] modifiers) {
 			super(name, instructions, modifiers);
 		}
-
-
-
 	}
 
-	public CodePropertyGraph buildCPG(String destination) {
-		CodePropertyGraph cpg = new CodePropertyGraph();
+	public static void main(String[] args) {
+		Parser p = new Parser();
+		p.buildCPG("");
+	}
 
-		CPGClass jc1 = new CPGClass("FirstClass");
-		CPGClass jc2 = new CPGClass("SecondClass");
-		CPGClass jc3 = new CPGClass("ThirdClass");
-		Attribute a1 = new JavaAttribute("attributeOne", new Modifier[] {Modifier.PUBLIC});
-		Attribute a2 = new JavaAttribute("attributeTwo", new Modifier[] {Modifier.STATIC, Modifier.PRIVATE});
-		Method m1 = new JavaMethod("methodOne(void);", new String[] {"instruction one;", "instruction two"},
-				new Modifier[] {Modifier.PRIVATE});
-		Method m2 = new JavaMethod("methodTwo(int x, int y);",
-				new String[] {"return x + y;"}, new Modifier[] {Modifier.PRIVATE});
-		Method m3 = new JavaMethod("methodThree(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m4 = new JavaMethod("methodFour(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m5 = new JavaMethod("methodFive(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m6 = new JavaMethod("methodSix(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m7 = new JavaMethod("methodSeven(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m8 = new JavaMethod("methodEight(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		m1.addCall(m2);
-		jc1.addMethod(m1);
-		Modifier[] m = new Modifier[] {Modifier.PUBLIC};
-		jc1.addAttribute(a1);
-		jc1.addAttribute(a2);
-		jc2.addMethod(m2);
-		jc3.addMethod(m3);
-		jc3.addMethod(m4);
-		jc3.addMethod(m5);
-		jc3.addMethod(m6);
-		jc3.addMethod(m7);
-		jc3.addMethod(m8);
-		cpg.addClass(jc1);
-		cpg.addClass(jc2);
-		cpg.addClass(jc3);
+	/**
+	 * @param destination A file location for source code
+	 * @return
+	 */
+	public CodePropertyGraph buildCPG(String destination) {
+		Gson gson = new Gson();
+		File sourceCode = new File("src/main/python/joernFiles/sourceCode.json");
+		CodePropertyGraph cpg = new CodePropertyGraph();
+		try {
+			Reader reader = Files.newBufferedReader(Paths.get("src/main/python/joernFiles/sourceCode.json"));
+
+			// convert JSON file to map
+			Map<?, ?> map = gson.fromJson(reader, Map.class);
+			Object[] entryValues;
+			entryValues = map.values().toArray();
+			ArrayList classes = (ArrayList) entryValues[0];
+			int classCount = -1;
+			for (Object classMap : classes) {
+				Map<?, ?> completeClassMap = (Map<?, ?>) classMap;
+				for (Map.Entry<?, ?> entry : completeClassMap.entrySet()) {
+					if(entry.getKey().equals("name"))
+					{
+						cpg.addClass(new CPGClass((String)entry.getValue()));
+						classCount++;
+					}
+					if(entry.getKey().equals("methods"))
+					{
+						ArrayList methods = (ArrayList) entry.getValue();
+						for(Object method: methods)
+						{
+							method = (Map<?, ?>)method;
+							String methodName = "";
+							ArrayList<String> methodInstructions = new ArrayList<>();
+							Modifier[] methodModifiers = new Modifier[1];
+							for(Map.Entry<?, ?> methodCharacteristic:((Map<?, ?>) method).entrySet()) {
+								switch ((String) methodCharacteristic.getKey()) {
+									case "name":
+										methodName = (String) methodCharacteristic.getValue();
+										break;
+									case "instructions":
+										String label = "";
+										String code = "";
+										ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
+										for(Object instructionsTree:instructions)
+										{
+											for(Map.Entry<?, ?> instruction:((Map<?, ?>) instructionsTree).entrySet())
+											{
+												if(instruction.getKey().equals("_label"))
+												{
+													label = (String)instruction.getValue();
+												}
+												if(instruction.getKey().equals("code"))
+												{
+													code = (String)instruction.getValue();
+												}
+											}
+										}
+										methodInstructions.add(label+":"+code);
+										break;
+									case "modifiers":
+										ArrayList  methodModifier = (ArrayList) methodCharacteristic.getValue();
+										switch ((String)methodModifier.get(0))
+										{
+											case "private":
+												methodModifiers[0] = Modifier.PRIVATE;
+												break;
+											case "public":
+												methodModifiers[0] = Modifier.PUBLIC;
+												break;
+											case "protected":
+												methodModifiers[0] = Modifier.PROTECTED;
+												break;
+										}
+								}
+							}
+							String[] methodInstruct = new String[methodInstructions.size()];
+							cpg.getClasses().get(classCount).addMethod(new Method(methodName,methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers));
+						}
+					}
+					if(entry.getKey().equals("fields"))
+					{
+						ArrayList fields = (ArrayList) entry.getValue();
+						for(Object field: fields)
+						{
+							field = (Map<?, ?>)field;
+							String fieldName = "";
+							Modifier[] fieldModifiers = new Modifier[1];
+							for(Map.Entry<?, ?> fieldCharacteristic:((Map<?, ?>) field).entrySet()) {
+								switch ((String) fieldCharacteristic.getKey()) {
+									case "name":
+										fieldName = (String) fieldCharacteristic.getValue();
+										break;
+									case "modifiers":
+										ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue();
+										switch ((String)fieldModifier.get(0))
+										{
+											case "private":
+												fieldModifiers[0] = Modifier.PRIVATE;
+												break;
+											case "public":
+												fieldModifiers[0] = Modifier.PUBLIC;
+												break;
+											case "protected":
+												fieldModifiers[0] = Modifier.PROTECTED;
+												break;
+										}
+								}
+							}
+							cpg.getClasses().get(classCount).addAttribute(new Attribute(fieldName,fieldModifiers));
+						}
+
+					}
+
+				}
+			}
+
+			// close reader
+			reader.close();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return cpg;
 	}
+
 }
