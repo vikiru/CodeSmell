@@ -52,7 +52,7 @@ public class WebControl implements RenderEventListener {
                 modStrings.add(m2.name());
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
-            js = String.format("addField(false, %d, '%s', 's');", 
+            js = String.format("addField(true, %d, '%s', '%s');", 
                     id, a.name, modifiers);
             this.engine.executeScript(js);
             modStrings.clear();
@@ -72,8 +72,8 @@ public class WebControl implements RenderEventListener {
         // node of the path borders a class object
         String js = String.format("createRelationPath(%d, %f, %f)", 
                classId , path.get(0).x, path.get(0).y);
-        Integer pathContainerId = (Integer) this.engine.executeScript(js);
-        if (pathContainerId < 0) {
+        Integer pathNumber = (Integer) this.engine.executeScript(js);
+        if (pathNumber < 0) {
             // the given coordinates cr.position.x, cr.position.y were
             // not inside (or on the edge) of the drawing box
             throw new RuntimeException("Bad starting location for path draw");
@@ -81,11 +81,11 @@ public class WebControl implements RenderEventListener {
 
         for (Position p : path) {
             this.engine.executeScript(String.format(
-                    "appendPathNode(%d, %d, %f, %f)", classId, pathContainerId, p.x, p.y));
+                    "appendPathNode(%d, %d, %f, %f)", classId, pathNumber, p.x, p.y));
         }
         this.engine.executeScript(String.format(
-                "renderPath(%d, %d)", classId, pathContainerId));
-        return pathContainerId;
+                "renderPath(%d, %d)", classId, pathNumber));
+        return pathNumber;
     }
 
     private void repositionClass(int id, double x, double y) {

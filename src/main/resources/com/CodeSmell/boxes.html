@@ -19,45 +19,20 @@ function renderClassBox(name) {
     classBox.appendChild(h);
 
     // add attributes divider to classBox
-    let attributesContainer = document.createElement('div');
-    attributesContainer.id = 'attributeContainer' + classCount;
-    classBox.appendChild(attributesContainer);
+    let attributeContainer = document.createElement('div');
+    attributeContainer.id = 'attributeContainer' + classCount;
+    attributeContainer.className = 'attributeContainer';
+    classBox.appendChild(attributeContainer);
 
     // add methods divider to classBox
-    let methodsContainer = document.createElement('div');
-    attributesContainer.id = 'methodContainer' + classCount;
-    classBox.appendChild(methodsContainer);
+    let methodContainer = document.createElement('div');
+    methodContainer.id = 'methodContainer' + classCount;
+    classBox.appendChild(methodContainer);
 
     // add class relation divider to classBox
     let relationContainer = document.createElement('div');
     relationContainer.id = 'relationContainer' + classCount;
     classBox.appendChild(relationContainer);
-
-    /**
-     * each div contained in relationContainer contains
-     * the lines which are used to draw class relationship arrows
-     */
-    /** example relationsContainer for the second class created
-    <div id="relationContainer1">
-        <div> path container 1
-            <div> node container
-                <div> 
-                <div>
-                <div> 
-            </div>
-            <div class=line/> 
-            <div class=line/>
-        </div>
-        <div> path container 2
-            <div> node container
-                <div> 
-                <div>
-            </div>
-            <div class=line/> 
-        </div>
-    <div> 
-    pathContainer.firstChild.children refers to the list of nodes
-    */
 
     classCount += 1;
     return classCount - 1;
@@ -97,8 +72,12 @@ function addField(isAttribute, classId, name, modifier) {
         p.style.fontStyle = "italic";
     }
     
+    if (modifier.includes('final')) {
+        p.style.fontWeight = "bold";
+    }
+
     if (modifier.includes('pub')) {
-        p.style.color = '#658D9C';
+        p.style.color = '#4E89C9';
     }
     
     if (modifier.includes('private')) {
@@ -107,15 +86,6 @@ function addField(isAttribute, classId, name, modifier) {
 
     p.innerHTML = name;
     fieldBox.appendChild(p);
-}
-
-// check that coordinates (x, y) are inside the class bounds
-function classBoundCheck(id, x, y) {
-    let classBox = document.getElementById('class' + id);
-    classX =  classBox.style.left;
-    classY = classBox.style.top;
-    return (x > classX + getClassWidth(id)) || (x < classX) ||
-        (y > classY + getClassHeight(id)) || (y < classY);
 }
 
 function drawDot(x, y, color) {
@@ -137,35 +107,33 @@ function drawDot(x, y, color) {
 function createRelationPath(classBoxId, x, y) {
     // adds a container to store nodes of a class
     // relationship path and returns that classes' relationship
-    // sequence number
-    if (!classBoundCheck(classBoxId, x, y)) {
-        //showError(x, y);
-        //throw 'x ' + x + ' y ' + y;
-        //return -1;
-    }
+    // sequence number pathContainer
+
     let rc = document.getElementById('relationContainer' + classBoxId);
-    let nodeContainer = document.createElement('div');
     let pathContainer = document.createElement('div');
     let children = rc.childElementCount;
-    pathContainer.appendChild(nodeContainer);
     rc.appendChild(pathContainer);
     return children;
 }
 
-function appendPathNode(classId, pathContainerId, x, y) {
+function appendPathNode(classId, pathNumber, x, y) {
+    // append a node (an anchor point to draw relation lines)
+    // to the given path container
+
     let relationContainer = document.getElementById('relationContainer' + classId);
-    let nodeContainer = relationContainer.children.item(pathContainerId).firstChild;
+    let pathContainer = relationContainer.children.item(pathNumber);
     let node = document.createElement('div');
     node.x = x;
     node.y = y;
-    nodeContainer.appendChild(node);
+    node.lineid = "lineseg" + classId + "_" + pathNumber + 
+            "_" + pathContainer.childElementCount;
+    pathContainer.appendChild(node);
 }
 
-function renderPath(classId, pathContainerId) {
-    let mainPanel = document.getElementById("main");
+function renderPath(classId, pathNumber) {
+    let lineContainer = document.getElementById("lines");
     let relationsContainer = document.getElementById('relationContainer' + classId);
-    let pathContainer = relationsContainer.children.item(pathContainerId);
-    let nodes = pathContainer.firstChild.children;
+    let nodes = relationsContainer.children.item(pathNumber).children;
 
     function rotateLine(line, angle) {
       //line.setAttribute("style", "transform: rotate(" + angle + ")");
@@ -179,6 +147,7 @@ function renderPath(classId, pathContainerId) {
         let startY = nodes[i].y;
         let endY = nodes[i+1].y;
         let magnitude = ((startX - endX)**2 + (startY - endY)**2)**0.5;
+
         // find angle to rotate a line by taking the dot product
         // with the unit vector for horizontal direction 
         // i = (1, 0)
@@ -193,10 +162,10 @@ function renderPath(classId, pathContainerId) {
         line.className = 'line';
         line.style.left = startX + 'px';
         line.style.top = startY + 'px';
-        line.style.width = magnitude + 'px';
+        line.style.width = magnitude - 7 + 'px';
+        line.id = nodes[i].id;
         rotateLine(line, angle);
-        //pathContainer.appendChild(line);
-        mainPanel.appendChild(line);
+        lineContainer.appendChild(line);
     }
 }
 
@@ -213,6 +182,16 @@ function renderPath(classId, pathContainerId) {
 body {
     scrollbar-width: none; 
     background: #22262A;
+}
+
+.attributeContainer {
+    background: #22262A;
+    padding: 2px;
+}
+
+.classBox:hover {
+    border: 2px dashed grey;
+    #5662F6
 }
 
 .classBox {
@@ -232,24 +211,34 @@ body {
 
 h2 {
     cursor: pointer;
+}
+
+h2:hover {
     text-decoration-line: underline;
- }
+}
+
 
 .field:hover {
     cursor: pointer;
 }
 
+
 .line {
     height: 0px;
-    border: 1px solid white;
+    border: 1px dashed #C4BEB7;
     position: absolute;
 }
 
+.line:hover {
+    border: 1px dashed #5662F6;
+}
 </style>
 </head>
 
 
 <body>
     <div id="main">
+        <div id="lines">
+        </div>
     </div>
 </body>

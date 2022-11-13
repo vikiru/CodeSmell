@@ -41,9 +41,9 @@ public class Parser {
 		Method m4 = new JavaMethod("methodFour(void);", new String[] {"return 0;"}, 
 			new Modifier[] {Modifier.PRIVATE});
 		Method m5 = new JavaMethod("methodFive(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
+			new Modifier[] {Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL});
 		Method m6 = new JavaMethod("methodSix(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
+			new Modifier[] {Modifier.PUBLIC});
 		Method m7 = new JavaMethod("methodSeven(void);", new String[] {"return 0;"}, 
 			new Modifier[] {Modifier.PRIVATE});
 		Method m8 = new JavaMethod("methodEight(void);", new String[] {"return 0;"}, 

@@ -21,6 +21,8 @@ public abstract class RenderObject {
 	}
 
 	public void render() {
+		// renders an object (ignores the UI response)
+
 		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
 		dispatchToRenderEventListeners(re);
 	}
