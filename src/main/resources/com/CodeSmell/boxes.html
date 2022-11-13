@@ -1,57 +1,174 @@
 <head>
 
 <script>
-let box_count = 0;
+let classCount = 0;
 
-function drawBox(x, y, width, height) 
-{
-    let main_panel = document.getElementById("main");
-    let box = document.createElement('div');
-    box.className = 'box';
-    box.id = box_count;
-    box_count += 1;
+function renderClassBox(name) {
+    let mainPanel = document.getElementById("main");
 
-    // for now take width and height directly
-    // should be changed to calculate an EM
-    // value based on the monitor size later
-    box.style.width = width;
-    box.style.height = height;
-    box.style.left = x;
-    box.style.top = y;
-    main_panel.appendChild(box);
-    return box_count - 1;
+    // create a box to represent the class
+    // and assign its ID sequentially
+    let classBox = document.createElement('div');
+    classBox.className = 'classBox';
+    classBox.id = 'class' + classCount;
+    mainPanel.appendChild(classBox);
+    
+    // add class name to classBox
+    let h = document.createElement('h2');
+    h.innerHTML = name;
+    classBox.appendChild(h);
+
+    // add attributes divider to classBox
+    let attributeContainer = document.createElement('div');
+    attributeContainer.id = 'attributeContainer' + classCount;
+    attributeContainer.className = 'attributeContainer';
+    classBox.appendChild(attributeContainer);
+
+    // add methods divider to classBox
+    let methodContainer = document.createElement('div');
+    methodContainer.id = 'methodContainer' + classCount;
+    classBox.appendChild(methodContainer);
+
+    // add class relation divider to classBox
+    let relationContainer = document.createElement('div');
+    relationContainer.id = 'relationContainer' + classCount;
+    classBox.appendChild(relationContainer);
+
+    classCount += 1;
+    return classCount - 1;
 }
 
-function repositionBox(id, x, y) {
-    let box = document.getElementById(id);
-    box.style.left =  x;
-    box.style.top = y;
+function repositionClass(id, x, y) {
+    let classBox = document.getElementById('class' + id);
+    classBox.style.left =  x;
+    classBox.style.top = y;
 }
 
-function boxDimensions(id) {
-    let box = document.getElementById(id);
-    let r = {};
-    r.width = box.style.width;
-    r.height = box.style.height;
-    return r;
+function getClassWidth(id) {
+    let classBox = document.getElementById('class' + id);
+    let w = window.getComputedStyle(classBox).width;
+    if (w) {
+        return w;
+    }
+    return '0px';
 }
 
-function boxDimW(id) {
-    let box = document.getElementById(id);
-    return box.style.width;
+function getClassHeight(id) {
+    let classBox = document.getElementById('class' + id);
+    let h = window.getComputedStyle(classBox).height;
+    if (h) {
+        return h;
+    }
+    return '0px';
 }
 
-function boxDimH(id) {
-    let box = document.getElementById(id);
-    return box.style.height;
+function addField(isAttribute, classId, name, modifier) {
+    let fieldType = ((isAttribute) ? 'attributeContainer' :  'methodContainer');
+    let fieldBox = document.getElementById(fieldType + classId);
+    let p = document.createElement('p');
+    p.className = 'field';
+    
+    if (modifier.includes('static')) {
+        p.style.fontStyle = "italic";
+    }
+    
+    if (modifier.includes('final')) {
+        p.style.fontWeight = "bold";
+    }
+
+    if (modifier.includes('pub')) {
+        p.style.color = '#4E89C9';
+    }
+    
+    if (modifier.includes('private')) {
+        p.style.color = '#E95F65';
+    }
+
+    p.innerHTML = name;
+    fieldBox.appendChild(p);
 }
 
-function init() {
-   // drawBox(0, 0, 100, 200);
-  //  drawBox(800, 400, 250, 300);
-    // let main_panel = document.getElementById("main");
-    return 1;
+function drawDot(x, y, color) {
+    let mainPanel = document.getElementById("main");
+    let dot = document.createElement('div');
+    if (!color) {
+        dot.style.backgroundColor = "red";
+    } else {
+        dot.style.backgroundColor = color;
+    }
+    dot.style.left = x;
+    dot.style.top = y;
+    dot.style.width = 4;
+    dot.style.height = 4;
+    dot.style.position = 'absolute';
+    mainPanel.appendChild(dot);
 }
+
+function createRelationPath(classBoxId, x, y) {
+    // adds a container to store nodes of a class
+    // relationship path and returns that classes' relationship
+    // sequence number pathContainer
+
+    let rc = document.getElementById('relationContainer' + classBoxId);
+    let pathContainer = document.createElement('div');
+    let children = rc.childElementCount;
+    rc.appendChild(pathContainer);
+    return children;
+}
+
+function appendPathNode(classId, pathNumber, x, y) {
+    // append a node (an anchor point to draw relation lines)
+    // to the given path container
+
+    let relationContainer = document.getElementById('relationContainer' + classId);
+    let pathContainer = relationContainer.children.item(pathNumber);
+    let node = document.createElement('div');
+    node.x = x;
+    node.y = y;
+    node.lineid = "lineseg" + classId + "_" + pathNumber + 
+            "_" + pathContainer.childElementCount;
+    pathContainer.appendChild(node);
+}
+
+function renderPath(classId, pathNumber) {
+    let lineContainer = document.getElementById("lines");
+    let relationsContainer = document.getElementById('relationContainer' + classId);
+    let nodes = relationsContainer.children.item(pathNumber).children;
+
+    function rotateLine(line, angle) {
+      //line.setAttribute("style", "transform: rotate(" + angle + ")");
+        line.style.transform = 'rotate(' + angle + 'rad)';
+        line.style.transformOrigin = "0 0"; 
+    }
+    
+    for (let i = 0; i < nodes.length - 1; i++) { 
+        let startX = nodes[i].x;
+        let endX = nodes[i+1].x;
+        let startY = nodes[i].y;
+        let endY = nodes[i+1].y;
+        let magnitude = ((startX - endX)**2 + (startY - endY)**2)**0.5;
+
+        // find angle to rotate a line by taking the dot product
+        // with the unit vector for horizontal direction 
+        // i = (1, 0)
+        // v =  (endX - startX, endY - startY))
+        // i・v = |i||v|cos0
+        let angle = Math.acos((endX - startX) / magnitude);
+        if (endX <= startX && endY <= startY) {
+            angle *= -1;
+        } 
+
+        let line = document.createElement('div');
+        line.className = 'line';
+        line.style.left = startX + 'px';
+        line.style.top = startY + 'px';
+        line.style.width = magnitude - 7 + 'px';
+        line.id = nodes[i].id;
+        rotateLine(line, angle);
+        lineContainer.appendChild(line);
+    }
+}
+
 </script>
 
 <style type="text/css">
@@ -63,16 +180,65 @@ function init() {
 }
 
 body {
-    scrollbar-width: none;  /* Firefox */
+    scrollbar-width: none; 
+    background: #22262A;
 }
 
-.box {
-    border: 2px solid black;
+.attributeContainer {
+    background: #22262A;
+    padding: 2px;
+}
+
+.classBox:hover {
+    border: 2px dashed grey;
+    #5662F6
+}
+
+.classBox {
+    border: 2px solid grey;
     position: absolute;
+    text-align: center;
+    font-family: sans-serif;
+    color: white;
+    max-width: 20em;
+    min-height: 10em;
+    overflow:  hidden;
+    white-space:nowrap;
+    padding: 0em 1em 0em 1em;
+    background: #303841;
+    box-sizing: border-box;
+}
+
+h2 {
+    cursor: pointer;
+}
+
+h2:hover {
+    text-decoration-line: underline;
+}
+
+
+.field:hover {
+    cursor: pointer;
+}
+
+
+.line {
+    height: 0px;
+    border: 1px dashed #C4BEB7;
+    position: absolute;
+}
+
+.line:hover {
+    border: 1px dashed #5662F6;
 }
 </style>
 </head>
-<body onload="init()">
-<div id="main">
-</div>
+
+
+<body>
+    <div id="main">
+        <div id="lines">
+        </div>
+    </div>
 </body>
