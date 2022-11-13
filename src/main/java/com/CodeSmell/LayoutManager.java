@@ -47,6 +47,9 @@ class LayoutManager  {
 	}
 
 	private class Line extends Shape {
+		/* Represents a line (i.e, one connecting
+		two classes) */
+
 		public final double x1, x2, y1, y2;
 		
 		Line(Position p1, Position p2) {
@@ -55,6 +58,16 @@ class LayoutManager  {
 			this.x2 = p2.x;
 			this.y1 = p1.y;
 			this.y2 = p2.y;	
+		}
+
+		Line(double x1, double y1, double x2, double y2) {
+			super(new Position[] {
+					new Position(x1, y1), new Position(x2, y2)
+				}, "orange");
+			this.x1 = x1;
+			this.x2 = x2;;
+			this.y1 = y1;
+			this.y2 = y2;	
 		}
 
 		public String toString() {
@@ -68,27 +81,30 @@ class LayoutManager  {
 	}
 
 	private class Dot extends Shape {
+		/* A dot to be rendered for debugging purposes */
+
 		Dot(Position p, String colour) {
-			super(new Position[]{p}, colour);
+			super(new Position[] { p }, colour);
 		}
 	}
 
-	private ArrayList<Line> classBoxLines(UMLClass c) {
-		ArrayList<Line> lines = new ArrayList<>();
+	private Line[] classBoxLines(UMLClass c) {
+		Line[] lines = new Line[4];
 		Position p1 = c.getPosition();
 		Position corner2 = new Position(p1.x + c.getWidth(), p1.y);
 		Position corner3 = new Position(p1.x + c.getWidth(), p1.y + c.getHeight());
 		Position corner4 = new Position(p1.x, p1.y + c.getHeight());
-		lines.add(new Line(p1, corner2));
-		lines.add(new Line(corner2, corner3));
-		lines.add(new Line(corner3, corner4));
-		lines.add(new Line(corner4, p1));
+		lines[0] = new Line(p1, corner2);
+		lines[1] = new Line(corner2, corner3);
+		lines[2] = new Line(corner3, corner4);
+		lines[3] = new Line(corner4, p1);
 		return lines;
 	}
 
 	private boolean testCollision(Line line, UMLClass[] exclude) {
 		/* returns true if the given line does not
-		 hit the bounding box of any class */
+		 hit the bounding box of any class not in exclude */
+
 		for (UMLClass c : classes) {
 			if (Arrays.asList(exclude).contains(c)) {
 				continue;
@@ -100,13 +116,10 @@ class LayoutManager  {
 		return true;
 	}
 
-
-	private Position intersection(Line l1, ArrayList<Line> with) {
+	private Position intersection(Line l1, Line[] with) {
 		/* gets the Position of where l1 interesects with a line in with */
 
 		for (Line l2 : with) {
-			double m1 = l1.magnitude();
-			double m2 = l2.magnitude();
 			double x1 = l1.x1;
 			double x2 = l1.x2;
 			double x3 = l2.x1;
@@ -126,31 +139,54 @@ class LayoutManager  {
 		return null;
 	}
 
+	private enum Direction {
+		TOP,
+		BOTTOM,
+		LEFT, 
+		RIGHT
+	}
+
+	private Position classMiddle(UMLClass c) {
+		/* Gets the position of the middle of a class bounding box */
+
+		Position p = c.getPosition(); // topleft corner of c
+		return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);
+	}
+
+	private Position classMiddle(UMLClass c, Direction d) {
+		/* Gets the position of the middle of the given edge (direction)
+		 of a class bounding box */
+
+		Position p = c.getPosition(); // topleft corner of c
+		if (d == Direction.TOP) {
+			return new Position(p.x + c.getWidth() / 2, p.y);
+		} else if (d == Direction.BOTTOM) {
+			return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight());
+		} else if (d == Direction.LEFT) {
+			return new Position(p.x, p.y + c.getHeight() / 2);
+		} else if (d == Direction.RIGHT) {
+			return new Position(p.x + c.getWidth(), p.y + c.getHeight() / 2);
+		} else {
+			throw new RuntimeException("Bad direction");
+		}
+	}
+
 	private Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2) {
 		/* 
 		returns the two closest points relations that sit on 
 		each classes box boundry to connect the two clases 
 		*/
-		
-		// get top left corners of each class
-		Position p1 = c1.getPosition();
-		Position p2 = c2.getPosition();
-
 
 		// get mid point of each class
-		Position mid1 = new Position(p1.x + c1.getWidth() / 2, p1.y + c1.getHeight() / 2);
-		Position mid2 = new Position(p2.x + c2.getWidth() / 2, p2.y + c2.getHeight() / 2);
-		new Dot(mid1, "blue").render();
-		new Dot(mid2, "red").render();
+		Position mid1 = classMiddle(c1);
+		Position mid2 = classMiddle(c2);
+
 		// return the position of where a line connecting the midpoints
 		// intersects with the class box boundaries
 		Line line = new Line(mid1, mid2);
-		new Dot(p1, "blue").render();
-		new Dot(p2, "red").render();
+		Position p1, p2;
 		p1 = intersection(line, classBoxLines(c1));
 		p2 = intersection(line, classBoxLines(c2));
-		new Dot(p1, "green").render();
-		new Dot(p2, "green").render();
 		if (p1 == null || p2 == null) {
 			throw new RuntimeException("No intersection");
 		}
@@ -158,23 +194,23 @@ class LayoutManager  {
 	} 
 
 	private Position indirectConnection(UMLClass c1, UMLClass c2) {
-		// get top left corners of each class
-		Position p1 = c1.getPosition();
-		Position p2 = c2.getPosition();
+		/* gets the  position of a bend where the perpendicular lines
+		coming from the midpoints of c1 and c2 intersect */
 
-		// get mid point of each class
-		Position mid1 = new Position(p1.x + c1.getWidth() / 2, p1.y + c1.getHeight() / 2);
-		Position mid2 = new Position(p2.x + c2.getWidth() / 2, p2.y + c2.getHeight() / 2);
+		// get top left corners of each class 
+		Position mid1 = classMiddle(c1);
+		Position mid2 = classMiddle(c2);
 
-		// need to calculate the right most and bottom most coordinates.
-		// for now just use constants
-		double viewRight = 10000;
-		double viewBottom = 10000;
-		Line line1 = new Line(new Position(0, mid2.y), new Position(viewRight, mid2.y));
-		Line line2 = new Line(new Position(mid1.x, 0), new Position(mid1.x, viewBottom));
-		ArrayList<Line> lines = new ArrayList<Line>();
-		lines.add(line2);
-		return intersection(line1, lines);
+		// new Dot(mid1, "blue").render();
+		// new Dot(mid2, "red").render();
+		Line l1 = new Line(mid1.x, mid1.y, mid2.x, mid1.y);
+		Line l2 = new Line(mid2.x, mid2.y, mid2.x, mid1.y);
+		Position p = intersection(l1, new Line[] { l2 });
+		//l2.render();
+		if (p == null) {
+			throw new RuntimeException("No intersection");
+		}
+		return p;
 	}
 
 	private void sortClasses() {
@@ -205,23 +241,41 @@ class LayoutManager  {
 			Position terminal = p.second;
 			Position test = p.first; 
 			boolean collision = !testCollision(
-					new Line(test, terminal), new UMLClass[]{r.source, r.target});
-			path.add(test);
+					new Line(test, terminal), new UMLClass[]{ r.source, r.target });
 
 			if (collision) {
 				System.out.printf("Indirect path from %s to %s\n", 
 						r.source.name, r.target.name);
-				Position bend = indirectConnection(r.source, r.target);
+		
+				Position bend, mid1, mid2;
+				bend = indirectConnection(r.source, r.target);
+				mid1 = classMiddle(r.source);
+				mid2 = classMiddle(r.target);
+
+				if (bend.y > mid1.y && bend.x < mid2.x) {
+					mid1 = classMiddle(r.source, Direction.BOTTOM);
+					mid2 = classMiddle(r.target, Direction.LEFT);
+				} else if (bend.x < mid1.x && bend.y > mid2.y) {
+					mid1 = classMiddle(r.source, Direction.LEFT);
+					mid2 = classMiddle(r.target, Direction.BOTTOM);
+				} else if (bend.x > mid2.x && bend.y < mid1.y) {
+					mid1 = classMiddle(r.source, Direction.TOP);
+					mid2 = classMiddle(r.target, Direction.RIGHT);
+				} else if (bend.x > mid1.x && bend.y < mid2.y) {
+					mid1 = classMiddle(r.source, Direction.RIGHT);
+					mid2 = classMiddle(r.target, Direction.TOP);
+				}
+
+				path.add(mid1);
 				path.add(bend);
-				new Dot(bend, "pink").render();
-				path.add(terminal);
+				path.add(mid2);
 				System.out.println(path);
 				r.setPath(path);
 			} else {
+				path.add(test);
 				System.out.printf("Direct path from %s to %s\n", 
 						r.source.name, r.target.name);
 				path.add(terminal);
-				new Dot(test, "pink").render();
 				System.out.println(path);
 				r.setPath(path);
 			}

@@ -68,7 +68,12 @@ public class Parser {
 				jc1, 
 				jc2, 
 				ClassRelation.Type.DEPENDENCY);
+		CodePropertyGraph.Relation r2 = new CodePropertyGraph.Relation(
+				jc1, 
+				jc3, 
+				ClassRelation.Type.DEPENDENCY);
 		cpg.addRelation(r);
+		cpg.addRelation(r2);
 		return cpg;
 	}
 }

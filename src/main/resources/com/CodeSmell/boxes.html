@@ -185,6 +185,9 @@ function renderPath(classId, pathContainerId) {
         // v =  (endX - startX, endY - startY))
         // i・v = |i||v|cos0
         let angle = Math.acos((endX - startX) / magnitude);
+        if (endX <= startX && endY <= startY) {
+            angle *= -1;
+        } 
 
         let line = document.createElement('div');
         line.className = 'line';

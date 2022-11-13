@@ -6,7 +6,7 @@ public class Shape extends RenderObject {
 	public final String colour;
 
 	public Shape(Position[] vertex, String colour) {
-		this.colour = colour;
 		this.vertex = vertex;
+		this.colour = colour;
 	}
 }

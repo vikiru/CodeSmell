@@ -86,6 +86,7 @@ public class MainApp extends Application {
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
+        webView.setZoom(1.0); // allow resizing for other resolutions
         RenderObject.addRenderEventListener(new WebControl(engine));
 
         engine.load(url.toExternalForm());

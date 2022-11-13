@@ -121,9 +121,7 @@ public class WebControl implements RenderEventListener {
 
     private void drawShape(Shape s) {
         String js;
-        Iterator<Position> i = Arrays.stream(s.vertex).iterator();
-        while (i.hasNext()) {
-            Position p = i.next();
+        for (Position p : s.vertex) {
             js = String.format("drawDot(%f, %f, \"%s\");", 
                     p.x, p.y, s.colour);
             this.engine.executeScript(js);
