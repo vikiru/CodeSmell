@@ -42,10 +42,10 @@ public class MainApp extends Application {
             UMLClass c = new UMLClass(graphClass.name);
             classMap.put(graphClass, c);
             for (CPGClass.Method m : graphClass.getMethods()) {
-                c.addField(true, m.name);
+                c.addMethod(m);
             }
             for (CPGClass.Attribute a : graphClass.getAttributes()) {
-                c.addField(false, a.name);
+                c.addAttribute(a);
             }
 
             //for (Smell s : SmellDetector.getSmells(cpg)) {
@@ -86,6 +86,7 @@ public class MainApp extends Application {
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
+        webView.setZoom(1.0); // allow resizing for other resolutions
         RenderObject.addRenderEventListener(new WebControl(engine));
 
         engine.load(url.toExternalForm());

@@ -2,11 +2,15 @@ package com.CodeSmell;
 
 public class Position {
 	
-	public final int x;
-	public final int y;
+	public final double x;
+	public final double y;
 
-	public Position(int x, int y) {
+	public Position(double x, double y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	public String toString() {
+		return String.format("(%f, %f)", x, y);
 	}
 }

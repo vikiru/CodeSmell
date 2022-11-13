@@ -14,6 +14,7 @@ import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Modifier;
 import com.CodeSmell.CodePropertyGraph;
 import com.google.gson.Gson;
+import com.CodeSmell.ClassRelation;
 
 public class Parser {
 
@@ -146,7 +147,6 @@ public class Parser {
 						}
 
 					}
-
 				}
 			}
 
@@ -156,6 +156,7 @@ public class Parser {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+
 		return cpg;
 	}
 
