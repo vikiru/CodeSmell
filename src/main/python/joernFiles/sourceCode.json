@@ -59,6 +59,7 @@
           "modifiers": ["public", "static"],
           "name": "main",
           "instructions": [
+            { "_label": "LOCAL", "code": "BuddyInfo bud", "lineNumber": null },
             {
               "_label": "CALL",
               "code": "ANY bud = new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
@@ -68,6 +69,11 @@
               "_label": "CALL",
               "code": "new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
               "lineNumber": 31
+            },
+            {
+              "_label": "LOCAL",
+              "code": "AddressBook addBook",
+              "lineNumber": null
             },
             {
               "_label": "CALL",
@@ -147,6 +153,11 @@
           "modifiers": ["public", "static"],
           "name": "main",
           "instructions": [
+            {
+              "_label": "LOCAL",
+              "code": "BuddyInfo friend1",
+              "lineNumber": null
+            },
             {
               "_label": "CALL",
               "code": "BuddyInfo friend1 = new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",

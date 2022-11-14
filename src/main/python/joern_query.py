@@ -13,25 +13,30 @@ directory = directory.replace("\\", "//")
 dirName = directory + "/src/main/python/joernTestProject/src"
 projectName = "analyzedProject"
 
+# Original directory of where the source code we are analyzing came from. We could use the user's
+# original dir instead of taking .java source files, or just take in .java files as store in a dir
+# originalDir = "D:/SYSC3110/Lab1"
 query = import_code_query(dirName, projectName)
 result = client.execute(query)
 
 # Perform all defined queries and write all results to respective files.
-def writeAll():
+def write_all():
     # Perform queries and write the result to a file, like so: getAndWriteJoernResults(query, filename)
-    getAndWriteJoernResults("cpg.argument.toJsonPretty", "allArguments.json")
-    getAndWriteJoernResults("cpg.call.name.toJsonPretty", "allCalls.json")
-    getAndWriteJoernResults("cpg.file.name.toJsonPretty", "allFiles.json")
-    getAndWriteJoernResults("cpg.identifier.name.toJsonPretty", "allIdentifiers.json")
-    getAndWriteJoernResults("cpg.literal.toJsonPretty", "allLiterals.json")
-    getAndWriteJoernResults("cpg.local.name.toJsonPretty", "allLocalVars.json")
-    getAndWriteJoernResults("cpg.member.code.toJsonPretty", "allMembers.json")
-    getAndWriteJoernResults("cpg.method.fullName.toJsonPretty", "allMethods.json")
-    getAndWriteJoernResults("cpg.parameter.name.toJsonPretty", "allParameters.json")
+    get_and_write_joern_results("cpg.argument.toJsonPretty", "allArguments.json")
+    get_and_write_joern_results("cpg.call.name.toJsonPretty", "allCalls.json")
+    get_and_write_joern_results("cpg.file.name.toJsonPretty", "allFiles.json")
+    get_and_write_joern_results(
+        "cpg.identifier.name.toJsonPretty", "allIdentifiers.json"
+    )
+    get_and_write_joern_results("cpg.literal.toJsonPretty", "allLiterals.json")
+    get_and_write_joern_results("cpg.local.name.toJsonPretty", "allLocalVars.json")
+    get_and_write_joern_results("cpg.member.code.toJsonPretty", "allMembers.json")
+    get_and_write_joern_results("cpg.method.fullName.toJsonPretty", "allMethods.json")
+    get_and_write_joern_results("cpg.parameter.name.toJsonPretty", "allParameters.json")
 
 
 # Write the joern output of a query to a specified filename
-def writeToFile(joernResult, filename):
+def write_to_file(joernResult, filename):
     dirName = "src/main/python/joernFiles/"
     finalName = dirName + filename
     file = open(finalName, "w")
@@ -40,11 +45,11 @@ def writeToFile(joernResult, filename):
 
 
 # Execute joern queries, cleanup the result and write to a file.
-def getAndWriteJoernResults(query, filename):
+def get_and_write_joern_results(query, filename):
     # execute a simple CPGQuery
     result = client.execute(query)
     joernResult = result["stdout"]
-    joernResult = cleanJson(joernResult)
+    joernResult = clean_json(joernResult)
 
     # Clean up file names to exclude the path and only contain, for example "AddressBook.java"
     if "allFiles" in filename:
@@ -57,21 +62,23 @@ def getAndWriteJoernResults(query, filename):
                 currItem = currItem[index + len(stringToFind) :]
                 joernJsonData[i] = currItem
     joernResult = json.dumps(joernJsonData)
-    writeToFile(joernResult, filename)
+    write_to_file(joernResult, filename)
 
 
 ## todo: need to update this for jsonPretty format
-def getMethodsWithModifiers(query, filename):
-    query = "cpg.method.map(node => (node.code, node.fullName)).toJsonPretty"
+def get_methods_with_modifiers(filename):
+    query = "cpg.method.map(node => (node.code, node.fullName)).toJson"
     result = client.execute(query)
     joernResult = result["stdout"]
-    joernResult = cleanJson(joernResult)
-    resultArr = []
+    joernResult = clean_json(joernResult)
+    resultArr = json.loads(joernResult)
     finalArr = []
+
     for i in range(0, len(resultArr)):
         currItem = resultArr[i]
+        print(currItem)
         currItemArr = currItem.split(":")
-        stringToClear = currItemArr[1]
+        stringToClear = currItemArr[i]
         stringToFind = "main.python.joernTestProject.src."
         index = stringToClear.find(stringToFind)
 
@@ -84,32 +91,32 @@ def getMethodsWithModifiers(query, filename):
                 finalStr = currItemArr[0] + ":" + stringToClear
                 finalArr.append(finalStr)
     joernResult = ("\n").join(finalArr)
-    writeToFile(joernResult, filename)
+    write_to_file(joernResult, filename)
 
 
 # Execute joern queries to get all the fields of classes with their access modifiers and write to a file.
-def getFieldsWithModifiers(write=False):
+def get_fields_with_modifiers(write=False):
 
     # Perform queries to get private, public, protected, and static fields.
     query = "cpg.member.isPrivate.code.toJsonPretty"
     result = client.execute(query)
     data = result["stdout"]
-    privateFields = cleanJson(data)
+    privateFields = clean_json(data)
 
     query = "cpg.member.isPublic.code.toJsonPretty"
     result = client.execute(query)
     data = result["stdout"]
-    publicFields = cleanJson(data)
+    publicFields = clean_json(data)
 
     query = "cpg.member.isProtected.code.toJsonPretty"
     result = client.execute(query)
     data = result["stdout"]
-    protectedFields = cleanJson(data)
+    protectedFields = clean_json(data)
 
     query = "cpg.member.isStatic.code.toJsonPretty"
     result = client.execute(query)
     data = result["stdout"]
-    staticFields = cleanJson(data)
+    staticFields = clean_json(data)
 
     # Load JSON into a python list for each field
     privateArr = json.loads(privateFields)
@@ -136,12 +143,12 @@ def getFieldsWithModifiers(write=False):
         finalArr = privateArr + publicArr + protectedArr + staticArr
         joernResult = ("\n").join(finalArr)
 
-        writeToFile(joernResult, "allFieldsWithModifiers.txt")
+        write_to_file(joernResult, "allFieldsWithModifiers.txt")
     return privateArr, publicArr, protectedArr, staticArr
 
 
 # Cleans up jsonPretty output from joern so that it can be a proper JSON file.
-def cleanJson(joernResult):
+def clean_json(joernResult):
     stringToFind = "["
     index = joernResult.find(stringToFind)
     joernResult = joernResult[index : len(joernResult)]
@@ -153,18 +160,18 @@ def cleanJson(joernResult):
 
 
 # Create a custom JSON object of the source code and save it to a JSON file.
-def sourceCodeJsonCreation():
+def source_code_json_creation():
     # Initial query to get all of the classes within the source code
     query = "cpg.typeDecl.isExternal(false).toJsonPretty"
     result = client.execute(query)
     data = result["stdout"]
-    allClasses = json.loads(cleanJson(data))
+    allClasses = json.loads(clean_json(data))
 
     # Dictionary which will store everything about the source code.
     sourceCodeJSON = {}
     sourceCodeJSON["classes"] = []
 
-    privateArr, publicArr, protectedArr, staticArr = getFieldsWithModifiers(False)
+    privateArr, publicArr, protectedArr, staticArr = get_fields_with_modifiers(False)
 
     # Go class by class populating sourceCodeJSON
     for i in range(0, len(allClasses)):
@@ -187,7 +194,7 @@ def sourceCodeJsonCreation():
         )
         result = client.execute(query)
         data = result["stdout"]
-        allFields = json.loads(cleanJson(data))
+        allFields = json.loads(clean_json(data))
 
         query = (
             "cpg.typeDecl("
@@ -198,7 +205,7 @@ def sourceCodeJsonCreation():
         )
         result = client.execute(query)
         data = result["stdout"]
-        allMethods = json.loads(cleanJson(data))
+        allMethods = json.loads(clean_json(data))
 
         # Create dicts for each field and method of each class
         for j in range(0, len(allFields)):
@@ -237,7 +244,11 @@ def sourceCodeJsonCreation():
             if index == -1 and methodName == "<init>":
                 newIndex = fullMethodCodeDecl.find("(")
                 result = fullMethodCodeDecl[0:newIndex].split()
-                currMethodDict["name"] = result[1]
+                if len(result) == 2:
+                    currMethodDict["name"] = result[1]
+                elif len(result) == 1:
+                    currMethodDict["name"] = result[0]
+
                 index = fullMethodCodeDecl.find(currMethodDict["name"])
 
             modifiersWithReturn = fullMethodCodeDecl[0:index]
@@ -267,18 +278,20 @@ def sourceCodeJsonCreation():
                 + '"'
                 + className
                 + '"'
-                + ")).astChildren.astChildren.where(node => node.lineNumber).toJsonPretty"
+                + ")).astChildren.astChildren.toJsonPretty"
             )
             result = client.execute(query)
             data = result["stdout"]
-            allInstructions = json.loads(cleanJson(data))
+            allInstructions = json.loads(clean_json(data))
 
             # Go instruction by instruction for each method and append to currMethodDict
             for m in range(0, len(allInstructions)):
                 currInstructionDict = {}
                 currInstructionDict["_label"] = allInstructions[m]["_label"]
                 currInstructionDict["code"] = allInstructions[m]["code"]
-                currInstructionDict["lineNumber"] = allInstructions[m]["lineNumber"]
+                currInstructionDict["lineNumber"] = allInstructions[m].get(
+                    "lineNumber", None
+                )
                 currMethodDict["instructions"].append(currInstructionDict)
 
             # Append the currMethodDict to currClassDict["methods"] list
@@ -289,10 +302,11 @@ def sourceCodeJsonCreation():
 
     # Finally, write everything to a file.
     joernResult = json.dumps(sourceCodeJSON)
-    writeToFile(joernResult, "sourceCode.json")
+    write_to_file(joernResult, "sourceCode.json")
 
 
 if __name__ == "__main__":
-    #writeAll()
-    #getFieldsWithModifiers()
-    sourceCodeJsonCreation()
+    # writeAll()
+    # getFieldsWithModifiers()
+    # getMethodsWithModifiers("allFieldsWithModifiers.txt")
+    source_code_json_creation()
