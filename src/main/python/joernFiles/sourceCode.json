@@ -1,96 +1,275 @@
 {
   "classes": [
+    { "name": "CPGClass$Method", "fields": [], "methods": [] },
+    { "name": "CPGClass$Modifier", "fields": [], "methods": [] },
+    { "name": "CPGClass$Attribute", "fields": [], "methods": [] },
     {
-      "name": "AddressBook",
+      "name": "CPGClass",
       "fields": [
+        { "name": "name", "modifiers": ["public"], "type": "java.lang.String" },
         {
-          "name": "Addresses",
+          "name": "methods",
           "modifiers": ["private"],
-          "type": "java.util.ArrayList<BuddyInfo>"
+          "type": "java.util.ArrayList"
+        },
+        {
+          "name": "attributes",
+          "modifiers": ["private"],
+          "type": "java.util.ArrayList"
         }
       ],
       "methods": [
         {
-          "code": "public AddressBook()",
-          "methodBody": "AddressBook()",
-          "modifiers": ["public"],
-          "name": "AddressBook",
+          "code": "protected ArrayList<Method> getMethods()",
+          "methodBody": "getMethods()",
+          "modifiers": ["protected"],
+          "name": "getMethods",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.methods;",
+              "lineNumber": 58
+            }
+          ],
+          "returnType": "ArrayList<Method>"
+        },
+        {
+          "code": "protected ArrayList<Attribute> getAttributes()",
+          "methodBody": "getAttributes()",
+          "modifiers": ["protected"],
+          "name": "getAttributes",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.attributes;",
+              "lineNumber": 62
+            }
+          ],
+          "returnType": "ArrayList<Attribute>"
+        },
+        {
+          "code": "protected void addMethod(Method m)",
+          "methodBody": "addMethod(Method m)",
+          "modifiers": ["protected"],
+          "name": "addMethod",
           "instructions": [
             {
               "_label": "CALL",
-              "code": "this.Addresses = new ArrayList<>()",
-              "lineNumber": 9
-            }
-          ],
-          "returnType": ""
-        },
-        {
-          "code": "public void addBuddy(BuddyInfo newBuddy)",
-          "methodBody": "addBuddy(BuddyInfo newBuddy)",
-          "modifiers": ["public"],
-          "name": "addBuddy",
-          "instructions": [
-            {
-              "_label": "CONTROL_STRUCTURE",
-              "code": "if (newBuddy != null)",
-              "lineNumber": 14
+              "code": "this.methods.add(m)",
+              "lineNumber": 66
             }
           ],
           "returnType": "void"
         },
         {
-          "code": "public BuddyInfo removeBuddy(int index)",
-          "methodBody": "removeBuddy(int index)",
-          "modifiers": ["public"],
-          "name": "removeBuddy",
+          "code": "protected void addAttribute(Attribute a)",
+          "methodBody": "addAttribute(Attribute a)",
+          "modifiers": ["protected"],
+          "name": "addAttribute",
           "instructions": [
             {
-              "_label": "CONTROL_STRUCTURE",
-              "code": "if (index >= 0 && index < Addresses.size())",
-              "lineNumber": 22
-            },
-            { "_label": "RETURN", "code": "return null;", "lineNumber": 26 }
+              "_label": "CALL",
+              "code": "this.attributes.add(a)",
+              "lineNumber": 70
+            }
           ],
-          "returnType": "BuddyInfo"
+          "returnType": "void"
         },
         {
-          "code": "public static void main(String[] args)",
-          "methodBody": "main(String[] args)",
-          "modifiers": ["public", "static"],
-          "name": "main",
+          "code": "CPGClass(String name)",
+          "methodBody": "CPGClass(String name)",
+          "modifiers": [],
+          "name": "CPGClass",
           "instructions": [
-            { "_label": "LOCAL", "code": "BuddyInfo bud", "lineNumber": null },
+            { "_label": "CALL", "code": "this.name = name", "lineNumber": 74 },
             {
               "_label": "CALL",
-              "code": "ANY bud = new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
-              "lineNumber": 31
+              "code": "this.methods = new ArrayList<Method>()",
+              "lineNumber": 75
             },
             {
               "_label": "CALL",
-              "code": "new BuddyInfo(\"Bob\", \"Carleton\", \"613\")",
-              "lineNumber": 31
-            },
+              "code": "this.attributes = new ArrayList<Attribute>()",
+              "lineNumber": 76
+            }
+          ],
+          "returnType": ""
+        }
+      ]
+    },
+    { "name": "ClassRelation$Type", "fields": [], "methods": [] },
+    {
+      "name": "ClassRelation",
+      "fields": [
+        {
+          "name": "type",
+          "modifiers": ["public"],
+          "type": "com.CodeSmell.ClassRelation$Type"
+        },
+        {
+          "name": "source",
+          "modifiers": ["public"],
+          "type": "com.CodeSmell.UMLClass"
+        },
+        {
+          "name": "target",
+          "modifiers": ["public"],
+          "type": "com.CodeSmell.UMLClass"
+        },
+        { "name": "pathContainerId", "modifiers": ["private"], "type": "int" },
+        {
+          "name": "path",
+          "modifiers": ["private"],
+          "type": "<unresolvedNamespace>.ArrayList<Position>"
+        }
+      ],
+      "methods": [
+        {
+          "code": "public ClassRelation(UMLClass source, UMLClass target, Type type)",
+          "methodBody": "ClassRelation(UMLClass source, UMLClass target, Type type)",
+          "modifiers": ["public"],
+          "name": "ClassRelation",
+          "instructions": [
+            { "_label": "CALL", "code": "this.type = type", "lineNumber": 26 },
             {
-              "_label": "LOCAL",
-              "code": "AddressBook addBook",
-              "lineNumber": null
+              "_label": "CALL",
+              "code": "this.source = source",
+              "lineNumber": 27
             },
             {
               "_label": "CALL",
-              "code": "AddressBook addBook = new AddressBook()",
-              "lineNumber": 32
-            },
-            { "_label": "CALL", "code": "new AddressBook()", "lineNumber": 32 },
-            { "_label": "CALL", "code": "addBuddy(bud)", "lineNumber": 33 },
+              "code": "this.target = target",
+              "lineNumber": 28
+            }
+          ],
+          "returnType": ""
+        },
+        {
+          "code": "public void setPath(ArrayList<Position> path)",
+          "methodBody": "setPath(ArrayList<Position> path)",
+          "modifiers": ["public"],
+          "name": "setPath",
+          "instructions": [
+            { "_label": "CALL", "code": "this.path = path", "lineNumber": 32 },
+            { "_label": "LOCAL", "code": "RenderEvent re", "lineNumber": null },
             {
               "_label": "CALL",
-              "code": "addBook.removeBuddy(0)",
+              "code": "ANY re = new RenderEvent(RenderEvent.Type.RENDER, this)",
+              "lineNumber": 33
+            },
+            {
+              "_label": "CALL",
+              "code": "new RenderEvent(RenderEvent.Type.RENDER, this)",
+              "lineNumber": 33
+            },
+            {
+              "_label": "CALL",
+              "code": "dispatchToRenderEventListeners(re)",
               "lineNumber": 34
             },
             {
               "_label": "CALL",
-              "code": "println(bud.getName())",
+              "code": "this.pathContainerId = (Integer) re.getResponse()",
               "lineNumber": 35
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public ArrayList<Position> getPath()",
+          "methodBody": "getPath()",
+          "modifiers": ["public"],
+          "name": "getPath",
+          "instructions": [
+            { "_label": "RETURN", "code": "return path;", "lineNumber": 39 }
+          ],
+          "returnType": "ArrayList<Position>"
+        }
+      ]
+    },
+    { "name": "CodePropertyGraph$Relation", "fields": [], "methods": [] },
+    {
+      "name": "CodePropertyGraph",
+      "fields": [
+        {
+          "name": "relations",
+          "modifiers": ["private"],
+          "type": "java.util.ArrayList"
+        },
+        {
+          "name": "classes",
+          "modifiers": ["private"],
+          "type": "<unresolvedNamespace>.ArrayList<CPGClass>"
+        }
+      ],
+      "methods": [
+        {
+          "code": "protected ArrayList<CPGClass> getClasses()",
+          "methodBody": "getClasses()",
+          "modifiers": ["protected"],
+          "name": "getClasses",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.classes;",
+              "lineNumber": 26
+            }
+          ],
+          "returnType": "ArrayList<CPGClass>"
+        },
+        {
+          "code": "protected ArrayList<Relation> getRelations()",
+          "methodBody": "getRelations()",
+          "modifiers": ["protected"],
+          "name": "getRelations",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.relations;",
+              "lineNumber": 30
+            }
+          ],
+          "returnType": "ArrayList<Relation>"
+        },
+        {
+          "code": "protected CodePropertyGraph()",
+          "methodBody": "CodePropertyGraph()",
+          "modifiers": ["protected"],
+          "name": "CodePropertyGraph",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.classes = new ArrayList<CPGClass>()",
+              "lineNumber": 34
+            },
+            {
+              "_label": "CALL",
+              "code": "this.relations = new ArrayList<Relation>()",
+              "lineNumber": 35
+            }
+          ],
+          "returnType": ""
+        },
+        {
+          "code": "public void addClass(CPGClass c)",
+          "methodBody": "addClass(CPGClass c)",
+          "modifiers": ["public"],
+          "name": "addClass",
+          "instructions": [
+            { "_label": "CALL", "code": "add(c)", "lineNumber": 39 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void addRelation(Relation r)",
+          "methodBody": "addRelation(Relation r)",
+          "modifiers": ["public"],
+          "name": "addRelation",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.relations.add(r)",
+              "lineNumber": 43
             }
           ],
           "returnType": "void"
@@ -98,55 +277,1506 @@
       ]
     },
     {
-      "name": "BuddyInfo",
+      "name": "Controller",
+      "fields": [],
+      "methods": [
+        {
+          "code": "public void initialize()",
+          "methodBody": "initialize()",
+          "modifiers": ["public"],
+          "name": "initialize",
+          "instructions": [
+            {
+              "_label": "LOCAL",
+              "code": "String javaVersion",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "String javaVersion = System.getProperty(\"java.version\")",
+              "lineNumber": 6
+            },
+            {
+              "_label": "LOCAL",
+              "code": "String javafxVersion",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "String javafxVersion = System.getProperty(\"javafx.version\")",
+              "lineNumber": 7
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<empty",
+          "instructions": [],
+          "returnType": "<empty>"
+        }
+      ]
+    },
+    {
+      "name": "Launcher",
+      "fields": [],
+      "methods": [
+        {
+          "code": "public static void main(String[] args)",
+          "methodBody": "main(String[] args)",
+          "modifiers": ["public", "static"],
+          "name": "main",
+          "instructions": [
+            { "_label": "CALL", "code": "main(args)", "lineNumber": 6 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<empty",
+          "instructions": [],
+          "returnType": "<empty>"
+        }
+      ]
+    },
+    { "name": "LayoutManager$Line", "fields": [], "methods": [] },
+    { "name": "LayoutManager$Direction", "fields": [], "methods": [] },
+    {
+      "name": "LayoutManager",
       "fields": [
         {
-          "name": "name",
+          "name": "classes",
           "modifiers": ["private"],
-          "type": "java.lang.String"
+          "type": "<unresolvedNamespace>.ArrayList<UMLClass>"
+        }
+      ],
+      "methods": [
+        {
+          "code": "public LayoutManager()",
+          "methodBody": "LayoutManager()",
+          "modifiers": ["public"],
+          "name": "LayoutManager",
+          "instructions": [],
+          "returnType": ""
         },
         {
-          "name": "address",
-          "modifiers": ["private"],
-          "type": "java.lang.String"
+          "code": "public void positionClasses(ArrayList<UMLClass> classes)",
+          "methodBody": "positionClasses(ArrayList<UMLClass> classes)",
+          "modifiers": ["public"],
+          "name": "positionClasses",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.classes = classes",
+              "lineNumber": 25
+            },
+            {
+              "_label": "CALL",
+              "code": "this.sortClasses()",
+              "lineNumber": 26
+            },
+            { "_label": "LOCAL", "code": "double x", "lineNumber": null },
+            { "_label": "CALL", "code": "double x = 0", "lineNumber": 28 },
+            { "_label": "LOCAL", "code": "double y", "lineNumber": null },
+            { "_label": "CALL", "code": "double y = 0", "lineNumber": 29 },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "for (int i = 0; Some(i < classes.size()); i++)",
+              "lineNumber": 31
+            }
+          ],
+          "returnType": "void"
         },
         {
-          "name": "phone_num",
+          "code": "private Line[] classBoxLines(UMLClass c)",
+          "methodBody": "classBoxLines(UMLClass c)",
           "modifiers": ["private"],
+          "name": "classBoxLines",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Line[] lines", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "LayoutManager$Line[] lines = new Line[4]",
+              "lineNumber": 92
+            },
+            { "_label": "LOCAL", "code": "Position p1", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position p1 = getPosition()",
+              "lineNumber": 93
+            },
+            {
+              "_label": "LOCAL",
+              "code": "Position corner2",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "Position corner2 = new Position(p1.x + c.getWidth(), p1.y)",
+              "lineNumber": 94
+            },
+            {
+              "_label": "CALL",
+              "code": "new Position(p1.x + c.getWidth(), p1.y)",
+              "lineNumber": 94
+            },
+            {
+              "_label": "LOCAL",
+              "code": "Position corner3",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "Position corner3 = new Position(p1.x + c.getWidth(), p1.y + c.getHeight())",
+              "lineNumber": 95
+            },
+            {
+              "_label": "CALL",
+              "code": "new Position(p1.x + c.getWidth(), p1.y + c.getHeight())",
+              "lineNumber": 95
+            },
+            {
+              "_label": "LOCAL",
+              "code": "Position corner4",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "Position corner4 = new Position(p1.x, p1.y + c.getHeight())",
+              "lineNumber": 96
+            },
+            {
+              "_label": "CALL",
+              "code": "new Position(p1.x, p1.y + c.getHeight())",
+              "lineNumber": 96
+            },
+            {
+              "_label": "CALL",
+              "code": "lines[0] = new Line(p1, corner2)",
+              "lineNumber": 97
+            },
+            {
+              "_label": "CALL",
+              "code": "lines[1] = new Line(corner2, corner3)",
+              "lineNumber": 98
+            },
+            {
+              "_label": "CALL",
+              "code": "lines[2] = new Line(corner3, corner4)",
+              "lineNumber": 99
+            },
+            {
+              "_label": "CALL",
+              "code": "lines[3] = new Line(corner4, p1)",
+              "lineNumber": 100
+            },
+            { "_label": "RETURN", "code": "return lines;", "lineNumber": 101 }
+          ],
+          "returnType": "Line[]"
+        },
+        {
+          "code": "private boolean testCollision(Line line, UMLClass[] exclude)",
+          "methodBody": "testCollision(Line line, UMLClass[] exclude)",
+          "modifiers": ["private"],
+          "name": "testCollision",
+          "instructions": [
+            { "_label": "LOCAL", "code": "$iterLocal0", "lineNumber": 108 },
+            { "_label": "CALL", "code": "", "lineNumber": 108 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 108 },
+            { "_label": "RETURN", "code": "return true;", "lineNumber": 116 }
+          ],
+          "returnType": "boolean"
+        },
+        {
+          "code": "private Position intersection(Line l1, Line[] with)",
+          "methodBody": "intersection(Line l1, Line[] with)",
+          "modifiers": ["private"],
+          "name": "intersection",
+          "instructions": [
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "<empty>",
+              "lineNumber": null
+            },
+            { "_label": "RETURN", "code": "return null;", "lineNumber": 139 }
+          ],
+          "returnType": "Position"
+        },
+        {
+          "code": "private Position classMiddle(UMLClass c)",
+          "methodBody": "classMiddle(UMLClass c)",
+          "modifiers": ["private"],
+          "name": "classMiddle",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Position p", "lineNumber": null },
+            { "_label": "LOCAL", "code": "Position p", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position p = getPosition()",
+              "lineNumber": 152
+            },
+            {
+              "_label": "CALL",
+              "code": "Position p = getPosition()",
+              "lineNumber": 160
+            },
+            {
+              "_label": "RETURN",
+              "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);",
+              "lineNumber": 153
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (d == Direction.TOP)",
+              "lineNumber": 161
+            }
+          ],
+          "returnType": "Position"
+        },
+        {
+          "code": "private Position classMiddle(UMLClass c, Direction d)",
+          "methodBody": "classMiddle(UMLClass c, Direction d)",
+          "modifiers": ["private"],
+          "name": "classMiddle",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Position p", "lineNumber": null },
+            { "_label": "LOCAL", "code": "Position p", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position p = getPosition()",
+              "lineNumber": 152
+            },
+            {
+              "_label": "CALL",
+              "code": "Position p = getPosition()",
+              "lineNumber": 160
+            },
+            {
+              "_label": "RETURN",
+              "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);",
+              "lineNumber": 153
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (d == Direction.TOP)",
+              "lineNumber": 161
+            }
+          ],
+          "returnType": "Position"
+        },
+        {
+          "code": "private Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2)",
+          "methodBody": "closetNodes(UMLClass c1, UMLClass c2)",
+          "modifiers": ["private"],
+          "name": "closetNodes",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Position mid1", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position mid1 = classMiddle(c1)",
+              "lineNumber": 181
+            },
+            { "_label": "LOCAL", "code": "Position mid2", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position mid2 = classMiddle(c2)",
+              "lineNumber": 182
+            },
+            { "_label": "LOCAL", "code": "Line line", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "LayoutManager$Line line = new Line(mid1, mid2)",
+              "lineNumber": 186
+            },
+            {
+              "_label": "CALL",
+              "code": "new Line(mid1, mid2)",
+              "lineNumber": 186
+            },
+            { "_label": "LOCAL", "code": "Position p1", "lineNumber": null },
+            { "_label": "LOCAL", "code": "Position p2", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "p1 = intersection(line, classBoxLines(c1))",
+              "lineNumber": 188
+            },
+            {
+              "_label": "CALL",
+              "code": "p2 = intersection(line, classBoxLines(c2))",
+              "lineNumber": 189
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (p1 == null || p2 == null)",
+              "lineNumber": 190
+            },
+            {
+              "_label": "RETURN",
+              "code": "return new Pair<Position, Position>(p1, p2);",
+              "lineNumber": 193
+            }
+          ],
+          "returnType": "Position>"
+        },
+        {
+          "code": "private Position indirectConnection(UMLClass c1, UMLClass c2)",
+          "methodBody": "indirectConnection(UMLClass c1, UMLClass c2)",
+          "modifiers": ["private"],
+          "name": "indirectConnection",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Position mid1", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position mid1 = classMiddle(c1)",
+              "lineNumber": 201
+            },
+            { "_label": "LOCAL", "code": "Position mid2", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position mid2 = classMiddle(c2)",
+              "lineNumber": 202
+            },
+            { "_label": "LOCAL", "code": "Line l1", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "LayoutManager$Line l1 = new Line(mid1.x, mid1.y, mid2.x, mid1.y)",
+              "lineNumber": 206
+            },
+            {
+              "_label": "CALL",
+              "code": "new Line(mid1.x, mid1.y, mid2.x, mid1.y)",
+              "lineNumber": 206
+            },
+            { "_label": "LOCAL", "code": "Line l2", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "LayoutManager$Line l2 = new Line(mid2.x, mid2.y, mid2.x, mid1.y)",
+              "lineNumber": 207
+            },
+            {
+              "_label": "CALL",
+              "code": "new Line(mid2.x, mid2.y, mid2.x, mid1.y)",
+              "lineNumber": 207
+            },
+            { "_label": "LOCAL", "code": "Position p", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Position p = this.intersection(l1, new Line[] { l2 })",
+              "lineNumber": 208
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (p == null)",
+              "lineNumber": 210
+            },
+            { "_label": "RETURN", "code": "return p;", "lineNumber": 213 }
+          ],
+          "returnType": "Position"
+        },
+        {
+          "code": "private void sortClasses()",
+          "methodBody": "sortClasses()",
+          "modifiers": ["private"],
+          "name": "sortClasses",
+          "instructions": [
+            {
+              "_label": "LOCAL",
+              "code": "Comparator<UMLClass> classHorzComp",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "ANY classHorzComp = new Comparator<UMLClass>() {\r\n\r\n    public int compare(UMLClass c1, UMLClass c2) {\r\n        Double d = (c1.getPosition().x - c2.getPosition().x);\r\n        return d.intValue();\r\n    }\r\n}",
+              "lineNumber": 219
+            },
+            {
+              "_label": "CALL",
+              "code": "new Comparator<UMLClass>() {\r\n\r\n    public int compare(UMLClass c1, UMLClass c2) {\r\n        Double d = (c1.getPosition().x - c2.getPosition().x);\r\n        return d.intValue();\r\n    }\r\n}",
+              "lineNumber": 219
+            },
+            {
+              "_label": "CALL",
+              "code": "sort(classes, classHorzComp)",
+              "lineNumber": 226
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void setRelationPaths(ArrayList<ClassRelation> relations)",
+          "methodBody": "setRelationPaths(ArrayList<ClassRelation> relations)",
+          "modifiers": ["public"],
+          "name": "setRelationPaths",
+          "instructions": [
+            { "_label": "LOCAL", "code": "$iterLocal1", "lineNumber": 237 },
+            { "_label": "CALL", "code": "", "lineNumber": 237 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 237 }
+          ],
+          "returnType": "void"
+        }
+      ]
+    },
+    { "name": "LayoutManager$Dot", "fields": [], "methods": [] },
+    {
+      "name": "MainApp",
+      "fields": [],
+      "methods": [
+        {
+          "code": "public void initializeMainView(CodePropertyGraph cpg)",
+          "methodBody": "initializeMainView(CodePropertyGraph cpg)",
+          "modifiers": ["public"],
+          "name": "initializeMainView",
+          "instructions": [
+            {
+              "_label": "LOCAL",
+              "code": "HashMap<CPGClass, UMLClass> classMap",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "ANY classMap = new HashMap<CPGClass, UMLClass>()",
+              "lineNumber": 39
+            },
+            {
+              "_label": "CALL",
+              "code": "new HashMap<CPGClass, UMLClass>()",
+              "lineNumber": 39
+            },
+            { "_label": "LOCAL", "code": "$iterLocal0", "lineNumber": 41 },
+            { "_label": "CALL", "code": "", "lineNumber": 41 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 41 },
+            {
+              "_label": "LOCAL",
+              "code": "ArrayList<ClassRelation> relations",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "ANY relations = new ArrayList<ClassRelation>()",
+              "lineNumber": 60
+            },
+            {
+              "_label": "CALL",
+              "code": "new ArrayList<ClassRelation>()",
+              "lineNumber": 60
+            },
+            { "_label": "LOCAL", "code": "$iterLocal3", "lineNumber": 61 },
+            { "_label": "CALL", "code": "", "lineNumber": 61 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 61 },
+            {
+              "_label": "LOCAL",
+              "code": "LayoutManager lm",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "LayoutManager lm = new LayoutManager()",
+              "lineNumber": 71
+            },
+            {
+              "_label": "CALL",
+              "code": "new LayoutManager()",
+              "lineNumber": 71
+            },
+            {
+              "_label": "CALL",
+              "code": "positionClasses(new ArrayList<UMLClass>(classMap.values()))",
+              "lineNumber": 72
+            },
+            {
+              "_label": "CALL",
+              "code": "setRelationPaths(relations)",
+              "lineNumber": 73
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void start(Stage primaryStage) throws Exception",
+          "methodBody": "start(Stage primaryStage) throws Exception",
+          "modifiers": ["public"],
+          "name": "start",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Parent root", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Parent root = load(getClass().getResource(\"jfx.fxml\"))",
+              "lineNumber": 78
+            },
+            {
+              "_label": "CALL",
+              "code": "setScene(new Scene(root, 400, 300))",
+              "lineNumber": 79
+            },
+            {
+              "_label": "CALL",
+              "code": "setTitle(\"CodeSmell Detector\")",
+              "lineNumber": 80
+            },
+            {
+              "_label": "LOCAL",
+              "code": "String location",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "String location = new File(System.getProperty(\"user.dir\") + \"/boxes.html\").toURI().toURL().toExternalForm()",
+              "lineNumber": 82
+            },
+            {
+              "_label": "LOCAL",
+              "code": "WebView webView",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "WebView webView = new WebView()",
+              "lineNumber": 84
+            },
+            { "_label": "CALL", "code": "new WebView()", "lineNumber": 84 },
+            { "_label": "CALL", "code": "load(location)", "lineNumber": 85 },
+            { "_label": "LOCAL", "code": "URL url", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "URL url = getResource(\"boxes.html\")",
+              "lineNumber": 87
+            },
+            {
+              "_label": "LOCAL",
+              "code": "WebEngine engine",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "WebEngine engine = getEngine()",
+              "lineNumber": 88
+            },
+            { "_label": "CALL", "code": "setZoom(1.0)", "lineNumber": 89 },
+            {
+              "_label": "CALL",
+              "code": "addRenderEventListener(new WebControl(engine))",
+              "lineNumber": 90
+            },
+            {
+              "_label": "CALL",
+              "code": "load(url.toExternalForm())",
+              "lineNumber": 92
+            },
+            {
+              "_label": "CALL",
+              "code": "addListener(<lambda>)",
+              "lineNumber": 93
+            },
+            {
+              "_label": "CALL",
+              "code": "addListener(new ListChangeListener<Node>() {\r\n\r\n    @Override\r\n    public void onChanged(Change<? extends Node> change) {\r\n        Set<Node> deadSeaScrolls = webView.lookupAll(\".scroll-bar\");\r\n        for (Node scroll : deadSeaScrolls) {\r\n            scroll.setVisible(false);\r\n        }\r\n    }\r\n})",
+              "lineNumber": 103
+            },
+            { "_label": "LOCAL", "code": "VBox vBox", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "VBox vBox = new VBox(webView)",
+              "lineNumber": 112
+            },
+            {
+              "_label": "CALL",
+              "code": "new VBox(webView)",
+              "lineNumber": 112
+            },
+            { "_label": "LOCAL", "code": "Scene scene", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Scene scene = new Scene(vBox, 960, 600)",
+              "lineNumber": 113
+            },
+            {
+              "_label": "CALL",
+              "code": "new Scene(vBox, 960, 600)",
+              "lineNumber": 113
+            },
+            { "_label": "CALL", "code": "setScene(scene)", "lineNumber": 114 },
+            { "_label": "CALL", "code": "show()", "lineNumber": 115 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public static void main(String[] args)",
+          "methodBody": "main(String[] args)",
+          "modifiers": ["public", "static"],
+          "name": "main",
+          "instructions": [
+            { "_label": "CALL", "code": "launch(args)", "lineNumber": 120 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<empty",
+          "instructions": [],
+          "returnType": "<empty>"
+        },
+        {
+          "code": "<lambda>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "lambda$0",
+          "instructions": [],
+          "returnType": ">"
+        }
+      ]
+    },
+    { "name": "lambda$0", "fields": [], "methods": [] },
+    {
+      "name": "Pair",
+      "fields": [
+        {
+          "name": "first",
+          "modifiers": ["public"],
+          "type": "java.lang.Object"
+        },
+        {
+          "name": "second",
+          "modifiers": ["public"],
+          "type": "java.lang.Object"
+        }
+      ],
+      "methods": [
+        {
+          "code": "Pair(F first, S second)",
+          "methodBody": "Pair(F first, S second)",
+          "modifiers": [],
+          "name": "Pair",
+          "instructions": [
+            { "_label": "CALL", "code": "this.first = first", "lineNumber": 9 },
+            {
+              "_label": "CALL",
+              "code": "this.second = second",
+              "lineNumber": 10
+            }
+          ],
+          "returnType": ""
+        }
+      ]
+    },
+    {
+      "name": "Parser",
+      "fields": [],
+      "methods": [
+        {
+          "code": "public static void main(String[] args)",
+          "methodBody": "main(String[] args)",
+          "modifiers": ["public", "static"],
+          "name": "main",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Parser p", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Parser p = new Parser()",
+              "lineNumber": 34
+            },
+            { "_label": "CALL", "code": "new Parser()", "lineNumber": 34 },
+            { "_label": "CALL", "code": "p.buildCPG(\"\")", "lineNumber": 35 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public CodePropertyGraph buildCPG(String destination)",
+          "methodBody": "buildCPG(String destination)",
+          "modifiers": ["public"],
+          "name": "buildCPG",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Gson gson", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Gson gson = new Gson()",
+              "lineNumber": 43
+            },
+            { "_label": "CALL", "code": "new Gson()", "lineNumber": 43 },
+            {
+              "_label": "LOCAL",
+              "code": "File sourceCode",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "File sourceCode = new File(\"src/main/python/joernFiles/sourceCode.json\")",
+              "lineNumber": 44
+            },
+            {
+              "_label": "CALL",
+              "code": "new File(\"src/main/python/joernFiles/sourceCode.json\")",
+              "lineNumber": 44
+            },
+            {
+              "_label": "LOCAL",
+              "code": "CodePropertyGraph cpg",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "CodePropertyGraph cpg = new CodePropertyGraph()",
+              "lineNumber": 45
+            },
+            {
+              "_label": "CALL",
+              "code": "new CodePropertyGraph()",
+              "lineNumber": 45
+            },
+            { "_label": "CONTROL_STRUCTURE", "code": "try", "lineNumber": 46 },
+            { "_label": "RETURN", "code": "return cpg;", "lineNumber": 160 }
+          ],
+          "returnType": "CodePropertyGraph"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<empty",
+          "instructions": [],
+          "returnType": "<empty>"
+        }
+      ]
+    },
+    { "name": "Parser$JavaAttribute", "fields": [], "methods": [] },
+    { "name": "Parser$JavaMethod", "fields": [], "methods": [] },
+    {
+      "name": "Position",
+      "fields": [
+        { "name": "x", "modifiers": ["public"], "type": "double" },
+        { "name": "y", "modifiers": ["public"], "type": "double" }
+      ],
+      "methods": [
+        {
+          "code": "public Position(double x, double y)",
+          "methodBody": "Position(double x, double y)",
+          "modifiers": ["public"],
+          "name": "Position",
+          "instructions": [
+            { "_label": "CALL", "code": "this.x = x", "lineNumber": 9 },
+            { "_label": "CALL", "code": "this.y = y", "lineNumber": 10 }
+          ],
+          "returnType": ""
+        },
+        {
+          "code": "public String toString()",
+          "methodBody": "toString()",
+          "modifiers": ["public"],
+          "name": "toString",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return String.format(\"(%f, %f)\", x, y);",
+              "lineNumber": 14
+            }
+          ],
+          "returnType": "String"
+        }
+      ]
+    },
+    { "name": "RenderEvent$Type", "fields": [], "methods": [] },
+    {
+      "name": "RenderEvent",
+      "fields": [
+        {
+          "name": "type",
+          "modifiers": ["public"],
+          "type": "com.CodeSmell.RenderEvent$Type"
+        },
+        {
+          "name": "source",
+          "modifiers": ["public"],
+          "type": "com.CodeSmell.RenderObject"
+        },
+        {
+          "name": "response",
+          "modifiers": ["private"],
+          "type": "java.lang.Object"
+        }
+      ],
+      "methods": [
+        {
+          "code": "RenderEvent(Type type, RenderObject source)",
+          "methodBody": "RenderEvent(Type type, RenderObject source)",
+          "modifiers": [],
+          "name": "RenderEvent",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.source = source",
+              "lineNumber": 19
+            },
+            { "_label": "CALL", "code": "this.type = type", "lineNumber": 20 }
+          ],
+          "returnType": ""
+        },
+        {
+          "code": "public void setResponse(Object response)",
+          "methodBody": "setResponse(Object response)",
+          "modifiers": ["public"],
+          "name": "setResponse",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.response = response",
+              "lineNumber": 24
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public Object getResponse()",
+          "methodBody": "getResponse()",
+          "modifiers": ["public"],
+          "name": "getResponse",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.response;",
+              "lineNumber": 28
+            }
+          ],
+          "returnType": "Object"
+        }
+      ]
+    },
+    {
+      "name": "RenderEventListener",
+      "fields": [],
+      "methods": [
+        {
+          "code": "public void renderEventPerformed(RenderEvent re)",
+          "methodBody": "renderEventPerformed(RenderEvent re)",
+          "modifiers": ["public"],
+          "name": "renderEventPerformed",
+          "instructions": [],
+          "returnType": "void"
+        }
+      ]
+    },
+    {
+      "name": "RenderObject",
+      "fields": [
+        {
+          "name": "renderEventListeners",
+          "modifiers": ["private", "static"],
+          "type": "<unresolvedNamespace>.ArrayList<RenderEventListener>"
+        }
+      ],
+      "methods": [
+        {
+          "code": "public static void addRenderEventListener(RenderEventListener rel)",
+          "methodBody": "addRenderEventListener(RenderEventListener rel)",
+          "modifiers": ["public", "static"],
+          "name": "addRenderEventListener",
+          "instructions": [
+            { "_label": "CALL", "code": "add(rel)", "lineNumber": 14 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void dispatchToRenderEventListeners(RenderEvent re)",
+          "methodBody": "dispatchToRenderEventListeners(RenderEvent re)",
+          "modifiers": ["public"],
+          "name": "dispatchToRenderEventListeners",
+          "instructions": [
+            { "_label": "LOCAL", "code": "$iterLocal0", "lineNumber": 18 },
+            { "_label": "CALL", "code": "", "lineNumber": 18 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 18 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void render()",
+          "methodBody": "render()",
+          "modifiers": ["public"],
+          "name": "render",
+          "instructions": [
+            { "_label": "LOCAL", "code": "RenderEvent re", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this)",
+              "lineNumber": 26
+            },
+            {
+              "_label": "CALL",
+              "code": "new RenderEvent(RenderEvent.Type.RENDER, this)",
+              "lineNumber": 26
+            },
+            {
+              "_label": "CALL",
+              "code": "dispatchToRenderEventListeners(re)",
+              "lineNumber": 27
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<empty",
+          "instructions": [],
+          "returnType": "<empty>"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<clinit>",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "ArrayList<RenderEventListener> renderEventListeners = new ArrayList<RenderEventListener>()",
+              "lineNumber": 11
+            },
+            {
+              "_label": "CALL",
+              "code": "new ArrayList<RenderEventListener>()",
+              "lineNumber": 11
+            }
+          ],
+          "returnType": ">"
+        }
+      ]
+    },
+    {
+      "name": "Shape",
+      "fields": [
+        {
+          "name": "vertex",
+          "modifiers": ["public"],
+          "type": "<unresolvedNamespace>.Position[]"
+        },
+        {
+          "name": "colour",
+          "modifiers": ["public"],
           "type": "java.lang.String"
         }
       ],
       "methods": [
         {
-          "code": "public BuddyInfo(String name, String address, String phone_num)",
-          "methodBody": "BuddyInfo(String name, String address, String phone_num)",
+          "code": "public Shape(Position[] vertex, String colour)",
+          "methodBody": "Shape(Position[] vertex, String colour)",
           "modifiers": ["public"],
-          "name": "BuddyInfo",
+          "name": "Shape",
           "instructions": [
-            { "_label": "CALL", "code": "this.name = name", "lineNumber": 9 },
             {
               "_label": "CALL",
-              "code": "this.address = address",
-              "lineNumber": 10
+              "code": "this.vertex = vertex",
+              "lineNumber": 9
             },
             {
               "_label": "CALL",
-              "code": "this.phone_num = phone_num",
-              "lineNumber": 11
+              "code": "this.colour = colour",
+              "lineNumber": 10
+            }
+          ],
+          "returnType": ""
+        }
+      ]
+    },
+    {
+      "name": "UMLClass",
+      "fields": [
+        { "name": "name", "modifiers": ["public"], "type": "java.lang.String" },
+        { "name": "id", "modifiers": ["private"], "type": "int" },
+        {
+          "name": "methods",
+          "modifiers": ["private"],
+          "type": "<unresolvedNamespace>.ArrayList<Method>"
+        },
+        {
+          "name": "attributes",
+          "modifiers": ["private"],
+          "type": "<unresolvedNamespace>.ArrayList<Attribute>"
+        },
+        {
+          "name": "relations",
+          "modifiers": ["private"],
+          "type": "<unresolvedNamespace>.ArrayList<ClassRelation>"
+        },
+        {
+          "name": "position",
+          "modifiers": ["private"],
+          "type": "com.CodeSmell.Position"
+        },
+        { "name": "width", "modifiers": ["private"], "type": "double" },
+        { "name": "height", "modifiers": ["private"], "type": "double" }
+      ],
+      "methods": [
+        {
+          "code": "UMLClass(String name)",
+          "methodBody": "UMLClass(String name)",
+          "modifiers": [],
+          "name": "UMLClass",
+          "instructions": [
+            { "_label": "CALL", "code": "this.name = name", "lineNumber": 24 },
+            { "_label": "CALL", "code": "this.id = -1", "lineNumber": 25 },
+            {
+              "_label": "CALL",
+              "code": "this.methods = new ArrayList<Method>()",
+              "lineNumber": 26
+            },
+            {
+              "_label": "CALL",
+              "code": "this.attributes = new ArrayList<Attribute>()",
+              "lineNumber": 27
+            },
+            {
+              "_label": "CALL",
+              "code": "this.relations = new ArrayList<ClassRelation>()",
+              "lineNumber": 28
+            },
+            {
+              "_label": "CALL",
+              "code": "this.position = new Position(0, 0)",
+              "lineNumber": 29
+            },
+            { "_label": "CALL", "code": "this.width = 0.0", "lineNumber": 30 },
+            { "_label": "CALL", "code": "this.height = 0.0", "lineNumber": 31 }
+          ],
+          "returnType": ""
+        },
+        {
+          "code": "public void addMethod(Method m)",
+          "methodBody": "addMethod(Method m)",
+          "modifiers": ["public"],
+          "name": "addMethod",
+          "instructions": [
+            { "_label": "CALL", "code": "add(m)", "lineNumber": 35 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void addAttribute(Attribute a)",
+          "methodBody": "addAttribute(Attribute a)",
+          "modifiers": ["public"],
+          "name": "addAttribute",
+          "instructions": [
+            { "_label": "CALL", "code": "add(a)", "lineNumber": 39 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void addRelationship(ClassRelation r)",
+          "methodBody": "addRelationship(ClassRelation r)",
+          "modifiers": ["public"],
+          "name": "addRelationship",
+          "instructions": [
+            { "_label": "CALL", "code": "add(r)", "lineNumber": 43 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void setPosition(double x, double y)",
+          "methodBody": "setPosition(double x, double y)",
+          "modifiers": ["public"],
+          "name": "setPosition",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.position = new Position(x, y)",
+              "lineNumber": 47
+            },
+            { "_label": "LOCAL", "code": "RenderEvent re", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this)",
+              "lineNumber": 48
+            },
+            {
+              "_label": "CALL",
+              "code": "new RenderEvent(RenderEvent.Type.REPOSITION, this)",
+              "lineNumber": 48
+            },
+            {
+              "_label": "CALL",
+              "code": "dispatchToRenderEventListeners(re)",
+              "lineNumber": 49
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void render()",
+          "methodBody": "render()",
+          "modifiers": ["public"],
+          "name": "render",
+          "instructions": [
+            { "_label": "LOCAL", "code": "RenderEvent re", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this)",
+              "lineNumber": 60
+            },
+            {
+              "_label": "CALL",
+              "code": "new RenderEvent(RenderEvent.Type.RENDER, this)",
+              "lineNumber": 60
+            },
+            {
+              "_label": "CALL",
+              "code": "dispatchToRenderEventListeners(re)",
+              "lineNumber": 61
+            },
+            {
+              "_label": "LOCAL",
+              "code": "Pair<Integer, Pair<Double, Double>> p",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "p = (Pair<Integer, Pair<Double, Double>>) re.getResponse()",
+              "lineNumber": 63
+            },
+            { "_label": "CALL", "code": "this.id = p.first", "lineNumber": 64 },
+            {
+              "_label": "CALL",
+              "code": "this.width = p.second.first",
+              "lineNumber": 65
+            },
+            {
+              "_label": "CALL",
+              "code": "this.height = p.second.second",
+              "lineNumber": 66
+            }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public ArrayList<Attribute> getAttributes()",
+          "methodBody": "getAttributes()",
+          "modifiers": ["public"],
+          "name": "getAttributes",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.attributes;",
+              "lineNumber": 70
+            }
+          ],
+          "returnType": "ArrayList<Attribute>"
+        },
+        {
+          "code": "public ArrayList<Method> getMethods()",
+          "methodBody": "getMethods()",
+          "modifiers": ["public"],
+          "name": "getMethods",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.methods;",
+              "lineNumber": 74
+            }
+          ],
+          "returnType": "ArrayList<Method>"
+        },
+        {
+          "code": "public int getId()",
+          "methodBody": "getId()",
+          "modifiers": ["public"],
+          "name": "getId",
+          "instructions": [
+            { "_label": "RETURN", "code": "return this.id;", "lineNumber": 78 }
+          ],
+          "returnType": "int"
+        },
+        {
+          "code": "public Double getWidth()",
+          "methodBody": "getWidth()",
+          "modifiers": ["public"],
+          "name": "getWidth",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.width;",
+              "lineNumber": 82
+            }
+          ],
+          "returnType": "Double"
+        },
+        {
+          "code": "public Double getHeight()",
+          "methodBody": "getHeight()",
+          "modifiers": ["public"],
+          "name": "getHeight",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.height;",
+              "lineNumber": 86
+            }
+          ],
+          "returnType": "Double"
+        },
+        {
+          "code": "public Position getPosition()",
+          "methodBody": "getPosition()",
+          "modifiers": ["public"],
+          "name": "getPosition",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.position;",
+              "lineNumber": 90
+            }
+          ],
+          "returnType": "Position"
+        },
+        {
+          "code": "public ArrayList<ClassRelation> getRelations()",
+          "methodBody": "getRelations()",
+          "modifiers": ["public"],
+          "name": "getRelations",
+          "instructions": [
+            {
+              "_label": "RETURN",
+              "code": "return this.relations;",
+              "lineNumber": 94
+            }
+          ],
+          "returnType": "ArrayList<ClassRelation>"
+        }
+      ]
+    },
+    {
+      "name": "WebControl",
+      "fields": [
+        {
+          "name": "engine",
+          "modifiers": ["private"],
+          "type": "javafx.scene.web.WebEngine"
+        }
+      ],
+      "methods": [
+        {
+          "code": "WebControl(WebEngine engine)",
+          "methodBody": "WebControl(WebEngine engine)",
+          "modifiers": [],
+          "name": "WebControl",
+          "instructions": [
+            {
+              "_label": "CALL",
+              "code": "this.engine = engine",
+              "lineNumber": 25
             }
           ],
           "returnType": ""
         },
         {
-          "code": "public String getName()",
-          "methodBody": "getName()",
-          "modifiers": ["public"],
-          "name": "getName",
+          "code": "private Integer renderClass(UMLClass c)",
+          "methodBody": "renderClass(UMLClass c)",
+          "modifiers": ["private"],
+          "name": "renderClass",
           "instructions": [
-            { "_label": "RETURN", "code": "return name;", "lineNumber": 16 }
+            { "_label": "LOCAL", "code": "String js", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "String js = format(\"renderClassBox('%s');\", c.name)",
+              "lineNumber": 33
+            },
+            { "_label": "LOCAL", "code": "Integer id", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Integer id = (Integer) this.engine.executeScript(js)",
+              "lineNumber": 34
+            },
+            {
+              "_label": "LOCAL",
+              "code": "ArrayList<String> modStrings",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "ArrayList modStrings = new ArrayList<String>()",
+              "lineNumber": 35
+            },
+            {
+              "_label": "CALL",
+              "code": "new ArrayList<String>()",
+              "lineNumber": 35
+            },
+            { "_label": "LOCAL", "code": "$iterLocal0", "lineNumber": 38 },
+            { "_label": "CALL", "code": "", "lineNumber": 38 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 38 },
+            { "_label": "LOCAL", "code": "$iterLocal2", "lineNumber": 50 },
+            { "_label": "CALL", "code": "", "lineNumber": 50 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 50 },
+            { "_label": "RETURN", "code": "return id;", "lineNumber": 61 }
           ],
-          "returnType": "String"
+          "returnType": "Integer"
         },
+        {
+          "code": "private Integer renderPath(ClassRelation cr)",
+          "methodBody": "renderPath(ClassRelation cr)",
+          "modifiers": ["private"],
+          "name": "renderPath",
+          "instructions": [
+            { "_label": "LOCAL", "code": "int classId", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "int classId = getId()",
+              "lineNumber": 69
+            },
+            {
+              "_label": "LOCAL",
+              "code": "ArrayList<Position> path",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "ANY path = getPath()",
+              "lineNumber": 70
+            },
+            { "_label": "LOCAL", "code": "String js", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "String js = format(\"createRelationPath(%d, %f, %f)\", classId, path.get(0).x, path.get(0).y)",
+              "lineNumber": 73
+            },
+            {
+              "_label": "LOCAL",
+              "code": "Integer pathNumber",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "Integer pathNumber = (Integer) this.engine.executeScript(js)",
+              "lineNumber": 75
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (pathNumber < 0)",
+              "lineNumber": 76
+            },
+            { "_label": "LOCAL", "code": "$iterLocal4", "lineNumber": 82 },
+            { "_label": "CALL", "code": "", "lineNumber": 82 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 82 },
+            {
+              "_label": "CALL",
+              "code": "executeScript(String.format(\"renderPath(%d, %d)\", classId, pathNumber))",
+              "lineNumber": 86
+            },
+            {
+              "_label": "RETURN",
+              "code": "return pathNumber;",
+              "lineNumber": 88
+            }
+          ],
+          "returnType": "Integer"
+        },
+        {
+          "code": "private void repositionClass(int id, double x, double y)",
+          "methodBody": "repositionClass(int id, double x, double y)",
+          "modifiers": ["private"],
+          "name": "repositionClass",
+          "instructions": [
+            { "_label": "LOCAL", "code": "String js", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "String js = String.format(\"repositionClass(%d, %f, %f);\", id, x, y)",
+              "lineNumber": 94
+            },
+            { "_label": "CALL", "code": "executeScript(js)", "lineNumber": 96 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "private Pair<Double, Double> getClassDimensions(int id)",
+          "methodBody": "getClassDimensions(int id)",
+          "modifiers": ["private"],
+          "name": "getClassDimensions",
+          "instructions": [
+            {
+              "_label": "LOCAL",
+              "code": "String getWidth",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "String getWidth = String.format(\"getClassWidth(%d);\", id)",
+              "lineNumber": 113
+            },
+            {
+              "_label": "LOCAL",
+              "code": "String getHeight",
+              "lineNumber": null
+            },
+            {
+              "_label": "CALL",
+              "code": "String getHeight = String.format(\"getClassHeight(%d);\", id)",
+              "lineNumber": 114
+            },
+            { "_label": "LOCAL", "code": "String w", "lineNumber": null },
+            { "_label": "LOCAL", "code": "String h", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "w = (String) this.engine.executeScript(getWidth)",
+              "lineNumber": 116
+            },
+            {
+              "_label": "CALL",
+              "code": "h = (String) this.engine.executeScript(getHeight)",
+              "lineNumber": 117
+            },
+            {
+              "_label": "RETURN",
+              "code": "return new Pair(Double.parseDouble(w.substring(0, w.length() - 2)), Double.parseDouble(h.substring(0, h.length() - 2)));",
+              "lineNumber": 118
+            }
+          ],
+          "returnType": "Double>"
+        },
+        {
+          "code": "private void drawShape(Shape s)",
+          "methodBody": "drawShape(Shape s)",
+          "modifiers": ["private"],
+          "name": "drawShape",
+          "instructions": [
+            { "_label": "LOCAL", "code": "String js", "lineNumber": null },
+            { "_label": "LOCAL", "code": "$iterLocal5", "lineNumber": 124 },
+            { "_label": "CALL", "code": "", "lineNumber": 124 },
+            { "_label": "CONTROL_STRUCTURE", "code": "FOR", "lineNumber": 124 }
+          ],
+          "returnType": "void"
+        },
+        {
+          "code": "public void renderEventPerformed(RenderEvent e)",
+          "methodBody": "renderEventPerformed(RenderEvent e)",
+          "modifiers": ["public"],
+          "name": "renderEventPerformed",
+          "instructions": [
+            { "_label": "LOCAL", "code": "Object source", "lineNumber": null },
+            {
+              "_label": "CALL",
+              "code": "Object source = e.source",
+              "lineNumber": 132
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if ((source instanceof RenderObject) == false)",
+              "lineNumber": 133
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (e.type == RenderEvent.Type.RENDER)",
+              "lineNumber": 136
+            }
+          ],
+          "returnType": "void"
+        }
+      ]
+    },
+    {
+      "name": "joernServer",
+      "fields": [],
+      "methods": [
         {
           "code": "public static void main(String[] args)",
           "methodBody": "main(String[] args)",
@@ -155,26 +1785,40 @@
           "instructions": [
             {
               "_label": "LOCAL",
-              "code": "BuddyInfo friend1",
+              "code": "String joernPath",
               "lineNumber": null
             },
             {
               "_label": "CALL",
-              "code": "BuddyInfo friend1 = new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
-              "lineNumber": 21
+              "code": "String joernPath = System.getProperty(\"user.home\") + \"/bin/joern/joern-cli\"",
+              "lineNumber": 11
             },
             {
               "_label": "CALL",
-              "code": "new BuddyInfo(\"Homer\", \"Carleton\", \"613\")",
-              "lineNumber": 21
+              "code": "System.out.println(joernPath)",
+              "lineNumber": 12
             },
             {
-              "_label": "CALL",
-              "code": "System.out.println(\"Hello \" + friend1.getName())",
-              "lineNumber": 22
-            }
+              "_label": "LOCAL",
+              "code": "ProcessBuilder builder",
+              "lineNumber": null
+            },
+            {
+              "_label": "CONTROL_STRUCTURE",
+              "code": "if (System.getProperty(\"os.name\").contains(\"Windows\"))",
+              "lineNumber": 18
+            },
+            { "_label": "CONTROL_STRUCTURE", "code": "try", "lineNumber": 25 }
           ],
           "returnType": "void"
+        },
+        {
+          "code": "<empty>",
+          "methodBody": "",
+          "modifiers": [],
+          "name": "<empty",
+          "instructions": [],
+          "returnType": "<empty>"
         }
       ]
     }
