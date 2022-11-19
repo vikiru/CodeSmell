@@ -43,10 +43,6 @@ class LayoutManager  {
 		 * given a list of classes with a defined size attribute,
 		 * set their position with the classes setPosition() method
 		 */
-
-		// determine coordinates for starting c
-		//int x = 0;
-		//int y = 0;
 		
 		// Find the number of columns that this list of classes will turn into.
 		int nColumns = (int) Math.ceil(Math.sqrt(classes.size()));
@@ -141,7 +137,6 @@ class LayoutManager  {
 				//special case: starts and ends in the same column
 				end = getStartPoint(r, r.target, Direction.RIGHT);
 				path.add(new Position(getPaddedPoint(r, curColumn), end.y));
-				//path.add(new Position((r.source.getPosition().x + (padding * 5)), end.y));
 				
 			}else{
 			//Add intermediate path waypoints..
@@ -189,8 +184,6 @@ class LayoutManager  {
 			if(Math.abs(n - startY) < Math.abs(targetY - startY))
 				targetY = n;
 		}
-		//System.out.println("startX: " + startX + ", startY: " + startY);
-		//System.out.println("targetX: " + targetX + ", targetY: " + targetY);
 		p.add(new Position(startX, targetY));
 		p.add(new Position(targetX, targetY));
 		
@@ -245,31 +238,12 @@ class LayoutManager  {
 		double distroStart;
 		double distroEnd;
 		
-		//if(getRelationDir(relation) == Direction.RIGHT){ //right
-			colWidth = maxWidth(theCol);
-			distroStart = startX + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
-				- ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-			distroEnd = startX + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
-				+ ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-			/*colWidth = maxWidth(getColumn(relation.source));
-			distroStart = relation.source.getPosition().x + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
-				- ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-			distroEnd = relation.source.getPosition().x + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
-				+ ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);*/
-				
-		/*} else{ //left
-		
-			colWidth = maxWidth(theCol); 
-			distroStart = startX + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
-				- ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-			distroEnd = startX + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
-				+ ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-			colWidth = maxWidth(getColumn(relation.source)-1);	
-			distroStart = relation.source.getPosition().x - (colWidth/(PADDING_DIVISOR*2)) 
-				- ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-			distroEnd = relation.source.getPosition().x - (colWidth/(PADDING_DIVISOR*2)) 
-				+ ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
-		}*/
+
+		colWidth = maxWidth(theCol);
+		distroStart = startX + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
+			- ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
+		distroEnd = startX + colWidth + (colWidth/(PADDING_DIVISOR*2)) 
+			+ ((colWidth/PADDING_DIVISOR)*MIDDLE_SPACING_SIZE);
 		
 		double d = (distroEnd - distroStart)/(nPassthroughs + 1);
 		double x = distroStart + index*d;
