@@ -44,22 +44,26 @@
                         {
                             "_label": "CALL",
                             "code": "this.name = name",
-                            "lineNumber": 21
+                            "lineNumber": 21,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.instructions = instructions",
-                            "lineNumber": 22
+                            "lineNumber": 22,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.modifiers = modifiers",
-                            "lineNumber": 23
+                            "lineNumber": 23,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.calls = new ArrayList<Method>()",
-                            "lineNumber": 24
+                            "lineNumber": 24,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -75,7 +79,8 @@
                         {
                             "_label": "CALL",
                             "code": "this.calls.add(m)",
-                            "lineNumber": 28
+                            "lineNumber": 28,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -157,12 +162,14 @@
                         {
                             "_label": "CALL",
                             "code": "this.name = name",
-                            "lineNumber": 49
+                            "lineNumber": 49,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.modifiers = modifiers",
-                            "lineNumber": 50
+                            "lineNumber": 50,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -206,7 +213,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.methods;",
-                            "lineNumber": 59
+                            "lineNumber": 59,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -222,7 +230,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.attributes;",
-                            "lineNumber": 63
+                            "lineNumber": 63,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -238,7 +247,8 @@
                         {
                             "_label": "CALL",
                             "code": "this.methods.add(m)",
-                            "lineNumber": 67
+                            "lineNumber": 67,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -254,7 +264,8 @@
                         {
                             "_label": "CALL",
                             "code": "this.attributes.add(a)",
-                            "lineNumber": 71
+                            "lineNumber": 71,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -268,17 +279,20 @@
                         {
                             "_label": "CALL",
                             "code": "this.name = name",
-                            "lineNumber": 75
+                            "lineNumber": 75,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.methods = new ArrayList<Method>()",
-                            "lineNumber": 76
+                            "lineNumber": 76,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.attributes = new ArrayList<Attribute>()",
-                            "lineNumber": 77
+                            "lineNumber": 77,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "CPGClass"
@@ -381,17 +395,20 @@
                         {
                             "_label": "CALL",
                             "code": "this.type = type",
-                            "lineNumber": 26
+                            "lineNumber": 26,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.source = source",
-                            "lineNumber": 27
+                            "lineNumber": 27,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.target = target",
-                            "lineNumber": 28
+                            "lineNumber": 28,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -407,32 +424,38 @@
                         {
                             "_label": "CALL",
                             "code": "this.path = path",
-                            "lineNumber": 32
+                            "lineNumber": 32,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "RenderEvent re",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY re = new RenderEvent(RenderEvent.Type.RENDER, this)",
-                            "lineNumber": 33
+                            "lineNumber": 33,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "new RenderEvent(RenderEvent.Type.RENDER, this)",
-                            "lineNumber": 33
+                            "lineNumber": 33,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "dispatchToRenderEventListeners(re)",
-                            "lineNumber": 34
+                            "lineNumber": 34,
+                            "methodCall": "dispatchToRenderEventListeners"
                         },
                         {
                             "_label": "CALL",
                             "code": "this.pathContainerId = (Integer) re.getResponse()",
-                            "lineNumber": 35
+                            "lineNumber": 35,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -448,7 +471,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return path;",
-                            "lineNumber": 39
+                            "lineNumber": 39,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -490,17 +514,20 @@
                         {
                             "_label": "CALL",
                             "code": "this.source = source",
-                            "lineNumber": 16
+                            "lineNumber": 16,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.destination = destination",
-                            "lineNumber": 17
+                            "lineNumber": 17,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.type = type",
-                            "lineNumber": 18
+                            "lineNumber": 18,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "Relation"
@@ -537,7 +564,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.classes;",
-                            "lineNumber": 26
+                            "lineNumber": 26,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -553,7 +581,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.relations;",
-                            "lineNumber": 30
+                            "lineNumber": 30,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -569,12 +598,14 @@
                         {
                             "_label": "CALL",
                             "code": "this.classes = new ArrayList<CPGClass>()",
-                            "lineNumber": 34
+                            "lineNumber": 34,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.relations = new ArrayList<Relation>()",
-                            "lineNumber": 35
+                            "lineNumber": 35,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -590,7 +621,8 @@
                         {
                             "_label": "CALL",
                             "code": "add(c)",
-                            "lineNumber": 39
+                            "lineNumber": 39,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -606,7 +638,8 @@
                         {
                             "_label": "CALL",
                             "code": "this.relations.add(r)",
-                            "lineNumber": 43
+                            "lineNumber": 43,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -628,22 +661,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "String javaVersion",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String javaVersion = System.getProperty(\"java.version\")",
-                            "lineNumber": 6
+                            "lineNumber": 6,
+                            "methodCall": "getProperty"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String javafxVersion",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String javafxVersion = System.getProperty(\"javafx.version\")",
-                            "lineNumber": 7
+                            "lineNumber": 7,
+                            "methodCall": "getProperty"
                         }
                     ],
                     "returnType": ""
@@ -674,7 +711,8 @@
                         {
                             "_label": "CALL",
                             "code": "main(args)",
-                            "lineNumber": 6
+                            "lineNumber": 6,
+                            "methodCall": "main"
                         }
                     ],
                     "returnType": ""
@@ -731,27 +769,32 @@
                         {
                             "_label": "CALL",
                             "code": "super(new Position[] { p1, p2 }, \"#4C94A2\");",
-                            "lineNumber": 56
+                            "lineNumber": 56,
+                            "methodCall": "super"
                         },
                         {
                             "_label": "CALL",
                             "code": "this.x1 = p1.x",
-                            "lineNumber": 57
+                            "lineNumber": 57,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.x2 = p2.x",
-                            "lineNumber": 58
+                            "lineNumber": 58,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.y1 = p1.y",
-                            "lineNumber": 59
+                            "lineNumber": 59,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.y2 = p2.y",
-                            "lineNumber": 60
+                            "lineNumber": 60,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "Line"
@@ -765,27 +808,32 @@
                         {
                             "_label": "CALL",
                             "code": "super(new Position[] { new Position(x1, y1), new Position(x2, y2) }, \"orange\");",
-                            "lineNumber": 64
+                            "lineNumber": 64,
+                            "methodCall": "super"
                         },
                         {
                             "_label": "CALL",
                             "code": "this.x1 = x1",
-                            "lineNumber": 67
+                            "lineNumber": 67,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.x2 = x2",
-                            "lineNumber": 68
+                            "lineNumber": 68,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.y1 = y1",
-                            "lineNumber": 69
+                            "lineNumber": 69,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.y2 = y2",
-                            "lineNumber": 70
+                            "lineNumber": 70,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "Line"
@@ -801,7 +849,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return String.format(\"(%f, %f) -> (%f, %f)\", x1, y1, x2, y2);",
-                            "lineNumber": 74
+                            "lineNumber": 74,
+                            "methodCall": "format"
                         }
                     ],
                     "returnType": ""
@@ -817,7 +866,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));",
-                            "lineNumber": 79
+                            "lineNumber": 79,
+                            "methodCall": "sqrt"
                         }
                     ],
                     "returnType": ""
@@ -892,37 +942,44 @@
                         {
                             "_label": "CALL",
                             "code": "this.classes = classes",
-                            "lineNumber": 25
+                            "lineNumber": 25,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.sortClasses()",
-                            "lineNumber": 26
+                            "lineNumber": 26,
+                            "methodCall": "sortClasses"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "double x",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "double x = 0",
-                            "lineNumber": 28
+                            "lineNumber": 28,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "double y",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "double y = 0",
-                            "lineNumber": 29
+                            "lineNumber": 29,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "for (int i = 0; Some(i < classes.size()); i++)",
-                            "lineNumber": 31
+                            "lineNumber": 31,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -938,92 +995,110 @@
                         {
                             "_label": "LOCAL",
                             "code": "Line[] lines",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "LayoutManager$Line[] lines = new Line[4]",
-                            "lineNumber": 92
+                            "lineNumber": 92,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position p1",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position p1 = getPosition()",
-                            "lineNumber": 93
+                            "lineNumber": 93,
+                            "methodCall": "getPosition"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position corner2",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position corner2 = new Position(p1.x + c.getWidth(), p1.y)",
-                            "lineNumber": 94
+                            "lineNumber": 94,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Position(p1.x + c.getWidth(), p1.y)",
-                            "lineNumber": 94
+                            "lineNumber": 94,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position corner3",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position corner3 = new Position(p1.x + c.getWidth(), p1.y + c.getHeight())",
-                            "lineNumber": 95
+                            "lineNumber": 95,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Position(p1.x + c.getWidth(), p1.y + c.getHeight())",
-                            "lineNumber": 95
+                            "lineNumber": 95,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position corner4",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position corner4 = new Position(p1.x, p1.y + c.getHeight())",
-                            "lineNumber": 96
+                            "lineNumber": 96,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Position(p1.x, p1.y + c.getHeight())",
-                            "lineNumber": 96
+                            "lineNumber": 96,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "CALL",
                             "code": "lines[0] = new Line(p1, corner2)",
-                            "lineNumber": 97
+                            "lineNumber": 97,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "CALL",
                             "code": "lines[1] = new Line(corner2, corner3)",
-                            "lineNumber": 98
+                            "lineNumber": 98,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "CALL",
                             "code": "lines[2] = new Line(corner3, corner4)",
-                            "lineNumber": 99
+                            "lineNumber": 99,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "CALL",
                             "code": "lines[3] = new Line(corner4, p1)",
-                            "lineNumber": 100
+                            "lineNumber": 100,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "RETURN",
                             "code": "return lines;",
-                            "lineNumber": 101
+                            "lineNumber": 101,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1039,22 +1114,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal0",
-                            "lineNumber": 108
+                            "lineNumber": 108,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 108
+                            "lineNumber": 108,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 108
+                            "lineNumber": 108,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return true;",
-                            "lineNumber": 116
+                            "lineNumber": 116,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1070,12 +1149,14 @@
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "<empty>",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return null;",
-                            "lineNumber": 139
+                            "lineNumber": 139,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1091,17 +1172,20 @@
                         {
                             "_label": "LOCAL",
                             "code": "Position p",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position p = getPosition()",
-                            "lineNumber": 152
+                            "lineNumber": 152,
+                            "methodCall": "getPosition"
                         },
                         {
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);",
-                            "lineNumber": 153
+                            "lineNumber": 153,
+                            "methodCall": "Position"
                         }
                     ],
                     "returnType": ""
@@ -1117,17 +1201,20 @@
                         {
                             "_label": "LOCAL",
                             "code": "Position p",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position p = getPosition()",
-                            "lineNumber": 160
+                            "lineNumber": 160,
+                            "methodCall": "getPosition"
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (d == Direction.TOP)",
-                            "lineNumber": 161
+                            "lineNumber": 161,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1143,67 +1230,80 @@
                         {
                             "_label": "LOCAL",
                             "code": "Position mid1",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position mid1 = classMiddle(c1)",
-                            "lineNumber": 181
+                            "lineNumber": 181,
+                            "methodCall": "classMiddle"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position mid2",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position mid2 = classMiddle(c2)",
-                            "lineNumber": 182
+                            "lineNumber": 182,
+                            "methodCall": "classMiddle"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Line line",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "LayoutManager$Line line = new Line(mid1, mid2)",
-                            "lineNumber": 186
+                            "lineNumber": 186,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Line(mid1, mid2)",
-                            "lineNumber": 186
+                            "lineNumber": 186,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position p1",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position p2",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "p1 = intersection(line, classBoxLines(c1))",
-                            "lineNumber": 188
+                            "lineNumber": 188,
+                            "methodCall": "intersection"
                         },
                         {
                             "_label": "CALL",
                             "code": "p2 = intersection(line, classBoxLines(c2))",
-                            "lineNumber": 189
+                            "lineNumber": 189,
+                            "methodCall": "intersection"
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (p1 == null || p2 == null)",
-                            "lineNumber": 190
+                            "lineNumber": 190,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return new Pair<Position, Position>(p1, p2);",
-                            "lineNumber": 193
+                            "lineNumber": 193,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1219,72 +1319,86 @@
                         {
                             "_label": "LOCAL",
                             "code": "Position mid1",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position mid1 = classMiddle(c1)",
-                            "lineNumber": 201
+                            "lineNumber": 201,
+                            "methodCall": "classMiddle"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position mid2",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position mid2 = classMiddle(c2)",
-                            "lineNumber": 202
+                            "lineNumber": 202,
+                            "methodCall": "classMiddle"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Line l1",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "LayoutManager$Line l1 = new Line(mid1.x, mid1.y, mid2.x, mid1.y)",
-                            "lineNumber": 206
+                            "lineNumber": 206,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Line(mid1.x, mid1.y, mid2.x, mid1.y)",
-                            "lineNumber": 206
+                            "lineNumber": 206,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Line l2",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "LayoutManager$Line l2 = new Line(mid2.x, mid2.y, mid2.x, mid1.y)",
-                            "lineNumber": 207
+                            "lineNumber": 207,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Line(mid2.x, mid2.y, mid2.x, mid1.y)",
-                            "lineNumber": 207
+                            "lineNumber": 207,
+                            "methodCall": "Line"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Position p",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Position p = this.intersection(l1, new Line[] { l2 })",
-                            "lineNumber": 208
+                            "lineNumber": 208,
+                            "methodCall": "intersection"
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (p == null)",
-                            "lineNumber": 210
+                            "lineNumber": 210,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return p;",
-                            "lineNumber": 213
+                            "lineNumber": 213,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1300,22 +1414,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "Comparator<UMLClass> classHorzComp",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY classHorzComp = new Comparator<UMLClass>() {    public int compare(UMLClass c1, UMLClass c2) {        Double d = (c1.getPosition().x - c2.getPosition().x);        return d.intValue();    }}",
-                            "lineNumber": 219
+                            "lineNumber": 219,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new Comparator<UMLClass>() {    public int compare(UMLClass c1, UMLClass c2) {        Double d = (c1.getPosition().x - c2.getPosition().x);        return d.intValue();    }}",
-                            "lineNumber": 219
+                            "lineNumber": 219,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "sort(classes, classHorzComp)",
-                            "lineNumber": 226
+                            "lineNumber": 226,
+                            "methodCall": "sort"
                         }
                     ],
                     "returnType": ""
@@ -1331,17 +1449,20 @@
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal1",
-                            "lineNumber": 237
+                            "lineNumber": 237,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 237
+                            "lineNumber": 237,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 237
+                            "lineNumber": 237,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1361,7 +1482,8 @@
                         {
                             "_label": "CALL",
                             "code": "super(new Position[] { p }, colour);",
-                            "lineNumber": 87
+                            "lineNumber": 87,
+                            "methodCall": "super"
                         }
                     ],
                     "returnType": "Dot"
@@ -1383,87 +1505,104 @@
                         {
                             "_label": "LOCAL",
                             "code": "HashMap<CPGClass, UMLClass> classMap",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY classMap = new HashMap<CPGClass, UMLClass>()",
-                            "lineNumber": 39
+                            "lineNumber": 39,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new HashMap<CPGClass, UMLClass>()",
-                            "lineNumber": 39
+                            "lineNumber": 39,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal0",
-                            "lineNumber": 41
+                            "lineNumber": 41,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 41
+                            "lineNumber": 41,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 41
+                            "lineNumber": 41,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ArrayList<ClassRelation> relations",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY relations = new ArrayList<ClassRelation>()",
-                            "lineNumber": 60
+                            "lineNumber": 60,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new ArrayList<ClassRelation>()",
-                            "lineNumber": 60
+                            "lineNumber": 60,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal3",
-                            "lineNumber": 61
+                            "lineNumber": 61,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 61
+                            "lineNumber": 61,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 61
+                            "lineNumber": 61,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "LayoutManager lm",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "LayoutManager lm = new LayoutManager()",
-                            "lineNumber": 71
+                            "lineNumber": 71,
+                            "methodCall": "LayoutManager"
                         },
                         {
                             "_label": "CALL",
                             "code": "new LayoutManager()",
-                            "lineNumber": 71
+                            "lineNumber": 71,
+                            "methodCall": "LayoutManager"
                         },
                         {
                             "_label": "CALL",
                             "code": "positionClasses(new ArrayList<UMLClass>(classMap.values()))",
-                            "lineNumber": 72
+                            "lineNumber": 72,
+                            "methodCall": "positionClasses"
                         },
                         {
                             "_label": "CALL",
                             "code": "setRelationPaths(relations)",
-                            "lineNumber": 73
+                            "lineNumber": 73,
+                            "methodCall": "setRelationPaths"
                         }
                     ],
                     "returnType": ""
@@ -1479,137 +1618,164 @@
                         {
                             "_label": "LOCAL",
                             "code": "Parent root",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Parent root = load(getClass().getResource(\"jfx.fxml\"))",
-                            "lineNumber": 78
+                            "lineNumber": 78,
+                            "methodCall": "load"
                         },
                         {
                             "_label": "CALL",
                             "code": "setScene(new Scene(root, 400, 300))",
-                            "lineNumber": 79
+                            "lineNumber": 79,
+                            "methodCall": "setScene"
                         },
                         {
                             "_label": "CALL",
                             "code": "setTitle(\"CodeSmell Detector\")",
-                            "lineNumber": 80
+                            "lineNumber": 80,
+                            "methodCall": "setTitle"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String location",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String location = new File(System.getProperty(\"user.dir\") + \"/boxes.html\").toURI().toURL().toExternalForm()",
-                            "lineNumber": 82
+                            "lineNumber": 82,
+                            "methodCall": "File"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "WebView webView",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "WebView webView = new WebView()",
-                            "lineNumber": 84
+                            "lineNumber": 84,
+                            "methodCall": "WebView"
                         },
                         {
                             "_label": "CALL",
                             "code": "new WebView()",
-                            "lineNumber": 84
+                            "lineNumber": 84,
+                            "methodCall": "WebView"
                         },
                         {
                             "_label": "CALL",
                             "code": "load(location)",
-                            "lineNumber": 85
+                            "lineNumber": 85,
+                            "methodCall": "load"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "URL url",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "URL url = getResource(\"boxes.html\")",
-                            "lineNumber": 87
+                            "lineNumber": 87,
+                            "methodCall": "getResource"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "WebEngine engine",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "WebEngine engine = getEngine()",
-                            "lineNumber": 88
+                            "lineNumber": 88,
+                            "methodCall": "getEngine"
                         },
                         {
                             "_label": "CALL",
                             "code": "setZoom(1.0)",
-                            "lineNumber": 89
+                            "lineNumber": 89,
+                            "methodCall": "setZoom"
                         },
                         {
                             "_label": "CALL",
                             "code": "addRenderEventListener(new WebControl(engine))",
-                            "lineNumber": 90
+                            "lineNumber": 90,
+                            "methodCall": "addRenderEventListener"
                         },
                         {
                             "_label": "CALL",
                             "code": "load(url.toExternalForm())",
-                            "lineNumber": 92
+                            "lineNumber": 92,
+                            "methodCall": "load"
                         },
                         {
                             "_label": "CALL",
                             "code": "addListener(<lambda>)",
-                            "lineNumber": 93
+                            "lineNumber": 93,
+                            "methodCall": "addListener"
                         },
                         {
                             "_label": "CALL",
                             "code": "addListener(new ListChangeListener<Node>() {    @Override    public void onChanged(Change<? extends Node> change) {        Set<Node> deadSeaScrolls = webView.lookupAll(\".scroll-bar\");        for (Node scroll : deadSeaScrolls) {            scroll.setVisible(false);        }    }})",
-                            "lineNumber": 103
+                            "lineNumber": 103,
+                            "methodCall": "addListener"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "VBox vBox",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "VBox vBox = new VBox(webView)",
-                            "lineNumber": 112
+                            "lineNumber": 112,
+                            "methodCall": "VBox"
                         },
                         {
                             "_label": "CALL",
                             "code": "new VBox(webView)",
-                            "lineNumber": 112
+                            "lineNumber": 112,
+                            "methodCall": "VBox"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Scene scene",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Scene scene = new Scene(vBox, 960, 600)",
-                            "lineNumber": 113
+                            "lineNumber": 113,
+                            "methodCall": "Scene"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Scene(vBox, 960, 600)",
-                            "lineNumber": 113
+                            "lineNumber": 113,
+                            "methodCall": "Scene"
                         },
                         {
                             "_label": "CALL",
                             "code": "setScene(scene)",
-                            "lineNumber": 114
+                            "lineNumber": 114,
+                            "methodCall": "setScene"
                         },
                         {
                             "_label": "CALL",
                             "code": "show()",
-                            "lineNumber": 115
+                            "lineNumber": 115,
+                            "methodCall": "show"
                         }
                     ],
                     "returnType": ""
@@ -1626,7 +1792,8 @@
                         {
                             "_label": "CALL",
                             "code": "launch(args)",
-                            "lineNumber": 120
+                            "lineNumber": 120,
+                            "methodCall": "launch"
                         }
                     ],
                     "returnType": ""
@@ -1648,37 +1815,44 @@
                         {
                             "_label": "LOCAL",
                             "code": "location",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "webView",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "engine",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "root",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "url",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "primaryStage",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (newState == Worker.State.SUCCEEDED)",
-                            "lineNumber": 94
+                            "lineNumber": 94,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1718,12 +1892,14 @@
                         {
                             "_label": "CALL",
                             "code": "this.first = first",
-                            "lineNumber": 9
+                            "lineNumber": 9,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.second = second",
-                            "lineNumber": 10
+                            "lineNumber": 10,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "Pair"
@@ -1746,22 +1922,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "Parser p",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Parser p = new Parser()",
-                            "lineNumber": 34
+                            "lineNumber": 34,
+                            "methodCall": "Parser"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Parser()",
-                            "lineNumber": 34
+                            "lineNumber": 34,
+                            "methodCall": "Parser"
                         },
                         {
                             "_label": "CALL",
                             "code": "p.buildCPG(\"\")",
-                            "lineNumber": 35
+                            "lineNumber": 35,
+                            "methodCall": "buildCPG"
                         }
                     ],
                     "returnType": ""
@@ -1777,42 +1957,50 @@
                         {
                             "_label": "LOCAL",
                             "code": "Gson gson",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Gson gson = new Gson()",
-                            "lineNumber": 43
+                            "lineNumber": 43,
+                            "methodCall": "Gson"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Gson()",
-                            "lineNumber": 43
+                            "lineNumber": 43,
+                            "methodCall": "Gson"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "CodePropertyGraph cpg",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "CodePropertyGraph cpg = new CodePropertyGraph()",
-                            "lineNumber": 44
+                            "lineNumber": 44,
+                            "methodCall": "CodePropertyGraph"
                         },
                         {
                             "_label": "CALL",
                             "code": "new CodePropertyGraph()",
-                            "lineNumber": 44
+                            "lineNumber": 44,
+                            "methodCall": "CodePropertyGraph"
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "try",
-                            "lineNumber": 45
+                            "lineNumber": 45,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return cpg;",
-                            "lineNumber": 162
+                            "lineNumber": 162,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1840,7 +2028,8 @@
                         {
                             "_label": "CALL",
                             "code": "super(name, m);",
-                            "lineNumber": 23
+                            "lineNumber": 23,
+                            "methodCall": "super"
                         }
                     ],
                     "returnType": "JavaAttribute"
@@ -1860,7 +2049,8 @@
                         {
                             "_label": "CALL",
                             "code": "super(name, instructions, modifiers);",
-                            "lineNumber": 29
+                            "lineNumber": 29,
+                            "methodCall": "super"
                         }
                     ],
                     "returnType": "JavaMethod"
@@ -1897,12 +2087,14 @@
                         {
                             "_label": "CALL",
                             "code": "this.x = x",
-                            "lineNumber": 9
+                            "lineNumber": 9,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.y = y",
-                            "lineNumber": 10
+                            "lineNumber": 10,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -1918,7 +2110,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return String.format(\"(%f, %f)\", x, y);",
-                            "lineNumber": 14
+                            "lineNumber": 14,
+                            "methodCall": "format"
                         }
                     ],
                     "returnType": ""
@@ -1985,12 +2178,14 @@
                         {
                             "_label": "CALL",
                             "code": "this.source = source",
-                            "lineNumber": 19
+                            "lineNumber": 19,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.type = type",
-                            "lineNumber": 20
+                            "lineNumber": 20,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "RenderEvent"
@@ -2006,7 +2201,8 @@
                         {
                             "_label": "CALL",
                             "code": "this.response = response",
-                            "lineNumber": 24
+                            "lineNumber": 24,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2022,7 +2218,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.response;",
-                            "lineNumber": 28
+                            "lineNumber": 28,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2070,7 +2267,8 @@
                         {
                             "_label": "CALL",
                             "code": "add(rel)",
-                            "lineNumber": 14
+                            "lineNumber": 14,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -2086,17 +2284,20 @@
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal0",
-                            "lineNumber": 18
+                            "lineNumber": 18,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 18
+                            "lineNumber": 18,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 18
+                            "lineNumber": 18,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2112,22 +2313,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "RenderEvent re",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this)",
-                            "lineNumber": 26
+                            "lineNumber": 26,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "new RenderEvent(RenderEvent.Type.RENDER, this)",
-                            "lineNumber": 26
+                            "lineNumber": 26,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "dispatchToRenderEventListeners(re)",
-                            "lineNumber": 27
+                            "lineNumber": 27,
+                            "methodCall": "dispatchToRenderEventListeners"
                         }
                     ],
                     "returnType": ""
@@ -2149,12 +2354,14 @@
                         {
                             "_label": "CALL",
                             "code": "ArrayList<RenderEventListener> renderEventListeners = new ArrayList<RenderEventListener>()",
-                            "lineNumber": 11
+                            "lineNumber": 11,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new ArrayList<RenderEventListener>()",
-                            "lineNumber": 11
+                            "lineNumber": 11,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2191,12 +2398,14 @@
                         {
                             "_label": "CALL",
                             "code": "this.vertex = vertex",
-                            "lineNumber": 9
+                            "lineNumber": 9,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.colour = colour",
-                            "lineNumber": 10
+                            "lineNumber": 10,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2273,42 +2482,50 @@
                         {
                             "_label": "CALL",
                             "code": "this.name = name",
-                            "lineNumber": 24
+                            "lineNumber": 24,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.id = -1",
-                            "lineNumber": 25
+                            "lineNumber": 25,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.methods = new ArrayList<Method>()",
-                            "lineNumber": 26
+                            "lineNumber": 26,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.attributes = new ArrayList<Attribute>()",
-                            "lineNumber": 27
+                            "lineNumber": 27,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.relations = new ArrayList<ClassRelation>()",
-                            "lineNumber": 28
+                            "lineNumber": 28,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.position = new Position(0, 0)",
-                            "lineNumber": 29
+                            "lineNumber": 29,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "CALL",
                             "code": "this.width = 0.0",
-                            "lineNumber": 30
+                            "lineNumber": 30,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.height = 0.0",
-                            "lineNumber": 31
+                            "lineNumber": 31,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "UMLClass"
@@ -2324,7 +2541,8 @@
                         {
                             "_label": "CALL",
                             "code": "add(m)",
-                            "lineNumber": 35
+                            "lineNumber": 35,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -2340,7 +2558,8 @@
                         {
                             "_label": "CALL",
                             "code": "add(a)",
-                            "lineNumber": 39
+                            "lineNumber": 39,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -2356,7 +2575,8 @@
                         {
                             "_label": "CALL",
                             "code": "add(r)",
-                            "lineNumber": 43
+                            "lineNumber": 43,
+                            "methodCall": "add"
                         }
                     ],
                     "returnType": ""
@@ -2372,27 +2592,32 @@
                         {
                             "_label": "CALL",
                             "code": "this.position = new Position(x, y)",
-                            "lineNumber": 47
+                            "lineNumber": 47,
+                            "methodCall": "Position"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "RenderEvent re",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this)",
-                            "lineNumber": 48
+                            "lineNumber": 48,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "new RenderEvent(RenderEvent.Type.REPOSITION, this)",
-                            "lineNumber": 48
+                            "lineNumber": 48,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "dispatchToRenderEventListeners(re)",
-                            "lineNumber": 49
+                            "lineNumber": 49,
+                            "methodCall": "dispatchToRenderEventListeners"
                         }
                     ],
                     "returnType": ""
@@ -2408,47 +2633,56 @@
                         {
                             "_label": "LOCAL",
                             "code": "RenderEvent re",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this)",
-                            "lineNumber": 60
+                            "lineNumber": 60,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "new RenderEvent(RenderEvent.Type.RENDER, this)",
-                            "lineNumber": 60
+                            "lineNumber": 60,
+                            "methodCall": "RenderEvent"
                         },
                         {
                             "_label": "CALL",
                             "code": "dispatchToRenderEventListeners(re)",
-                            "lineNumber": 61
+                            "lineNumber": 61,
+                            "methodCall": "dispatchToRenderEventListeners"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Pair<Integer, Pair<Double, Double>> p",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "p = (Pair<Integer, Pair<Double, Double>>) re.getResponse()",
-                            "lineNumber": 63
+                            "lineNumber": 63,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.id = p.first",
-                            "lineNumber": 64
+                            "lineNumber": 64,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.width = p.second.first",
-                            "lineNumber": 65
+                            "lineNumber": 65,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.height = p.second.second",
-                            "lineNumber": 66
+                            "lineNumber": 66,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2464,7 +2698,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.attributes;",
-                            "lineNumber": 70
+                            "lineNumber": 70,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2480,7 +2715,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.methods;",
-                            "lineNumber": 74
+                            "lineNumber": 74,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2496,7 +2732,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.id;",
-                            "lineNumber": 78
+                            "lineNumber": 78,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2512,7 +2749,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.width;",
-                            "lineNumber": 82
+                            "lineNumber": 82,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2528,7 +2766,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.height;",
-                            "lineNumber": 86
+                            "lineNumber": 86,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2544,7 +2783,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.position;",
-                            "lineNumber": 90
+                            "lineNumber": 90,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2560,7 +2800,8 @@
                         {
                             "_label": "RETURN",
                             "code": "return this.relations;",
-                            "lineNumber": 94
+                            "lineNumber": 94,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2588,7 +2829,8 @@
                         {
                             "_label": "CALL",
                             "code": "this.engine = engine",
-                            "lineNumber": 25
+                            "lineNumber": 25,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "WebControl"
@@ -2604,72 +2846,86 @@
                         {
                             "_label": "LOCAL",
                             "code": "String js",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String js = format(\"renderClassBox('%s');\", c.name)",
-                            "lineNumber": 33
+                            "lineNumber": 33,
+                            "methodCall": "format"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Integer id",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Integer id = (Integer) this.engine.executeScript(js)",
-                            "lineNumber": 34
+                            "lineNumber": 34,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ArrayList<String> modStrings",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ArrayList modStrings = new ArrayList<String>()",
-                            "lineNumber": 35
+                            "lineNumber": 35,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new ArrayList<String>()",
-                            "lineNumber": 35
+                            "lineNumber": 35,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal0",
-                            "lineNumber": 38
+                            "lineNumber": 38,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 38
+                            "lineNumber": 38,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 38
+                            "lineNumber": 38,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal2",
-                            "lineNumber": 50
+                            "lineNumber": 50,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 50
+                            "lineNumber": 50,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 50
+                            "lineNumber": 50,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return id;",
-                            "lineNumber": 61
+                            "lineNumber": 61,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2685,72 +2941,86 @@
                         {
                             "_label": "LOCAL",
                             "code": "int classId",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "int classId = getId()",
-                            "lineNumber": 69
+                            "lineNumber": 69,
+                            "methodCall": "getId"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ArrayList<Position> path",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY path = getPath()",
-                            "lineNumber": 70
+                            "lineNumber": 70,
+                            "methodCall": "getPath"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String js",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String js = format(\"createRelationPath(%d, %f, %f)\", classId, path.get(0).x, path.get(0).y)",
-                            "lineNumber": 73
+                            "lineNumber": 73,
+                            "methodCall": "format"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Integer pathNumber",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Integer pathNumber = (Integer) this.engine.executeScript(js)",
-                            "lineNumber": 75
+                            "lineNumber": 75,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (pathNumber < 0)",
-                            "lineNumber": 76
+                            "lineNumber": 76,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal4",
-                            "lineNumber": 82
+                            "lineNumber": 82,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 82
+                            "lineNumber": 82,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 82
+                            "lineNumber": 82,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "executeScript(String.format(\"renderPath(%d, %d)\", classId, pathNumber))",
-                            "lineNumber": 86
+                            "lineNumber": 86,
+                            "methodCall": "executeScript"
                         },
                         {
                             "_label": "RETURN",
                             "code": "return pathNumber;",
-                            "lineNumber": 88
+                            "lineNumber": 88,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2766,17 +3036,20 @@
                         {
                             "_label": "LOCAL",
                             "code": "String js",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String js = String.format(\"repositionClass(%d, %f, %f);\", id, x, y)",
-                            "lineNumber": 94
+                            "lineNumber": 94,
+                            "methodCall": "format"
                         },
                         {
                             "_label": "CALL",
                             "code": "executeScript(js)",
-                            "lineNumber": 96
+                            "lineNumber": 96,
+                            "methodCall": "executeScript"
                         }
                     ],
                     "returnType": ""
@@ -2792,47 +3065,56 @@
                         {
                             "_label": "LOCAL",
                             "code": "String getWidth",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String getWidth = String.format(\"getClassWidth(%d);\", id)",
-                            "lineNumber": 113
+                            "lineNumber": 113,
+                            "methodCall": "format"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String getHeight",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String getHeight = String.format(\"getClassHeight(%d);\", id)",
-                            "lineNumber": 114
+                            "lineNumber": 114,
+                            "methodCall": "format"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String w",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String h",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "w = (String) this.engine.executeScript(getWidth)",
-                            "lineNumber": 116
+                            "lineNumber": 116,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "h = (String) this.engine.executeScript(getHeight)",
-                            "lineNumber": 117
+                            "lineNumber": 117,
+                            "methodCall": ""
                         },
                         {
                             "_label": "RETURN",
                             "code": "return new Pair(Double.parseDouble(w.substring(0, w.length() - 2)), Double.parseDouble(h.substring(0, h.length() - 2)));",
-                            "lineNumber": 118
+                            "lineNumber": 118,
+                            "methodCall": "Pair"
                         }
                     ],
                     "returnType": ""
@@ -2848,22 +3130,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "String js",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal5",
-                            "lineNumber": 124
+                            "lineNumber": 124,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 124
+                            "lineNumber": 124,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 124
+                            "lineNumber": 124,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2879,22 +3165,26 @@
                         {
                             "_label": "LOCAL",
                             "code": "Object source",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Object source = e.source",
-                            "lineNumber": 132
+                            "lineNumber": 132,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if ((source instanceof RenderObject) == false)",
-                            "lineNumber": 133
+                            "lineNumber": 133,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (e.type == RenderEvent.Type.RENDER)",
-                            "lineNumber": 136
+                            "lineNumber": 136,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2917,32 +3207,38 @@
                         {
                             "_label": "LOCAL",
                             "code": "String joernPath",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String joernPath = System.getProperty(\"user.home\") + \"/bin/joern/joern-cli\"",
-                            "lineNumber": 11
+                            "lineNumber": 11,
+                            "methodCall": "getProperty"
                         },
                         {
                             "_label": "CALL",
                             "code": "System.out.println(joernPath)",
-                            "lineNumber": 12
+                            "lineNumber": 12,
+                            "methodCall": "println"
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ProcessBuilder builder",
-                            "lineNumber": null
+                            "lineNumber": null,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (System.getProperty(\"os.name\").contains(\"Windows\"))",
-                            "lineNumber": 18
+                            "lineNumber": 18,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "try",
-                            "lineNumber": 25
+                            "lineNumber": 25,
+                            "methodCall": ""
                         }
                     ],
                     "returnType": ""

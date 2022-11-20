@@ -32,10 +32,17 @@ def source_code_json_creation():
     def create_method_dict(currMethod):
         # For every method's instruction, create a dictionary and return it.
         def create_instruction_dict(currInstruction):
+            methodCallPattern = re.compile("([a-zA-Z]*\()")
+            calls = methodCallPattern.findall(currInstruction["code"])
+            methodCall = ""
+            if calls:
+                methodCall = calls[0].replace("(", "")
+
             currInstructionDict = {
                 "_label": currInstruction["_label"],
                 "code": currInstruction["code"].replace("\r\n", ""),
                 "lineNumber": currInstruction.get("lineNumber", None),
+                "methodCall": methodCall,
             }
             return currInstructionDict
 
@@ -99,11 +106,11 @@ if __name__ == "__main__":
     # originalDir = "D:/SYSC3110/Lab1"
     query = import_code_query(ourProjectDir, projectName)
     result = client.execute(query)
-    
+
     # Create the source code json representation
     source_code_json_creation()
-    
-    # Close and delete the project from user's bin/joern/joern-cli/workspace 
+
+    # Close and delete the project from user's bin/joern/joern-cli/workspace
     query = 'delete ("' + projectName + '")'
     result = client.execute(query)
     if result["success"]:
