@@ -42,8 +42,8 @@ def source_code_json_creation():
         # Get the modifiers, return type and the method body from the full method body provided by Joern.
         modifiersPattern = re.compile("(private|public|protected|static|final)")
         returnTypePattern = re.compile("(^[a-zA-z]*)")
-        methodBody = re.sub(modifiersPattern, "", currMethod["_1"]["code"])
-        methodBody = re.sub(returnTypePattern, "", methodBody)
+        methodWithReturn = re.sub(modifiersPattern, "", currMethod["_1"]["code"])
+        methodBody = re.sub(returnTypePattern, "", methodWithReturn)
 
         currMethodDict = {
             "code": currMethod["_1"]["code"],
@@ -51,7 +51,7 @@ def source_code_json_creation():
             "modifiers": modifiersPattern.findall(currMethod["_1"]["code"]),
             "name": currMethod["_1"]["name"],
             "instructions": list(map(create_instruction_dict, currMethod["_2"])),
-            "returnType": returnTypePattern.findall(currMethod["_1"]["code"]),
+            "returnType": returnTypePattern.findall(methodWithReturn)[0],
         }
         return currMethodDict
 
