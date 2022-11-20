@@ -39,7 +39,7 @@
                     "modifiers": [
                         "protected"
                     ],
-                    "name": "<init>",
+                    "name": "Method",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -70,7 +70,7 @@
                 },
                 {
                     "code": "protected void addCall(Method m)",
-                    "methodBody": "void addCall(Method m)",
+                    "methodBody": "addCall(Method m)",
                     "modifiers": [
                         "protected"
                     ],
@@ -83,7 +83,7 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 }
             ]
         },
@@ -126,7 +126,7 @@
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -157,7 +157,7 @@
                     "modifiers": [
                         "protected"
                     ],
-                    "name": "<init>",
+                    "name": "Attribute",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -238,7 +238,7 @@
                 },
                 {
                     "code": "protected void addMethod(Method m)",
-                    "methodBody": "void addMethod(Method m)",
+                    "methodBody": "addMethod(Method m)",
                     "modifiers": [
                         "protected"
                     ],
@@ -251,11 +251,11 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "protected void addAttribute(Attribute a)",
-                    "methodBody": "void addAttribute(Attribute a)",
+                    "methodBody": "addAttribute(Attribute a)",
                     "modifiers": [
                         "protected"
                     ],
@@ -268,13 +268,13 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "CPGClass(String name)",
-                    "methodBody": "(String name)",
+                    "methodBody": "CPGClass(String name)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "CPGClass",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -295,7 +295,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "CPGClass"
+                    "returnType": ""
                 }
             ]
         },
@@ -338,7 +338,7 @@
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -390,7 +390,7 @@
                     "modifiers": [
                         "public"
                     ],
-                    "name": "<init>",
+                    "name": "ClassRelation",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -415,7 +415,7 @@
                 },
                 {
                     "code": "public void setPath(ArrayList<Position> path)",
-                    "methodBody": "void setPath(ArrayList<Position> path)",
+                    "methodBody": "setPath(ArrayList<Position> path)",
                     "modifiers": [
                         "public"
                     ],
@@ -458,7 +458,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public ArrayList<Position> getPath()",
@@ -507,9 +507,9 @@
             "methods": [
                 {
                     "code": "Relation(CPGClass source, CPGClass destination, Type type)",
-                    "methodBody": "(CPGClass source, CPGClass destination, Type type)",
+                    "methodBody": "Relation(CPGClass source, CPGClass destination, Type type)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "Relation",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -530,7 +530,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "Relation"
+                    "returnType": ""
                 }
             ]
         },
@@ -593,7 +593,7 @@
                     "modifiers": [
                         "protected"
                     ],
-                    "name": "<init>",
+                    "name": "CodePropertyGraph",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -612,7 +612,7 @@
                 },
                 {
                     "code": "public void addClass(CPGClass c)",
-                    "methodBody": "void addClass(CPGClass c)",
+                    "methodBody": "addClass(CPGClass c)",
                     "modifiers": [
                         "public"
                     ],
@@ -625,11 +625,11 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void addRelation(Relation r)",
-                    "methodBody": "void addRelation(Relation r)",
+                    "methodBody": "addRelation(Relation r)",
                     "modifiers": [
                         "public"
                     ],
@@ -642,7 +642,7 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 }
             ]
         },
@@ -652,7 +652,7 @@
             "methods": [
                 {
                     "code": "public void initialize()",
-                    "methodBody": "void initialize()",
+                    "methodBody": "initialize()",
                     "modifiers": [
                         "public"
                     ],
@@ -683,13 +683,13 @@
                             "methodCall": "getProperty"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -701,7 +701,7 @@
             "methods": [
                 {
                     "code": "public static void main(String[] args)",
-                    "methodBody": "void main(String[] args)",
+                    "methodBody": "main(String[] args)",
                     "modifiers": [
                         "public",
                         "static"
@@ -715,13 +715,13 @@
                             "methodCall": "main"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -762,9 +762,9 @@
             "methods": [
                 {
                     "code": "Line(Position p1, Position p2)",
-                    "methodBody": "(Position p1, Position p2)",
+                    "methodBody": "Line(Position p1, Position p2)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "Line",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -797,13 +797,13 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "Line"
+                    "returnType": ""
                 },
                 {
                     "code": "Line(double x1, double y1, double x2, double y2)",
-                    "methodBody": "(double x1, double y1, double x2, double y2)",
+                    "methodBody": "Line(double x1, double y1, double x2, double y2)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "Line",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -836,11 +836,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "Line"
+                    "returnType": ""
                 },
                 {
                     "code": "public String toString()",
-                    "methodBody": "String toString()",
+                    "methodBody": "toString()",
                     "modifiers": [
                         "public"
                     ],
@@ -853,11 +853,11 @@
                             "methodCall": "format"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "String"
                 },
                 {
                     "code": "public double magnitude()",
-                    "methodBody": "double magnitude()",
+                    "methodBody": "magnitude()",
                     "modifiers": [
                         "public"
                     ],
@@ -870,7 +870,7 @@
                             "methodCall": "sqrt"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "double"
                 }
             ]
         },
@@ -903,7 +903,7 @@
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -927,13 +927,13 @@
                     "modifiers": [
                         "public"
                     ],
-                    "name": "<init>",
+                    "name": "LayoutManager",
                     "instructions": [],
                     "returnType": ""
                 },
                 {
                     "code": "public void positionClasses(ArrayList<UMLClass> classes)",
-                    "methodBody": "void positionClasses(ArrayList<UMLClass> classes)",
+                    "methodBody": "positionClasses(ArrayList<UMLClass> classes)",
                     "modifiers": [
                         "public"
                     ],
@@ -982,11 +982,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "private Line[] classBoxLines(UMLClass c)",
-                    "methodBody": "Line[] classBoxLines(UMLClass c)",
+                    "methodBody": "classBoxLines(UMLClass c)",
                     "modifiers": [
                         "private"
                     ],
@@ -1101,11 +1101,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Line[]"
                 },
                 {
                     "code": "private boolean testCollision(Line line, UMLClass[] exclude)",
-                    "methodBody": "boolean testCollision(Line line, UMLClass[] exclude)",
+                    "methodBody": "testCollision(Line line, UMLClass[] exclude)",
                     "modifiers": [
                         "private"
                     ],
@@ -1136,11 +1136,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "boolean"
                 },
                 {
                     "code": "private Position intersection(Line l1, Line[] with)",
-                    "methodBody": "Position intersection(Line l1, Line[] with)",
+                    "methodBody": "intersection(Line l1, Line[] with)",
                     "modifiers": [
                         "private"
                     ],
@@ -1159,11 +1159,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Position"
                 },
                 {
                     "code": "private Position classMiddle(UMLClass c)",
-                    "methodBody": "Position classMiddle(UMLClass c)",
+                    "methodBody": "classMiddle(UMLClass c)",
                     "modifiers": [
                         "private"
                     ],
@@ -1188,11 +1188,11 @@
                             "methodCall": "Position"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Position"
                 },
                 {
                     "code": "private Position classMiddle(UMLClass c, Direction d)",
-                    "methodBody": "Position classMiddle(UMLClass c, Direction d)",
+                    "methodBody": "classMiddle(UMLClass c, Direction d)",
                     "modifiers": [
                         "private"
                     ],
@@ -1217,7 +1217,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Position"
                 },
                 {
                     "code": "private Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2)",
@@ -1310,7 +1310,7 @@
                 },
                 {
                     "code": "private Position indirectConnection(UMLClass c1, UMLClass c2)",
-                    "methodBody": "Position indirectConnection(UMLClass c1, UMLClass c2)",
+                    "methodBody": "indirectConnection(UMLClass c1, UMLClass c2)",
                     "modifiers": [
                         "private"
                     ],
@@ -1401,11 +1401,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Position"
                 },
                 {
                     "code": "private void sortClasses()",
-                    "methodBody": "void sortClasses()",
+                    "methodBody": "sortClasses()",
                     "modifiers": [
                         "private"
                     ],
@@ -1436,11 +1436,11 @@
                             "methodCall": "sort"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void setRelationPaths(ArrayList<ClassRelation> relations)",
-                    "methodBody": "void setRelationPaths(ArrayList<ClassRelation> relations)",
+                    "methodBody": "setRelationPaths(ArrayList<ClassRelation> relations)",
                     "modifiers": [
                         "public"
                     ],
@@ -1465,7 +1465,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 }
             ]
         },
@@ -1475,9 +1475,9 @@
             "methods": [
                 {
                     "code": "Dot(Position p, String colour)",
-                    "methodBody": "(Position p, String colour)",
+                    "methodBody": "Dot(Position p, String colour)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "Dot",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -1486,7 +1486,7 @@
                             "methodCall": "super"
                         }
                     ],
-                    "returnType": "Dot"
+                    "returnType": ""
                 }
             ]
         },
@@ -1496,7 +1496,7 @@
             "methods": [
                 {
                     "code": "public void initializeMainView(CodePropertyGraph cpg)",
-                    "methodBody": "void initializeMainView(CodePropertyGraph cpg)",
+                    "methodBody": "initializeMainView(CodePropertyGraph cpg)",
                     "modifiers": [
                         "public"
                     ],
@@ -1605,11 +1605,11 @@
                             "methodCall": "setRelationPaths"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void start(Stage primaryStage) throws Exception",
-                    "methodBody": "void start(Stage primaryStage) throws Exception",
+                    "methodBody": "start(Stage primaryStage) throws Exception",
                     "modifiers": [
                         "public"
                     ],
@@ -1778,11 +1778,11 @@
                             "methodCall": "show"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public static void main(String[] args)",
-                    "methodBody": "void main(String[] args)",
+                    "methodBody": "main(String[] args)",
                     "modifiers": [
                         "public",
                         "static"
@@ -1796,13 +1796,13 @@
                             "methodCall": "launch"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 },
@@ -1885,9 +1885,9 @@
             "methods": [
                 {
                     "code": "Pair(F first, S second)",
-                    "methodBody": "(F first, S second)",
+                    "methodBody": "Pair(F first, S second)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "Pair",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -1902,7 +1902,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "Pair"
+                    "returnType": ""
                 }
             ]
         },
@@ -1912,7 +1912,7 @@
             "methods": [
                 {
                     "code": "public static void main(String[] args)",
-                    "methodBody": "void main(String[] args)",
+                    "methodBody": "main(String[] args)",
                     "modifiers": [
                         "public",
                         "static"
@@ -1944,11 +1944,11 @@
                             "methodCall": "buildCPG"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public CodePropertyGraph buildCPG(String destination)",
-                    "methodBody": "CodePropertyGraph buildCPG(String destination)",
+                    "methodBody": "buildCPG(String destination)",
                     "modifiers": [
                         "public"
                     ],
@@ -2003,13 +2003,13 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "CodePropertyGraph"
                 },
                 {
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -2021,9 +2021,9 @@
             "methods": [
                 {
                     "code": "JavaAttribute(String name, Modifier[] m)",
-                    "methodBody": "(String name, Modifier[] m)",
+                    "methodBody": "JavaAttribute(String name, Modifier[] m)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "JavaAttribute",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2032,7 +2032,7 @@
                             "methodCall": "super"
                         }
                     ],
-                    "returnType": "JavaAttribute"
+                    "returnType": ""
                 }
             ]
         },
@@ -2042,9 +2042,9 @@
             "methods": [
                 {
                     "code": "JavaMethod(String name, String[] instructions, Modifier[] modifiers)",
-                    "methodBody": "(String name, String[] instructions, Modifier[] modifiers)",
+                    "methodBody": "JavaMethod(String name, String[] instructions, Modifier[] modifiers)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "JavaMethod",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2053,7 +2053,7 @@
                             "methodCall": "super"
                         }
                     ],
-                    "returnType": "JavaMethod"
+                    "returnType": ""
                 }
             ]
         },
@@ -2082,7 +2082,7 @@
                     "modifiers": [
                         "public"
                     ],
-                    "name": "<init>",
+                    "name": "Position",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2101,7 +2101,7 @@
                 },
                 {
                     "code": "public String toString()",
-                    "methodBody": "String toString()",
+                    "methodBody": "toString()",
                     "modifiers": [
                         "public"
                     ],
@@ -2114,7 +2114,7 @@
                             "methodCall": "format"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "String"
                 }
             ]
         },
@@ -2137,7 +2137,7 @@
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }
@@ -2171,9 +2171,9 @@
             "methods": [
                 {
                     "code": "RenderEvent(Type type, RenderObject source)",
-                    "methodBody": "(Type type, RenderObject source)",
+                    "methodBody": "RenderEvent(Type type, RenderObject source)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "RenderEvent",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2188,11 +2188,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "RenderEvent"
+                    "returnType": ""
                 },
                 {
                     "code": "public void setResponse(Object response)",
-                    "methodBody": "void setResponse(Object response)",
+                    "methodBody": "setResponse(Object response)",
                     "modifiers": [
                         "public"
                     ],
@@ -2205,11 +2205,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public Object getResponse()",
-                    "methodBody": "Object getResponse()",
+                    "methodBody": "getResponse()",
                     "modifiers": [
                         "public"
                     ],
@@ -2222,7 +2222,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Object"
                 }
             ]
         },
@@ -2232,13 +2232,13 @@
             "methods": [
                 {
                     "code": "public void renderEventPerformed(RenderEvent re)",
-                    "methodBody": "void renderEventPerformed(RenderEvent re)",
+                    "methodBody": "renderEventPerformed(RenderEvent re)",
                     "modifiers": [
                         "public"
                     ],
                     "name": "renderEventPerformed",
                     "instructions": [],
-                    "returnType": ""
+                    "returnType": "void"
                 }
             ]
         },
@@ -2257,7 +2257,7 @@
             "methods": [
                 {
                     "code": "public static void addRenderEventListener(RenderEventListener rel)",
-                    "methodBody": "void addRenderEventListener(RenderEventListener rel)",
+                    "methodBody": "addRenderEventListener(RenderEventListener rel)",
                     "modifiers": [
                         "public",
                         "static"
@@ -2271,11 +2271,11 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void dispatchToRenderEventListeners(RenderEvent re)",
-                    "methodBody": "void dispatchToRenderEventListeners(RenderEvent re)",
+                    "methodBody": "dispatchToRenderEventListeners(RenderEvent re)",
                     "modifiers": [
                         "public"
                     ],
@@ -2300,11 +2300,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void render()",
-                    "methodBody": "void render()",
+                    "methodBody": "render()",
                     "modifiers": [
                         "public"
                     ],
@@ -2335,13 +2335,13 @@
                             "methodCall": "dispatchToRenderEventListeners"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 },
@@ -2393,7 +2393,7 @@
                     "modifiers": [
                         "public"
                     ],
-                    "name": "<init>",
+                    "name": "Shape",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2475,9 +2475,9 @@
             "methods": [
                 {
                     "code": "UMLClass(String name)",
-                    "methodBody": "(String name)",
+                    "methodBody": "UMLClass(String name)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "UMLClass",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2528,11 +2528,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "UMLClass"
+                    "returnType": ""
                 },
                 {
                     "code": "public void addMethod(Method m)",
-                    "methodBody": "void addMethod(Method m)",
+                    "methodBody": "addMethod(Method m)",
                     "modifiers": [
                         "public"
                     ],
@@ -2545,11 +2545,11 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void addAttribute(Attribute a)",
-                    "methodBody": "void addAttribute(Attribute a)",
+                    "methodBody": "addAttribute(Attribute a)",
                     "modifiers": [
                         "public"
                     ],
@@ -2562,11 +2562,11 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void addRelationship(ClassRelation r)",
-                    "methodBody": "void addRelationship(ClassRelation r)",
+                    "methodBody": "addRelationship(ClassRelation r)",
                     "modifiers": [
                         "public"
                     ],
@@ -2579,11 +2579,11 @@
                             "methodCall": "add"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void setPosition(double x, double y)",
-                    "methodBody": "void setPosition(double x, double y)",
+                    "methodBody": "setPosition(double x, double y)",
                     "modifiers": [
                         "public"
                     ],
@@ -2620,11 +2620,11 @@
                             "methodCall": "dispatchToRenderEventListeners"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void render()",
-                    "methodBody": "void render()",
+                    "methodBody": "render()",
                     "modifiers": [
                         "public"
                     ],
@@ -2685,7 +2685,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public ArrayList<Attribute> getAttributes()",
@@ -2723,7 +2723,7 @@
                 },
                 {
                     "code": "public int getId()",
-                    "methodBody": "int getId()",
+                    "methodBody": "getId()",
                     "modifiers": [
                         "public"
                     ],
@@ -2736,11 +2736,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "int"
                 },
                 {
                     "code": "public Double getWidth()",
-                    "methodBody": "Double getWidth()",
+                    "methodBody": "getWidth()",
                     "modifiers": [
                         "public"
                     ],
@@ -2753,11 +2753,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Double"
                 },
                 {
                     "code": "public Double getHeight()",
-                    "methodBody": "Double getHeight()",
+                    "methodBody": "getHeight()",
                     "modifiers": [
                         "public"
                     ],
@@ -2770,11 +2770,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Double"
                 },
                 {
                     "code": "public Position getPosition()",
-                    "methodBody": "Position getPosition()",
+                    "methodBody": "getPosition()",
                     "modifiers": [
                         "public"
                     ],
@@ -2787,7 +2787,7 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Position"
                 },
                 {
                     "code": "public ArrayList<ClassRelation> getRelations()",
@@ -2822,9 +2822,9 @@
             "methods": [
                 {
                     "code": "WebControl(WebEngine engine)",
-                    "methodBody": "(WebEngine engine)",
+                    "methodBody": "WebControl(WebEngine engine)",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "WebControl",
                     "instructions": [
                         {
                             "_label": "CALL",
@@ -2833,11 +2833,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": "WebControl"
+                    "returnType": ""
                 },
                 {
                     "code": "private Integer renderClass(UMLClass c)",
-                    "methodBody": "Integer renderClass(UMLClass c)",
+                    "methodBody": "renderClass(UMLClass c)",
                     "modifiers": [
                         "private"
                     ],
@@ -2928,11 +2928,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Integer"
                 },
                 {
                     "code": "private Integer renderPath(ClassRelation cr)",
-                    "methodBody": "Integer renderPath(ClassRelation cr)",
+                    "methodBody": "renderPath(ClassRelation cr)",
                     "modifiers": [
                         "private"
                     ],
@@ -3023,11 +3023,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "Integer"
                 },
                 {
                     "code": "private void repositionClass(int id, double x, double y)",
-                    "methodBody": "void repositionClass(int id, double x, double y)",
+                    "methodBody": "repositionClass(int id, double x, double y)",
                     "modifiers": [
                         "private"
                     ],
@@ -3052,7 +3052,7 @@
                             "methodCall": "executeScript"
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "private Pair<Double, Double> getClassDimensions(int id)",
@@ -3121,7 +3121,7 @@
                 },
                 {
                     "code": "private void drawShape(Shape s)",
-                    "methodBody": "void drawShape(Shape s)",
+                    "methodBody": "drawShape(Shape s)",
                     "modifiers": [
                         "private"
                     ],
@@ -3152,11 +3152,11 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "public void renderEventPerformed(RenderEvent e)",
-                    "methodBody": "void renderEventPerformed(RenderEvent e)",
+                    "methodBody": "renderEventPerformed(RenderEvent e)",
                     "modifiers": [
                         "public"
                     ],
@@ -3187,17 +3187,23 @@
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 }
             ]
         },
         {
             "name": "joernServer",
-            "fields": [],
+            "fields": [
+                {
+                    "name": "name",
+                    "modifiers": [],
+                    "type": "java.lang.String"
+                }
+            ],
             "methods": [
                 {
                     "code": "public static void main(String[] args)",
-                    "methodBody": "void main(String[] args)",
+                    "methodBody": "main(String[] args)",
                     "modifiers": [
                         "public",
                         "static"
@@ -3213,13 +3219,13 @@
                         {
                             "_label": "CALL",
                             "code": "String joernPath = System.getProperty(\"user.home\") + \"/bin/joern/joern-cli\"",
-                            "lineNumber": 11,
+                            "lineNumber": 13,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "CALL",
                             "code": "System.out.println(joernPath)",
-                            "lineNumber": 12,
+                            "lineNumber": 14,
                             "methodCall": "println"
                         },
                         {
@@ -3231,23 +3237,23 @@
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (System.getProperty(\"os.name\").contains(\"Windows\"))",
-                            "lineNumber": 18,
+                            "lineNumber": 20,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "try",
-                            "lineNumber": 25,
+                            "lineNumber": 27,
                             "methodCall": ""
                         }
                     ],
-                    "returnType": ""
+                    "returnType": "void"
                 },
                 {
                     "code": "<empty>",
                     "methodBody": "<empty>",
                     "modifiers": [],
-                    "name": "<init>",
+                    "name": "",
                     "instructions": [],
                     "returnType": ""
                 }

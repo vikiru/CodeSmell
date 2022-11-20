@@ -1,7 +1,8 @@
-from cpgqls_client import CPGQLSClient, import_code_query
+import json
 import os
 import re
-import json
+from cpgqls_client import CPGQLSClient, import_code_query
+
 
 # Cleans up json output from joern so that it can be a proper JSON file.
 def clean_json(joernResult):
@@ -32,6 +33,7 @@ def source_code_json_creation():
     def create_method_dict(currMethod):
         # For every method's instruction, create a dictionary and return it.
         def create_instruction_dict(currInstruction):
+            # Get the method call in each line of code, if any.
             methodCallPattern = re.compile("([a-zA-Z]*\()")
             calls = methodCallPattern.findall(currInstruction["code"])
             methodCall = ""
@@ -46,21 +48,32 @@ def source_code_json_creation():
             }
             return currInstructionDict
 
-        # Get the modifiers, return type and the method body from the full method body provided by Joern.
-        modifiersPattern = re.compile("(private|public|protected|static|final)")
-        returnTypePattern = re.compile("(^[a-zA-z]*)")
-        methodWithReturn = re.sub(modifiersPattern, "", currMethod["_1"]["code"])
-        methodBody = re.sub(returnTypePattern, "", methodWithReturn)
+        if currMethod["_1"]["code"] == "<empty":
+            return
+        else:
+            # Get the modifiers, return type and the method body from the full method body provided by Joern.
+            modifiersPattern = re.compile("(private|public|protected|static|final)")
+            returnTypePattern = re.compile("(^[a-zA-z]*\s)")
+            methodNamePattern = re.compile("(^[a-zA-z]*)")
+            methodWithReturn = re.sub(
+                modifiersPattern, "", currMethod["_1"]["code"]
+            ).strip()
+            methodReturnType = returnTypePattern.findall(methodWithReturn)
+            returnType = ""
+            if methodReturnType:
+                returnType = methodReturnType[0].strip()
+            methodBody = re.sub(returnTypePattern, "", methodWithReturn)
+            constructorName = methodNamePattern.findall(methodBody)[0]
 
-        currMethodDict = {
-            "code": currMethod["_1"]["code"],
-            "methodBody": methodBody.strip(),
-            "modifiers": modifiersPattern.findall(currMethod["_1"]["code"]),
-            "name": currMethod["_1"]["name"],
-            "instructions": list(map(create_instruction_dict, currMethod["_2"])),
-            "returnType": returnTypePattern.findall(methodWithReturn)[0],
-        }
-        return currMethodDict
+            currMethodDict = {
+                "code": currMethod["_1"]["code"],
+                "methodBody": methodBody,
+                "modifiers": modifiersPattern.findall(currMethod["_1"]["code"]),
+                "name": currMethod["_1"]["name"].replace("<init>", constructorName),
+                "instructions": list(map(create_instruction_dict, currMethod["_2"])),
+                "returnType": returnType,
+            }
+            return currMethodDict
 
     # For every class, create a dictionary and return it.
     def create_class_dict(currClass):
