@@ -48,7 +48,7 @@ def source_code_json_creation():
             }
             return currInstructionDict
 
-        if currMethod["_1"]["code"] == "<empty":
+        if currMethod["_1"]["code"] == "<empty>":
             return
         else:
             # Get the modifiers, return type and the method body from the full method body provided by Joern.
@@ -80,7 +80,9 @@ def source_code_json_creation():
         currClassDict = {
             "name": currClass["_1"],
             "fields": list(map(create_field_dict, currClass["_2"])),
-            "methods": list(map(create_method_dict, currClass["_3"])),
+            "methods": list(
+                filter(None, list(map(create_method_dict, currClass["_3"])))
+            ),
         }
         return currClassDict
 

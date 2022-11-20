@@ -121,16 +121,7 @@
                     "type": "com.CodeSmell.CPGClass$Modifier"
                 }
             ],
-            "methods": [
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
-                }
-            ]
+            "methods": []
         },
         {
             "name": "CPGClass$Attribute",
@@ -333,16 +324,7 @@
                     "type": "com.CodeSmell.ClassRelation$Type"
                 }
             ],
-            "methods": [
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
-                }
-            ]
+            "methods": []
         },
         {
             "name": "ClassRelation",
@@ -684,14 +666,6 @@
                         }
                     ],
                     "returnType": "void"
-                },
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
                 }
             ]
         },
@@ -716,14 +690,6 @@
                         }
                     ],
                     "returnType": "void"
-                },
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
                 }
             ]
         },
@@ -898,16 +864,7 @@
                     "type": "com.CodeSmell.LayoutManager$Direction"
                 }
             ],
-            "methods": [
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
-                }
-            ]
+            "methods": []
         },
         {
             "name": "LayoutManager",
@@ -1799,14 +1756,6 @@
                     "returnType": "void"
                 },
                 {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
-                },
-                {
                     "code": "<lambda>",
                     "methodBody": "<lambda>",
                     "modifiers": [],
@@ -2004,14 +1953,6 @@
                         }
                     ],
                     "returnType": "CodePropertyGraph"
-                },
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
                 }
             ]
         },
@@ -2132,16 +2073,7 @@
                     "type": "com.CodeSmell.RenderEvent$Type"
                 }
             ],
-            "methods": [
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
-                }
-            ]
+            "methods": []
         },
         {
             "name": "RenderEvent",
@@ -2336,35 +2268,6 @@
                         }
                     ],
                     "returnType": "void"
-                },
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
-                },
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "<clinit>",
-                    "instructions": [
-                        {
-                            "_label": "CALL",
-                            "code": "ArrayList<RenderEventListener> renderEventListeners = new ArrayList<RenderEventListener>()",
-                            "lineNumber": 11,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "new ArrayList<RenderEventListener>()",
-                            "lineNumber": 11,
-                            "methodCall": ""
-                        }
-                    ],
-                    "returnType": ""
                 }
             ]
         },
@@ -3248,14 +3151,6 @@
                         }
                     ],
                     "returnType": "void"
-                },
-                {
-                    "code": "<empty>",
-                    "methodBody": "<empty>",
-                    "modifiers": [],
-                    "name": "",
-                    "instructions": [],
-                    "returnType": ""
                 }
             ]
         }
