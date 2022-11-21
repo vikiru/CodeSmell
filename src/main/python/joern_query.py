@@ -16,7 +16,11 @@ def clean_json(joernResult):
 # Execute a single joern query to get all the data required to create a json representation of the source code.
 def source_code_json_creation():
     # Obtain the classes, fields and modifiers, methods and their instructions
-    query = "cpg.typeDecl.isExternal(false).map(node => (node.name, node.astChildren.isMember.l.map(node => (node, node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, node.astChildren.astChildren.l)))).toJsonPretty"
+    query = (
+        "cpg.typeDecl.isExternal(false).map(node => (node.name, node.astChildren.isMember.l.map(node => (node, "
+        "node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, "
+        "node.ast.label.l, node.ast.code.l, node.ast.lineNumber.l)))).toJsonPretty "
+    )
     result = client.execute(query)
     allData = json.loads(clean_json(result["stdout"]))
 
@@ -30,25 +34,25 @@ def source_code_json_creation():
         return currFieldDict
 
     # For every method, create a dictionary and return it.
-    def create_method_dict(currMethod):
+    def create_method_dict(curr_method):
         # For every method's instruction, create a dictionary and return it.
-        def create_instruction_dict(currInstruction):
+        def create_instruction_dict(currLabel, currInstruction, currLineNumber):
             # Get the method call in each line of code, if any.
             methodCallPattern = re.compile("([a-zA-Z]*\()")
-            calls = methodCallPattern.findall(currInstruction["code"])
+            calls = methodCallPattern.findall(currInstruction)
             methodCall = ""
             if calls:
                 methodCall = calls[0].replace("(", "")
 
             currInstructionDict = {
-                "_label": currInstruction["_label"],
-                "code": currInstruction["code"].replace("\r\n", ""),
-                "lineNumber": currInstruction.get("lineNumber", None),
+                "_label": currLabel,
+                "code": currInstruction.replace("\r\n", ""),
+                "lineNumber": currLineNumber or "none",
                 "methodCall": methodCall,
             }
             return currInstructionDict
 
-        if currMethod["_1"]["code"] == "<empty>":
+        if curr_method["_1"]["code"] == "<empty>":
             return
         else:
             # Get the modifiers, return type and the method body from the full method body provided by Joern.
@@ -56,7 +60,7 @@ def source_code_json_creation():
             returnTypePattern = re.compile("(^[a-zA-z]*\s)")
             methodNamePattern = re.compile("(^[a-zA-z]*)")
             methodWithReturn = re.sub(
-                modifiersPattern, "", currMethod["_1"]["code"]
+                modifiersPattern, "", curr_method["_1"]["code"]
             ).strip()
             methodReturnType = returnTypePattern.findall(methodWithReturn)
             returnType = ""
@@ -66,11 +70,22 @@ def source_code_json_creation():
             constructorName = methodNamePattern.findall(methodBody)[0]
 
             currMethodDict = {
-                "code": currMethod["_1"]["code"],
+                "code": curr_method["_1"]["code"],
                 "methodBody": methodBody,
-                "modifiers": modifiersPattern.findall(currMethod["_1"]["code"]),
-                "name": currMethod["_1"]["name"].replace("<init>", constructorName),
-                "instructions": list(map(create_instruction_dict, currMethod["_2"])),
+                "modifiers": modifiersPattern.findall(curr_method["_1"]["code"]),
+                "name": curr_method["_1"]["name"].replace("<init>", constructorName),
+                # For the instructions,
+                # _2 corresponds to the labels,
+                # _3 corresponds to the code,
+                # _4 corresponds to the lineNumbers
+                "instructions": list(
+                    map(
+                        create_instruction_dict,
+                        curr_method["_2"],
+                        curr_method["_3"],
+                        curr_method["_4"],
+                    )
+                ),
                 "returnType": returnType,
             }
             return currMethodDict
