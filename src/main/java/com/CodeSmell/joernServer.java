@@ -8,7 +8,7 @@ public class joernServer {
     public static void main(String[] args) {
 
         // Get the path to joern
-        String joernPath = System.getProperty("user.home") + "\\bin\\joern\\joern-cli";
+        String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
         System.out.println(joernPath);
         // Start up a command prompt terminal (no popup) and start the joern server
         ProcessBuilder builder;
@@ -18,7 +18,7 @@ public class joernServer {
         if (System.getProperty("os.name").contains("Windows")) {
             builder = new ProcessBuilder("cmd.exe", "/c", "cd " + joernPath, "& joern --server");
         } else {
-            builder = new ProcessBuilder("sh", "-c", "cd " + joernPath, "& joern --server");
+            builder = new ProcessBuilder("sh", "-c",  "joern --server");
         }
 
         // Start the server
