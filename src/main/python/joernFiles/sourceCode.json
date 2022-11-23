@@ -45,7 +45,7 @@
                             "_label": "METHOD",
                             "code": "protected Method(String name, String[] instructions, Modifier[] modifiers)",
                             "lineNumber": 20,
-                            "methodCall": "Method"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -254,7 +254,7 @@
                             "_label": "METHOD",
                             "code": "protected void addCall(Method m)",
                             "lineNumber": 27,
-                            "methodCall": "addCall"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -394,7 +394,7 @@
                             "_label": "METHOD",
                             "code": "protected Attribute(String name, Modifier[] modifiers)",
                             "lineNumber": 48,
-                            "methodCall": "Attribute"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -547,7 +547,7 @@
                             "_label": "METHOD",
                             "code": "protected ArrayList<Method> getMethods()",
                             "lineNumber": 58,
-                            "methodCall": "getMethods"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -612,7 +612,7 @@
                             "_label": "METHOD",
                             "code": "protected ArrayList<Attribute> getAttributes()",
                             "lineNumber": 62,
-                            "methodCall": "getAttributes"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -677,7 +677,7 @@
                             "_label": "METHOD",
                             "code": "protected void addMethod(Method m)",
                             "lineNumber": 66,
-                            "methodCall": "addMethod"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -760,7 +760,7 @@
                             "_label": "METHOD",
                             "code": "protected void addAttribute(Attribute a)",
                             "lineNumber": 70,
-                            "methodCall": "addAttribute"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -841,7 +841,7 @@
                             "_label": "METHOD",
                             "code": "CPGClass(String name)",
                             "lineNumber": 74,
-                            "methodCall": "CPGClass"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1086,7 +1086,7 @@
                             "_label": "METHOD",
                             "code": "public ClassRelation(UMLClass source, UMLClass target, Type type)",
                             "lineNumber": 25,
-                            "methodCall": "ClassRelation"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1253,7 +1253,7 @@
                             "_label": "METHOD",
                             "code": "public void setPath(ArrayList<Position> path)",
                             "lineNumber": 31,
-                            "methodCall": "setPath"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1468,7 +1468,7 @@
                             "_label": "METHOD",
                             "code": "public ArrayList<Position> getPath()",
                             "lineNumber": 38,
-                            "methodCall": "getPath"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1559,7 +1559,7 @@
                             "_label": "METHOD",
                             "code": "Relation(CPGClass source, CPGClass destination, Type type)",
                             "lineNumber": 15,
-                            "methodCall": "Relation"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1747,7 +1747,7 @@
                             "_label": "METHOD",
                             "code": "protected ArrayList<CPGClass> getClasses()",
                             "lineNumber": 25,
-                            "methodCall": "getClasses"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1812,7 +1812,7 @@
                             "_label": "METHOD",
                             "code": "protected ArrayList<Relation> getRelations()",
                             "lineNumber": 29,
-                            "methodCall": "getRelations"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -1877,7 +1877,7 @@
                             "_label": "METHOD",
                             "code": "protected CodePropertyGraph()",
                             "lineNumber": 33,
-                            "methodCall": "CodePropertyGraph"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2002,7 +2002,7 @@
                             "_label": "METHOD",
                             "code": "public void addClass(CPGClass c)",
                             "lineNumber": 38,
-                            "methodCall": "addClass"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2085,7 +2085,7 @@
                             "_label": "METHOD",
                             "code": "public void addRelation(Relation r)",
                             "lineNumber": 42,
-                            "methodCall": "addRelation"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2174,7 +2174,7 @@
                             "_label": "METHOD",
                             "code": "public void initialize()",
                             "lineNumber": 5,
-                            "methodCall": "initialize"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2282,7 +2282,7 @@
                             "_label": "METHOD",
                             "code": "public static void main(String[] args)",
                             "lineNumber": 5,
-                            "methodCall": "main"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2374,7 +2374,7 @@
                             "_label": "METHOD",
                             "code": "Line(Position p1, Position p2)",
                             "lineNumber": 55,
-                            "methodCall": "Line"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2635,7 +2635,7 @@
                             "_label": "METHOD",
                             "code": "Line(double x1, double y1, double x2, double y2)",
                             "lineNumber": 63,
-                            "methodCall": "Line"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2922,7 +2922,7 @@
                             "_label": "METHOD",
                             "code": "public String toString()",
                             "lineNumber": 73,
-                            "methodCall": "toString"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -2940,7 +2940,7 @@
                             "_label": "RETURN",
                             "code": "return String.format(\"(%f, %f) -> (%f, %f)\", x1, y1, x2, y2);",
                             "lineNumber": 74,
-                            "methodCall": "format"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -3065,7 +3065,7 @@
                             "_label": "METHOD",
                             "code": "public double magnitude()",
                             "lineNumber": 78,
-                            "methodCall": "magnitude"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -3083,7 +3083,7 @@
                             "_label": "RETURN",
                             "code": "return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));",
                             "lineNumber": 79,
-                            "methodCall": "sqrt"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -3290,7 +3290,7 @@
                             "_label": "METHOD",
                             "code": "public LayoutManager()",
                             "lineNumber": 15,
-                            "methodCall": "LayoutManager"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -3331,7 +3331,7 @@
                             "_label": "METHOD",
                             "code": "public void positionClasses(ArrayList<UMLClass> classes)",
                             "lineNumber": 19,
-                            "methodCall": "positionClasses"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -3888,7 +3888,7 @@
                             "_label": "METHOD",
                             "code": "private Line[] classBoxLines(UMLClass c)",
                             "lineNumber": 91,
-                            "methodCall": "classBoxLines"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -4481,7 +4481,7 @@
                             "_label": "METHOD",
                             "code": "private boolean testCollision(Line line, UMLClass[] exclude)",
                             "lineNumber": 104,
-                            "methodCall": "testCollision"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -4774,7 +4774,7 @@
                             "_label": "METHOD",
                             "code": "private Position intersection(Line l1, Line[] with)",
                             "lineNumber": 119,
-                            "methodCall": "intersection"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -5716,7 +5716,7 @@
                             "_label": "RETURN",
                             "code": "return new Position(x1 + a * (x2 - x1), y1 + a * (y2 - y1));",
                             "lineNumber": 136,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -5805,7 +5805,7 @@
                             "_label": "METHOD",
                             "code": "private Position classMiddle(UMLClass c)",
                             "lineNumber": 149,
-                            "methodCall": "classMiddle"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -5859,7 +5859,7 @@
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);",
                             "lineNumber": 153,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -6002,7 +6002,7 @@
                             "_label": "METHOD",
                             "code": "private Position classMiddle(UMLClass c, Direction d)",
                             "lineNumber": 156,
-                            "methodCall": "classMiddle"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -6104,7 +6104,7 @@
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y);",
                             "lineNumber": 162,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -6266,7 +6266,7 @@
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight());",
                             "lineNumber": 164,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -6446,7 +6446,7 @@
                             "_label": "RETURN",
                             "code": "return new Position(p.x, p.y + c.getHeight() / 2);",
                             "lineNumber": 166,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -6608,7 +6608,7 @@
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth(), p.y + c.getHeight() / 2);",
                             "lineNumber": 168,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -6715,7 +6715,7 @@
                             "_label": "METHOD",
                             "code": "private Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2)",
                             "lineNumber": 174,
-                            "methodCall": "closetNodes"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -7098,7 +7098,7 @@
                             "_label": "METHOD",
                             "code": "private Position indirectConnection(UMLClass c1, UMLClass c2)",
                             "lineNumber": 196,
-                            "methodCall": "indirectConnection"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -7541,7 +7541,7 @@
                             "_label": "METHOD",
                             "code": "private void sortClasses()",
                             "lineNumber": 216,
-                            "methodCall": "sortClasses"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -7648,7 +7648,7 @@
                             "_label": "METHOD",
                             "code": "public void setRelationPaths(ArrayList<ClassRelation> relations)",
                             "lineNumber": 229,
-                            "methodCall": "setRelationPaths"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -9487,7 +9487,7 @@
                             "_label": "METHOD",
                             "code": "Dot(Position p, String colour)",
                             "lineNumber": 86,
-                            "methodCall": "Dot"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -9582,7 +9582,7 @@
                             "_label": "METHOD",
                             "code": "public void initializeMainView(CodePropertyGraph cpg)",
                             "lineNumber": 31,
-                            "methodCall": "initializeMainView"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -10463,7 +10463,7 @@
                             "_label": "METHOD",
                             "code": "public void start(Stage primaryStage) throws Exception",
                             "lineNumber": 76,
-                            "methodCall": "start"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -11075,7 +11075,7 @@
                             "_label": "METHOD",
                             "code": "public static void main(String[] args)",
                             "lineNumber": 119,
-                            "methodCall": "main"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -11359,7 +11359,7 @@
                             "_label": "METHOD",
                             "code": "Pair(F first, S second)",
                             "lineNumber": 8,
-                            "methodCall": "Pair"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -11491,7 +11491,7 @@
                             "_label": "METHOD",
                             "code": "public static void main(String[] args)",
                             "lineNumber": 33,
-                            "methodCall": "main"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -11580,7 +11580,7 @@
                             "_label": "METHOD",
                             "code": "public CodePropertyGraph buildCPG(String destination)",
                             "lineNumber": 42,
-                            "methodCall": "buildCPG"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -12630,7 +12630,7 @@
                             "_label": "CONTROL_STRUCTURE",
                             "code": "switch((String) methodCharacteristic.getKey())",
                             "lineNumber": 75,
-                            "methodCall": "switch"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -13121,7 +13121,7 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "code",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
@@ -13133,31 +13133,31 @@
                         {
                             "_label": "TYPE_REF",
                             "code": "String",
-                            "lineNumber": 93,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "instruction.getValue()",
-                            "lineNumber": 93,
+                            "lineNumber": 94,
                             "methodCall": "getValue"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "instruction",
-                            "lineNumber": 93,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodInstructions.add(label + \":\" + code)",
-                            "lineNumber": 93,
+                            "lineNumber": 94,
                             "methodCall": "add"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodInstructions",
-                            "lineNumber": 93,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
@@ -13169,13 +13169,13 @@
                         {
                             "_label": "CALL",
                             "code": "label + \":\"",
-                            "lineNumber": 96,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "label",
-                            "lineNumber": 96,
+                            "lineNumber": 95,
                             "methodCall": ""
                         },
                         {
@@ -13187,13 +13187,13 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "code",
-                            "lineNumber": 96,
+                            "lineNumber": 97,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "break;",
-                            "lineNumber": 96,
+                            "lineNumber": 97,
                             "methodCall": ""
                         },
                         {
@@ -13205,25 +13205,25 @@
                         {
                             "_label": "LITERAL",
                             "code": "\"modifiers\"",
-                            "lineNumber": 98,
+                            "lineNumber": 97,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ArrayList methodModifier",
-                            "lineNumber": 98,
+                            "lineNumber": 97,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ArrayList methodModifier = (ArrayList) methodCharacteristic.getValue()",
-                            "lineNumber": 98,
+                            "lineNumber": 97,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodModifier",
-                            "lineNumber": 98,
+                            "lineNumber": 97,
                             "methodCall": ""
                         },
                         {
@@ -13235,1117 +13235,1045 @@
                         {
                             "_label": "TYPE_REF",
                             "code": "ArrayList",
-                            "lineNumber": 98,
+                            "lineNumber": 99,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodCharacteristic.getValue()",
-                            "lineNumber": 98,
+                            "lineNumber": 100,
                             "methodCall": "getValue"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodCharacteristic",
-                            "lineNumber": 99,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CONTROL_STRUCTURE",
-                            "code": "if (methodModifier.isEmpty())",
                             "lineNumber": 100,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "methodModifier.isEmpty()",
-                            "lineNumber": 101,
-                            "methodCall": "isEmpty"
-                        },
-                        {
-                            "_label": "IDENTIFIER",
-                            "code": "methodModifier",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "methodModifiers[0] = Modifier.NONE",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "methodModifiers[0]",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "IDENTIFIER",
-                            "code": "methodModifiers",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "LITERAL",
-                            "code": "0",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "Modifier.NONE",
-                            "lineNumber": 102,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "IDENTIFIER",
-                            "code": "Modifier",
-                            "lineNumber": 103,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "FIELD_IDENTIFIER",
-                            "code": "NONE",
-                            "lineNumber": 104,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CONTROL_STRUCTURE",
-                            "code": "break;",
-                            "lineNumber": 104,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "switch((String) methodModifier.get(0))",
-                            "lineNumber": 104,
-                            "methodCall": "switch"
+                            "lineNumber": 100,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(String) methodModifier.get(0)",
-                            "lineNumber": 104,
+                            "lineNumber": 100,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "String",
-                            "lineNumber": 104,
+                            "lineNumber": 100,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifier.get(0)",
-                            "lineNumber": 104,
+                            "lineNumber": 100,
                             "methodCall": "get"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodModifier",
-                            "lineNumber": 104,
+                            "lineNumber": 100,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 105,
+                            "lineNumber": 101,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 109,
+                            "lineNumber": 105,
                             "methodCall": ""
                         },
                         {
                             "_label": "JUMP_TARGET",
                             "code": "\"private\"",
-                            "lineNumber": 109,
+                            "lineNumber": 105,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"private\"",
-                            "lineNumber": 109,
+                            "lineNumber": 105,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifiers[0] = Modifier.PRIVATE",
-                            "lineNumber": 109,
+                            "lineNumber": 105,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifiers[0]",
-                            "lineNumber": 110,
+                            "lineNumber": 106,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodModifiers",
-                            "lineNumber": 110,
+                            "lineNumber": 106,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 110,
+                            "lineNumber": 106,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Modifier.PRIVATE",
-                            "lineNumber": 110,
+                            "lineNumber": 106,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "Modifier",
-                            "lineNumber": 110,
+                            "lineNumber": 106,
                             "methodCall": ""
                         },
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "PRIVATE",
-                            "lineNumber": 110,
+                            "lineNumber": 106,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "break;",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "JUMP_TARGET",
                             "code": "\"public\"",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"public\"",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifiers[0] = Modifier.PUBLIC",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifiers[0]",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodModifiers",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Modifier.PUBLIC",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "Modifier",
-                            "lineNumber": 111,
+                            "lineNumber": 107,
                             "methodCall": ""
                         },
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "PUBLIC",
-                            "lineNumber": 112,
+                            "lineNumber": 108,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "break;",
-                            "lineNumber": 112,
+                            "lineNumber": 108,
                             "methodCall": ""
                         },
                         {
                             "_label": "JUMP_TARGET",
                             "code": "\"protected\"",
-                            "lineNumber": 112,
+                            "lineNumber": 108,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"protected\"",
-                            "lineNumber": 112,
+                            "lineNumber": 108,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifiers[0] = Modifier.PROTECTED",
-                            "lineNumber": 112,
+                            "lineNumber": 108,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodModifiers[0]",
-                            "lineNumber": 112,
+                            "lineNumber": 108,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodModifiers",
-                            "lineNumber": 116,
+                            "lineNumber": 112,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 116,
+                            "lineNumber": 112,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Modifier.PROTECTED",
-                            "lineNumber": 116,
+                            "lineNumber": 112,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "Modifier",
-                            "lineNumber": 116,
+                            "lineNumber": 112,
                             "methodCall": ""
                         },
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "PROTECTED",
-                            "lineNumber": 116,
+                            "lineNumber": 112,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "break;",
-                            "lineNumber": 116,
+                            "lineNumber": 112,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String[] methodInstruct",
-                            "lineNumber": 117,
+                            "lineNumber": 113,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String[] methodInstruct = new String[methodInstructions.size()]",
-                            "lineNumber": 117,
+                            "lineNumber": 113,
                             "methodCall": "size"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodInstruct",
-                            "lineNumber": 117,
+                            "lineNumber": 113,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new String[methodInstructions.size()]",
-                            "lineNumber": 117,
+                            "lineNumber": 113,
                             "methodCall": "size"
                         },
                         {
                             "_label": "CALL",
                             "code": "methodInstructions.size()",
-                            "lineNumber": 117,
+                            "lineNumber": 113,
                             "methodCall": "size"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodInstructions",
-                            "lineNumber": 117,
+                            "lineNumber": 113,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (classCount != -1)",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "classCount != -1",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "classCount",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "-1",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "1",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "addMethod(new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers))",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": "addMethod"
                         },
                         {
                             "_label": "CALL",
                             "code": "get(classCount)",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": "get"
                         },
                         {
                             "_label": "CALL",
                             "code": "getClasses()",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": "getClasses"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "cpg",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "classCount",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj5",
-                            "lineNumber": 118,
+                            "lineNumber": 114,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers)",
-                            "lineNumber": 119,
+                            "lineNumber": 115,
                             "methodCall": "Method"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers)",
-                            "lineNumber": 119,
+                            "lineNumber": 115,
                             "methodCall": "Method"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj5",
-                            "lineNumber": 119,
+                            "lineNumber": 115,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodName",
-                            "lineNumber": 119,
+                            "lineNumber": 115,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodInstruct = methodInstructions.toArray(methodInstruct)",
-                            "lineNumber": 119,
+                            "lineNumber": 115,
                             "methodCall": "toArray"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodInstruct",
-                            "lineNumber": 120,
+                            "lineNumber": 116,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "methodInstructions.toArray(methodInstruct)",
-                            "lineNumber": 120,
+                            "lineNumber": 116,
                             "methodCall": "toArray"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodInstructions",
-                            "lineNumber": 120,
+                            "lineNumber": 116,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodInstruct",
-                            "lineNumber": 121,
+                            "lineNumber": 117,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodModifiers",
-                            "lineNumber": 121,
+                            "lineNumber": 117,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj5",
-                            "lineNumber": 121,
+                            "lineNumber": 117,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (entry.getKey().equals(\"fields\"))",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "entry.getKey().equals(\"fields\")",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": "getKey"
                         },
                         {
                             "_label": "CALL",
                             "code": "entry.getKey()",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": "getKey"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "entry",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"fields\"",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ArrayList fields",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ArrayList fields = (ArrayList) entry.getValue()",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fields",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(ArrayList) entry.getValue()",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "ArrayList",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "entry.getValue()",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": "getValue"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "entry",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal6",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal6",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 122,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fields",
-                            "lineNumber": 123,
+                            "lineNumber": 119,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 123,
+                            "lineNumber": 119,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 123,
+                            "lineNumber": 119,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal6",
-                            "lineNumber": 123,
+                            "lineNumber": 119,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 124,
+                            "lineNumber": 120,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "field",
-                            "lineNumber": 125,
+                            "lineNumber": 121,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 125,
+                            "lineNumber": 121,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "field",
-                            "lineNumber": 125,
+                            "lineNumber": 121,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 125,
+                            "lineNumber": 121,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal6",
-                            "lineNumber": 125,
+                            "lineNumber": 121,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "field = (Map<?, ?>) field",
-                            "lineNumber": 125,
+                            "lineNumber": 121,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "field",
-                            "lineNumber": 126,
+                            "lineNumber": 122,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(Map<?, ?>) field",
-                            "lineNumber": 127,
+                            "lineNumber": 123,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "Map<?, ?>",
-                            "lineNumber": 128,
+                            "lineNumber": 124,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "field",
-                            "lineNumber": 128,
+                            "lineNumber": 124,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String fieldName",
-                            "lineNumber": 128,
+                            "lineNumber": 124,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String fieldName = \"\"",
-                            "lineNumber": 128,
+                            "lineNumber": 124,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldName",
-                            "lineNumber": 128,
+                            "lineNumber": 124,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"\"",
-                            "lineNumber": 128,
+                            "lineNumber": 124,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Modifier[] fieldModifiers",
-                            "lineNumber": 129,
+                            "lineNumber": 125,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY fieldModifiers = new Modifier[1]",
-                            "lineNumber": 129,
+                            "lineNumber": 125,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldModifiers",
-                            "lineNumber": 129,
+                            "lineNumber": 125,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new Modifier[1]",
-                            "lineNumber": 129,
+                            "lineNumber": 125,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "1",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "$iterLocal7",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal7",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "this.entrySet()",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": "entrySet"
                         },
                         {
                             "_label": "CALL",
                             "code": "(Map<?, ?>) field",
-                            "lineNumber": 130,
+                            "lineNumber": 126,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "Map<?, ?>",
-                            "lineNumber": 131,
+                            "lineNumber": 127,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "field",
-                            "lineNumber": 133,
+                            "lineNumber": 129,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "FOR",
-                            "lineNumber": 133,
+                            "lineNumber": 129,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 133,
+                            "lineNumber": 129,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal7",
-                            "lineNumber": 133,
+                            "lineNumber": 129,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 133,
+                            "lineNumber": 129,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 134,
+                            "lineNumber": 130,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 135,
+                            "lineNumber": 131,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 135,
+                            "lineNumber": 131,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<empty>",
-                            "lineNumber": 135,
+                            "lineNumber": 131,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal7",
-                            "lineNumber": 135,
+                            "lineNumber": 131,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "switch((String) fieldCharacteristic.getKey())",
-                            "lineNumber": 135,
-                            "methodCall": "switch"
+                            "lineNumber": 131,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(String) fieldCharacteristic.getKey()",
-                            "lineNumber": 135,
+                            "lineNumber": 131,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "String",
-                            "lineNumber": 135,
+                            "lineNumber": 131,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldCharacteristic.getKey()",
-                            "lineNumber": 136,
+                            "lineNumber": 132,
                             "methodCall": "getKey"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 137,
+                            "lineNumber": 133,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "JUMP_TARGET",
                             "code": "\"name\"",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"name\"",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldName = (String) fieldCharacteristic.getValue()",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldName",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(String) fieldCharacteristic.getValue()",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "String",
-                            "lineNumber": 138,
+                            "lineNumber": 134,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldCharacteristic.getValue()",
-                            "lineNumber": 139,
+                            "lineNumber": 135,
                             "methodCall": "getValue"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 140,
+                            "lineNumber": 136,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "break;",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "JUMP_TARGET",
                             "code": "\"modifiers\"",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"modifiers\"",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ArrayList fieldModifier",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue()",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldModifier",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(ArrayList) fieldCharacteristic.getValue()",
-                            "lineNumber": 141,
+                            "lineNumber": 137,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "ArrayList",
-                            "lineNumber": 142,
+                            "lineNumber": 138,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldCharacteristic.getValue()",
-                            "lineNumber": 146,
+                            "lineNumber": 142,
                             "methodCall": "getValue"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 146,
+                            "lineNumber": 142,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (fieldModifier.isEmpty())",
-                            "lineNumber": 146,
+                            "lineNumber": 142,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldModifier.isEmpty()",
-                            "lineNumber": 146,
+                            "lineNumber": 142,
                             "methodCall": "isEmpty"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldModifier",
-                            "lineNumber": 146,
+                            "lineNumber": 142,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 146,
+                            "lineNumber": 142,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldModifiers[0] = Modifier.NONE",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldModifiers[0]",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldModifiers",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Modifier.NONE",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "Modifier",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "NONE",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "break;",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "switch((String) fieldModifier.get(0))",
-                            "lineNumber": 147,
-                            "methodCall": "switch"
+                            "lineNumber": 143,
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "(String) fieldModifier.get(0)",
-                            "lineNumber": 147,
+                            "lineNumber": 143,
                             "methodCall": ""
                         },
                         {
                             "_label": "TYPE_REF",
                             "code": "String",
-                            "lineNumber": 156,
+                            "lineNumber": 152,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "fieldModifier.get(0)",
-                            "lineNumber": 156,
+                            "lineNumber": 152,
                             "methodCall": "get"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldModifier",
-                            "lineNumber": 158,
+                            "lineNumber": 154,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 159,
+                            "lineNumber": 155,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "<empty>",
-                            "lineNumber": 159,
+                            "lineNumber": 155,
                             "methodCall": ""
                         },
                         {
                             "_label": "JUMP_TARGET",
                             "code": "\"private\"",
-                            "lineNumber": 162,
+                            "lineNumber": 158,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"private\"",
-                            "lineNumber": 162,
+                            "lineNumber": 158,
                             "methodCall": ""
                         },
                         {
@@ -14385,7 +14313,7 @@
                             "_label": "METHOD",
                             "code": "JavaAttribute(String name, Modifier[] m)",
                             "lineNumber": 22,
-                            "methodCall": "JavaAttribute"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -14472,7 +14400,7 @@
                             "_label": "METHOD",
                             "code": "JavaMethod(String name, String[] instructions, Modifier[] modifiers)",
                             "lineNumber": 28,
-                            "methodCall": "JavaMethod"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -14594,7 +14522,7 @@
                             "_label": "METHOD",
                             "code": "public Position(double x, double y)",
                             "lineNumber": 8,
-                            "methodCall": "Position"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -14719,7 +14647,7 @@
                             "_label": "METHOD",
                             "code": "public String toString()",
                             "lineNumber": 13,
-                            "methodCall": "toString"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -14737,7 +14665,7 @@
                             "_label": "RETURN",
                             "code": "return String.format(\"(%f, %f)\", x, y);",
                             "lineNumber": 14,
-                            "methodCall": "format"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -14868,7 +14796,7 @@
                             "_label": "METHOD",
                             "code": "RenderEvent(Type type, RenderObject source)",
                             "lineNumber": 18,
-                            "methodCall": "RenderEvent"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -14993,7 +14921,7 @@
                             "_label": "METHOD",
                             "code": "public void setResponse(Object response)",
                             "lineNumber": 23,
-                            "methodCall": "setResponse"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15076,7 +15004,7 @@
                             "_label": "METHOD",
                             "code": "public Object getResponse()",
                             "lineNumber": 27,
-                            "methodCall": "getResponse"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15147,7 +15075,7 @@
                             "_label": "METHOD",
                             "code": "public void renderEventPerformed(RenderEvent re)",
                             "lineNumber": 6,
-                            "methodCall": "renderEventPerformed"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15210,7 +15138,7 @@
                             "_label": "METHOD",
                             "code": "public static void addRenderEventListener(RenderEventListener rel)",
                             "lineNumber": 13,
-                            "methodCall": "addRenderEventListener"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15281,7 +15209,7 @@
                             "_label": "METHOD",
                             "code": "public void dispatchToRenderEventListeners(RenderEvent re)",
                             "lineNumber": 17,
-                            "methodCall": "dispatchToRenderEventListeners"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15448,7 +15376,7 @@
                             "_label": "METHOD",
                             "code": "public void render()",
                             "lineNumber": 23,
-                            "methodCall": "render"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15594,7 +15522,7 @@
                             "_label": "METHOD",
                             "code": "public Shape(Position[] vertex, String colour)",
                             "lineNumber": 8,
-                            "methodCall": "Shape"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -15780,7 +15708,7 @@
                             "_label": "METHOD",
                             "code": "UMLClass(String name)",
                             "lineNumber": 23,
-                            "methodCall": "UMLClass"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16139,7 +16067,7 @@
                             "_label": "METHOD",
                             "code": "public void addMethod(Method m)",
                             "lineNumber": 34,
-                            "methodCall": "addMethod"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16222,7 +16150,7 @@
                             "_label": "METHOD",
                             "code": "public void addAttribute(Attribute a)",
                             "lineNumber": 38,
-                            "methodCall": "addAttribute"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16305,7 +16233,7 @@
                             "_label": "METHOD",
                             "code": "public void addRelationship(ClassRelation r)",
                             "lineNumber": 42,
-                            "methodCall": "addRelationship"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16388,7 +16316,7 @@
                             "_label": "METHOD",
                             "code": "public void setPosition(double x, double y)",
                             "lineNumber": 46,
-                            "methodCall": "setPosition"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16591,7 +16519,7 @@
                             "_label": "METHOD",
                             "code": "public void render()",
                             "lineNumber": 52,
-                            "methodCall": "render"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16902,7 +16830,7 @@
                             "_label": "METHOD",
                             "code": "public ArrayList<Attribute> getAttributes()",
                             "lineNumber": 69,
-                            "methodCall": "getAttributes"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -16967,7 +16895,7 @@
                             "_label": "METHOD",
                             "code": "public ArrayList<Method> getMethods()",
                             "lineNumber": 73,
-                            "methodCall": "getMethods"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17032,7 +16960,7 @@
                             "_label": "METHOD",
                             "code": "public int getId()",
                             "lineNumber": 77,
-                            "methodCall": "getId"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17097,7 +17025,7 @@
                             "_label": "METHOD",
                             "code": "public Double getWidth()",
                             "lineNumber": 81,
-                            "methodCall": "getWidth"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17162,7 +17090,7 @@
                             "_label": "METHOD",
                             "code": "public Double getHeight()",
                             "lineNumber": 85,
-                            "methodCall": "getHeight"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17227,7 +17155,7 @@
                             "_label": "METHOD",
                             "code": "public Position getPosition()",
                             "lineNumber": 89,
-                            "methodCall": "getPosition"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17292,7 +17220,7 @@
                             "_label": "METHOD",
                             "code": "public ArrayList<ClassRelation> getRelations()",
                             "lineNumber": 93,
-                            "methodCall": "getRelations"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17369,7 +17297,7 @@
                             "_label": "METHOD",
                             "code": "WebControl(WebEngine engine)",
                             "lineNumber": 24,
-                            "methodCall": "WebControl"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17452,7 +17380,7 @@
                             "_label": "METHOD",
                             "code": "private Integer renderClass(UMLClass c)",
                             "lineNumber": 29,
-                            "methodCall": "renderClass"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -17506,7 +17434,7 @@
                             "_label": "LITERAL",
                             "code": "\"renderClassBox('%s');\"",
                             "lineNumber": 33,
-                            "methodCall": "renderClassBox"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -17908,7 +17836,7 @@
                             "_label": "LITERAL",
                             "code": "\"addField(false, %d, '%s', '%s');\"",
                             "lineNumber": 44,
-                            "methodCall": "addField"
+                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -18268,7 +18196,7 @@
                             "_label": "LITERAL",
                             "code": "\"addField(true, %d, '%s', '%s');\"",
                             "lineNumber": 56,
-                            "methodCall": "addField"
+                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -18357,7 +18285,7 @@
                             "_label": "METHOD",
                             "code": "private Integer renderPath(ClassRelation cr)",
                             "lineNumber": 64,
-                            "methodCall": "renderPath"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -18483,7 +18411,7 @@
                             "_label": "LITERAL",
                             "code": "\"createRelationPath(%d, %f, %f)\"",
                             "lineNumber": 74,
-                            "methodCall": "createRelationPath"
+                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -18819,7 +18747,7 @@
                             "_label": "LITERAL",
                             "code": "\"appendPathNode(%d, %d, %f, %f)\"",
                             "lineNumber": 84,
-                            "methodCall": "appendPathNode"
+                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -18909,7 +18837,7 @@
                             "_label": "LITERAL",
                             "code": "\"renderPath(%d, %d)\"",
                             "lineNumber": 64,
-                            "methodCall": "renderPath"
+                            "methodCall": ""
                         }
                     ],
                     "returnType": "Integer"
@@ -18926,7 +18854,7 @@
                             "_label": "METHOD",
                             "code": "private void repositionClass(int id, double x, double y)",
                             "lineNumber": 91,
-                            "methodCall": "repositionClass"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -18992,7 +18920,7 @@
                             "_label": "LITERAL",
                             "code": "\"repositionClass(%d, %f, %f);\"",
                             "lineNumber": 94,
-                            "methodCall": "repositionClass"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -19087,7 +19015,7 @@
                             "_label": "METHOD",
                             "code": "private Pair<Double, Double> getClassDimensions(int id)",
                             "lineNumber": 99,
-                            "methodCall": "getClassDimensions"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -19141,7 +19069,7 @@
                             "_label": "LITERAL",
                             "code": "\"getClassWidth(%d);\"",
                             "lineNumber": 113,
-                            "methodCall": "getClassWidth"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -19189,7 +19117,7 @@
                             "_label": "LITERAL",
                             "code": "\"getClassHeight(%d);\"",
                             "lineNumber": 114,
-                            "methodCall": "getClassHeight"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -19327,7 +19255,7 @@
                             "_label": "RETURN",
                             "code": "return new Pair(Double.parseDouble(w.substring(0, w.length() - 2)), Double.parseDouble(h.substring(0, h.length() - 2)));",
                             "lineNumber": 118,
-                            "methodCall": "Pair"
+                            "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
@@ -19464,7 +19392,7 @@
                             "_label": "METHOD",
                             "code": "private void drawShape(Shape s)",
                             "lineNumber": 122,
-                            "methodCall": "drawShape"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -19614,7 +19542,7 @@
                             "_label": "LITERAL",
                             "code": "\"drawDot(%f, %f, \\\"%s\\\");\"",
                             "lineNumber": 126,
-                            "methodCall": "drawDot"
+                            "methodCall": ""
                         },
                         {
                             "_label": "CALL",
@@ -19727,7 +19655,7 @@
                             "_label": "METHOD",
                             "code": "public void renderEventPerformed(RenderEvent e)",
                             "lineNumber": 131,
-                            "methodCall": "renderEventPerformed"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
@@ -20483,7 +20411,7 @@
                             "_label": "METHOD",
                             "code": "public static void main(String[] args)",
                             "lineNumber": 10,
-                            "methodCall": "main"
+                            "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
