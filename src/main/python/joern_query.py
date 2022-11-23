@@ -41,7 +41,7 @@ def source_code_json_creation():
             method_call_pattern = re.compile("([a-zA-Z]*\()")
             calls = method_call_pattern.findall(curr_instructions)
             method_call = ""
-            if calls:
+            if calls and curr_label == "CALL":
                 method_call = calls[0].replace("(", "")
 
             curr_instruction_dict = {
@@ -56,7 +56,9 @@ def source_code_json_creation():
             return
         else:
             # Get the modifiers, return type and the method body from the full method body provided by Joern.
-            modifiers_pattern = re.compile("(private|public|protected|static|final|synchronized|volatile|abstract|native)")
+            modifiers_pattern = re.compile(
+                "(private|public|protected|static|final|synchronized|volatile|abstract|native)"
+            )
             return_type_pattern = re.compile("(^[a-zA-z]*\s)")
             method_name_pattern = re.compile("(^[a-zA-z]*)")
 
