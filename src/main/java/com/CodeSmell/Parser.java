@@ -54,6 +54,7 @@ public class Parser {
 			for (Object classMap : classes) {
 				Map<?, ?> completeClassMap = (Map<?, ?>) classMap;
 				for (Map.Entry<?, ?> entry : completeClassMap.entrySet()) {
+
 					if(entry.getKey().equals("name"))
 					{
 						cpg.addClass(new CPGClass((String)entry.getValue()));
@@ -61,102 +62,118 @@ public class Parser {
 					}
 					if(entry.getKey().equals("methods"))
 					{
-						ArrayList methods = (ArrayList) entry.getValue();
+						ArrayList methods = parseSourceCodeMethods((ArrayList) entry.getValue());
 						for(Object method: methods)
 						{
-							method = (Map<?, ?>)method;
-							String methodName = "";
-							ArrayList<String> methodInstructions = new ArrayList<>();
-							Modifier[] methodModifiers = new Modifier[1];
-							for(Map.Entry<?, ?> methodCharacteristic:((Map<?, ?>) method).entrySet()) {
-								switch ((String) methodCharacteristic.getKey()) {
-									case "name":
-										methodName = (String) methodCharacteristic.getValue();
-										break;
-									case "instructions":
-										String label = "";
-										String code = "";
-										ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
-										for(Object instructionsTree:instructions)
-										{
-											for(Map.Entry<?, ?> instruction:((Map<?, ?>) instructionsTree).entrySet())
-											{
-												if(instruction.getKey().equals("_label"))
-												{
-													label = (String)instruction.getValue();
-												}
-												if(instruction.getKey().equals("code"))
-												{
-													code = (String)instruction.getValue();
-												}
-											}
-										}
-										methodInstructions.add(label+":"+code);
-										break;
-									case "modifiers":
-										ArrayList  methodModifier = (ArrayList) methodCharacteristic.getValue();
-										switch ((String)methodModifier.get(0))
-										{
-											case "private":
-												methodModifiers[0] = Modifier.PRIVATE;
-												break;
-											case "public":
-												methodModifiers[0] = Modifier.PUBLIC;
-												break;
-											case "protected":
-												methodModifiers[0] = Modifier.PROTECTED;
-												break;
-										}
-								}
-							}
-							String[] methodInstruct = new String[methodInstructions.size()];
-							cpg.getClasses().get(classCount).addMethod(new Method(methodName,methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers));
+							cpg.getClasses().get(classCount).addMethod((Method)method);
 						}
 					}
 					if(entry.getKey().equals("fields"))
 					{
-						ArrayList fields = (ArrayList) entry.getValue();
+						ArrayList fields = parseSourceCodeFields((ArrayList) entry.getValue());
 						for(Object field: fields)
 						{
-							field = (Map<?, ?>)field;
-							String fieldName = "";
-							Modifier[] fieldModifiers = new Modifier[1];
-							for(Map.Entry<?, ?> fieldCharacteristic:((Map<?, ?>) field).entrySet()) {
-								switch ((String) fieldCharacteristic.getKey()) {
-									case "name":
-										fieldName = (String) fieldCharacteristic.getValue();
-										break;
-									case "modifiers":
-										ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue();
-										switch ((String)fieldModifier.get(0))
-										{
-											case "private":
-												fieldModifiers[0] = Modifier.PRIVATE;
-												break;
-											case "public":
-												fieldModifiers[0] = Modifier.PUBLIC;
-												break;
-											case "protected":
-												fieldModifiers[0] = Modifier.PROTECTED;
-												break;
-										}
-								}
-							}
-							cpg.getClasses().get(classCount).addAttribute(new Attribute(fieldName,fieldModifiers));
+							cpg.getClasses().get(classCount).addAttribute((Attribute) field);
 						}
-
 					}
 
 				}
 			}
-
 			// close reader
 			reader.close();
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		cpg.addRelation(new CodePropertyGraph.Relation(cpg.getClasses().get(0),cpg.getClasses().get(1), ClassRelation.Type.ASSOCIATION));
 		return cpg;
+	}
+
+	private ArrayList<Method> parseSourceCodeMethods(ArrayList methods)
+	{
+		ArrayList<Method> parsedMethods = new ArrayList<Method>();
+
+		for(Object method: methods) {
+			method = (Map<?, ?>) method;
+			String methodName = "";
+			ArrayList<String> methodInstructions = new ArrayList<>();
+			Modifier[] methodModifiers = new Modifier[1];
+			for (Map.Entry<?, ?> methodCharacteristic : ((Map<?, ?>) method).entrySet()) {
+				switch ((String) methodCharacteristic.getKey()) {
+					case "name":
+						methodName = (String) methodCharacteristic.getValue();
+						break;
+					case "instructions":
+						String label = "";
+						String code = "";
+						ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
+						for (Object instructionsTree : instructions) {
+							for (Map.Entry<?, ?> instruction : ((Map<?, ?>) instructionsTree).entrySet()) {
+								if (instruction.getKey().equals("code")) {
+									code = (String) instruction.getValue();
+								}
+							}
+						}
+						methodInstructions.add(code);
+						break;
+					case "modifiers":
+						ArrayList methodModifier = (ArrayList) methodCharacteristic.getValue();
+						if (!methodModifier.isEmpty()) {
+								switch ((String) methodModifier.get(0)) {
+									case "private":
+										methodModifiers[0] = Modifier.PRIVATE;
+										break;
+									case "public":
+										methodModifiers[0] = Modifier.PUBLIC;
+										break;
+									case "protected":
+										methodModifiers[0] = Modifier.PROTECTED;
+										break;
+								}
+						}
+				}
+			}
+			String[] methodInstruct = new String[methodInstructions.size()];
+			parsedMethods.add(new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers));
+		}
+
+		return parsedMethods;
+	}
+
+	private ArrayList<Attribute> parseSourceCodeFields(ArrayList fields)
+	{
+		ArrayList<Attribute> parsedFields = new ArrayList<Attribute>();
+
+		for(Object field: fields)
+		{
+			field = (Map<?, ?>)field;
+			String fieldName = "";
+			Modifier[] fieldModifiers = new Modifier[1];
+			for(Map.Entry<?, ?> fieldCharacteristic:((Map<?, ?>) field).entrySet()) {
+				switch ((String) fieldCharacteristic.getKey()) {
+					case "name":
+						fieldName = (String) fieldCharacteristic.getValue();
+						break;
+					case "modifiers":
+						ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue();
+						if (!fieldModifier.isEmpty()){
+							switch ((String) fieldModifier.get(0)) {
+								case "private":
+									fieldModifiers[0] = Modifier.PRIVATE;
+									break;
+								case "public":
+									fieldModifiers[0] = Modifier.PUBLIC;
+									break;
+								case "protected":
+									fieldModifiers[0] = Modifier.PROTECTED;
+									break;
+							}
+					}
+				}
+			}
+			parsedFields.add(new Attribute(fieldName,fieldModifiers));
+		}
+		return parsedFields;
 	}
 
 }
