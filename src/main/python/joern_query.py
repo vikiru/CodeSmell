@@ -17,7 +17,7 @@ def clean_json(joern_result):
 def source_code_json_creation():
     # Obtain the classes, fields and modifiers, methods and their instructions
     query = (
-        "cpg.typeDecl.isExternal(false).map(node => (node.name, node.astChildren.isMember.l.map(node => (node, "
+        "cpg.typeDecl.isExternal(false).map(node => (node.name, node.code, node.astChildren.isMember.l.map(node => (node, "
         "node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, "
         "node.ast.label.l, node.ast.code.l, node.ast.lineNumber.l)))).toJsonPretty "
     )
@@ -95,14 +95,40 @@ def source_code_json_creation():
             return curr_method_dict
 
     # For every class, create a dictionary and return it.
+    # _1 corresponds to class name, _2 corresponds to class code declaration (i.e. "public class A")
+    # _3 corresponds to class fields
+    # _4 corresponds to class methods
     def create_class_dict(curr_class):
+        # Get the type of the object, either a interface, class, enum or abstract class.
+        def get_type(declaration, curr_class_dict):
+            if "interface" in declaration:
+                return "interface"
+            else:
+                list_method_modifiers = [
+                    methods["modifiers"] for methods in curr_class_dict["methods"]
+                ]
+                single_list_method_modifiers = []
+                for list in list_method_modifiers:
+                    single_list_method_modifiers.extend(list)
+                if "class" in declaration and not curr_class_dict["methods"]:
+                    return "enum"
+                elif (
+                    "class" in declaration
+                    and "abstract" in single_list_method_modifiers
+                ):
+                    return "abstract class"
+                else:
+                    return "class"
+
         curr_class_dict = {
             "name": curr_class["_1"],
-            "fields": list(map(create_field_dict, curr_class["_2"])),
+            "type": "",
+            "fields": list(map(create_field_dict, curr_class["_3"])),
             "methods": list(
-                filter(None, list(map(create_method_dict, curr_class["_3"])))
+                filter(None, list(map(create_method_dict, curr_class["_4"])))
             ),
         }
+        curr_class_dict["type"] = get_type(curr_class["_2"], curr_class_dict)
         return curr_class_dict
 
     # Create a dictionary with all of the info about the source code and write it to a .json file.
