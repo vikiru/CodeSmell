@@ -26,10 +26,17 @@ def source_code_json_creation():
 
     # For every field, create a dictionary and return it.
     def create_field_dict(curr_field):
+        type = curr_field["_1"]["typeFullName"]
+        index = curr_field["_1"]["typeFullName"].rfind(".")
+        if index != -1:
+            type = curr_field["_1"]["typeFullName"][
+                index + 1 : len(curr_field["_1"]["typeFullName"])
+            ]
+
         curr_field_dict = {
             "name": curr_field["_1"]["name"],
             "modifiers": [x.lower() for x in curr_field["_2"]],
-            "type": curr_field["_1"]["typeFullName"],
+            "type": type,
         }
         return curr_field_dict
 
@@ -136,12 +143,14 @@ def source_code_json_creation():
             if "interface" in declaration:
                 return "interface"
             else:
+                # Get all of the modifiers of a class's methods and combine them into a single list.
                 list_method_modifiers = [
                     methods["modifiers"] for methods in curr_class_dict["methods"]
                 ]
                 single_list_method_modifiers = []
                 for list in list_method_modifiers:
                     single_list_method_modifiers.extend(list)
+
                 if "class" in declaration and not curr_class_dict["methods"]:
                     return "enum"
                 elif (
