@@ -34,6 +34,10 @@ public class CPGClass {
 		PRIVATE,
 		PROTECTED,
 		STATIC,
+		SYNCHRONIZED,
+		VOLATILE,
+		ABSTRACT,
+		NATIVE,
 		FINAL
 	}
 

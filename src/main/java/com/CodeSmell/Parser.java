@@ -97,7 +97,7 @@ public class Parser {
 			method = (Map<?, ?>) method;
 			String methodName = "";
 			ArrayList<String> methodInstructions = new ArrayList<>();
-			Modifier[] methodModifiers = new Modifier[1];
+			ArrayList<Modifier> methodModifiers = new ArrayList<>();
 			for (Map.Entry<?, ?> methodCharacteristic : ((Map<?, ?>) method).entrySet()) {
 				switch ((String) methodCharacteristic.getKey()) {
 					case "name":
@@ -117,24 +117,46 @@ public class Parser {
 						methodInstructions.add(code);
 						break;
 					case "modifiers":
+						//NEED TO GET STATIC VOID AND PUBLIC
+						//ADD TO ENUM
 						ArrayList methodModifier = (ArrayList) methodCharacteristic.getValue();
 						if (!methodModifier.isEmpty()) {
-								switch ((String) methodModifier.get(0)) {
+							for(int i=0 ; i<methodModifier.size(); i++) {
+								switch ((String) methodModifier.get(i)) {
 									case "private":
-										methodModifiers[0] = Modifier.PRIVATE;
+										methodModifiers.add(Modifier.PRIVATE);
 										break;
 									case "public":
-										methodModifiers[0] = Modifier.PUBLIC;
+										methodModifiers.add(Modifier.PUBLIC);
 										break;
 									case "protected":
-										methodModifiers[0] = Modifier.PROTECTED;
+										methodModifiers.add(Modifier.PROTECTED);
 										break;
+									case "static":
+										methodModifiers.add(Modifier.STATIC);
+										break;
+									case "final":
+										methodModifiers.add(Modifier.FINAL);
+										break;
+									case "synchronized":
+										methodModifiers.add(Modifier.SYNCHRONIZED);
+										break;
+									case "abstract":
+										methodModifiers.add(Modifier.ABSTRACT);
+										break;
+									case "native":
+										methodModifiers.add(Modifier.NATIVE);
+										break;
+
 								}
+							}
 						}
 				}
 			}
 			String[] methodInstruct = new String[methodInstructions.size()];
-			parsedMethods.add(new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), methodModifiers));
+			Modifier modifiers[] = new Modifier[methodModifiers.size()];
+			modifiers = methodModifiers.toArray(modifiers);
+			parsedMethods.add(new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct),modifiers));
 		}
 
 		return parsedMethods;
