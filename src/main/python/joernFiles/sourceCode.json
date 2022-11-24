@@ -19520,38 +19520,6 @@
                     "returnType": "void"
                 }
             ]
-        },
-        {
-            "name": "test",
-            "type": "abstract class",
-            "fields": [],
-            "methods": [
-                {
-                    "code": "public abstract void draw()",
-                    "methodBody": "draw()",
-                    "parameters": [],
-                    "modifiers": [
-                        "public",
-                        "abstract"
-                    ],
-                    "name": "draw",
-                    "instructions": [
-                        {
-                            "_label": "METHOD",
-                            "code": "public abstract void draw()",
-                            "lineNumber": 4,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "METHOD_PARAMETER_IN",
-                            "code": "this",
-                            "lineNumber": 4,
-                            "methodCall": ""
-                        }
-                    ],
-                    "returnType": "void"
-                }
-            ]
         }
     ]
 }
