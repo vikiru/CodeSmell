@@ -37,20 +37,23 @@ def source_code_json_creation():
     def create_method_dict(curr_method):
         # For every method's instruction, create a dictionary and return it.
         def create_instruction_dict(curr_label, curr_instructions, curr_line_number):
-            # Get the method call in each line of code, if any.
-            method_call_pattern = re.compile("([a-zA-Z]*\()")
-            calls = method_call_pattern.findall(curr_instructions)
-            method_call = ""
-            if calls and curr_label == "CALL":
-                method_call = calls[0].replace("(", "")
+            if curr_instructions == "<empty>":
+                return
+            else:
+                # Get the method call in each line of code, if any.
+                method_call_pattern = re.compile("([a-zA-Z]*\()")
+                calls = method_call_pattern.findall(curr_instructions)
+                method_call = ""
+                if calls and curr_label == "CALL":
+                    method_call = calls[0].replace("(", "")
 
-            curr_instruction_dict = {
-                "_label": curr_label,
-                "code": curr_instructions.replace("\r\n", ""),
-                "lineNumber": curr_line_number or "none",
-                "methodCall": method_call,
-            }
-            return curr_instruction_dict
+                curr_instruction_dict = {
+                    "_label": curr_label,
+                    "code": curr_instructions.replace("\r\n", ""),
+                    "lineNumber": curr_line_number or "none",
+                    "methodCall": method_call,
+                }
+                return curr_instruction_dict
 
         if curr_method["_1"]["code"] == "<empty>":
             return
@@ -83,11 +86,16 @@ def source_code_json_creation():
                 # _3 corresponds to the code,
                 # _4 corresponds to the lineNumbers
                 "instructions": list(
-                    map(
-                        create_instruction_dict,
-                        curr_method["_2"],
-                        curr_method["_3"],
-                        curr_method["_4"],
+                    filter(
+                        None,
+                        list(
+                            map(
+                                create_instruction_dict,
+                                curr_method["_2"],
+                                curr_method["_3"],
+                                curr_method["_4"],
+                            )
+                        ),
                     )
                 ),
                 "returnType": return_type,

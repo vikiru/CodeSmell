@@ -73,12 +73,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 20,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.name = name",
                             "lineNumber": 21,
@@ -193,18 +187,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 24,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 24,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj0",
                             "lineNumber": 24,
@@ -270,12 +252,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 27,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.calls.add(m)",
                             "lineNumber": 28,
@@ -303,12 +279,6 @@
                             "_label": "IDENTIFIER",
                             "code": "m",
                             "lineNumber": 28,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 27,
                             "methodCall": ""
                         },
                         {
@@ -409,12 +379,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Modifier[] modifiers",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 47,
                             "methodCall": ""
                         },
@@ -555,12 +519,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 57,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.methods;",
                             "lineNumber": 58,
@@ -582,12 +540,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "methods",
                             "lineNumber": 58,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 57,
                             "methodCall": ""
                         },
                         {
@@ -620,12 +572,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 61,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.attributes;",
                             "lineNumber": 62,
@@ -647,12 +593,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "attributes",
                             "lineNumber": 62,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 61,
                             "methodCall": ""
                         },
                         {
@@ -691,12 +631,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 65,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.methods.add(m)",
                             "lineNumber": 66,
@@ -724,12 +658,6 @@
                             "_label": "IDENTIFIER",
                             "code": "m",
                             "lineNumber": 66,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 65,
                             "methodCall": ""
                         },
                         {
@@ -774,12 +702,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 69,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.attributes.add(a)",
                             "lineNumber": 70,
@@ -807,12 +729,6 @@
                             "_label": "IDENTIFIER",
                             "code": "a",
                             "lineNumber": 70,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 69,
                             "methodCall": ""
                         },
                         {
@@ -851,12 +767,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "String name",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 73,
                             "methodCall": ""
                         },
@@ -915,18 +825,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 75,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 75,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj1",
                             "lineNumber": 75,
@@ -978,18 +876,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "attributes",
                             "lineNumber": 77,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 73,
                             "methodCall": ""
                         }
                     ],
@@ -1110,12 +996,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Type type",
-                            "lineNumber": 25,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 25,
                             "methodCall": ""
                         },
@@ -1265,12 +1145,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "ArrayList<Position> path",
-                            "lineNumber": 31,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 31,
                             "methodCall": ""
                         },
@@ -1441,18 +1315,6 @@
                             "code": "re",
                             "lineNumber": 31,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 31,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 31,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "void"
@@ -1478,12 +1340,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return path;",
                             "lineNumber": 39,
@@ -1505,18 +1361,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "path",
                             "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 38,
                             "methodCall": ""
                         }
                     ],
@@ -1584,12 +1428,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Type type",
-                            "lineNumber": 15,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 15,
                             "methodCall": ""
                         },
@@ -1759,12 +1597,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 25,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.classes;",
                             "lineNumber": 26,
@@ -1786,12 +1618,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "classes",
                             "lineNumber": 26,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
@@ -1824,12 +1650,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 29,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.relations;",
                             "lineNumber": 30,
@@ -1851,12 +1671,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "relations",
                             "lineNumber": 30,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 29,
                             "methodCall": ""
                         },
                         {
@@ -1889,12 +1703,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 33,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.classes = new ArrayList<CPGClass>()",
                             "lineNumber": 34,
@@ -1915,18 +1723,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "classes",
-                            "lineNumber": 34,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 34,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 34,
                             "methodCall": ""
                         },
@@ -1983,12 +1779,6 @@
                             "code": "relations",
                             "lineNumber": 36,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 33,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": ""
@@ -2020,12 +1810,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "add(c)",
                             "lineNumber": 39,
@@ -2053,18 +1837,6 @@
                             "_label": "IDENTIFIER",
                             "code": "c",
                             "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 38,
                             "methodCall": ""
                         },
                         {
@@ -2103,12 +1875,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 42,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.relations.add(r)",
                             "lineNumber": 43,
@@ -2136,18 +1902,6 @@
                             "_label": "IDENTIFIER",
                             "code": "r",
                             "lineNumber": 43,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 42,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 42,
                             "methodCall": ""
                         },
                         {
@@ -2183,12 +1937,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 5,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 5,
                             "methodCall": ""
                         },
@@ -2296,12 +2044,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 5,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "main(args)",
                             "lineNumber": 6,
@@ -2317,18 +2059,6 @@
                             "_label": "IDENTIFIER",
                             "code": "args",
                             "lineNumber": 6,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 5,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 5,
                             "methodCall": ""
                         }
                     ],
@@ -2397,12 +2127,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Position p2",
-                            "lineNumber": 55,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 55,
                             "methodCall": ""
                         },
@@ -2674,12 +2398,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 63,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "super(new Position[] { new Position(x1, y1), new Position(x2, y2) }, \"orange\");",
                             "lineNumber": 64,
@@ -2696,18 +2414,6 @@
                             "code": "new Position[] { new Position(x1, y1), new Position(x2, y2) }",
                             "lineNumber": 65,
                             "methodCall": "Position"
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 65,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 65,
-                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -2749,18 +2455,6 @@
                             "_label": "IDENTIFIER",
                             "code": "$obj0",
                             "lineNumber": 65,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 66,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 67,
                             "methodCall": ""
                         },
                         {
@@ -2937,12 +2631,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return String.format(\"(%f, %f) -> (%f, %f)\", x1, y1, x2, y2);",
                             "lineNumber": 74,
@@ -3043,18 +2731,6 @@
                             "code": "y2",
                             "lineNumber": 75,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "String"
@@ -3076,12 +2752,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 78,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 78,
                             "methodCall": ""
                         },
@@ -3228,18 +2898,6 @@
                             "code": "2",
                             "lineNumber": 79,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 78,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 78,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "double"
@@ -3307,12 +2965,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 15,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "METHOD_RETURN",
                             "code": "void",
                             "lineNumber": 15,
@@ -3350,12 +3002,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "ArrayList<UMLClass> classes",
-                            "lineNumber": 19,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 19,
                             "methodCall": ""
                         },
@@ -3516,12 +3162,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 35,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (i >= 1)",
                             "lineNumber": 35,
@@ -3542,12 +3182,6 @@
                         {
                             "_label": "LITERAL",
                             "code": "1",
-                            "lineNumber": 36,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 36,
                             "methodCall": ""
                         },
@@ -3907,12 +3541,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "UMLClass c",
-                            "lineNumber": 91,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 91,
                             "methodCall": ""
                         },
@@ -4289,18 +3917,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 98,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 98,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj5",
                             "lineNumber": 98,
@@ -4363,18 +3979,6 @@
                         {
                             "_label": "LITERAL",
                             "code": "1",
-                            "lineNumber": 99,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 99,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 99,
                             "methodCall": ""
                         },
@@ -4445,18 +4049,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj7",
                             "lineNumber": 91,
@@ -4510,12 +4102,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 104,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "$iterLocal0",
                             "lineNumber": 108,
@@ -4530,12 +4116,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 108,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 108,
                             "methodCall": ""
                         },
@@ -4564,20 +4144,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 108,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 108,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 108,
                             "methodCall": ""
                         },
@@ -4588,20 +4156,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 108,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "c",
-                            "lineNumber": 108,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 108,
                             "methodCall": ""
                         },
@@ -4644,12 +4200,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "c",
-                            "lineNumber": 109,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 109,
                             "methodCall": ""
                         },
@@ -4714,12 +4264,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 112,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return false;",
                             "lineNumber": 113,
@@ -4741,18 +4285,6 @@
                             "_label": "LITERAL",
                             "code": "true",
                             "lineNumber": 116,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 104,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 104,
                             "methodCall": ""
                         },
                         {
@@ -4800,18 +4332,6 @@
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Line[] with",
                             "lineNumber": 119,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 119,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CONTROL_STRUCTURE",
-                            "code": "<empty>",
-                            "lineNumber": 122,
                             "methodCall": ""
                         },
                         {
@@ -4881,32 +4401,14 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 122,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "l2",
                             "lineNumber": 122,
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 122,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "l2",
-                            "lineNumber": 122,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 122,
                             "methodCall": ""
                         },
@@ -5715,26 +5217,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 136,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return new Position(x1 + a * (x2 - x1), y1 + a * (y2 - y1));",
-                            "lineNumber": 136,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 136,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 136,
                             "methodCall": ""
                         },
@@ -5828,12 +5312,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 149,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "Position p",
                             "lineNumber": 152,
@@ -5866,18 +5344,6 @@
                         {
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);",
-                            "lineNumber": 153,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 153,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 153,
                             "methodCall": ""
                         },
@@ -6031,12 +5497,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 156,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "Position p",
                             "lineNumber": 160,
@@ -6103,26 +5563,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 162,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y);",
-                            "lineNumber": 162,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 162,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 162,
                             "methodCall": ""
                         },
@@ -6265,26 +5707,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 164,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight());",
-                            "lineNumber": 164,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 164,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 164,
                             "methodCall": ""
                         },
@@ -6445,26 +5869,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 166,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return new Position(p.x, p.y + c.getHeight() / 2);",
-                            "lineNumber": 166,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 166,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 166,
                             "methodCall": ""
                         },
@@ -6607,26 +6013,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 168,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return new Position(p.x + c.getWidth(), p.y + c.getHeight() / 2);",
-                            "lineNumber": 168,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 168,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 168,
                             "methodCall": ""
                         },
@@ -6740,12 +6128,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "UMLClass c2",
-                            "lineNumber": 174,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 174,
                             "methodCall": ""
                         },
@@ -7026,28 +6408,10 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 191,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "throw new RuntimeException(\"No intersection\");",
                             "lineNumber": 193,
                             "methodCall": "RuntimeException"
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 193,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 193,
-                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -7123,12 +6487,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "UMLClass c2",
-                            "lineNumber": 196,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 196,
                             "methodCall": ""
                         },
@@ -7493,28 +6851,10 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 211,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "throw new RuntimeException(\"No intersection\");",
                             "lineNumber": 213,
                             "methodCall": "RuntimeException"
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 213,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 196,
-                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -7554,12 +6894,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 216,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 216,
                             "methodCall": ""
                         },
@@ -7634,12 +6968,6 @@
                             "code": "classHorzComp",
                             "lineNumber": 216,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 216,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "void"
@@ -7671,12 +6999,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 229,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "$iterLocal1",
                             "lineNumber": 237,
@@ -7695,12 +7017,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 237,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "relations",
                             "lineNumber": 237,
@@ -7713,20 +7029,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 237,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal1",
-                            "lineNumber": 237,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 237,
                             "methodCall": ""
                         },
@@ -7737,20 +7041,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 237,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "r",
-                            "lineNumber": 237,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 237,
                             "methodCall": ""
                         },
@@ -7971,18 +7263,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 244,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 244,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj24",
                             "lineNumber": 244,
@@ -8075,12 +7355,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "collision",
-                            "lineNumber": 248,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 248,
                             "methodCall": ""
                         },
@@ -8433,12 +7707,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 257,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "mid1 = classMiddle(r.source, Direction.BOTTOM)",
                             "lineNumber": 257,
@@ -8657,12 +7925,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "y",
-                            "lineNumber": 260,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 260,
                             "methodCall": ""
                         },
@@ -8889,12 +8151,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 263,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "mid1 = classMiddle(r.source, Direction.TOP)",
                             "lineNumber": 263,
@@ -9113,12 +8369,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "y",
-                            "lineNumber": 266,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 266,
                             "methodCall": ""
                         },
@@ -9351,12 +8601,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 277,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "add(test)",
                             "lineNumber": 277,
@@ -9517,12 +8761,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 86,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "super(new Position[] { p }, colour);",
                             "lineNumber": 87,
@@ -9607,12 +8845,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 31,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "HashMap<CPGClass, UMLClass> classMap",
                             "lineNumber": 39,
@@ -9668,12 +8900,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 41,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "getClasses()",
                             "lineNumber": 41,
                             "methodCall": "getClasses"
@@ -9691,20 +8917,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 41,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 41,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 41,
                             "methodCall": ""
                         },
@@ -9715,20 +8929,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 41,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "graphClass",
-                            "lineNumber": 41,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 41,
                             "methodCall": ""
                         },
@@ -9836,12 +9038,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 44,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "getMethods()",
                             "lineNumber": 44,
                             "methodCall": "getMethods"
@@ -9859,20 +9055,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 44,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal1",
-                            "lineNumber": 44,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 44,
                             "methodCall": ""
                         },
@@ -9883,21 +9067,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 44,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "m",
                             "lineNumber": 44,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 45,
                             "methodCall": ""
                         },
                         {
@@ -9944,12 +9116,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "getAttributes()",
                             "lineNumber": 47,
                             "methodCall": "getAttributes"
@@ -9967,20 +9133,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal2",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 47,
                             "methodCall": ""
                         },
@@ -9991,21 +9145,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "a",
                             "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 48,
                             "methodCall": ""
                         },
                         {
@@ -10100,12 +9242,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 61,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "getRelations()",
                             "lineNumber": 61,
                             "methodCall": "getRelations"
@@ -10123,20 +9259,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 61,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal3",
-                            "lineNumber": 61,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 61,
                             "methodCall": ""
                         },
@@ -10147,20 +9271,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 61,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "r",
-                            "lineNumber": 63,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 63,
                             "methodCall": ""
                         },
@@ -10435,18 +9547,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 31,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj5",
                             "lineNumber": 31,
@@ -10484,12 +9584,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Stage primaryStage",
-                            "lineNumber": 77,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 77,
                             "methodCall": ""
                         },
@@ -10556,18 +9650,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "primaryStage",
-                            "lineNumber": 79,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 79,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 79,
                             "methodCall": ""
                         },
@@ -10672,18 +9754,6 @@
                             "code": "new File(System.getProperty(\"user.dir\") + \"/boxes.html\").toURI()",
                             "lineNumber": 82,
                             "methodCall": "File"
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 82,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 82,
-                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -10908,18 +9978,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 103,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 103,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj9",
                             "lineNumber": 103,
@@ -11028,18 +10086,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 114,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 114,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj11",
                             "lineNumber": 115,
@@ -11094,12 +10140,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 119,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "launch(args)",
                             "lineNumber": 120,
@@ -11115,18 +10155,6 @@
                             "_label": "IDENTIFIER",
                             "code": "args",
                             "lineNumber": 120,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 119,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 119,
                             "methodCall": ""
                         }
                     ],
@@ -11166,12 +10194,6 @@
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "<unresolvedNamespace> newState",
                             "lineNumber": 93,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
@@ -11255,12 +10277,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "SUCCEEDED",
-                            "lineNumber": 96,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 96,
                             "methodCall": ""
                         },
@@ -11392,12 +10408,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 8,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.first = first",
                             "lineNumber": 9,
@@ -11513,12 +10523,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 32,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "Parser p",
                             "lineNumber": 33,
@@ -11571,12 +10575,6 @@
                             "code": "\"\"",
                             "lineNumber": 32,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 32,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "void"
@@ -11604,12 +10602,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "String destination",
-                            "lineNumber": 41,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 41,
                             "methodCall": ""
                         },
@@ -11980,12 +10972,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 54,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "classes",
                             "lineNumber": 54,
@@ -11998,20 +10984,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 55,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 55,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 55,
                             "methodCall": ""
                         },
@@ -12022,20 +10996,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 55,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "classMap",
-                            "lineNumber": 56,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 56,
                             "methodCall": ""
                         },
@@ -12101,12 +11063,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 56,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "completeClassMap.entrySet()",
                             "lineNumber": 56,
                             "methodCall": "entrySet"
@@ -12124,20 +11080,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 58,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal1",
-                            "lineNumber": 58,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 58,
                             "methodCall": ""
                         },
@@ -12148,20 +11092,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 59,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "entry",
-                            "lineNumber": 60,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 60,
                             "methodCall": ""
                         },
@@ -12202,12 +11134,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 60,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "addClass(new CPGClass((String) entry.getValue()))",
                             "lineNumber": 61,
@@ -12217,18 +11143,6 @@
                             "_label": "IDENTIFIER",
                             "code": "cpg",
                             "lineNumber": 61,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 63,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 63,
                             "methodCall": ""
                         },
                         {
@@ -12328,12 +11242,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 66,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "ArrayList methods",
                             "lineNumber": 66,
@@ -12406,12 +11314,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 68,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "methods",
                             "lineNumber": 68,
@@ -12424,21 +11326,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 68,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal2",
                             "lineNumber": 68,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 71,
                             "methodCall": ""
                         },
                         {
@@ -12448,20 +11338,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 71,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "method",
-                            "lineNumber": 71,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 71,
                             "methodCall": ""
                         },
@@ -12550,12 +11428,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 74,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "ArrayList fields",
                             "lineNumber": 74,
@@ -12628,12 +11500,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 76,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "fields",
                             "lineNumber": 76,
@@ -12646,20 +11512,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 76,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal3",
-                            "lineNumber": 83,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 83,
                             "methodCall": ""
                         },
@@ -12670,21 +11524,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 86,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "field",
                             "lineNumber": 86,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 88,
                             "methodCall": ""
                         },
                         {
@@ -12760,12 +11602,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 88,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "ex.printStackTrace()",
                             "lineNumber": 88,
@@ -12787,18 +11623,6 @@
                             "_label": "IDENTIFIER",
                             "code": "cpg",
                             "lineNumber": 88,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 89,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 89,
                             "methodCall": ""
                         },
                         {
@@ -12846,12 +11670,6 @@
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "ArrayList methods",
                             "lineNumber": 92,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
@@ -12909,12 +11727,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 96,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "methods",
                             "lineNumber": 96,
@@ -12927,20 +11739,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 96,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal4",
-                            "lineNumber": 96,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 96,
                             "methodCall": ""
                         },
@@ -12951,20 +11751,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 96,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "method",
-                            "lineNumber": 96,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 96,
                             "methodCall": ""
                         },
@@ -13114,12 +11902,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "this.entrySet()",
                             "lineNumber": 101,
                             "methodCall": "entrySet"
@@ -13149,20 +11931,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal5",
-                            "lineNumber": 101,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 101,
                             "methodCall": ""
                         },
@@ -13173,20 +11943,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 102,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "methodCharacteristic",
-                            "lineNumber": 102,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 102,
                             "methodCall": ""
                         },
@@ -13223,12 +11981,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "methodCharacteristic",
-                            "lineNumber": 104,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 104,
                             "methodCall": ""
                         },
@@ -13407,12 +12159,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 111,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "instructions",
                             "lineNumber": 111,
@@ -13425,20 +12171,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 111,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal6",
-                            "lineNumber": 111,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 111,
                             "methodCall": ""
                         },
@@ -13449,20 +12183,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 111,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "instructionsTree",
-                            "lineNumber": 111,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 111,
                             "methodCall": ""
                         },
@@ -13487,12 +12209,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal7",
-                            "lineNumber": 111,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 111,
                             "methodCall": ""
                         },
@@ -13527,21 +12243,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 112,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal7",
                             "lineNumber": 112,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 113,
                             "methodCall": ""
                         },
                         {
@@ -13551,20 +12255,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 113,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "instruction",
-                            "lineNumber": 113,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 113,
                             "methodCall": ""
                         },
@@ -13602,12 +12294,6 @@
                             "_label": "LITERAL",
                             "code": "\"code\"",
                             "lineNumber": 119,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 120,
                             "methodCall": ""
                         },
                         {
@@ -13749,12 +12435,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 125,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "switch((String) methodModifier.get(0))",
                             "lineNumber": 126,
@@ -13787,12 +12467,6 @@
                         {
                             "_label": "LITERAL",
                             "code": "0",
-                            "lineNumber": 127,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 127,
                             "methodCall": ""
                         },
@@ -14018,12 +12692,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 144,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "ArrayList<Attribute> parsedFields",
                             "lineNumber": 145,
@@ -14078,12 +12746,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 147,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "fields",
                             "lineNumber": 147,
@@ -14096,21 +12758,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 147,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal8",
                             "lineNumber": 148,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 147,
                             "methodCall": ""
                         },
                         {
@@ -14120,20 +12770,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 147,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "field",
-                            "lineNumber": 147,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 147,
                             "methodCall": ""
                         },
@@ -14247,12 +12885,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 152,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "this.entrySet()",
                             "lineNumber": 152,
                             "methodCall": "entrySet"
@@ -14282,20 +12914,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 152,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal9",
-                            "lineNumber": 152,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 152,
                             "methodCall": ""
                         },
@@ -14306,20 +12926,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 153,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 153,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 153,
                             "methodCall": ""
                         },
@@ -14356,12 +12964,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "fieldCharacteristic",
-                            "lineNumber": 155,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 155,
                             "methodCall": ""
                         },
@@ -14498,12 +13100,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 162,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "switch((String) fieldModifier.get(0))",
                             "lineNumber": 162,
@@ -14537,12 +13133,6 @@
                             "_label": "LITERAL",
                             "code": "0",
                             "lineNumber": 164,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 165,
                             "methodCall": ""
                         },
                         {
@@ -14754,12 +13344,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 21,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "super(name, m);",
                             "lineNumber": 22,
@@ -14844,12 +13428,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "Modifier[] modifiers",
-                            "lineNumber": 27,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 27,
                             "methodCall": ""
                         },
@@ -14965,12 +13543,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 8,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.x = x",
                             "lineNumber": 9,
@@ -15078,12 +13650,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 13,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return String.format(\"(%f, %f)\", x, y);",
                             "lineNumber": 14,
@@ -15147,18 +13713,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "y",
                             "lineNumber": 14,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 13,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 13,
                             "methodCall": ""
                         }
                     ],
@@ -15237,12 +13791,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "RenderObject source",
-                            "lineNumber": 18,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 18,
                             "methodCall": ""
                         },
@@ -15360,12 +13908,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 23,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.response = response",
                             "lineNumber": 24,
@@ -15393,18 +13935,6 @@
                             "_label": "IDENTIFIER",
                             "code": "response",
                             "lineNumber": 24,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 23,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 23,
                             "methodCall": ""
                         },
                         {
@@ -15437,12 +13967,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 27,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.response;",
                             "lineNumber": 28,
@@ -15464,18 +13988,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "response",
                             "lineNumber": 28,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 27,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 27,
                             "methodCall": ""
                         }
                     ],
@@ -15511,24 +14023,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "RenderEvent re",
-                            "lineNumber": 6,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 6,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 6,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
                             "lineNumber": 6,
                             "methodCall": ""
                         }
@@ -15573,12 +14067,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 13,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "add(rel)",
                             "lineNumber": 14,
@@ -15606,18 +14094,6 @@
                             "_label": "IDENTIFIER",
                             "code": "rel",
                             "lineNumber": 14,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 13,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 13,
                             "methodCall": ""
                         }
                     ],
@@ -15650,12 +14126,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 17,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "$iterLocal0",
                             "lineNumber": 18,
@@ -15670,12 +14140,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 18,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 18,
                             "methodCall": ""
                         },
@@ -15704,20 +14168,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 18,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 18,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 18,
                             "methodCall": ""
                         },
@@ -15728,20 +14180,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 18,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "rel",
-                            "lineNumber": 18,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 18,
                             "methodCall": ""
                         },
@@ -15770,18 +14210,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 17,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 17,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "METHOD_RETURN",
                             "code": "void",
                             "lineNumber": 17,
@@ -15807,12 +14235,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 23,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 23,
                             "methodCall": ""
                         },
@@ -15905,12 +14327,6 @@
                             "code": "re",
                             "lineNumber": 23,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 23,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "void"
@@ -15966,12 +14382,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "String colour",
-                            "lineNumber": 8,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 8,
                             "methodCall": ""
                         },
@@ -16151,12 +14561,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 23,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.name = name",
                             "lineNumber": 24,
@@ -16247,18 +14651,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 26,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 26,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj0",
                             "lineNumber": 26,
@@ -16309,18 +14701,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "attributes",
-                            "lineNumber": 28,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 28,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 28,
                             "methodCall": ""
                         },
@@ -16379,18 +14759,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 29,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 29,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj2",
                             "lineNumber": 29,
@@ -16441,18 +14809,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "position",
-                            "lineNumber": 31,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 31,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 31,
                             "methodCall": ""
                         },
@@ -16510,12 +14866,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 34,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "add(m)",
                             "lineNumber": 35,
@@ -16543,18 +14893,6 @@
                             "_label": "IDENTIFIER",
                             "code": "m",
                             "lineNumber": 35,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 34,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 34,
                             "methodCall": ""
                         },
                         {
@@ -16593,12 +14931,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "add(a)",
                             "lineNumber": 39,
@@ -16626,18 +14958,6 @@
                             "_label": "IDENTIFIER",
                             "code": "a",
                             "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 38,
                             "methodCall": ""
                         },
                         {
@@ -16676,12 +14996,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 42,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "add(r)",
                             "lineNumber": 43,
@@ -16709,18 +15023,6 @@
                             "_label": "IDENTIFIER",
                             "code": "r",
                             "lineNumber": 43,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 42,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 42,
                             "methodCall": ""
                         },
                         {
@@ -16765,12 +15067,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 46,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "this.position = new Position(x, y)",
                             "lineNumber": 47,
@@ -16791,18 +15087,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "position",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 47,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 47,
                             "methodCall": ""
                         },
@@ -16952,12 +15236,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 52,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 52,
                             "methodCall": ""
                         },
@@ -17267,12 +15545,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 69,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.attributes;",
                             "lineNumber": 70,
@@ -17294,18 +15566,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "attributes",
                             "lineNumber": 70,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 69,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 69,
                             "methodCall": ""
                         }
                     ],
@@ -17332,12 +15592,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.methods;",
                             "lineNumber": 74,
@@ -17359,18 +15613,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "methods",
                             "lineNumber": 74,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 73,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 73,
                             "methodCall": ""
                         }
                     ],
@@ -17397,12 +15639,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 77,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.id;",
                             "lineNumber": 78,
@@ -17424,18 +15660,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "id",
                             "lineNumber": 78,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 77,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 77,
                             "methodCall": ""
                         }
                     ],
@@ -17462,12 +15686,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 81,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.width;",
                             "lineNumber": 82,
@@ -17489,18 +15707,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "width",
                             "lineNumber": 82,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 81,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 81,
                             "methodCall": ""
                         }
                     ],
@@ -17527,12 +15733,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 85,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.height;",
                             "lineNumber": 86,
@@ -17554,18 +15754,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "height",
                             "lineNumber": 86,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 85,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 85,
                             "methodCall": ""
                         }
                     ],
@@ -17592,12 +15780,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 89,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.position;",
                             "lineNumber": 90,
@@ -17619,18 +15801,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "position",
                             "lineNumber": 90,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 89,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 89,
                             "methodCall": ""
                         }
                     ],
@@ -17657,12 +15827,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 93,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "RETURN",
                             "code": "return this.relations;",
                             "lineNumber": 94,
@@ -17684,18 +15848,6 @@
                             "_label": "FIELD_IDENTIFIER",
                             "code": "relations",
                             "lineNumber": 94,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 93,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 93,
                             "methodCall": ""
                         }
                     ],
@@ -17737,12 +15889,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "WebEngine engine",
-                            "lineNumber": 24,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 24,
                             "methodCall": ""
                         },
@@ -17820,12 +15966,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "UMLClass c",
-                            "lineNumber": 29,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 29,
                             "methodCall": ""
                         },
@@ -17999,12 +16139,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "getMethods()",
                             "lineNumber": 38,
                             "methodCall": "getMethods"
@@ -18022,20 +16156,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal0",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 38,
                             "methodCall": ""
                         },
@@ -18046,20 +16168,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 38,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "m",
-                            "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 39,
                             "methodCall": ""
                         },
@@ -18089,12 +16199,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "m.modifiers",
                             "lineNumber": 39,
                             "methodCall": ""
@@ -18118,20 +16222,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal1",
-                            "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 39,
                             "methodCall": ""
                         },
@@ -18142,20 +16234,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 39,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "m2",
-                            "lineNumber": 40,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 40,
                             "methodCall": ""
                         },
@@ -18359,12 +16439,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 50,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "getAttributes()",
                             "lineNumber": 50,
                             "methodCall": "getAttributes"
@@ -18382,20 +16456,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 50,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal2",
-                            "lineNumber": 50,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 50,
                             "methodCall": ""
                         },
@@ -18406,20 +16468,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 51,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "a",
-                            "lineNumber": 51,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 51,
                             "methodCall": ""
                         },
@@ -18449,12 +16499,6 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 51,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
                             "code": "a.modifiers",
                             "lineNumber": 51,
                             "methodCall": ""
@@ -18478,20 +16522,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 51,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal3",
-                            "lineNumber": 51,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 51,
                             "methodCall": ""
                         },
@@ -18502,20 +16534,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 52,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "m2",
-                            "lineNumber": 52,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 52,
                             "methodCall": ""
                         },
@@ -18725,12 +16745,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "ClassRelation cr",
-                            "lineNumber": 64,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 64,
                             "methodCall": ""
                         },
@@ -18993,28 +17007,10 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 79,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "throw new RuntimeException(\"Bad starting location for path draw\");",
                             "lineNumber": 79,
                             "methodCall": "RuntimeException"
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 82,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 82,
-                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -19071,12 +17067,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 82,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "path",
                             "lineNumber": 82,
@@ -19089,20 +17079,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 83,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal4",
-                            "lineNumber": 83,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 83,
                             "methodCall": ""
                         },
@@ -19113,21 +17091,9 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 83,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "p",
                             "lineNumber": 83,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 84,
                             "methodCall": ""
                         },
                         {
@@ -19310,12 +17276,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 91,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "String js",
                             "lineNumber": 94,
@@ -19406,18 +17366,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 91,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 91,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "METHOD_RETURN",
                             "code": "void",
                             "lineNumber": 91,
@@ -19455,12 +17403,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "int id",
-                            "lineNumber": 99,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 99,
                             "methodCall": ""
                         },
@@ -19687,18 +17629,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 118,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 118,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj2",
                             "lineNumber": 118,
@@ -19836,12 +17766,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 122,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "String js",
                             "lineNumber": 124,
@@ -19862,12 +17786,6 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal5",
-                            "lineNumber": 124,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 124,
                             "methodCall": ""
                         },
@@ -19896,20 +17814,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 124,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$iterLocal5",
-                            "lineNumber": 124,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 124,
                             "methodCall": ""
                         },
@@ -19920,20 +17826,8 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 124,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "p",
-                            "lineNumber": 124,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
                             "lineNumber": 124,
                             "methodCall": ""
                         },
@@ -20056,18 +17950,6 @@
                             "code": "js",
                             "lineNumber": 122,
                             "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 122,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
-                            "lineNumber": 122,
-                            "methodCall": ""
                         }
                     ],
                     "returnType": "void"
@@ -20095,12 +17977,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "RenderEvent e",
-                            "lineNumber": 131,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 131,
                             "methodCall": ""
                         },
@@ -20177,28 +18053,10 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 134,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "throw new RuntimeException(\"Bad RenderEvent dispatcher.\");",
                             "lineNumber": 134,
                             "methodCall": "RuntimeException"
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 134,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 134,
-                            "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
@@ -20297,12 +18155,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 137,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (source instanceof UMLClass)",
                             "lineNumber": 138,
@@ -20323,12 +18175,6 @@
                         {
                             "_label": "TYPE_REF",
                             "code": "UMLClass",
-                            "lineNumber": 138,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 138,
                             "methodCall": ""
                         },
@@ -20525,12 +18371,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 145,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "LOCAL",
                             "code": "Integer id",
                             "lineNumber": 145,
@@ -20639,12 +18479,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 149,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "drawShape((Shape) source)",
                             "lineNumber": 149,
@@ -20737,12 +18571,6 @@
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "REPOSITION",
-                            "lineNumber": 151,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 151,
                             "methodCall": ""
                         },
@@ -20840,12 +18668,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "String[] args",
-                            "lineNumber": 8,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 8,
                             "methodCall": ""
                         },
@@ -20970,12 +18792,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 19,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "CALL",
                             "code": "builder = new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + joernPath, \"& joern --server\")",
                             "lineNumber": 19,
@@ -21050,12 +18866,6 @@
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "else",
-                            "lineNumber": 21,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
                             "lineNumber": 21,
                             "methodCall": ""
                         },
@@ -21192,18 +19002,6 @@
                             "methodCall": ""
                         },
                         {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 27,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "<empty>",
-                            "lineNumber": 28,
-                            "methodCall": ""
-                        },
-                        {
                             "_label": "IDENTIFIER",
                             "code": "$obj2",
                             "lineNumber": 28,
@@ -21291,18 +19089,6 @@
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 4,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "BLOCK",
-                            "code": "<empty>",
-                            "lineNumber": 4,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "MODIFIER",
-                            "code": "<empty>",
                             "lineNumber": 4,
                             "methodCall": ""
                         }
