@@ -68,17 +68,41 @@ def source_code_json_creation():
             method_with_return = re.sub(
                 modifiers_pattern, "", curr_method["_1"]["code"]
             ).strip()
+
+            # Get the return type of the method, if any.
             method_return_type = return_type_pattern.findall(method_with_return)
             return_type = ""
-
             if method_return_type:
                 return_type = method_return_type[0].strip()
+
+            # Get the method body with any method parameters.
             method_body = re.sub(return_type_pattern, "", method_with_return)
+
+            # If the method is a constructor, find the name of the class.
             constructor_name = method_name_pattern.findall(method_body)[0]
+
+            # Extract the type and names of all method parameters within the method body.
+            def get_method_parameters(method_body):
+                param_list = []
+                index = method_body.find("(")
+                all_parameters = []
+                if "<lambda>" not in method_body:
+                    all_parameters = (
+                        method_body[index : len(method_body)]
+                        .replace("(", "")
+                        .replace(")", "")
+                    )
+                    all_parameters = list(filter(None, all_parameters.split(",")))
+                if all_parameters:
+                    for param in all_parameters:
+                        splitter = param.strip().split(" ")
+                        param_list.append(dict(type=splitter[0], name=splitter[1]))
+                return param_list
 
             curr_method_dict = {
                 "code": curr_method["_1"]["code"],
                 "methodBody": method_body,
+                "parameters": get_method_parameters(method_body),
                 "modifiers": modifiers_pattern.findall(curr_method["_1"]["code"]),
                 "name": curr_method["_1"]["name"].replace("<init>", constructor_name),
                 # For the instructions,

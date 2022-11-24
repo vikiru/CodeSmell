@@ -37,6 +37,20 @@
                 {
                     "code": "protected Method(String name, String[] instructions, Modifier[] modifiers)",
                     "methodBody": "Method(String name, String[] instructions, Modifier[] modifiers)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "name"
+                        },
+                        {
+                            "type": "String[]",
+                            "name": "instructions"
+                        },
+                        {
+                            "type": "Modifier[]",
+                            "name": "modifiers"
+                        }
+                    ],
                     "modifiers": [
                         "protected"
                     ],
@@ -228,6 +242,12 @@
                 {
                     "code": "protected void addCall(Method m)",
                     "methodBody": "addCall(Method m)",
+                    "parameters": [
+                        {
+                            "type": "Method",
+                            "name": "m"
+                        }
+                    ],
                     "modifiers": [
                         "protected"
                     ],
@@ -353,6 +373,16 @@
                 {
                     "code": "protected Attribute(String name, Modifier[] modifiers)",
                     "methodBody": "Attribute(String name, Modifier[] modifiers)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "name"
+                        },
+                        {
+                            "type": "Modifier[]",
+                            "name": "modifiers"
+                        }
+                    ],
                     "modifiers": [
                         "protected"
                     ],
@@ -501,6 +531,7 @@
                 {
                     "code": "protected ArrayList<Method> getMethods()",
                     "methodBody": "ArrayList<Method> getMethods()",
+                    "parameters": [],
                     "modifiers": [
                         "protected"
                     ],
@@ -554,6 +585,7 @@
                 {
                     "code": "protected ArrayList<Attribute> getAttributes()",
                     "methodBody": "ArrayList<Attribute> getAttributes()",
+                    "parameters": [],
                     "modifiers": [
                         "protected"
                     ],
@@ -607,6 +639,12 @@
                 {
                     "code": "protected void addMethod(Method m)",
                     "methodBody": "addMethod(Method m)",
+                    "parameters": [
+                        {
+                            "type": "Method",
+                            "name": "m"
+                        }
+                    ],
                     "modifiers": [
                         "protected"
                     ],
@@ -678,6 +716,12 @@
                 {
                     "code": "protected void addAttribute(Attribute a)",
                     "methodBody": "addAttribute(Attribute a)",
+                    "parameters": [
+                        {
+                            "type": "Attribute",
+                            "name": "a"
+                        }
+                    ],
                     "modifiers": [
                         "protected"
                     ],
@@ -749,6 +793,12 @@
                 {
                     "code": "CPGClass(String name)",
                     "methodBody": "CPGClass(String name)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "name"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "CPGClass",
                     "instructions": [
@@ -964,6 +1014,20 @@
                 {
                     "code": "public ClassRelation(UMLClass source, UMLClass target, Type type)",
                     "methodBody": "ClassRelation(UMLClass source, UMLClass target, Type type)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "source"
+                        },
+                        {
+                            "type": "UMLClass",
+                            "name": "target"
+                        },
+                        {
+                            "type": "Type",
+                            "name": "type"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -1125,6 +1189,12 @@
                 {
                     "code": "public void setPath(ArrayList<Position> path)",
                     "methodBody": "setPath(ArrayList<Position> path)",
+                    "parameters": [
+                        {
+                            "type": "ArrayList<Position>",
+                            "name": "path"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -1322,6 +1392,7 @@
                 {
                     "code": "public ArrayList<Position> getPath()",
                     "methodBody": "ArrayList<Position> getPath()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -1398,6 +1469,20 @@
                 {
                     "code": "Relation(CPGClass source, CPGClass destination, Type type)",
                     "methodBody": "Relation(CPGClass source, CPGClass destination, Type type)",
+                    "parameters": [
+                        {
+                            "type": "CPGClass",
+                            "name": "source"
+                        },
+                        {
+                            "type": "CPGClass",
+                            "name": "destination"
+                        },
+                        {
+                            "type": "Type",
+                            "name": "type"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "Relation",
                     "instructions": [
@@ -1579,6 +1664,7 @@
                 {
                     "code": "protected ArrayList<CPGClass> getClasses()",
                     "methodBody": "ArrayList<CPGClass> getClasses()",
+                    "parameters": [],
                     "modifiers": [
                         "protected"
                     ],
@@ -1632,6 +1718,7 @@
                 {
                     "code": "protected ArrayList<Relation> getRelations()",
                     "methodBody": "ArrayList<Relation> getRelations()",
+                    "parameters": [],
                     "modifiers": [
                         "protected"
                     ],
@@ -1685,6 +1772,7 @@
                 {
                     "code": "protected CodePropertyGraph()",
                     "methodBody": "CodePropertyGraph()",
+                    "parameters": [],
                     "modifiers": [
                         "protected"
                     ],
@@ -1786,6 +1874,12 @@
                 {
                     "code": "public void addClass(CPGClass c)",
                     "methodBody": "addClass(CPGClass c)",
+                    "parameters": [
+                        {
+                            "type": "CPGClass",
+                            "name": "c"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -1851,6 +1945,12 @@
                 {
                     "code": "public void addRelation(Relation r)",
                     "methodBody": "addRelation(Relation r)",
+                    "parameters": [
+                        {
+                            "type": "Relation",
+                            "name": "r"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -1923,6 +2023,7 @@
                 {
                     "code": "public void initialize()",
                     "methodBody": "initialize()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -2025,6 +2126,12 @@
                 {
                     "code": "public static void main(String[] args)",
                     "methodBody": "main(String[] args)",
+                    "parameters": [
+                        {
+                            "type": "String[]",
+                            "name": "args"
+                        }
+                    ],
                     "modifiers": [
                         "public",
                         "static"
@@ -2103,6 +2210,16 @@
                 {
                     "code": "Line(Position p1, Position p2)",
                     "methodBody": "Line(Position p1, Position p2)",
+                    "parameters": [
+                        {
+                            "type": "Position",
+                            "name": "p1"
+                        },
+                        {
+                            "type": "Position",
+                            "name": "p2"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "Line",
                     "instructions": [
@@ -2358,6 +2475,24 @@
                 {
                     "code": "Line(double x1, double y1, double x2, double y2)",
                     "methodBody": "Line(double x1, double y1, double x2, double y2)",
+                    "parameters": [
+                        {
+                            "type": "double",
+                            "name": "x1"
+                        },
+                        {
+                            "type": "double",
+                            "name": "y1"
+                        },
+                        {
+                            "type": "double",
+                            "name": "x2"
+                        },
+                        {
+                            "type": "double",
+                            "name": "y2"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "Line",
                     "instructions": [
@@ -2613,6 +2748,7 @@
                 {
                     "code": "public String toString()",
                     "methodBody": "toString()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -2738,6 +2874,7 @@
                 {
                     "code": "public double magnitude()",
                     "methodBody": "magnitude()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -2947,6 +3084,7 @@
                 {
                     "code": "public LayoutManager()",
                     "methodBody": "LayoutManager()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -2982,6 +3120,12 @@
                 {
                     "code": "public void positionClasses(ArrayList<UMLClass> classes)",
                     "methodBody": "positionClasses(ArrayList<UMLClass> classes)",
+                    "parameters": [
+                        {
+                            "type": "ArrayList<UMLClass>",
+                            "name": "classes"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -3521,6 +3665,12 @@
                 {
                     "code": "private Line[] classBoxLines(UMLClass c)",
                     "methodBody": "classBoxLines(UMLClass c)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "c"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -4072,6 +4222,16 @@
                 {
                     "code": "private boolean testCollision(Line line, UMLClass[] exclude)",
                     "methodBody": "testCollision(Line line, UMLClass[] exclude)",
+                    "parameters": [
+                        {
+                            "type": "Line",
+                            "name": "line"
+                        },
+                        {
+                            "type": "UMLClass[]",
+                            "name": "exclude"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -4305,6 +4465,16 @@
                 {
                     "code": "private Position intersection(Line l1, Line[] with)",
                     "methodBody": "intersection(Line l1, Line[] with)",
+                    "parameters": [
+                        {
+                            "type": "Line",
+                            "name": "l1"
+                        },
+                        {
+                            "type": "Line[]",
+                            "name": "with"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -5288,6 +5458,12 @@
                 {
                     "code": "private Position classMiddle(UMLClass c)",
                     "methodBody": "classMiddle(UMLClass c)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "c"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -5467,6 +5643,16 @@
                 {
                     "code": "private Position classMiddle(UMLClass c, Direction d)",
                     "methodBody": "classMiddle(UMLClass c, Direction d)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "c"
+                        },
+                        {
+                            "type": "Direction",
+                            "name": "d"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -6102,6 +6288,16 @@
                 {
                     "code": "private Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2)",
                     "methodBody": "Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "c1"
+                        },
+                        {
+                            "type": "UMLClass",
+                            "name": "c2"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -6461,6 +6657,16 @@
                 {
                     "code": "private Position indirectConnection(UMLClass c1, UMLClass c2)",
                     "methodBody": "indirectConnection(UMLClass c1, UMLClass c2)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "c1"
+                        },
+                        {
+                            "type": "UMLClass",
+                            "name": "c2"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -6880,6 +7086,7 @@
                 {
                     "code": "private void sortClasses()",
                     "methodBody": "sortClasses()",
+                    "parameters": [],
                     "modifiers": [
                         "private"
                     ],
@@ -6975,6 +7182,12 @@
                 {
                     "code": "public void setRelationPaths(ArrayList<ClassRelation> relations)",
                     "methodBody": "setRelationPaths(ArrayList<ClassRelation> relations)",
+                    "parameters": [
+                        {
+                            "type": "ArrayList<ClassRelation>",
+                            "name": "relations"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -8733,6 +8946,16 @@
                 {
                     "code": "Dot(Position p, String colour)",
                     "methodBody": "Dot(Position p, String colour)",
+                    "parameters": [
+                        {
+                            "type": "Position",
+                            "name": "p"
+                        },
+                        {
+                            "type": "String",
+                            "name": "colour"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "Dot",
                     "instructions": [
@@ -8821,6 +9044,12 @@
                 {
                     "code": "public void initializeMainView(CodePropertyGraph cpg)",
                     "methodBody": "initializeMainView(CodePropertyGraph cpg)",
+                    "parameters": [
+                        {
+                            "type": "CodePropertyGraph",
+                            "name": "cpg"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -9564,6 +9793,12 @@
                 {
                     "code": "public void start(Stage primaryStage) throws Exception",
                     "methodBody": "start(Stage primaryStage) throws Exception",
+                    "parameters": [
+                        {
+                            "type": "Stage",
+                            "name": "primaryStage"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -9758,241 +9993,241 @@
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj7",
-                            "lineNumber": 84,
+                            "lineNumber": 83,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new File(System.getProperty(\"user.dir\") + \"/boxes.html\")",
-                            "lineNumber": 84,
+                            "lineNumber": 83,
                             "methodCall": "File"
                         },
                         {
                             "_label": "CALL",
                             "code": "new File(System.getProperty(\"user.dir\") + \"/boxes.html\")",
-                            "lineNumber": 84,
+                            "lineNumber": 83,
                             "methodCall": "File"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj7",
-                            "lineNumber": 84,
+                            "lineNumber": 83,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "System.getProperty(\"user.dir\") + \"/boxes.html\"",
-                            "lineNumber": 84,
+                            "lineNumber": 83,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "CALL",
                             "code": "System.getProperty(\"user.dir\")",
-                            "lineNumber": 85,
+                            "lineNumber": 84,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "System",
-                            "lineNumber": 85,
+                            "lineNumber": 84,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"user.dir\"",
-                            "lineNumber": 85,
+                            "lineNumber": 84,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"/boxes.html\"",
-                            "lineNumber": 85,
+                            "lineNumber": 84,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj7",
-                            "lineNumber": 87,
+                            "lineNumber": 86,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "WebView webView",
-                            "lineNumber": 87,
+                            "lineNumber": 86,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "WebView webView = new WebView()",
-                            "lineNumber": 87,
+                            "lineNumber": 86,
                             "methodCall": "WebView"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "webView",
-                            "lineNumber": 87,
+                            "lineNumber": 86,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new WebView()",
-                            "lineNumber": 87,
+                            "lineNumber": 86,
                             "methodCall": "WebView"
                         },
                         {
                             "_label": "CALL",
                             "code": "new WebView()",
-                            "lineNumber": 87,
+                            "lineNumber": 86,
                             "methodCall": "WebView"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "webView",
-                            "lineNumber": 88,
+                            "lineNumber": 87,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "load(location)",
-                            "lineNumber": 88,
+                            "lineNumber": 87,
                             "methodCall": "load"
                         },
                         {
                             "_label": "CALL",
                             "code": "getEngine()",
-                            "lineNumber": 88,
+                            "lineNumber": 87,
                             "methodCall": "getEngine"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "webView",
-                            "lineNumber": 88,
+                            "lineNumber": 87,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "location",
-                            "lineNumber": 89,
+                            "lineNumber": 88,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "URL url",
-                            "lineNumber": 89,
+                            "lineNumber": 88,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "URL url = getResource(\"boxes.html\")",
-                            "lineNumber": 89,
+                            "lineNumber": 88,
                             "methodCall": "getResource"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "url",
-                            "lineNumber": 90,
+                            "lineNumber": 89,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "getResource(\"boxes.html\")",
-                            "lineNumber": 90,
+                            "lineNumber": 89,
                             "methodCall": "getResource"
                         },
                         {
                             "_label": "CALL",
                             "code": "getClass()",
-                            "lineNumber": 90,
+                            "lineNumber": 89,
                             "methodCall": "getClass"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "this",
-                            "lineNumber": 90,
+                            "lineNumber": 89,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"boxes.html\"",
-                            "lineNumber": 90,
+                            "lineNumber": 89,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "WebEngine engine",
-                            "lineNumber": 90,
+                            "lineNumber": 89,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "WebEngine engine = getEngine()",
-                            "lineNumber": 92,
+                            "lineNumber": 91,
                             "methodCall": "getEngine"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "engine",
-                            "lineNumber": 92,
+                            "lineNumber": 91,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "getEngine()",
-                            "lineNumber": 92,
+                            "lineNumber": 91,
                             "methodCall": "getEngine"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "webView",
-                            "lineNumber": 92,
+                            "lineNumber": 91,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "setZoom(1.0)",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": "setZoom"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "webView",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "1.0",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "addRenderEventListener(new WebControl(engine))",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": "addRenderEventListener"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "RenderObject",
-                            "lineNumber": 103,
+                            "lineNumber": 102,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj9",
-                            "lineNumber": 103,
+                            "lineNumber": 102,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new WebControl(engine)",
-                            "lineNumber": 103,
+                            "lineNumber": 102,
                             "methodCall": "WebControl"
                         },
                         {
                             "_label": "CALL",
                             "code": "new WebControl(engine)",
-                            "lineNumber": 103,
+                            "lineNumber": 102,
                             "methodCall": "WebControl"
                         },
                         {
@@ -10121,6 +10356,12 @@
                 {
                     "code": "public static void main(String[] args)",
                     "methodBody": "main(String[] args)",
+                    "parameters": [
+                        {
+                            "type": "String[]",
+                            "name": "args"
+                        }
+                    ],
                     "modifiers": [
                         "public",
                         "static"
@@ -10130,31 +10371,31 @@
                         {
                             "_label": "METHOD",
                             "code": "public static void main(String[] args)",
-                            "lineNumber": 119,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "String[] args",
-                            "lineNumber": 119,
+                            "lineNumber": 118,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "launch(args)",
-                            "lineNumber": 120,
+                            "lineNumber": 119,
                             "methodCall": "launch"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "this",
-                            "lineNumber": 120,
+                            "lineNumber": 119,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "args",
-                            "lineNumber": 120,
+                            "lineNumber": 119,
                             "methodCall": ""
                         }
                     ],
@@ -10163,187 +10404,188 @@
                 {
                     "code": "<lambda>",
                     "methodBody": "<lambda>",
+                    "parameters": [],
                     "modifiers": [],
                     "name": "lambda$0",
                     "instructions": [
                         {
                             "_label": "METHOD",
                             "code": "<lambda>",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "this",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "<unresolvedNamespace> ov",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "<unresolvedNamespace> oldState",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "<unresolvedNamespace> newState",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "location",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "webView",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "engine",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "root",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "url",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "primaryStage",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (newState == Worker.State.SUCCEEDED)",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "newState == Worker.State.SUCCEEDED",
-                            "lineNumber": 94,
+                            "lineNumber": 93,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "newState",
-                            "lineNumber": 95,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Worker.State.SUCCEEDED",
-                            "lineNumber": 95,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "Worker.State",
-                            "lineNumber": 95,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "Worker",
-                            "lineNumber": 95,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "State",
-                            "lineNumber": 95,
+                            "lineNumber": 94,
                             "methodCall": ""
                         },
                         {
                             "_label": "FIELD_IDENTIFIER",
                             "code": "SUCCEEDED",
-                            "lineNumber": 96,
+                            "lineNumber": 95,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "Parser p",
-                            "lineNumber": 96,
+                            "lineNumber": 95,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "ANY p = new Parser()",
-                            "lineNumber": 96,
+                            "lineNumber": 95,
                             "methodCall": "Parser"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "p",
-                            "lineNumber": 96,
+                            "lineNumber": 95,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new Parser()",
-                            "lineNumber": 97,
+                            "lineNumber": 96,
                             "methodCall": "Parser"
                         },
                         {
                             "_label": "CALL",
                             "code": "new Parser()",
-                            "lineNumber": 97,
+                            "lineNumber": 96,
                             "methodCall": "Parser"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "p",
-                            "lineNumber": 97,
+                            "lineNumber": 96,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "CodePropertyGraph cpg",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "CodePropertyGraph cpg = buildCPG(\"\")",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": "buildCPG"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "cpg",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "buildCPG(\"\")",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": "buildCPG"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "p",
-                            "lineNumber": 93,
+                            "lineNumber": 92,
                             "methodCall": ""
                         }
                     ],
@@ -10380,6 +10622,16 @@
                 {
                     "code": "Pair(F first, S second)",
                     "methodBody": "Pair(F first, S second)",
+                    "parameters": [
+                        {
+                            "type": "F",
+                            "name": "first"
+                        },
+                        {
+                            "type": "S",
+                            "name": "second"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "Pair",
                     "instructions": [
@@ -10504,6 +10756,12 @@
                 {
                     "code": "public static void main(String[] args)",
                     "methodBody": "main(String[] args)",
+                    "parameters": [
+                        {
+                            "type": "String[]",
+                            "name": "args"
+                        }
+                    ],
                     "modifiers": [
                         "public",
                         "static"
@@ -10582,6 +10840,12 @@
                 {
                     "code": "public CodePropertyGraph buildCPG(String destination)",
                     "methodBody": "buildCPG(String destination)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "destination"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -11649,6 +11913,12 @@
                 {
                     "code": "private ArrayList<Method> parseSourceCodeMethods(ArrayList methods)",
                     "methodBody": "ArrayList<Method> parseSourceCodeMethods(ArrayList methods)",
+                    "parameters": [
+                        {
+                            "type": "ArrayList",
+                            "name": "methods"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -12668,6 +12938,12 @@
                 {
                     "code": "private ArrayList<Attribute> parseSourceCodeFields(ArrayList fields)",
                     "methodBody": "ArrayList<Attribute> parseSourceCodeFields(ArrayList fields)",
+                    "parameters": [
+                        {
+                            "type": "ArrayList",
+                            "name": "fields"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -13316,6 +13592,16 @@
                 {
                     "code": "JavaAttribute(String name, Modifier[] m)",
                     "methodBody": "JavaAttribute(String name, Modifier[] m)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "name"
+                        },
+                        {
+                            "type": "Modifier[]",
+                            "name": "m"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "JavaAttribute",
                     "instructions": [
@@ -13398,6 +13684,20 @@
                 {
                     "code": "JavaMethod(String name, String[] instructions, Modifier[] modifiers)",
                     "methodBody": "JavaMethod(String name, String[] instructions, Modifier[] modifiers)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "name"
+                        },
+                        {
+                            "type": "String[]",
+                            "name": "instructions"
+                        },
+                        {
+                            "type": "Modifier[]",
+                            "name": "modifiers"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "JavaMethod",
                     "instructions": [
@@ -13513,6 +13813,16 @@
                 {
                     "code": "public Position(double x, double y)",
                     "methodBody": "Position(double x, double y)",
+                    "parameters": [
+                        {
+                            "type": "double",
+                            "name": "x"
+                        },
+                        {
+                            "type": "double",
+                            "name": "y"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -13632,6 +13942,7 @@
                 {
                     "code": "public String toString()",
                     "methodBody": "toString()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -13767,6 +14078,16 @@
                 {
                     "code": "RenderEvent(Type type, RenderObject source)",
                     "methodBody": "RenderEvent(Type type, RenderObject source)",
+                    "parameters": [
+                        {
+                            "type": "Type",
+                            "name": "type"
+                        },
+                        {
+                            "type": "RenderObject",
+                            "name": "source"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "RenderEvent",
                     "instructions": [
@@ -13884,6 +14205,12 @@
                 {
                     "code": "public void setResponse(Object response)",
                     "methodBody": "setResponse(Object response)",
+                    "parameters": [
+                        {
+                            "type": "Object",
+                            "name": "response"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -13949,6 +14276,7 @@
                 {
                     "code": "public Object getResponse()",
                     "methodBody": "getResponse()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -14003,6 +14331,12 @@
                 {
                     "code": "public void renderEventPerformed(RenderEvent re)",
                     "methodBody": "renderEventPerformed(RenderEvent re)",
+                    "parameters": [
+                        {
+                            "type": "RenderEvent",
+                            "name": "re"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -14048,6 +14382,12 @@
                 {
                     "code": "public static void addRenderEventListener(RenderEventListener rel)",
                     "methodBody": "addRenderEventListener(RenderEventListener rel)",
+                    "parameters": [
+                        {
+                            "type": "RenderEventListener",
+                            "name": "rel"
+                        }
+                    ],
                     "modifiers": [
                         "public",
                         "static"
@@ -14102,6 +14442,12 @@
                 {
                     "code": "public void dispatchToRenderEventListeners(RenderEvent re)",
                     "methodBody": "dispatchToRenderEventListeners(RenderEvent re)",
+                    "parameters": [
+                        {
+                            "type": "RenderEvent",
+                            "name": "re"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -14221,6 +14567,7 @@
                 {
                     "code": "public void render()",
                     "methodBody": "render()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -14356,6 +14703,16 @@
                 {
                     "code": "public Shape(Position[] vertex, String colour)",
                     "methodBody": "Shape(Position[] vertex, String colour)",
+                    "parameters": [
+                        {
+                            "type": "Position[]",
+                            "name": "vertex"
+                        },
+                        {
+                            "type": "String",
+                            "name": "colour"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -14539,6 +14896,12 @@
                 {
                     "code": "UMLClass(String name)",
                     "methodBody": "UMLClass(String name)",
+                    "parameters": [
+                        {
+                            "type": "String",
+                            "name": "name"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "UMLClass",
                     "instructions": [
@@ -14842,6 +15205,12 @@
                 {
                     "code": "public void addMethod(Method m)",
                     "methodBody": "addMethod(Method m)",
+                    "parameters": [
+                        {
+                            "type": "Method",
+                            "name": "m"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -14907,6 +15276,12 @@
                 {
                     "code": "public void addAttribute(Attribute a)",
                     "methodBody": "addAttribute(Attribute a)",
+                    "parameters": [
+                        {
+                            "type": "Attribute",
+                            "name": "a"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -14972,6 +15347,12 @@
                 {
                     "code": "public void addRelationship(ClassRelation r)",
                     "methodBody": "addRelationship(ClassRelation r)",
+                    "parameters": [
+                        {
+                            "type": "ClassRelation",
+                            "name": "r"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -15037,6 +15418,16 @@
                 {
                     "code": "public void setPosition(double x, double y)",
                     "methodBody": "setPosition(double x, double y)",
+                    "parameters": [
+                        {
+                            "type": "double",
+                            "name": "x"
+                        },
+                        {
+                            "type": "double",
+                            "name": "y"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -15222,6 +15613,7 @@
                 {
                     "code": "public void render()",
                     "methodBody": "render()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15527,6 +15919,7 @@
                 {
                     "code": "public ArrayList<Attribute> getAttributes()",
                     "methodBody": "ArrayList<Attribute> getAttributes()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15574,6 +15967,7 @@
                 {
                     "code": "public ArrayList<Method> getMethods()",
                     "methodBody": "ArrayList<Method> getMethods()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15621,6 +16015,7 @@
                 {
                     "code": "public int getId()",
                     "methodBody": "getId()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15668,6 +16063,7 @@
                 {
                     "code": "public Double getWidth()",
                     "methodBody": "getWidth()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15715,6 +16111,7 @@
                 {
                     "code": "public Double getHeight()",
                     "methodBody": "getHeight()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15762,6 +16159,7 @@
                 {
                     "code": "public Position getPosition()",
                     "methodBody": "getPosition()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15809,6 +16207,7 @@
                 {
                     "code": "public ArrayList<ClassRelation> getRelations()",
                     "methodBody": "ArrayList<ClassRelation> getRelations()",
+                    "parameters": [],
                     "modifiers": [
                         "public"
                     ],
@@ -15871,6 +16270,12 @@
                 {
                     "code": "WebControl(WebEngine engine)",
                     "methodBody": "WebControl(WebEngine engine)",
+                    "parameters": [
+                        {
+                            "type": "WebEngine",
+                            "name": "engine"
+                        }
+                    ],
                     "modifiers": [],
                     "name": "WebControl",
                     "instructions": [
@@ -15946,6 +16351,12 @@
                 {
                     "code": "private Integer renderClass(UMLClass c)",
                     "methodBody": "renderClass(UMLClass c)",
+                    "parameters": [
+                        {
+                            "type": "UMLClass",
+                            "name": "c"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -16725,6 +17136,12 @@
                 {
                     "code": "private Integer renderPath(ClassRelation cr)",
                     "methodBody": "renderPath(ClassRelation cr)",
+                    "parameters": [
+                        {
+                            "type": "ClassRelation",
+                            "name": "cr"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -17240,6 +17657,20 @@
                 {
                     "code": "private void repositionClass(int id, double x, double y)",
                     "methodBody": "repositionClass(int id, double x, double y)",
+                    "parameters": [
+                        {
+                            "type": "int",
+                            "name": "id"
+                        },
+                        {
+                            "type": "double",
+                            "name": "x"
+                        },
+                        {
+                            "type": "double",
+                            "name": "y"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -17383,6 +17814,12 @@
                 {
                     "code": "private Pair<Double, Double> getClassDimensions(int id)",
                     "methodBody": "Pair<Double, Double> getClassDimensions(int id)",
+                    "parameters": [
+                        {
+                            "type": "int",
+                            "name": "id"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -17742,6 +18179,12 @@
                 {
                     "code": "private void drawShape(Shape s)",
                     "methodBody": "drawShape(Shape s)",
+                    "parameters": [
+                        {
+                            "type": "Shape",
+                            "name": "s"
+                        }
+                    ],
                     "modifiers": [
                         "private"
                     ],
@@ -17957,6 +18400,12 @@
                 {
                     "code": "public void renderEventPerformed(RenderEvent e)",
                     "methodBody": "renderEventPerformed(RenderEvent e)",
+                    "parameters": [
+                        {
+                            "type": "RenderEvent",
+                            "name": "e"
+                        }
+                    ],
                     "modifiers": [
                         "public"
                     ],
@@ -18653,6 +19102,12 @@
                 {
                     "code": "public static void main(String[] args)",
                     "methodBody": "main(String[] args)",
+                    "parameters": [
+                        {
+                            "type": "String[]",
+                            "name": "args"
+                        }
+                    ],
                     "modifiers": [
                         "public",
                         "static"
@@ -19074,6 +19529,7 @@
                 {
                     "code": "public abstract void draw()",
                     "methodBody": "draw()",
+                    "parameters": [],
                     "modifiers": [
                         "public",
                         "abstract"
