@@ -99,11 +99,23 @@ def source_code_json_creation():
                         .replace("(", "")
                         .replace(")", "")
                     )
-                    all_parameters = list(filter(None, all_parameters.split(",")))
-                if all_parameters:
-                    for param in all_parameters:
-                        splitter = param.strip().split(" ")
-                        param_list.append(dict(type=splitter[0], name=splitter[1]))
+                    paramater_pattern = re.compile("(\w*\[?\]?(\<\w*\,\s\w*\>)?(\<\w*\>)?)")
+                    all_parameter_matches = paramater_pattern.findall(all_parameters)
+                    all_parameters = list(filter(None, [t[0] for t in all_parameter_matches]))
+                if not all_parameters:
+                    return param_list
+                else:
+                    max = len(all_parameters) / 2
+                    def append_all_parameters(all_parameters, first, second, count):
+                        type = all_parameters[first]
+                        name = all_parameters[second]
+                        param_list.append(dict(name=name, type=type))
+                        count += 1
+                        if count + 1 > max:
+                            return
+                        else:
+                            append_all_parameters(all_parameters, first + 2, second + 2, count)
+                    append_all_parameters(all_parameters, 0, 1, 0)
                 return param_list
 
             curr_method_dict = {
