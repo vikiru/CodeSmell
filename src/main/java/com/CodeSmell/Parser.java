@@ -58,7 +58,7 @@ public class Parser {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        cpg.addRelation(new CodePropertyGraph.Relation(cpg.getClasses().get(0), cpg.getClasses().get(1), ClassRelation.Type.ASSOCIATION));
+        //cpg.addRelation(new CodePropertyGraph.Relation(cpg.getClasses().get(0), cpg.getClasses().get(1), ClassRelation.Type.ASSOCIATION));
         return cpg;
     }
 
@@ -126,6 +126,9 @@ public class Parser {
             String[] methodInstruct = new String[methodInstructions.size()];
             Modifier modifiers[] = new Modifier[methodModifiers.size()];
             modifiers = methodModifiers.toArray(modifiers);
+            if (modifiers.length == 0) {
+                modifiers = new Modifier[]{};
+            }
             //todo
             HashMap<String, String> parameters = new HashMap<>();
             parsedMethods.add(new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters));
@@ -141,7 +144,7 @@ public class Parser {
             field = (Map<?, ?>) field;
             String fieldName = "";
             String fieldType = "";
-            Modifier[] fieldModifiers = new Modifier[1];
+            ArrayList<Modifier> fieldModifiers = new ArrayList<>();
             for (Map.Entry<?, ?> fieldCharacteristic : ((Map<?, ?>) field).entrySet()) {
                 switch ((String) fieldCharacteristic.getKey()) {
                     case "name":
@@ -153,21 +156,44 @@ public class Parser {
                     case "modifiers":
                         ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue();
                         if (!fieldModifier.isEmpty()) {
-                            switch ((String) fieldModifier.get(0)) {
-                                case "private":
-                                    fieldModifiers[0] = Modifier.PRIVATE;
-                                    break;
-                                case "public":
-                                    fieldModifiers[0] = Modifier.PUBLIC;
-                                    break;
-                                case "protected":
-                                    fieldModifiers[0] = Modifier.PROTECTED;
-                                    break;
+                            for (int i = 0; i < fieldModifier.size(); i++) {
+                                switch ((String) fieldModifier.get(i)) {
+                                    case "private":
+                                        fieldModifiers.add(Modifier.PRIVATE);
+                                        break;
+                                    case "public":
+                                        fieldModifiers.add(Modifier.PUBLIC);
+                                        break;
+                                    case "protected":
+                                        fieldModifiers.add(Modifier.PROTECTED);
+                                        break;
+                                    case "static":
+                                        fieldModifiers.add(Modifier.STATIC);
+                                        break;
+                                    case "final":
+                                        fieldModifiers.add(Modifier.FINAL);
+                                        break;
+                                    case "synchronized":
+                                        fieldModifiers.add(Modifier.SYNCHRONIZED);
+                                        break;
+                                    case "abstract":
+                                        fieldModifiers.add(Modifier.ABSTRACT);
+                                        break;
+                                    case "native":
+                                        fieldModifiers.add(Modifier.NATIVE);
+                                        break;
+                                }
                             }
                         }
                 }
             }
-            parsedFields.add(new Attribute(fieldName, fieldType, fieldModifiers));
+
+            Modifier modifiers[] = new Modifier[fieldModifiers.size()];
+            modifiers = fieldModifiers.toArray(modifiers);
+            if (modifiers.length == 0) {
+                modifiers = new Modifier[]{};
+            }
+            parsedFields.add(new Attribute(fieldName, fieldType, modifiers));
         }
         return parsedFields;
     }
