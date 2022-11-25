@@ -46,7 +46,9 @@ public class Parser {
                 classCount++;
                 ArrayList methods = parseSourceCodeMethods((ArrayList) ((Map<?, ?>) classMap).get("methods"));
                 for (Object method : methods) {
-                    cpg.getClasses().get(classCount).addMethod((Method) method);
+                    Method thisMethod = (Method) method;
+                    cpg.getClasses().get(classCount).addMethod(thisMethod);
+
                 }
                 ArrayList fields = parseSourceCodeFields((ArrayList) ((Map<?, ?>) classMap).get("fields"));
                 for (Object field : fields) {
@@ -60,9 +62,35 @@ public class Parser {
             ex.printStackTrace();
         }
         //cpg.addRelation(new CodePropertyGraph.Relation(cpg.getClasses().get(0), cpg.getClasses().get(1), ClassRelation.Type.ASSOCIATION));
+        HashMap<String, Method> allMethods = new HashMap();
+        for (CPGClass cpgClass : cpg.getClasses())
+        {
+            for(Method method : cpgClass.getMethods())
+            {
+                allMethods.put(method.name,method);
+            }
+        }
+        updateMethodCalls(allMethods, cpg);
         return cpg;
     }
 
+
+    private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg)
+    {
+        for (CPGClass cpgClass : cpg.getClasses())
+        {
+            for(Method method : cpgClass.getMethods())
+            {
+              for(String calledMethod : method.getCalls().values())
+              {
+                  if(allMethods.containsKey(calledMethod))
+                  {
+                      method.addMethodCall(allMethods.get(calledMethod));
+                  }
+              }
+            }
+        }
+    }
 
     private ArrayList<Method> parseSourceCodeMethods(ArrayList methods) {
         ArrayList<Method> parsedMethods = new ArrayList<Method>();
@@ -141,6 +169,7 @@ public class Parser {
             }
             //todo
             HashMap<String, String> parameters = new HashMap<>();
+
             Method thisMethod =  new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters);
             thisMethod.addCall(thisMethod,calledMethod);
             parsedMethods.add(thisMethod);
