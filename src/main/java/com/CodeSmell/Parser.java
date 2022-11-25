@@ -10,9 +10,7 @@ import java.io.File;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Parser {
 
@@ -96,6 +94,7 @@ public class Parser {
         ArrayList<Method> parsedMethods = new ArrayList<Method>();
         Pair<Method,String> methodToCalledMethod;
         String calledMethod = "";
+        HashMap<String, String> parameters = new HashMap<>();
         for (Object method : methods) {
             method = (Map<?, ?>) method;
             String methodName = "";
@@ -116,16 +115,38 @@ public class Parser {
                                     code = (String) instruction.getValue();
                                     methodInstructions.add(code);
                                 }
-                                else if(instruction.getKey().equals("_label") && instruction.getValue().equals("CALL"))
-                                {
-                                    if(!((Map<?, ?>) instructionsTree).get("methodCall").equals(""))
-                                    {
-                                        calledMethod = (String)((Map<?, ?>) instructionsTree).get("methodCall");
+                                else if(instruction.getKey().equals("_label") && instruction.getValue().equals("CALL")) {
+                                    if (!((Map<?, ?>) instructionsTree).get("methodCall").equals("")) {
+                                        calledMethod = (String) ((Map<?, ?>) instructionsTree).get("methodCall");
                                     }
                                 }
                             }
                         }
                         break;
+                    case "parameters":
+                        ArrayList allParameters = (ArrayList) methodCharacteristic.getValue();
+                        for(Object paramPair : allParameters)
+                        {
+                            String name = "";
+                            String type = "";
+                            for (Map.Entry<?, ?> param : ((Map<?, ?>) paramPair).entrySet())
+                            {
+                                if(param.getKey().equals("name"))
+                                {
+                                    name = (String)param.getValue();
+                                }
+                                else if(param.getKey().equals("type"))
+                                {
+                                    type = (String)param.getValue();
+                                }
+                                //Add to pair param and type, then add to methods
+                            }
+                            if(!(name.equals("") && type.equals("")))
+                            {
+                                parameters.put(type,name);
+                            }
+                        }
+                    break;
                     case "modifiers":
                         ArrayList methodModifier = (ArrayList) methodCharacteristic.getValue();
                         if (!methodModifier.isEmpty()) {
@@ -167,10 +188,19 @@ public class Parser {
             if (modifiers.length == 0) {
                 modifiers = new Modifier[]{};
             }
-            //todo
-            HashMap<String, String> parameters = new HashMap<>();
 
             Method thisMethod =  new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters);
+            // Getting a Set of Key-value pairs
+            Set entrySet = parameters.entrySet();
+
+            // Obtaining an iterator for the entry set
+            Iterator paramIterator = entrySet.iterator();
+
+            // Iterate through HashMap entries(Key-Value pairs)
+            while(paramIterator.hasNext()){
+                Map.Entry param = (Map.Entry)paramIterator.next();
+                thisMethod.addToParameters((String)param.getKey(),(String)param.getValue());
+            }
             thisMethod.addCall(thisMethod,calledMethod);
             parsedMethods.add(thisMethod);
         }

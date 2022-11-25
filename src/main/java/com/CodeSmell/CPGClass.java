@@ -50,6 +50,11 @@ public class CPGClass {
         public ArrayList<Method> getMethodCalls() {
             return methodCalls;
         }
+
+        protected void addToParameters(String type, String paramName)
+        {
+            parameters.put(type,paramName);
+        }
     }
 
     public enum Modifier {
