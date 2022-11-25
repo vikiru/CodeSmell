@@ -16,7 +16,7 @@ public class CPGClass {
         public final Modifier[] modifiers;
 
         // return a list of methods which this calls
-        private ArrayList<Method> calls;
+        private HashMap<Method, String> calls;
 
         // a hashmap of all of the method parameters, key is the name of the parameters
         // and value is the type
@@ -27,11 +27,11 @@ public class CPGClass {
             this.instructions = instructions;
             this.modifiers = modifiers;
             this.parameters = parameters;
-            this.calls = new ArrayList<Method>();
+            this.calls = new HashMap<>();
         }
 
-        protected void addCall(Method m) {
-            this.calls.add(m);
+        protected void addCall(Method m, String s) {
+            this.calls.put(m,s);
         }
     }
 

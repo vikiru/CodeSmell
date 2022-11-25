@@ -4,6 +4,7 @@ import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Modifier;
 import com.google.gson.Gson;
+import javafx.util.Pair;
 
 import java.io.File;
 import java.io.Reader;
@@ -62,9 +63,11 @@ public class Parser {
         return cpg;
     }
 
+
     private ArrayList<Method> parseSourceCodeMethods(ArrayList methods) {
         ArrayList<Method> parsedMethods = new ArrayList<Method>();
-
+        Pair<Method,String> methodToCalledMethod;
+        String calledMethod = "";
         for (Object method : methods) {
             method = (Map<?, ?>) method;
             String methodName = "";
@@ -84,6 +87,13 @@ public class Parser {
                                 if (instruction.getKey().equals("code")) {
                                     code = (String) instruction.getValue();
                                     methodInstructions.add(code);
+                                }
+                                else if(instruction.getKey().equals("_label") && instruction.getValue().equals("CALL"))
+                                {
+                                    if(!((Map<?, ?>) instructionsTree).get("methodCall").equals(""))
+                                    {
+                                        calledMethod = (String)((Map<?, ?>) instructionsTree).get("methodCall");
+                                    }
                                 }
                             }
                         }
@@ -131,7 +141,9 @@ public class Parser {
             }
             //todo
             HashMap<String, String> parameters = new HashMap<>();
-            parsedMethods.add(new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters));
+            Method thisMethod =  new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters);
+            thisMethod.addCall(thisMethod,calledMethod);
+            parsedMethods.add(thisMethod);
         }
 
         return parsedMethods;
