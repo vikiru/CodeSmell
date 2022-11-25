@@ -46,6 +46,10 @@ public class CPGClass {
         {
             return calls;
         }
+
+        public ArrayList<Method> getMethodCalls() {
+            return methodCalls;
+        }
     }
 
     public enum Modifier {
