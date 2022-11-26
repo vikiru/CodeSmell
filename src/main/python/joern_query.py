@@ -69,14 +69,14 @@ def source_code_json_creation():
             modifiers_pattern = re.compile(
                 "(private|public|protected|static|final|synchronized|volatile|abstract|native)"
             )
-            return_type_pattern = re.compile("(^[a-zA-z]*\s)")
-            method_name_pattern = re.compile("(^[a-zA-z]*)")
-
             method_with_return = re.sub(
                 modifiers_pattern, "", curr_method["_1"]["code"]
             ).strip()
 
+            method_name_pattern = re.compile("(^[a-zA-z]*)")
+
             # Get the return type of the method, if any.
+            return_type_pattern = re.compile("(^[a-zA-z]*\s)")
             method_return_type = return_type_pattern.findall(method_with_return)
             return_type = ""
             if method_return_type:
@@ -84,6 +84,14 @@ def source_code_json_creation():
 
             # Get the method body with any method parameters.
             method_body = re.sub(return_type_pattern, "", method_with_return)
+            if not return_type:
+                # Handle ArrayList and HashMap return types
+                index = method_body.find(">")
+                return_type = method_body[0 : index + 1]
+                if "(" in return_type or not return_type:
+                    return_type = ""
+                if return_type in method_body:
+                    method_body = method_body.replace(return_type, "").strip()
 
             # If the method is a constructor, find the name of the class.
             constructor_name = method_name_pattern.findall(method_body)[0]
@@ -99,13 +107,18 @@ def source_code_json_creation():
                         .replace("(", "")
                         .replace(")", "")
                     )
-                    paramater_pattern = re.compile("(\w*\[?\]?(\<\w*\,\s\w*\>)?(\<\w*\>)?)")
+                    paramater_pattern = re.compile(
+                        "(\w*\[?\]?(\<\w*\,\s\w*\>)?(\<\w*\>)?)"
+                    )
                     all_parameter_matches = paramater_pattern.findall(all_parameters)
-                    all_parameters = list(filter(None, [t[0] for t in all_parameter_matches]))
+                    all_parameters = list(
+                        filter(None, [t[0] for t in all_parameter_matches])
+                    )
                 if not all_parameters:
                     return param_list
                 else:
                     max = len(all_parameters) / 2
+
                     def append_all_parameters(all_parameters, first, second, count):
                         type = all_parameters[first]
                         name = all_parameters[second]
@@ -114,16 +127,20 @@ def source_code_json_creation():
                         if count + 1 > max:
                             return
                         else:
-                            append_all_parameters(all_parameters, first + 2, second + 2, count)
+                            append_all_parameters(
+                                all_parameters, first + 2, second + 2, count
+                            )
+
                     append_all_parameters(all_parameters, 0, 1, 0)
                 return param_list
 
             curr_method_dict = {
                 "code": curr_method["_1"]["code"],
+                "name": curr_method["_1"]["name"].replace("<init>", constructor_name),
+                "modifiers": modifiers_pattern.findall(curr_method["_1"]["code"]),
+                "returnType": return_type,
                 "methodBody": method_body,
                 "parameters": get_method_parameters(method_body),
-                "modifiers": modifiers_pattern.findall(curr_method["_1"]["code"]),
-                "name": curr_method["_1"]["name"].replace("<init>", constructor_name),
                 # For the instructions,
                 # _2 corresponds to the labels,
                 # _3 corresponds to the code,
@@ -141,48 +158,50 @@ def source_code_json_creation():
                         ),
                     )
                 ),
-                "returnType": return_type,
             }
             return curr_method_dict
 
     # For every class, create a dictionary and return it.
-    # _1 corresponds to class name, _2 corresponds to class code declaration (i.e. "public class A")
-    # _3 corresponds to class fields
-    # _4 corresponds to class methods
     def create_class_dict(curr_class):
-        # Get the type of the object, either a interface, class, enum or abstract class.
-        def get_type(declaration, curr_class_dict):
-            if "interface" in declaration:
-                return "interface"
-            else:
-                # Get all of the modifiers of a class's methods and combine them into a single list.
-                list_method_modifiers = [
-                    methods["modifiers"] for methods in curr_class_dict["methods"]
-                ]
-                single_list_method_modifiers = []
-                for list in list_method_modifiers:
-                    single_list_method_modifiers.extend(list)
-
-                if "class" in declaration and not curr_class_dict["methods"]:
-                    return "enum"
-                elif (
-                    "class" in declaration
-                    and "abstract" in single_list_method_modifiers
-                ):
-                    return "abstract class"
+        if "lambda" in curr_class["_1"]:
+            return
+        else:
+            # Get the type of the object, either a interface, class, enum or abstract class.
+            def get_type(declaration, curr_class_dict):
+                if "interface" in declaration:
+                    return "interface"
                 else:
-                    return "class"
+                    # Get all of the modifiers of a class's methods and combine them into a single list.
+                    list_method_modifiers = [
+                        methods["modifiers"] for methods in curr_class_dict["methods"]
+                    ]
+                    single_list_method_modifiers = []
+                    for list in list_method_modifiers:
+                        single_list_method_modifiers.extend(list)
 
-        curr_class_dict = {
-            "name": curr_class["_1"],
-            "type": "",
-            "fields": list(map(create_field_dict, curr_class["_3"])),
-            "methods": list(
-                filter(None, list(map(create_method_dict, curr_class["_4"])))
-            ),
-        }
-        curr_class_dict["type"] = get_type(curr_class["_2"], curr_class_dict)
-        return curr_class_dict
+                    if "class" in declaration and not curr_class_dict["methods"]:
+                        return "enum"
+                    elif (
+                        "class" in declaration
+                        and "abstract" in single_list_method_modifiers
+                    ):
+                        return "abstract class"
+                    else:
+                        return "class"
+
+            # _1 corresponds to class name, _2 corresponds to class code declaration (i.e. "public class A")
+            # _3 corresponds to class fields
+            # _4 corresponds to class methods
+            curr_class_dict = {
+                "name": curr_class["_1"],
+                "type": "",
+                "fields": list(map(create_field_dict, curr_class["_3"])),
+                "methods": list(
+                    filter(None, list(map(create_method_dict, curr_class["_4"])))
+                ),
+            }
+            curr_class_dict["type"] = get_type(curr_class["_2"], curr_class_dict)
+            return curr_class_dict
 
     # Create a dictionary with all of the info about the source code and write it to a .json file.
     source_code_json = {"classes": list(map(create_class_dict, all_data))}
