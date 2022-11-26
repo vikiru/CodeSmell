@@ -93,7 +93,12 @@ public class Parser {
         HashMap<String, String> parameters = new HashMap<>();
         for (Object method : methods) {
             String methodName = "";
-            ArrayList<String> methodInstructions = new ArrayList<>();
+            // todo - extract return type of method from .json
+            String returnType = "";
+
+            // todo - populate methodInstructions with type of Instructions not String
+            ArrayList<Method.Instruction> methodInstructions = new ArrayList<>();
+
             ArrayList<Modifier> methodModifiers = new ArrayList<>();
             for (Map.Entry<?, ?> methodCharacteristic : ((Map<?, ?>) method).entrySet()) {
                 switch ((String) methodCharacteristic.getKey()) {
@@ -106,9 +111,10 @@ public class Parser {
                         ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
                         for (Object instructionsTree : instructions) {
                             for (Map.Entry<?, ?> instruction : ((Map<?, ?>) instructionsTree).entrySet()) {
+                                // todo - add new Instructions(label, code, lineNumber) to methodInstructions list
                                 if (instruction.getKey().equals("code")) {
                                     code = (String) instruction.getValue();
-                                    methodInstructions.add(code);
+                                    //methodInstructions.add(code);
                                 } else if (instruction.getKey().equals("_label") && instruction.getValue().equals("CALL")) {
                                     if (!((Map<?, ?>) instructionsTree).get("methodCall").equals("")) {
                                         calledMethod = (String) ((Map<?, ?>) instructionsTree).get("methodCall");
@@ -170,14 +176,14 @@ public class Parser {
                         }
                 }
             }
-            String[] methodInstruct = new String[methodInstructions.size()];
+            Method.Instruction[] methodInstruct = new Method.Instruction[methodInstructions.size()];
             Modifier[] modifiers = new Modifier[methodModifiers.size()];
             modifiers = methodModifiers.toArray(modifiers);
             if (modifiers.length == 0) {
                 modifiers = new Modifier[]{};
             }
 
-            Method thisMethod = new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters);
+            Method thisMethod = new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters, returnType);
             // Getting a Set of Key-value pairs
             Set<Map.Entry<String, String>> entrySet = parameters.entrySet();
 
@@ -260,8 +266,8 @@ public class Parser {
     }
 
     private class JavaMethod extends Method {
-        JavaMethod(String name, String[] instructions, Modifier[] modifiers, HashMap<String, String> parameters) {
-            super(name, instructions, modifiers, parameters);
+        JavaMethod(String name, Instruction[] instructions, Modifier[] modifiers, HashMap<String, String> parameters, String returnType) {
+            super(name, instructions, modifiers, parameters, returnType);
         }
     }
 }
