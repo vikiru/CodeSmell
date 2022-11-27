@@ -102,25 +102,37 @@ public class Parser {
             ArrayList<Modifier> methodModifiers = new ArrayList<>();
             for (Map.Entry<?, ?> methodCharacteristic : ((Map<?, ?>) method).entrySet()) {
                 switch ((String) methodCharacteristic.getKey()) {
+                    case "returnType":
+                        returnType = (String)methodCharacteristic.getValue();
+                        break;
                     case "name":
                         methodName = (String) methodCharacteristic.getValue();
                         break;
                     case "instructions":
                         String label = "";
                         String code = "";
+                        String lineNumber = "";
                         ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
                         for (Object instructionsTree : instructions) {
                             for (Map.Entry<?, ?> instruction : ((Map<?, ?>) instructionsTree).entrySet()) {
-                                // todo - add new Instructions(label, code, lineNumber) to methodInstructions list
                                 if (instruction.getKey().equals("code")) {
                                     code = (String) instruction.getValue();
-                                    //methodInstructions.add(code);
                                 } else if (instruction.getKey().equals("_label") && instruction.getValue().equals("CALL")) {
+                                    label = (String) instruction.getValue();
                                     if (!((Map<?, ?>) instructionsTree).get("methodCall").equals("")) {
                                         calledMethod = (String) ((Map<?, ?>) instructionsTree).get("methodCall");
                                     }
+                                    else
+                                    {
+                                        label = (String) instruction.getValue();
+                                    }
+                                }
+                                else if (instruction.getKey().equals("lineNumber"))
+                                {
+                                    lineNumber = String.valueOf((Double)instruction.getValue());
                                 }
                             }
+                            methodInstructions.add(new Method.Instruction(label,code,lineNumber));
                         }
                         break;
                     case "parameters":
