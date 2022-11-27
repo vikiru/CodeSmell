@@ -13,26 +13,28 @@ public class joernServer {
         String directoryPath = Paths.get("").toAbsolutePath() + "/src/main/python";
 
         // Start up a command prompt terminal (no popup) and start the joern server
-        ProcessBuilder builder, builder2;
+        ProcessBuilder joernServerBuilder, joernQueryBuilder, portFinderBuilder;
 
-        // Open terminal and start the joern server once process for builder starts
+        // Open terminal and start the joern server once process for joernServerBuilder starts
         // Different commands for windows and linux
         if (System.getProperty("os.name").contains("Windows")) {
-            builder = new ProcessBuilder("cmd.exe", "/c", "cd " + joernPath, "& joern --server");
-            builder2 = new ProcessBuilder("cmd.exe", "/c", "cd " + directoryPath + "& python joern_query.py");
+            joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "cd " + joernPath, "& joern --server");
+            joernQueryBuilder = new ProcessBuilder("cmd.exe", "/c", "cd " + directoryPath + "& python joern_query.py");
+            portFinderBuilder = new ProcessBuilder("cmd.exe", "/c", "netstat -ano | findstr 8080");
         } else {
-            builder = new ProcessBuilder("sh", "-c", "joern --server");
-            builder2 = new ProcessBuilder("sh", "-c", "cd " + directoryPath + "python joern_query.py");
+            joernServerBuilder = new ProcessBuilder("sh", "-c", "joern --server");
+            joernQueryBuilder = new ProcessBuilder("sh", "-c", "cd " + directoryPath + "python joern_query.py");
+            portFinderBuilder = new ProcessBuilder("cmd.exe", "/c", "netstat -ano | findstr 8080");
         }
 
         try {
             // Start the server
-            Process joernServerProcess = builder.start();
+            Process joernServerProcess = joernServerBuilder.start();
             BufferedReader joernServerReader = new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()));
             System.out.println(joernServerReader.readLine());
 
             // Execute queries against the local joern server instance.
-            Process joernQueryProcess = builder2.start();
+            Process joernQueryProcess = joernQueryBuilder.start();
             BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()));
             String line;
             while ((line = joernQueryReader.readLine()) != null) {
@@ -46,6 +48,18 @@ public class joernServer {
                 if (joernServerProcess.isAlive()) {
                     joernServerProcess.destroyForcibly();
                 }
+                // For Windows OS, find the process bound to port 8080 and kill it.
+                // todo - add commands for other OS such as linux.
+                Process findProcess = portFinderBuilder.start();
+                BufferedReader findProcessReader = new BufferedReader(new InputStreamReader(findProcess.getInputStream()));
+
+                // Obtain the PID of the process bound to port 8080
+                String lineFree = findProcessReader.readLine();
+                String processID = lineFree.substring(lineFree.lastIndexOf(" ")).trim();
+
+                // Kill the process bound to port 8080
+                ProcessBuilder portFreerBuilder = new ProcessBuilder("cmd.exe", "/c", "taskkill /F /PID " + processID);
+                Process freeProcess = portFreerBuilder.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
