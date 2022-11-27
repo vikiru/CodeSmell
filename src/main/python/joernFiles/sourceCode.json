@@ -22179,426 +22179,438 @@
                         {
                             "_label": "METHOD",
                             "code": "public static void main(String[] args)",
-                            "lineNumber": 8,
+                            "lineNumber": 9,
                             "methodCall": ""
                         },
                         {
                             "_label": "METHOD_PARAMETER_IN",
                             "code": "String[] args",
-                            "lineNumber": 8,
+                            "lineNumber": 9,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "String joernPath",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "String joernPath = System.getProperty(\"user.home\") + \"/bin/joern/joern-cli\"",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "joernPath",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "System.getProperty(\"user.home\") + \"/bin/joern/joern-cli\"",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "CALL",
                             "code": "System.getProperty(\"user.home\")",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "System",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"user.home\"",
-                            "lineNumber": 11,
+                            "lineNumber": 12,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"/bin/joern/joern-cli\"",
-                            "lineNumber": 12,
+                            "lineNumber": 13,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
-                            "code": "String dirPath",
-                            "lineNumber": 12,
+                            "code": "String directoryPath",
+                            "lineNumber": 13,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "String dirPath = System.getProperty(\"user.dir\") + \"/src/main/python\"",
-                            "lineNumber": 12,
-                            "methodCall": "getProperty"
+                            "code": "String directoryPath = Paths.get(\"\").toAbsolutePath() + \"/src/main/python\"",
+                            "lineNumber": 13,
+                            "methodCall": "get"
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "dirPath",
-                            "lineNumber": 12,
+                            "code": "directoryPath",
+                            "lineNumber": 13,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "System.getProperty(\"user.dir\") + \"/src/main/python\"",
-                            "lineNumber": 12,
-                            "methodCall": "getProperty"
+                            "code": "Paths.get(\"\").toAbsolutePath() + \"/src/main/python\"",
+                            "lineNumber": 13,
+                            "methodCall": "get"
                         },
                         {
                             "_label": "CALL",
-                            "code": "System.getProperty(\"user.dir\")",
-                            "lineNumber": 12,
-                            "methodCall": "getProperty"
+                            "code": "Paths.get(\"\").toAbsolutePath()",
+                            "lineNumber": 13,
+                            "methodCall": "get"
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "Paths.get(\"\")",
+                            "lineNumber": 13,
+                            "methodCall": "get"
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "System",
-                            "lineNumber": 12,
+                            "code": "Paths",
+                            "lineNumber": 13,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
-                            "code": "\"user.dir\"",
-                            "lineNumber": 19,
+                            "code": "\"\"",
+                            "lineNumber": 13,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "<operator>.arrayInitializer",
+                            "lineNumber": 20,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"/src/main/python\"",
-                            "lineNumber": 19,
+                            "lineNumber": 20,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ProcessBuilder builder",
-                            "lineNumber": 19,
+                            "lineNumber": 20,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
                             "code": "ProcessBuilder builder2",
-                            "lineNumber": 19,
+                            "lineNumber": 20,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "if (System.getProperty(\"os.name\").contains(\"Windows\"))",
-                            "lineNumber": 19,
+                            "lineNumber": 20,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "System.getProperty(\"os.name\").contains(\"Windows\")",
-                            "lineNumber": 19,
+                            "lineNumber": 20,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "CALL",
                             "code": "System.getProperty(\"os.name\")",
-                            "lineNumber": 19,
+                            "lineNumber": 20,
                             "methodCall": "getProperty"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "System",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"os.name\"",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"Windows\"",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "builder = new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + joernPath, \"& joern --server\")",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + joernPath, \"& joern --server\")",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "CALL",
                             "code": "new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + joernPath, \"& joern --server\")",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<operator>.arrayInitializer",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"cmd.exe\"",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"/c\"",
-                            "lineNumber": 20,
+                            "lineNumber": 21,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "\"cd \" + joernPath",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"cd \"",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "joernPath",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"& joern --server\"",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "builder2 = new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + dirPath + \"& python joern_query.py\")",
-                            "lineNumber": 21,
+                            "code": "builder2 = new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + directoryPath + \"& python joern_query.py\")",
+                            "lineNumber": 22,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder2",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + dirPath + \"& python joern_query.py\")",
-                            "lineNumber": 21,
+                            "code": "new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + directoryPath + \"& python joern_query.py\")",
+                            "lineNumber": 22,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "CALL",
-                            "code": "new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + dirPath + \"& python joern_query.py\")",
-                            "lineNumber": 21,
+                            "code": "new ProcessBuilder(\"cmd.exe\", \"/c\", \"cd \" + directoryPath + \"& python joern_query.py\")",
+                            "lineNumber": 22,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder2",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<operator>.arrayInitializer",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"cmd.exe\"",
-                            "lineNumber": 21,
+                            "lineNumber": 22,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"/c\"",
-                            "lineNumber": 21,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "\"cd \" + dirPath + \"& python joern_query.py\"",
-                            "lineNumber": 21,
-                            "methodCall": ""
-                        },
-                        {
-                            "_label": "CALL",
-                            "code": "\"cd \" + dirPath",
                             "lineNumber": 22,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "\"cd \" + directoryPath + \"& python joern_query.py\"",
+                            "lineNumber": 22,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "\"cd \" + directoryPath",
+                            "lineNumber": 23,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"cd \"",
-                            "lineNumber": 22,
+                            "lineNumber": 23,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "dirPath",
-                            "lineNumber": 23,
+                            "code": "directoryPath",
+                            "lineNumber": 24,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"& python joern_query.py\"",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "else",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "builder = new ProcessBuilder(\"sh\", \"-c\", \"joern --server\")",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "new ProcessBuilder(\"sh\", \"-c\", \"joern --server\")",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "CALL",
                             "code": "new ProcessBuilder(\"sh\", \"-c\", \"joern --server\")",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder",
-                            "lineNumber": 23,
+                            "lineNumber": 24,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<operator>.arrayInitializer",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"sh\"",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"-c\"",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"joern --server\"",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "builder2 = new ProcessBuilder(\"sh\", \"-c\", \"cd \" + dirPath + \"python joern_query.py\")",
-                            "lineNumber": 24,
+                            "code": "builder2 = new ProcessBuilder(\"sh\", \"-c\", \"cd \" + directoryPath + \"python joern_query.py\")",
+                            "lineNumber": 25,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder2",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "new ProcessBuilder(\"sh\", \"-c\", \"cd \" + dirPath + \"python joern_query.py\")",
-                            "lineNumber": 24,
+                            "code": "new ProcessBuilder(\"sh\", \"-c\", \"cd \" + directoryPath + \"python joern_query.py\")",
+                            "lineNumber": 25,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "CALL",
-                            "code": "new ProcessBuilder(\"sh\", \"-c\", \"cd \" + dirPath + \"python joern_query.py\")",
-                            "lineNumber": 24,
+                            "code": "new ProcessBuilder(\"sh\", \"-c\", \"cd \" + directoryPath + \"python joern_query.py\")",
+                            "lineNumber": 25,
                             "methodCall": "ProcessBuilder"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "builder2",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
                             "code": "<operator>.arrayInitializer",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"sh\"",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"-c\"",
-                            "lineNumber": 24,
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "\"cd \" + dirPath + \"python joern_query.py\"",
-                            "lineNumber": 24,
+                            "code": "\"cd \" + directoryPath + \"python joern_query.py\"",
+                            "lineNumber": 25,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "\"cd \" + dirPath",
+                            "code": "\"cd \" + directoryPath",
                             "lineNumber": 28,
                             "methodCall": ""
                         },
@@ -22610,43 +22622,43 @@
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "dirPath",
-                            "lineNumber": 29,
+                            "code": "directoryPath",
+                            "lineNumber": 30,
                             "methodCall": ""
                         },
                         {
                             "_label": "LITERAL",
                             "code": "\"python joern_query.py\"",
-                            "lineNumber": 29,
+                            "lineNumber": 30,
                             "methodCall": ""
                         },
                         {
                             "_label": "CONTROL_STRUCTURE",
                             "code": "try",
-                            "lineNumber": 29,
+                            "lineNumber": 30,
                             "methodCall": ""
                         },
                         {
                             "_label": "BLOCK",
                             "code": "try",
-                            "lineNumber": 29,
+                            "lineNumber": 30,
                             "methodCall": ""
                         },
                         {
                             "_label": "LOCAL",
-                            "code": "Process p",
+                            "code": "Process joernServerProcess",
                             "lineNumber": 31,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "Process p = builder.start()",
+                            "code": "Process joernServerProcess = builder.start()",
                             "lineNumber": 31,
                             "methodCall": "start"
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "p",
+                            "code": "joernServerProcess",
                             "lineNumber": 31,
                             "methodCall": ""
                         },
@@ -22664,56 +22676,56 @@
                         },
                         {
                             "_label": "LOCAL",
-                            "code": "BufferedReader reader",
+                            "code": "BufferedReader joernServerReader",
                             "lineNumber": 31,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))",
+                            "code": "BufferedReader joernServerReader = new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()))",
                             "lineNumber": 31,
                             "methodCall": "BufferedReader"
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "reader",
+                            "code": "joernServerReader",
                             "lineNumber": 31,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "new BufferedReader(new InputStreamReader(p.getInputStream()))",
+                            "code": "new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()))",
                             "lineNumber": 31,
                             "methodCall": "BufferedReader"
                         },
                         {
                             "_label": "CALL",
-                            "code": "new BufferedReader(new InputStreamReader(p.getInputStream()))",
+                            "code": "new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()))",
                             "lineNumber": 31,
                             "methodCall": "BufferedReader"
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "reader",
-                            "lineNumber": 33,
+                            "code": "joernServerReader",
+                            "lineNumber": 32,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj4",
-                            "lineNumber": 33,
+                            "lineNumber": 32,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "new InputStreamReader(p.getInputStream())",
-                            "lineNumber": 33,
+                            "code": "new InputStreamReader(joernServerProcess.getInputStream())",
+                            "lineNumber": 32,
                             "methodCall": "InputStreamReader"
                         },
                         {
                             "_label": "CALL",
-                            "code": "new InputStreamReader(p.getInputStream())",
-                            "lineNumber": 33,
+                            "code": "new InputStreamReader(joernServerProcess.getInputStream())",
+                            "lineNumber": 32,
                             "methodCall": "InputStreamReader"
                         },
                         {
@@ -22724,27 +22736,303 @@
                         },
                         {
                             "_label": "CALL",
-                            "code": "p.getInputStream()",
-                            "lineNumber": 36,
+                            "code": "joernServerProcess.getInputStream()",
+                            "lineNumber": 35,
                             "methodCall": "getInputStream"
                         },
                         {
                             "_label": "IDENTIFIER",
-                            "code": "p",
-                            "lineNumber": 36,
+                            "code": "joernServerProcess",
+                            "lineNumber": 35,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "$obj4",
-                            "lineNumber": 8,
+                            "lineNumber": 35,
                             "methodCall": ""
                         },
                         {
                             "_label": "CALL",
-                            "code": "System.out.println(reader.readLine())",
-                            "lineNumber": 8,
+                            "code": "System.out.println(joernServerReader.readLine())",
+                            "lineNumber": 36,
                             "methodCall": "println"
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "System.out",
+                            "lineNumber": 36,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "System",
+                            "lineNumber": 36,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "FIELD_IDENTIFIER",
+                            "code": "out",
+                            "lineNumber": 36,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "joernServerReader.readLine()",
+                            "lineNumber": 36,
+                            "methodCall": "readLine"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernServerReader",
+                            "lineNumber": 36,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "LOCAL",
+                            "code": "Process joernQueryProcess",
+                            "lineNumber": 36,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "Process joernQueryProcess = builder2.start()",
+                            "lineNumber": 36,
+                            "methodCall": "start"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernQueryProcess",
+                            "lineNumber": 36,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "builder2.start()",
+                            "lineNumber": 36,
+                            "methodCall": "start"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "builder2",
+                            "lineNumber": 38,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "LOCAL",
+                            "code": "BufferedReader joernQueryReader",
+                            "lineNumber": 38,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()))",
+                            "lineNumber": 38,
+                            "methodCall": "BufferedReader"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernQueryReader",
+                            "lineNumber": 38,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()))",
+                            "lineNumber": 38,
+                            "methodCall": "BufferedReader"
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()))",
+                            "lineNumber": 38,
+                            "methodCall": "BufferedReader"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernQueryReader",
+                            "lineNumber": 38,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "$obj6",
+                            "lineNumber": 39,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "new InputStreamReader(joernQueryProcess.getInputStream())",
+                            "lineNumber": 39,
+                            "methodCall": "InputStreamReader"
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "new InputStreamReader(joernQueryProcess.getInputStream())",
+                            "lineNumber": 39,
+                            "methodCall": "InputStreamReader"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "$obj6",
+                            "lineNumber": 39,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "joernQueryProcess.getInputStream()",
+                            "lineNumber": 43,
+                            "methodCall": "getInputStream"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernQueryProcess",
+                            "lineNumber": 43,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "$obj6",
+                            "lineNumber": 43,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "LOCAL",
+                            "code": "String line",
+                            "lineNumber": 43,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CONTROL_STRUCTURE",
+                            "code": "while ((line = joernQueryReader.readLine()) != null)",
+                            "lineNumber": 44,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "(line = joernQueryReader.readLine()) != null",
+                            "lineNumber": 44,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "line = joernQueryReader.readLine()",
+                            "lineNumber": 44,
+                            "methodCall": "readLine"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "line",
+                            "lineNumber": 44,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "joernQueryReader.readLine()",
+                            "lineNumber": 44,
+                            "methodCall": "readLine"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernQueryReader",
+                            "lineNumber": 45,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "LITERAL",
+                            "code": "null",
+                            "lineNumber": 45,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "System.out.println(line)",
+                            "lineNumber": 46,
+                            "methodCall": "println"
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "System.out",
+                            "lineNumber": 46,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "System",
+                            "lineNumber": 46,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "FIELD_IDENTIFIER",
+                            "code": "out",
+                            "lineNumber": 47,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "line",
+                            "lineNumber": 47,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "LOCAL",
+                            "code": "int exitCode",
+                            "lineNumber": 50,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "int exitCode = joernQueryProcess.waitFor()",
+                            "lineNumber": 51,
+                            "methodCall": "waitFor"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "exitCode",
+                            "lineNumber": 51,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "joernQueryProcess.waitFor()",
+                            "lineNumber": 52,
+                            "methodCall": "waitFor"
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "joernQueryProcess",
+                            "lineNumber": 53,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CONTROL_STRUCTURE",
+                            "code": "if (exitCode == 0)",
+                            "lineNumber": 53,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "exitCode == 0",
+                            "lineNumber": 53,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "IDENTIFIER",
+                            "code": "exitCode",
+                            "lineNumber": 53,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "LITERAL",
+                            "code": "0",
+                            "lineNumber": 53,
+                            "methodCall": ""
+                        },
+                        {
+                            "_label": "CALL",
+                            "code": "joernServerProcess.destroy()",
+                            "lineNumber": 9,
+                            "methodCall": "destroy"
                         }
                     ]
                 }
