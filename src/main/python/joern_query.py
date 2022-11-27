@@ -10,8 +10,8 @@ from cpgqls_client import CPGQLSClient, import_code_query
 def clean_json(joern_result):
     string_to_find = '"""'
     index = joern_result.find(string_to_find)
-    joern_result = joern_result[index : len(joern_result)]
     joern_result = joern_result.replace('"""', "")
+    joern_result = joern_result[index : len(joern_result)]
     return joern_result
 
 
@@ -208,17 +208,16 @@ def source_code_json_creation():
 
     # Create a dictionary with all the info about the source code and write it to a .json file.
     source_code_json = {"classes": list(map(create_class_dict, all_data))}
-    joern_result = json.dumps(source_code_json, indent=4)
-    write_to_file(joern_result, "sourceCode.json")
+    write_to_file(source_code_json, "sourceCode")
 
 
 # Write the joern output of a query to a specified filename
-def write_to_file(joern_result, file_name):
+def write_to_file(source_code_json, file_name):
     final_directory_name = (
-        str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name
+        str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name + ".json"
     )
     with open(final_directory_name, "w") as f:
-        f.write(joern_result)
+        json.dump(source_code_json, f, indent=4)
 
 
 if __name__ == "__main__":
@@ -240,7 +239,7 @@ if __name__ == "__main__":
     our_project_dir = our_project_dir.replace(winDrive, winDrive.upper()).replace(
         "\\", "//"
     )
-
+            
     # Original directory of where the source code we are analyzing came from. We could use the user's
     # original dir instead of taking .java source files, or just take in .java files as store in a dir
     # originalDir = "D:/SYSC3110/Lab1"
@@ -278,3 +277,15 @@ if __name__ == "__main__":
             + format(end - start, ".2f")
             + " seconds."
         )
+"""
+    import cProfile
+    import pstats
+
+    with cProfile.Profile() as pr:
+        source_code_json_creation(all_data)
+
+    stats = pstats.Stats(pr)
+    stats.sort_stats(pstats.SortKey.TIME)
+    # stats.print_stats()
+    stats.dump_stats(filename="profiling.prof")
+"""

@@ -3084,19 +3084,19 @@
                         {
                             "_label": "CALL",
                             "code": "main(args)",
-                            "lineNumber": 6,
+                            "lineNumber": 10,
                             "methodCall": "main"
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "MainApp",
-                            "lineNumber": 6,
+                            "lineNumber": 10,
                             "methodCall": ""
                         },
                         {
                             "_label": "IDENTIFIER",
                             "code": "args",
-                            "lineNumber": 6,
+                            "lineNumber": 10,
                             "methodCall": ""
                         }
                     ]
