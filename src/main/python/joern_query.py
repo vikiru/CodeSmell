@@ -87,7 +87,7 @@ def source_code_json_creation():
             # Get the method body with any method parameters.
             method_body = re.sub(return_type_pattern, "", method_with_return)
             if not return_type:
-                # Handle ArrayList and HashMap return types
+                # Handle all Collection types (Set, HashMap, ArrayList, etc)
                 index = method_body.find(">")
                 return_type = method_body[0 : index + 1]
                 if "(" in return_type or not return_type:
@@ -119,21 +119,19 @@ def source_code_json_creation():
                 if not all_parameters:
                     return param_list
                 else:
-                    max = len(all_parameters) / 2
-
-                    def append_all_parameters(all_parameters, first, second, count):
-                        type = all_parameters[first]
-                        name = all_parameters[second]
-                        param_list.append(dict(name=name, type=type))
-                        count += 1
-                        if count + 1 > max:
-                            return
-                        else:
-                            append_all_parameters(
-                                all_parameters, first + 2, second + 2, count
+                    # Append all parameters to the param_list
+                    count = 0
+                    for i in range(0, len(all_parameters)):
+                        if (i + 1 + count) <= len(all_parameters):
+                            param_list.append(
+                                dict(
+                                    name=all_parameters[i + 1 + count],
+                                    type=all_parameters[i + count],
+                                )
                             )
-
-                    append_all_parameters(all_parameters, 0, 1, 0)
+                            count += 1
+                        else:
+                            break
                 return param_list
 
             curr_method_dict = {
