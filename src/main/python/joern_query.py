@@ -10,7 +10,7 @@ from cpgqls_client import CPGQLSClient, import_code_query
 def clean_json(joern_result):
     string_to_find = '"""'
     index = joern_result.find(string_to_find)
-    joern_result = joern_result[index: len(joern_result)]
+    joern_result = joern_result[index : len(joern_result)]
     joern_result = joern_result.replace('"""', "")
     return joern_result
 
@@ -32,8 +32,8 @@ def source_code_json_creation():
         index = curr_field["_1"]["typeFullName"].rfind(".")
         if index != -1:
             type = curr_field["_1"]["typeFullName"][
-                   index + 1: len(curr_field["_1"]["typeFullName"])
-                   ]
+                index + 1 : len(curr_field["_1"]["typeFullName"])
+            ]
 
         curr_field_dict = {
             "name": curr_field["_1"]["name"],
@@ -89,7 +89,7 @@ def source_code_json_creation():
             if not return_type:
                 # Handle ArrayList and HashMap return types
                 index = method_body.find(">")
-                return_type = method_body[0: index + 1]
+                return_type = method_body[0 : index + 1]
                 if "(" in return_type or not return_type:
                     return_type = ""
                 if return_type in method_body:
@@ -105,7 +105,7 @@ def source_code_json_creation():
                 all_parameters = []
                 if "<lambda>" not in method_body:
                     all_parameters = (
-                        method_body[index: len(method_body)]
+                        method_body[index : len(method_body)]
                         .replace("(", "")
                         .replace(")", "")
                     )
@@ -185,8 +185,8 @@ def source_code_json_creation():
                     if "class" in declaration and not curr_class_dict["methods"]:
                         return "enum"
                     elif (
-                            "class" in declaration
-                            and "abstract" in single_list_method_modifiers
+                        "class" in declaration
+                        and "abstract" in single_list_method_modifiers
                     ):
                         return "abstract class"
                     else:
@@ -208,7 +208,7 @@ def source_code_json_creation():
                 method["parentClass"] = curr_class["_1"]
             return curr_class_dict
 
-    # Create a dictionary with all of the info about the source code and write it to a .json file.
+    # Create a dictionary with all the info about the source code and write it to a .json file.
     source_code_json = {"classes": list(map(create_class_dict, all_data))}
     joern_result = json.dumps(source_code_json, indent=4)
     write_to_file(joern_result, "sourceCode.json")
@@ -216,14 +216,14 @@ def source_code_json_creation():
 
 # Write the joern output of a query to a specified filename
 def write_to_file(joern_result, file_name):
-    directory_name = str(Path().absolute()) + "/joernFiles/"
-    final_directory_name = directory_name + file_name
+    final_directory_name = (
+        str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name
+    )
     with open(final_directory_name, "w") as f:
         f.write(joern_result)
 
 
 if __name__ == "__main__":
-
     server_endpoint = "localhost:8080"
     client = CPGQLSClient(server_endpoint)
 
@@ -236,8 +236,11 @@ if __name__ == "__main__":
 
     # For testing purposes. Full file paths are required for joern.
     # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
-    our_project_dir = (
-        "C:/Users/viski/OneDrive/Documents/GitHub/CodeSmell/src/main/java/com/CodeSmell"
+    our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
+    index = our_project_dir.find(":")
+    winDrive = our_project_dir[0 : index + 1]
+    our_project_dir = our_project_dir.replace(winDrive, winDrive.upper()).replace(
+        "\\", "//"
     )
 
     # Original directory of where the source code we are analyzing came from. We could use the user's
@@ -247,16 +250,24 @@ if __name__ == "__main__":
     query = import_code_query(our_project_dir, project_name)
     result = client.execute(query)
     end = time.time()
+
     if result["success"]:
         print(
-            "The source code has been successfully imported. Completed in " + format(end - start, ".2f") + " seconds.")
+            "The source code has been successfully imported. Completed in "
+            + format(end - start, ".2f")
+            + " seconds."
+        )
 
     start = time.time()
     # Create the source code json representation
     source_code_json_creation()
     end = time.time()
-    print("A .json representation of the source code has been created. Completed in " + format(end - start,
-                                                                                               ".2f") + " seconds.")
+
+    print(
+        "A .json representation of the source code has been created. Completed in "
+        + format(end - start, ".2f")
+        + " seconds."
+    )
 
     # Close and delete the project from user's bin/joern/joern-cli/workspace
     start = time.time()
@@ -264,4 +275,8 @@ if __name__ == "__main__":
     result = client.execute(query)
     end = time.time()
     if result["success"]:
-        print("The source code has been successfully removed. Completed in " + format(end - start, ".2f") + " seconds.")
+        print(
+            "The source code has been successfully removed. Completed in "
+            + format(end - start, ".2f")
+            + " seconds."
+        )
