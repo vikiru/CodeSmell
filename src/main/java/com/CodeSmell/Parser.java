@@ -150,7 +150,7 @@ public class Parser {
                                 //Add to pair param and type, then add to methods
                             }
                             if (!(name.equals("") && type.equals(""))) {
-                                parameters.put(type, name);
+                                parameters.put(name, type);
                             }
                         }
                         break;

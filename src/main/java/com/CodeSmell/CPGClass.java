@@ -80,8 +80,8 @@ public class CPGClass {
             return methodCalls;
         }
 
-        protected void addToParameters(String type, String paramName) {
-            parameters.put(type, paramName);
+        protected void addToParameters(String paramName, String type) {
+            parameters.put(paramName, type);
         }
 
         public static class Instruction {
