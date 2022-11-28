@@ -28,6 +28,7 @@ public class Parser {
     public CodePropertyGraph buildCPG(String destination) {
         Gson gson = new Gson();
         CodePropertyGraph cpg = new CodePropertyGraph();
+        HashMap<Method, String> calls = new HashMap<>();
         try {
             Reader reader = Files.newBufferedReader(Paths.get("src/main/python/joernFiles/sourceCode.json"));
 
@@ -44,7 +45,7 @@ public class Parser {
                     String type = (String) completeClassMap.get("type");
                     cpg.addClass(new CPGClass(name, type));
                     classCount++;
-                    ArrayList methods = parseSourceCodeMethods((ArrayList) completeClassMap.get("methods"));
+                    ArrayList methods = parseSourceCodeMethods((ArrayList) completeClassMap.get("methods"), calls);
                     for (Object method : methods) {
                         Method thisMethod = (Method) method;
                         cpg.getClasses().get(classCount).addMethod(thisMethod);
@@ -69,15 +70,15 @@ public class Parser {
                 allMethods.put(method.name, method);
             }
         }
-        updateMethodCalls(allMethods, cpg);
+        updateMethodCalls(allMethods, cpg, calls);
         return cpg;
     }
 
 
-    private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg) {
+    private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg, HashMap<Method, String> calls) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (Method method : cpgClass.getMethods()) {
-                for (String calledMethod : method.getCalls().values()) {
+                for (String calledMethod : calls.values()) {
                     if (allMethods.containsKey(calledMethod)) {
                         method.addMethodCall(allMethods.get(calledMethod));
                     }
@@ -86,7 +87,7 @@ public class Parser {
         }
     }
 
-    private ArrayList<Method> parseSourceCodeMethods(ArrayList methods) {
+    private ArrayList<Method> parseSourceCodeMethods(ArrayList methods, HashMap<Method, String> calls) {
         ArrayList<Method> parsedMethods = new ArrayList<>();
         Pair<Method, String> methodToCalledMethod;
         String calledMethod = "";
@@ -204,7 +205,7 @@ public class Parser {
                 Map.Entry param = (Map.Entry) o;
                 thisMethod.addToParameters((String) param.getKey(), (String) param.getValue());
             }
-            thisMethod.addCall(thisMethod, calledMethod);
+            calls.put(thisMethod,calledMethod);
             parsedMethods.add(thisMethod);
         }
 

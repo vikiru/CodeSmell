@@ -58,8 +58,8 @@ public class CPGClass {
         public final HashMap<String, String> parameters;
         public final String returnType;
         // return a list of methods which this calls
-        private HashMap<Method, String> calls;
         private ArrayList<Method> methodCalls;
+
 
         protected Method(String name, Instruction[] instructions, Modifier[] modifiers, HashMap<String, String> parameters, String returnType) {
             this.name = name;
@@ -67,21 +67,14 @@ public class CPGClass {
             this.modifiers = modifiers;
             this.parameters = parameters;
             this.returnType = returnType;
-            this.calls = new HashMap<>();
             this.methodCalls = new ArrayList<>();
         }
 
-        protected void addCall(Method m, String s) {
-            this.calls.put(m, s);
-        }
 
         protected void addMethodCall(Method m) {
             this.methodCalls.add(m);
         }
 
-        protected HashMap<Method, String> getCalls() {
-            return calls;
-        }
 
         public ArrayList<Method> getMethodCalls() {
             return methodCalls;
