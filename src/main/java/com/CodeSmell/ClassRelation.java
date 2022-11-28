@@ -17,7 +17,7 @@ public class ClassRelation extends RenderObject {
         this.source = source;
         this.target = target;
     }
-
+    
     public ArrayList<Position> getPath() {
         return path;
     }
@@ -29,6 +29,18 @@ public class ClassRelation extends RenderObject {
         pathContainerId = (Integer) re.getResponse();
     }
 
+    public Multiplicity reverseMultiplicity() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.multiplicity.cardinality).reverse();
+        Multiplicity reverseMultiplicity = null;
+        for (Multiplicity m : Multiplicity.values()) {
+            if (m.cardinality.equals(String.valueOf(sb))) {
+                reverseMultiplicity = m;
+            }
+        }
+        return reverseMultiplicity;
+    }
+
     public enum Type {
         DEPENDENCY,
         ASSOCIATION,
@@ -38,11 +50,21 @@ public class ClassRelation extends RenderObject {
         INTERFACE
     }
 
-    // todo - add any missing multiplicities, here (0..*, *..0, 0..1, 1..0?)
     public enum Multiplicity {
-        ONE_TO_ONE,
-        ONE_TO_MANY,
-        MANY_TO_ONE,
-        MANY_TO_MANY
+        ZERO_TO_ONE("0..1"),
+        ZERO_TO_MANY("0..*"),
+        ONE_TO_ZERO("1..0"),
+        ONE_TO_ONE("1..1"),
+        ONE_TO_MANY("1..*"),
+        MANY_TO_ZERO("*..0"),
+        MANY_TO_ONE("*..1"),
+        MANY_TO_MANY("*..*");
+
+        // Represents the cardinality of the Multiplicity enum as a String.
+        public final String cardinality;
+
+        Multiplicity(String cardinality) {
+            this.cardinality = cardinality;
+        }
     }
 }
