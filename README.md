@@ -1,18 +1,57 @@
 # CodeSmell
 
-## Building and Running
+## Project Description
 
-1.) Ensure the relevant enviornment variables are set. 
+## Authors
+
+- Golan Hassin
+- Visakan Kirubakaran
+- Sabin Plaiasu
+- Martin Rivard
+- Kshitij Sawhney
+
+## Prerequisites
+
+Make sure that the following prerequisites are successfully installed on your machine:
+
+- Java - [Download & Install Java.](https://www.java.com/en/download/manual.jsp) Download Java based on
+  your operating system.
+- Maven - [Download & Install Maven.](https://maven.apache.org/download.cgi) Choosing the latest version will suffice.
+- Python - [Download & Install Python.](https://www.python.org/downloads/) Python 3 is required.
+- Joern - Please see the [joern](https://github.com/joernio/joern) repository for more details on installing joern.
+
+## Build and Run Instructions
+
+0. Ensure the relevant enviornment variables are set:
+
 `export JAVA_HOME=/usr/lib/jvm/default-java/`
 
-2.) Build the project files with Maven
+`MAVEN_HOME`
+
+1. Run the following commands to clean and repackage the project:
+
+`mvn clean`
+
+`mvn package`
+
+2. Build the project files with Maven:
+
 `mvn install`
 
-3.) In order to execute the program: 
-`mvn javafx:run`
+3. In order to execute the main program via the terminal, run the following:
 
-In order to run the program manually the following command can be used:
-`java --module-path ./target/dependency --add-modules javafx.controls,javafx.fxml,javafx.controls,javafx.media,javafx.web -jar ./target/CodeSmell-1.0-SNAPSHOT.jar`
+`mvn clean javafx:run`
 
-In order to do this the dependencies (JavaFX) must be copied into the ./target/dependencies folder.
-`mvn javafx:run`
+In order to run the program through the executable jar via the terminal, the following command can be used:
+
+`java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar`
+
+In order to do this, the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
+
+## Usage
+
+## Testing Instructions
+
+Run the following command to execute all of the tests:
+
+`mvn test`

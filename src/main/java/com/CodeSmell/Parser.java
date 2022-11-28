@@ -1,79 +1,286 @@
 package com.CodeSmell;
 
-import java.util.ArrayList;
-
-import com.CodeSmell.CPGClass;
-import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Attribute;
+import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Modifier;
-import com.CodeSmell.CodePropertyGraph;
-import com.CodeSmell.ClassRelation;
+import com.google.gson.Gson;
+import javafx.util.Pair;
+
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+public class Parser {
+
+    public static void main(String[] args) {
+        Parser p = new Parser();
+        CodePropertyGraph g = p.buildCPG("");
+    }
+
+    /**
+     * @param destination A file location for source code
+     * @return cpg A code property graph of the source code containing all classes and their fields and methods
+     */
+    public CodePropertyGraph buildCPG(String destination) {
+        Gson gson = new Gson();
+        CodePropertyGraph cpg = new CodePropertyGraph();
+        HashMap<Method, String> calls = new HashMap<>();
+        try {
+            Reader reader = Files.newBufferedReader(Paths.get("src/main/python/joernFiles/sourceCode.json"));
+
+            // convert JSON file to map
+            Map<?, ?> map = gson.fromJson(reader, Map.class);
+            Object[] entryValues;
+            entryValues = map.values().toArray();
+            ArrayList classes = (ArrayList) entryValues[0];
+            int classCount = -1;
+            for (Object classMap : classes) {
+                Map<?, ?> completeClassMap = (Map<?, ?>) classMap;
+                if (completeClassMap != null) {
+                    String name = (String) completeClassMap.get("name");
+                    String type = (String) completeClassMap.get("type");
+                    cpg.addClass(new CPGClass(name, type));
+                    classCount++;
+                    ArrayList methods = parseSourceCodeMethods((ArrayList) completeClassMap.get("methods"), calls);
+                    for (Object method : methods) {
+                        Method thisMethod = (Method) method;
+                        cpg.getClasses().get(classCount).addMethod(thisMethod);
+
+                    }
+                    ArrayList fields = parseSourceCodeFields((ArrayList) completeClassMap.get("fields"));
+                    for (Object field : fields) {
+                        cpg.getClasses().get(classCount).addAttribute((Attribute) field);
+                    }
+                }
+            }
+            // close reader
+            reader.close();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        //cpg.addRelation(new CodePropertyGraph.Relation(cpg.getClasses().get(0), cpg.getClasses().get(1), ClassRelation.Type.ASSOCIATION));
+        HashMap<String, Method> allMethods = new HashMap();
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            for (Method method : cpgClass.getMethods()) {
+                allMethods.put(method.name, method);
+            }
+        }
+        updateMethodCalls(allMethods, cpg, calls);
+        return cpg;
+    }
 
 
-public class Parser {	
+    private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg, HashMap<Method, String> calls) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            for (Method method : cpgClass.getMethods()) {
+                for (String calledMethod : calls.values()) {
+                    if (allMethods.containsKey(calledMethod)) {
+                        method.addMethodCall(allMethods.get(calledMethod));
+                    }
+                }
+            }
+        }
+    }
 
-	private class JavaAttribute extends Attribute {
-		JavaAttribute(String name, Modifier[] m) {
-			super(name, m);
-		}
-	}
+    private ArrayList<Method> parseSourceCodeMethods(ArrayList methods, HashMap<Method, String> calls) {
+        ArrayList<Method> parsedMethods = new ArrayList<>();
+        Pair<Method, String> methodToCalledMethod;
+        String calledMethod = "";
+        HashMap<String, String> parameters = new HashMap<>();
+        for (Object method : methods) {
+            String methodName = "";
+            // todo - extract return type of method from .json
+            String returnType = "";
 
-	private class JavaMethod extends Method {
-		JavaMethod(String name, String[] instructions, Modifier[] modifiers) {
-			super(name, instructions, modifiers);
-		}
-	}
+            // todo - populate methodInstructions with type of Instructions not String
+            ArrayList<Method.Instruction> methodInstructions = new ArrayList<>();
 
-	public CodePropertyGraph buildCPG(String destination) {
-		CodePropertyGraph cpg = new CodePropertyGraph();
+            ArrayList<Modifier> methodModifiers = new ArrayList<>();
+            for (Map.Entry<?, ?> methodCharacteristic : ((Map<?, ?>) method).entrySet()) {
+                switch ((String) methodCharacteristic.getKey()) {
+                    case "returnType":
+                        returnType = (String)methodCharacteristic.getValue();
+                        break;
+                    case "name":
+                        methodName = (String) methodCharacteristic.getValue();
+                        break;
+                    case "instructions":
+                        String label = "";
+                        String code = "";
+                        String lineNumber = "";
+                        ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
+                        for (Object instructionsTree : instructions) {
+                            for (Map.Entry<?, ?> instruction : ((Map<?, ?>) instructionsTree).entrySet()) {
+                                if (instruction.getKey().equals("code")) {
+                                    code = (String) instruction.getValue();
+                                } else if (instruction.getKey().equals("_label") && instruction.getValue().equals("CALL")) {
+                                    label = (String) instruction.getValue();
+                                    if (!((Map<?, ?>) instructionsTree).get("methodCall").equals("")) {
+                                        calledMethod = (String) ((Map<?, ?>) instructionsTree).get("methodCall");
+                                    }
+                                    else
+                                    {
+                                        label = (String) instruction.getValue();
+                                    }
+                                }
+                                else if (instruction.getKey().equals("lineNumber"))
+                                {
+                                    lineNumber = String.valueOf((Double)instruction.getValue());
+                                }
+                            }
+                            methodInstructions.add(new Method.Instruction(label,code,lineNumber));
+                        }
+                        break;
+                    case "parameters":
+                        ArrayList allParameters = (ArrayList) methodCharacteristic.getValue();
+                        for (Object paramPair : allParameters) {
+                            String name = "";
+                            String type = "";
+                            for (Map.Entry<?, ?> param : ((Map<?, ?>) paramPair).entrySet()) {
+                                if (param.getKey().equals("name")) {
+                                    name = (String) param.getValue();
+                                } else if (param.getKey().equals("type")) {
+                                    type = (String) param.getValue();
+                                }
+                                //Add to pair param and type, then add to methods
+                            }
+                            if (!(name.equals("") && type.equals(""))) {
+                                parameters.put(name, type);
+                            }
+                        }
+                        break;
+                    case "modifiers":
+                        ArrayList methodModifier = (ArrayList) methodCharacteristic.getValue();
+                        if (!methodModifier.isEmpty()) {
+                            for (int i = 0; i < methodModifier.size(); i++) {
+                                switch ((String) methodModifier.get(i)) {
+                                    case "private":
+                                        methodModifiers.add(Modifier.PRIVATE);
+                                        break;
+                                    case "public":
+                                        methodModifiers.add(Modifier.PUBLIC);
+                                        break;
+                                    case "protected":
+                                        methodModifiers.add(Modifier.PROTECTED);
+                                        break;
+                                    case "static":
+                                        methodModifiers.add(Modifier.STATIC);
+                                        break;
+                                    case "final":
+                                        methodModifiers.add(Modifier.FINAL);
+                                        break;
+                                    case "synchronized":
+                                        methodModifiers.add(Modifier.SYNCHRONIZED);
+                                        break;
+                                    case "abstract":
+                                        methodModifiers.add(Modifier.ABSTRACT);
+                                        break;
+                                    case "native":
+                                        methodModifiers.add(Modifier.NATIVE);
+                                        break;
 
-		CPGClass jc1 = new CPGClass("FirstClass");
-		CPGClass jc2 = new CPGClass("SecondClass");
-		CPGClass jc3 = new CPGClass("ThirdClassWithAReallyLongName");
-		Attribute a1 = new JavaAttribute("attributeOne", new Modifier[] {Modifier.PUBLIC});
-		Attribute a2 = new JavaAttribute("attributeTwo", new Modifier[] {Modifier.STATIC, Modifier.PRIVATE});
-		Method m1 = new JavaMethod("methodOne(void);", new String[] {"instruction one;", "instruction two"},
-				new Modifier[] {Modifier.PRIVATE});
-		Method m2 = new JavaMethod("methodTwo(int x, int y);",
-				new String[] {"return x + y;"}, new Modifier[] {Modifier.PRIVATE});
-		Method m3 = new JavaMethod("methodThree(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m4 = new JavaMethod("methodFour(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m5 = new JavaMethod("methodFive(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL});
-		Method m6 = new JavaMethod("methodSix(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PUBLIC});
-		Method m7 = new JavaMethod("methodSeven(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
-		Method m8 = new JavaMethod("methodEight(void);", new String[] {"return 0;"}, 
-			new Modifier[] {Modifier.PRIVATE});
+                                }
+                            }
+                        }
+                }
+            }
+            Method.Instruction[] methodInstruct = new Method.Instruction[methodInstructions.size()];
+            Modifier[] modifiers = new Modifier[methodModifiers.size()];
+            modifiers = methodModifiers.toArray(modifiers);
+            if (modifiers.length == 0) {
+                modifiers = new Modifier[]{};
+            }
 
-		m1.addCall(m2);
-		jc1.addMethod(m1);
-		Modifier[] m = new Modifier[] {Modifier.PUBLIC};
-		jc1.addAttribute(a1);
-		jc1.addAttribute(a2);
-		jc2.addMethod(m2);
-		jc3.addMethod(m3);
-		jc3.addMethod(m4);
-		jc3.addMethod(m5);
-		jc3.addMethod(m6);
-		jc3.addMethod(m7);
-		jc3.addMethod(m8);
-		cpg.addClass(jc1);
-		cpg.addClass(jc2);
-		cpg.addClass(jc3);
-		CodePropertyGraph.Relation r = new CodePropertyGraph.Relation(
-				jc1, 
-				jc2, 
-				ClassRelation.Type.DEPENDENCY);
-		CodePropertyGraph.Relation r2 = new CodePropertyGraph.Relation(
-				jc1, 
-				jc3, 
-				ClassRelation.Type.DEPENDENCY);
-		cpg.addRelation(r);
-		cpg.addRelation(r2);
-		return cpg;
-	}
+            Method thisMethod = new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters, returnType);
+            // Getting a Set of Key-value pairs
+            Set<Map.Entry<String, String>> entrySet = parameters.entrySet();
+
+            // Iterate through HashMap entries(Key-Value pairs)
+            for (Object o : entrySet) {
+                Map.Entry param = (Map.Entry) o;
+                thisMethod.addToParameters((String) param.getKey(), (String) param.getValue());
+            }
+            calls.put(thisMethod,calledMethod);
+            parsedMethods.add(thisMethod);
+        }
+
+        return parsedMethods;
+    }
+
+    private ArrayList<Attribute> parseSourceCodeFields(ArrayList fields) {
+        ArrayList<Attribute> parsedFields = new ArrayList<>();
+
+        for (Object field : fields) {
+            String fieldName = "";
+            String fieldType = "";
+            ArrayList<Modifier> fieldModifiers = new ArrayList<>();
+            for (Map.Entry<?, ?> fieldCharacteristic : ((Map<?, ?>) field).entrySet()) {
+                switch ((String) fieldCharacteristic.getKey()) {
+                    case "name":
+                        fieldName = (String) fieldCharacteristic.getValue();
+                        break;
+                    case "type":
+                        fieldType = (String) fieldCharacteristic.getValue();
+                        break;
+                    case "modifiers":
+                        ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue();
+                        if (!fieldModifier.isEmpty()) {
+                            for (Object o : fieldModifier) {
+                                switch ((String) o) {
+                                    case "private":
+                                        fieldModifiers.add(Modifier.PRIVATE);
+                                        break;
+                                    case "public":
+                                        fieldModifiers.add(Modifier.PUBLIC);
+                                        break;
+                                    case "protected":
+                                        fieldModifiers.add(Modifier.PROTECTED);
+                                        break;
+                                    case "static":
+                                        fieldModifiers.add(Modifier.STATIC);
+                                        break;
+                                    case "final":
+                                        fieldModifiers.add(Modifier.FINAL);
+                                        break;
+                                    case "synchronized":
+                                        fieldModifiers.add(Modifier.SYNCHRONIZED);
+                                        break;
+                                    case "abstract":
+                                        fieldModifiers.add(Modifier.ABSTRACT);
+                                        break;
+                                    case "native":
+                                        fieldModifiers.add(Modifier.NATIVE);
+                                        break;
+                                }
+                            }
+                        }
+                }
+            }
+
+            Modifier[] modifiers = new Modifier[fieldModifiers.size()];
+            modifiers = fieldModifiers.toArray(modifiers);
+            if (modifiers.length == 0) {
+                modifiers = new Modifier[]{};
+            }
+            parsedFields.add(new Attribute(fieldName, fieldType, modifiers));
+        }
+        return parsedFields;
+    }
+
+    private class JavaAttribute extends Attribute {
+        JavaAttribute(String name, String type, Modifier[] m) {
+            super(name, type, m);
+        }
+    }
+
+    private class JavaMethod extends Method {
+        JavaMethod(String name, Instruction[] instructions, Modifier[] modifiers, HashMap<String, String> parameters, String returnType) {
+            super(name, instructions, modifiers, parameters, returnType);
+        }
+    }
 }
