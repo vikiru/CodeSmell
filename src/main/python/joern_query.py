@@ -21,7 +21,7 @@ def source_code_json_creation():
     query = (
         "cpg.typeDecl.isExternal(false).map(node => (node.name, node.code, node.astChildren.isMember.l.map(node => (node, "
         "node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, "
-        "node.ast.label.l, node.ast.code.l, node.ast.lineNumber.l)))).toJsonPretty "
+        "node.ast.label.l, node.ast.code.l, node.ast.lineNumber.l)), node.filename)).toJsonPretty "
     )
     result = client.execute(query)
     all_data = json.loads(clean_json(result["stdout"]))
@@ -144,7 +144,7 @@ def source_code_json_creation():
                 "parameters": get_method_parameters(method_body),
                 # For the instructions,
                 # _2 corresponds to the labels,
-                # _3 corresponds to the code,
+                # _3 corresponds to the instructions,
                 # _4 corresponds to the lineNumbers
                 "instructions": list(
                     filter(
@@ -172,6 +172,7 @@ def source_code_json_creation():
                 if "interface" in declaration:
                     return "interface"
                 else:
+                    class_name = curr_class_dict["name"]
                     # Get all of the modifiers of a class's methods and combine them into a single list.
                     list_method_modifiers = [
                         methods["modifiers"] for methods in curr_class_dict["methods"]
@@ -180,7 +181,32 @@ def source_code_json_creation():
                     for list in list_method_modifiers:
                         single_list_method_modifiers.extend(list)
 
-                    if "class" in declaration and not curr_class_dict["methods"]:
+                    # Get all of the modifiers and types of each field and combine each into a single list.
+                    list_field_modifiers = [
+                        fields["modifiers"]
+                        for fields in curr_class_dict["fields"]
+                        if not fields["modifiers"]
+                    ]
+                    list_field_types = [
+                        fields["type"]
+                        for fields in curr_class_dict["fields"]
+                        if fields["type"] == class_name
+                    ]
+                    single_list_field_modifiers = []
+                    single_list_field_types = []
+                    for list in list_field_modifiers:
+                        single_list_field_modifiers.extend(list)
+                    for list in list_field_types:
+                        single_list_field_types.extend(list)
+
+                    set_field_types = set(list_field_types)
+                    if (
+                        "class" in declaration
+                        and not single_list_field_modifiers
+                        and (
+                            len(set_field_types) == 1 and class_name in set_field_types
+                        )
+                    ):
                         return "enum"
                     elif (
                         "class" in declaration
@@ -193,9 +219,11 @@ def source_code_json_creation():
             # _1 corresponds to class name, _2 corresponds to class code declaration (i.e. "public class A")
             # _3 corresponds to class fields
             # _4 corresponds to class methods
+            # _5 corresponds to class filename (full path)
             curr_class_dict = {
                 "name": curr_class["_1"],
                 "type": "",
+                "filePath": curr_class["_5"],
                 "fields": list(map(create_field_dict, curr_class["_3"])),
                 "methods": list(
                     filter(None, list(map(create_method_dict, curr_class["_4"])))
@@ -239,7 +267,7 @@ if __name__ == "__main__":
     our_project_dir = our_project_dir.replace(winDrive, winDrive.upper()).replace(
         "\\", "//"
     )
-            
+
     # Original directory of where the source code we are analyzing came from. We could use the user's
     # original dir instead of taking .java source files, or just take in .java files as store in a dir
     # originalDir = "D:/SYSC3110/Lab1"
@@ -259,7 +287,6 @@ if __name__ == "__main__":
     # Create the source code json representation
     source_code_json_creation()
     end = time.time()
-
     print(
         "A .json representation of the source code has been created. Completed in "
         + format(end - start, ".2f")
@@ -277,15 +304,17 @@ if __name__ == "__main__":
             + format(end - start, ".2f")
             + " seconds."
         )
+
 """
-    import cProfile
+import cProfile
     import pstats
 
     with cProfile.Profile() as pr:
-        source_code_json_creation(all_data)
+        source_code_json_creation()
 
     stats = pstats.Stats(pr)
     stats.sort_stats(pstats.SortKey.TIME)
     # stats.print_stats()
     stats.dump_stats(filename="profiling.prof")
+
 """
