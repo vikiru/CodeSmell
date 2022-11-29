@@ -43,13 +43,13 @@ public class Parser {
                 if (completeClassMap != null) {
                     String name = (String) completeClassMap.get("name");
                     String type = (String) completeClassMap.get("type");
-                    cpg.addClass(new CPGClass(name, type));
+                    String filePath = (String) completeClassMap.get("filePath");
+                    cpg.addClass(new CPGClass(name, filePath, type));
                     classCount++;
-                    ArrayList methods = parseSourceCodeMethods((ArrayList) completeClassMap.get("methods"), calls);
+                    ArrayList methods = parseSourceCodeMethods(cpg.getClasses().get(classCount), (ArrayList) completeClassMap.get("methods"), calls);
                     for (Object method : methods) {
                         Method thisMethod = (Method) method;
                         cpg.getClasses().get(classCount).addMethod(thisMethod);
-
                     }
                     ArrayList fields = parseSourceCodeFields((ArrayList) completeClassMap.get("fields"));
                     for (Object field : fields) {
@@ -74,7 +74,6 @@ public class Parser {
         return cpg;
     }
 
-
     private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg, HashMap<Method, String> calls) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (Method method : cpgClass.getMethods()) {
@@ -87,116 +86,57 @@ public class Parser {
         }
     }
 
-    private ArrayList<Method> parseSourceCodeMethods(ArrayList methods, HashMap<Method, String> calls) {
+    private ArrayList<Method> parseSourceCodeMethods(CPGClass parentClass, ArrayList methods, HashMap<Method, String> calls) {
         ArrayList<Method> parsedMethods = new ArrayList<>();
         Pair<Method, String> methodToCalledMethod;
         String calledMethod = "";
         HashMap<String, String> parameters = new HashMap<>();
         for (Object method : methods) {
-            String methodName = "";
-            // todo - extract return type of method from .json
-            String returnType = "";
+            Map<?, ?> completeMethodMap = (Map<?, ?>) method;
+            String methodName = (String) completeMethodMap.get("name");
+            ArrayList methodModifiers = (ArrayList) completeMethodMap.get("modifiers");
+            String methodBody = (String) completeMethodMap.get("methodBody");
+            String returnType = (String) completeMethodMap.get("returnType");
+            ArrayList methodParameters = (ArrayList) completeMethodMap.get("parameters");
+            ArrayList methodInstructions = (ArrayList) completeMethodMap.get("instructions");
 
-            // todo - populate methodInstructions with type of Instructions not String
-            ArrayList<Method.Instruction> methodInstructions = new ArrayList<>();
+            // Add all the instructions of a method
+            Method.Instruction[] methodInstruct = new Method.Instruction[methodInstructions.size()];
+            for (int i = 0; i < methodInstructions.size(); i++) {
+                Map<?, ?> completeInstructionMap = (Map<?, ?>) methodInstructions.get(i);
+                String label = (String) completeInstructionMap.get("_label");
+                String code = (String) completeInstructionMap.get("instruction");
+                String lineNumber = String.valueOf(completeInstructionMap.get("lineNumber"));
+                calledMethod = (String) completeInstructionMap.get("methodCall");
+                methodInstruct[i] = new Method.Instruction(label, code, lineNumber);
+            }
 
-            ArrayList<Modifier> methodModifiers = new ArrayList<>();
-            for (Map.Entry<?, ?> methodCharacteristic : ((Map<?, ?>) method).entrySet()) {
-                switch ((String) methodCharacteristic.getKey()) {
-                    case "returnType":
-                        returnType = (String)methodCharacteristic.getValue();
-                        break;
-                    case "name":
-                        methodName = (String) methodCharacteristic.getValue();
-                        break;
-                    case "instructions":
-                        String label = "";
-                        String code = "";
-                        String lineNumber = "";
-                        ArrayList instructions = (ArrayList) methodCharacteristic.getValue();
-                        for (Object instructionsTree : instructions) {
-                            for (Map.Entry<?, ?> instruction : ((Map<?, ?>) instructionsTree).entrySet()) {
-                                if (instruction.getKey().equals("code")) {
-                                    code = (String) instruction.getValue();
-                                } else if (instruction.getKey().equals("_label") && instruction.getValue().equals("CALL")) {
-                                    label = (String) instruction.getValue();
-                                    if (!((Map<?, ?>) instructionsTree).get("methodCall").equals("")) {
-                                        calledMethod = (String) ((Map<?, ?>) instructionsTree).get("methodCall");
-                                    }
-                                    else
-                                    {
-                                        label = (String) instruction.getValue();
-                                    }
-                                }
-                                else if (instruction.getKey().equals("lineNumber"))
-                                {
-                                    lineNumber = String.valueOf((Double)instruction.getValue());
-                                }
-                            }
-                            methodInstructions.add(new Method.Instruction(label,code,lineNumber));
-                        }
-                        break;
-                    case "parameters":
-                        ArrayList allParameters = (ArrayList) methodCharacteristic.getValue();
-                        for (Object paramPair : allParameters) {
-                            String name = "";
-                            String type = "";
-                            for (Map.Entry<?, ?> param : ((Map<?, ?>) paramPair).entrySet()) {
-                                if (param.getKey().equals("name")) {
-                                    name = (String) param.getValue();
-                                } else if (param.getKey().equals("type")) {
-                                    type = (String) param.getValue();
-                                }
-                                //Add to pair param and type, then add to methods
-                            }
-                            if (!(name.equals("") && type.equals(""))) {
-                                parameters.put(name, type);
-                            }
-                        }
-                        break;
-                    case "modifiers":
-                        ArrayList methodModifier = (ArrayList) methodCharacteristic.getValue();
-                        if (!methodModifier.isEmpty()) {
-                            for (int i = 0; i < methodModifier.size(); i++) {
-                                switch ((String) methodModifier.get(i)) {
-                                    case "private":
-                                        methodModifiers.add(Modifier.PRIVATE);
-                                        break;
-                                    case "public":
-                                        methodModifiers.add(Modifier.PUBLIC);
-                                        break;
-                                    case "protected":
-                                        methodModifiers.add(Modifier.PROTECTED);
-                                        break;
-                                    case "static":
-                                        methodModifiers.add(Modifier.STATIC);
-                                        break;
-                                    case "final":
-                                        methodModifiers.add(Modifier.FINAL);
-                                        break;
-                                    case "synchronized":
-                                        methodModifiers.add(Modifier.SYNCHRONIZED);
-                                        break;
-                                    case "abstract":
-                                        methodModifiers.add(Modifier.ABSTRACT);
-                                        break;
-                                    case "native":
-                                        methodModifiers.add(Modifier.NATIVE);
-                                        break;
-
-                                }
-                            }
-                        }
+            // Add all the parameters of a method
+            for (Object parametersTree : methodParameters) {
+                Map<?, ?> completeParametersMap = (Map<?, ?>) parametersTree;
+                String name = (String) completeParametersMap.get("name");
+                String type = (String) completeParametersMap.get("type");
+                if (!(name.equals("") && type.equals(""))) {
+                    parameters.put(name, type);
                 }
             }
-            Method.Instruction[] methodInstruct = new Method.Instruction[methodInstructions.size()];
+
+            // Add all the modifiers of a method
             Modifier[] modifiers = new Modifier[methodModifiers.size()];
-            modifiers = methodModifiers.toArray(modifiers);
-            if (modifiers.length == 0) {
+            if (!methodModifiers.isEmpty()) {
+                for (int i = 0; i < methodModifiers.size(); i++) {
+                    for (Modifier m : Modifier.values()) {
+                        if (methodModifiers.get(i).equals(m.modString)) {
+                            modifiers[i] = m;
+                        }
+                    }
+                }
+            } else {
                 modifiers = new Modifier[]{};
             }
 
-            Method thisMethod = new Method(methodName, methodInstruct = methodInstructions.toArray(methodInstruct), modifiers, parameters, returnType);
+            Method thisMethod = new Method(parentClass, methodName, methodBody, methodInstruct, modifiers, parameters, returnType);
+
             // Getting a Set of Key-value pairs
             Set<Map.Entry<String, String>> entrySet = parameters.entrySet();
 
@@ -205,66 +145,33 @@ public class Parser {
                 Map.Entry param = (Map.Entry) o;
                 thisMethod.addToParameters((String) param.getKey(), (String) param.getValue());
             }
-            calls.put(thisMethod,calledMethod);
+            if (!(calledMethod.equals(""))) {
+                calls.put(thisMethod, calledMethod);
+            }
             parsedMethods.add(thisMethod);
         }
-
         return parsedMethods;
     }
 
     private ArrayList<Attribute> parseSourceCodeFields(ArrayList fields) {
         ArrayList<Attribute> parsedFields = new ArrayList<>();
-
         for (Object field : fields) {
-            String fieldName = "";
-            String fieldType = "";
-            ArrayList<Modifier> fieldModifiers = new ArrayList<>();
-            for (Map.Entry<?, ?> fieldCharacteristic : ((Map<?, ?>) field).entrySet()) {
-                switch ((String) fieldCharacteristic.getKey()) {
-                    case "name":
-                        fieldName = (String) fieldCharacteristic.getValue();
-                        break;
-                    case "type":
-                        fieldType = (String) fieldCharacteristic.getValue();
-                        break;
-                    case "modifiers":
-                        ArrayList fieldModifier = (ArrayList) fieldCharacteristic.getValue();
-                        if (!fieldModifier.isEmpty()) {
-                            for (Object o : fieldModifier) {
-                                switch ((String) o) {
-                                    case "private":
-                                        fieldModifiers.add(Modifier.PRIVATE);
-                                        break;
-                                    case "public":
-                                        fieldModifiers.add(Modifier.PUBLIC);
-                                        break;
-                                    case "protected":
-                                        fieldModifiers.add(Modifier.PROTECTED);
-                                        break;
-                                    case "static":
-                                        fieldModifiers.add(Modifier.STATIC);
-                                        break;
-                                    case "final":
-                                        fieldModifiers.add(Modifier.FINAL);
-                                        break;
-                                    case "synchronized":
-                                        fieldModifiers.add(Modifier.SYNCHRONIZED);
-                                        break;
-                                    case "abstract":
-                                        fieldModifiers.add(Modifier.ABSTRACT);
-                                        break;
-                                    case "native":
-                                        fieldModifiers.add(Modifier.NATIVE);
-                                        break;
-                                }
-                            }
-                        }
-                }
-            }
+            Map<?, ?> completeFieldMap = (Map<?, ?>) field;
+            String fieldName = (String) completeFieldMap.get("name");
+            String fieldType = (String) completeFieldMap.get("type");
+            ArrayList fieldModifiers = (ArrayList) completeFieldMap.get("modifiers");
 
+            // Add all modifiers of a field
             Modifier[] modifiers = new Modifier[fieldModifiers.size()];
-            modifiers = fieldModifiers.toArray(modifiers);
-            if (modifiers.length == 0) {
+            if (!fieldModifiers.isEmpty()) {
+                for (int i = 0; i < fieldModifiers.size(); i++) {
+                    for (Modifier m : Modifier.values()) {
+                        if (fieldModifiers.get(i).equals(m.modString)) {
+                            modifiers[i] = m;
+                        }
+                    }
+                }
+            } else {
                 modifiers = new Modifier[]{};
             }
             parsedFields.add(new Attribute(fieldName, fieldType, modifiers));
@@ -279,8 +186,8 @@ public class Parser {
     }
 
     private class JavaMethod extends Method {
-        JavaMethod(String name, Instruction[] instructions, Modifier[] modifiers, HashMap<String, String> parameters, String returnType) {
-            super(name, instructions, modifiers, parameters, returnType);
+        JavaMethod(CPGClass parentClass, String name, String methodBody, Instruction[] instructions, Modifier[] modifiers, HashMap<String, String> parameters, String returnType) {
+            super(parentClass, name, methodBody, instructions, modifiers, parameters, returnType);
         }
     }
 }
