@@ -17,7 +17,7 @@ public class ClassRelation extends RenderObject {
         this.source = source;
         this.target = target;
     }
-    
+
     public ArrayList<Position> getPath() {
         return path;
     }
@@ -65,6 +65,11 @@ public class ClassRelation extends RenderObject {
 
         Multiplicity(String cardinality) {
             this.cardinality = cardinality;
+        }
+
+        @Override
+        public String toString() {
+            return this.cardinality;
         }
     }
 }
