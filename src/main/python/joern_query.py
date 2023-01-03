@@ -11,7 +11,7 @@ def clean_json(joern_result):
     string_to_find = '"""'
     index = joern_result.find(string_to_find)
     joern_result = joern_result.replace('"""', "")
-    joern_result = joern_result[index : len(joern_result)]
+    joern_result = joern_result[index: len(joern_result)]
     return joern_result
 
 
@@ -29,15 +29,20 @@ def source_code_json_creation():
     # For every field, create a dictionary and return it.
     def create_field_dict(curr_field):
         type = curr_field["_1"]["typeFullName"]
+        package_name = ""
         index = curr_field["_1"]["typeFullName"].rfind(".")
         if index != -1:
+            package_name = curr_field["_1"]["typeFullName"][
+                           0: index].replace("<unresolvedNamespace>", "")
             type = curr_field["_1"]["typeFullName"][
-                index + 1 : len(curr_field["_1"]["typeFullName"])
-            ]
+                   index + 1: len(curr_field["_1"]["typeFullName"])
+                   ]
 
         curr_field_dict = {
             "name": curr_field["_1"]["name"],
             "modifiers": [x.lower() for x in curr_field["_2"]],
+            "typeFullName": curr_field["_1"]["typeFullName"],
+            "packageName": package_name,
             "type": type,
         }
         return curr_field_dict
@@ -45,20 +50,20 @@ def source_code_json_creation():
     # For every method, create a dictionary and return it.
     def create_method_dict(curr_method):
         # For every method's instruction, create a dictionary and return it.
-        def create_instruction_dict(curr_label, curr_instructions, curr_line_number):
-            if curr_instructions == "<empty>":
+        def create_instruction_dict(curr_label, curr_instruction, curr_line_number):
+            if curr_instruction == "<empty>":
                 return
             else:
                 # Get the method call in each line of code, if any.
                 method_call_pattern = re.compile("([a-zA-Z]*\()")
-                calls = method_call_pattern.findall(curr_instructions)
+                calls = method_call_pattern.findall(curr_instruction)
                 method_call = ""
                 if calls and curr_label == "CALL":
                     method_call = calls[0].replace("(", "")
 
                 curr_instruction_dict = {
                     "_label": curr_label,
-                    "code": curr_instructions.replace("\r\n", ""),
+                    "code": curr_instruction.replace("\r\n", ""),
                     "lineNumber": curr_line_number or "none",
                     "methodCall": method_call,
                 }
@@ -89,7 +94,7 @@ def source_code_json_creation():
             if not return_type:
                 # Handle all Collection types (Set, HashMap, ArrayList, etc)
                 index = method_body.find(">")
-                return_type = method_body[0 : index + 1]
+                return_type = method_body[0: index + 1]
                 if "(" in return_type or not return_type:
                     return_type = ""
                 if return_type in method_body:
@@ -105,7 +110,7 @@ def source_code_json_creation():
                 all_parameters = []
                 if "<lambda>" not in method_body:
                     all_parameters = (
-                        method_body[index : len(method_body)]
+                        method_body[index: len(method_body)]
                         .replace("(", "")
                         .replace(")", "")
                     )
@@ -122,7 +127,7 @@ def source_code_json_creation():
                     # Append all parameters to the param_list
                     count = 0
                     for i in range(0, len(all_parameters)):
-                        if (i + 1 + count) <= len(all_parameters):
+                        if (i + 1 + count) < len(all_parameters):
                             param_list.append(
                                 dict(
                                     name=all_parameters[i + 1 + count],
@@ -201,16 +206,16 @@ def source_code_json_creation():
 
                     set_field_types = set(list_field_types)
                     if (
-                        "class" in declaration
-                        and not single_list_field_modifiers
-                        and (
+                            "class" in declaration
+                            and not single_list_field_modifiers
+                            and (
                             len(set_field_types) == 1 and class_name in set_field_types
-                        )
+                    )
                     ):
                         return "enum"
                     elif (
-                        "class" in declaration
-                        and "abstract" in single_list_method_modifiers
+                            "class" in declaration
+                            and "abstract" in single_list_method_modifiers
                     ):
                         return "abstract class"
                     else:
@@ -224,12 +229,19 @@ def source_code_json_creation():
                 "name": curr_class["_1"],
                 "type": "",
                 "filePath": curr_class["_5"],
+                "packageName": "",
                 "fields": list(map(create_field_dict, curr_class["_3"])),
                 "methods": list(
                     filter(None, list(map(create_method_dict, curr_class["_4"])))
                 ),
             }
             curr_class_dict["type"] = get_type(curr_class["_2"], curr_class_dict)
+
+            path_without_separators = curr_class_dict["filePath"].replace("\\", " ").split(" ")
+            index_of_src = path_without_separators.index("src")
+            if index != -1:
+                curr_class_dict["packageName"] = ".".join(
+                    path_without_separators[index_of_src: len(path_without_separators)])
             for method in curr_class_dict["methods"]:
                 method["parentClass"] = curr_class["_1"]
             return curr_class_dict
@@ -242,7 +254,7 @@ def source_code_json_creation():
 # Write the joern output of a query to a specified filename
 def write_to_file(source_code_json, file_name):
     final_directory_name = (
-        str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name + ".json"
+            str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name + ".json"
     )
     with open(final_directory_name, "w") as f:
         json.dump(source_code_json, f, indent=4)
@@ -252,46 +264,39 @@ if __name__ == "__main__":
     server_endpoint = "localhost:8080"
     client = CPGQLSClient(server_endpoint)
 
-    # Eventually replace dirName with a directory which we decide upon
-    # which will always store the imported source code
-    directory = os.getcwd()
-    directory = directory.replace("\\", "//")
-    directory_name = directory + "/src/main/python/joernTestProject/src"
-    project_name = "analyzedProject"
-
     # For testing purposes. Full file paths are required for joern.
     # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
     our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
     index = our_project_dir.find(":")
-    winDrive = our_project_dir[0 : index + 1]
-    our_project_dir = our_project_dir.replace(winDrive, winDrive.upper()).replace(
+    win_drive = our_project_dir[0: index + 1]
+    our_project_dir = our_project_dir.replace(win_drive, win_drive.upper()).replace(
         "\\", "//"
     )
+    project_name = "analyzedProject"
+    project_dir = our_project_dir  # Change this as needed for testing purposes. Remember to replace "\\" with "//".
 
-    # Original directory of where the source code we are analyzing came from. We could use the user's
-    # original dir instead of taking .java source files, or just take in .java files as store in a dir
-    # originalDir = "D:/SYSC3110/Lab1"
+    total_time = 0
     start = time.time()
-    query = import_code_query(our_project_dir, project_name)
+    query = import_code_query(project_dir, project_name)
     result = client.execute(query)
     end = time.time()
 
     if result["success"]:
         print(
-            "The source code has been successfully imported. Completed in "
-            + format(end - start, ".2f")
-            + " seconds."
+            "The source code has been successfully imported. Completed in {0} seconds.".format(
+                format(end - start, ".2f"))
         )
+        total_time += end - start
 
-    start = time.time()
     # Create the source code json representation
+    start = time.time()
     source_code_json_creation()
     end = time.time()
     print(
-        "A .json representation of the source code has been created. Completed in "
-        + format(end - start, ".2f")
-        + " seconds."
+        "A .json representation of the source code has been created. Completed in {0} seconds.".format(
+            format(end - start, ".2f"))
     )
+    total_time += end - start
 
     # Close and delete the project from user's bin/joern/joern-cli/workspace
     start = time.time()
@@ -300,12 +305,16 @@ if __name__ == "__main__":
     end = time.time()
     if result["success"]:
         print(
-            "The source code has been successfully removed. Completed in "
-            + format(end - start, ".2f")
-            + " seconds."
+            "The source code has been successfully removed. Completed in {0} seconds.".format(
+                format(end - start, ".2f"))
         )
+        total_time += end - start
+    print("Total time taken: {0} seconds.".format(
+        format(total_time, ".2f"))
+    )
 
 """
+SnakeViz and cProfile diagnostics.
 import cProfile
     import pstats
 
