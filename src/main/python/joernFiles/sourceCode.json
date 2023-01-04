@@ -4,7 +4,7 @@
             "name": "CPGClass$Modifier",
             "type": "enum",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CPGClass.java",
-            "packageName": "src.main.java.com.CodeSmell.CPGClass.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "PUBLIC",
@@ -217,7 +217,7 @@
             "name": "CPGClass$Method$Instruction",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CPGClass.java",
-            "packageName": "src.main.java.com.CodeSmell.CPGClass.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "label",
@@ -430,7 +430,7 @@
             "name": "CPGClass$Method",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CPGClass.java",
-            "packageName": "src.main.java.com.CodeSmell.CPGClass.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "parentClass",
@@ -1214,7 +1214,7 @@
             "name": "CPGClass$Attribute",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CPGClass.java",
-            "packageName": "src.main.java.com.CodeSmell.CPGClass.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "name",
@@ -1427,7 +1427,7 @@
             "name": "CPGClass",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CPGClass.java",
-            "packageName": "src.main.java.com.CodeSmell.CPGClass.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "name",
@@ -1982,7 +1982,7 @@
             "name": "ClassRelation$Type",
             "type": "enum",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\ClassRelation.java",
-            "packageName": "src.main.java.com.CodeSmell.ClassRelation.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "DEPENDENCY",
@@ -2033,7 +2033,7 @@
             "name": "ClassRelation$Multiplicity",
             "type": "enum",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\ClassRelation.java",
-            "packageName": "src.main.java.com.CodeSmell.ClassRelation.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "ZERO_TO_ONE",
@@ -2239,7 +2239,7 @@
             "name": "ClassRelation",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\ClassRelation.java",
-            "packageName": "src.main.java.com.CodeSmell.ClassRelation.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "type",
@@ -3103,7 +3103,7 @@
             "name": "CodePropertyGraph$Relation",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CodePropertyGraph.java",
-            "packageName": "src.main.java.com.CodeSmell.CodePropertyGraph.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "source",
@@ -3369,7 +3369,7 @@
             "name": "CodePropertyGraph",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\CodePropertyGraph.java",
-            "packageName": "src.main.java.com.CodeSmell.CodePropertyGraph.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "relations",
@@ -3754,7 +3754,7 @@
             "name": "Controller",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Controller.java",
-            "packageName": "src.main.java.com.CodeSmell.Controller.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -3860,7 +3860,7 @@
             "name": "Launcher",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Launcher.java",
-            "packageName": "src.main.java.com.CodeSmell.Launcher.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -3918,7 +3918,7 @@
             "name": "LayoutManager$Line",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\LayoutManager.java",
-            "packageName": "src.main.java.com.CodeSmell.LayoutManager.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "x1",
@@ -4800,7 +4800,7 @@
             "name": "LayoutManager$Direction",
             "type": "enum",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\LayoutManager.java",
-            "packageName": "src.main.java.com.CodeSmell.LayoutManager.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "TOP",
@@ -4837,7 +4837,7 @@
             "name": "LayoutManager",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\LayoutManager.java",
-            "packageName": "src.main.java.com.CodeSmell.LayoutManager.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "classes",
@@ -10722,7 +10722,7 @@
             "name": "LayoutManager$Dot",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\LayoutManager.java",
-            "packageName": "src.main.java.com.CodeSmell.LayoutManager.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -10823,7 +10823,7 @@
             "name": "MainApp",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\MainApp.java",
-            "packageName": "src.main.java.com.CodeSmell.MainApp.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -12404,12 +12404,11 @@
                 }
             ]
         },
-        null,
         {
             "name": "Pair",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Pair.java",
-            "packageName": "src.main.java.com.CodeSmell.Pair.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "first",
@@ -12565,7 +12564,7 @@
             "name": "Parser",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Parser.java",
-            "packageName": "src.main.java.com.CodeSmell.Parser.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -16539,7 +16538,7 @@
             "name": "Parser$JavaAttribute",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Parser.java",
-            "packageName": "src.main.java.com.CodeSmell.Parser.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -16656,7 +16655,7 @@
             "name": "Parser$JavaMethod",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Parser.java",
-            "packageName": "src.main.java.com.CodeSmell.Parser.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -16861,7 +16860,7 @@
             "name": "Position",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Position.java",
-            "packageName": "src.main.java.com.CodeSmell.Position.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "x",
@@ -17110,7 +17109,7 @@
             "name": "RenderEvent$Type",
             "type": "enum",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\RenderEvent.java",
-            "packageName": "src.main.java.com.CodeSmell.RenderEvent.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "RENDER",
@@ -17133,7 +17132,7 @@
             "name": "RenderEvent",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\RenderEvent.java",
-            "packageName": "src.main.java.com.CodeSmell.RenderEvent.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "type",
@@ -17419,7 +17418,7 @@
             "name": "RenderEventListener",
             "type": "interface",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\RenderEventListener.java",
-            "packageName": "src.main.java.com.CodeSmell.RenderEventListener.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -17464,7 +17463,7 @@
             "name": "RenderObject",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\RenderObject.java",
-            "packageName": "src.main.java.com.CodeSmell.RenderObject.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "renderEventListeners",
@@ -17786,7 +17785,7 @@
             "name": "Shape",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\Shape.java",
-            "packageName": "src.main.java.com.CodeSmell.Shape.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "vertex",
@@ -17944,7 +17943,7 @@
             "name": "UMLClass",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\UMLClass.java",
-            "packageName": "src.main.java.com.CodeSmell.UMLClass.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "name",
@@ -19398,7 +19397,7 @@
             "name": "WebControl",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\WebControl.java",
-            "packageName": "src.main.java.com.CodeSmell.WebControl.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [
                 {
                     "name": "engine",
@@ -22249,7 +22248,7 @@
             "name": "joernServer",
             "type": "class",
             "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\joernServer.java",
-            "packageName": "src.main.java.com.CodeSmell.joernServer.java",
+            "packageName": "src.main.java.com.CodeSmell",
             "fields": [],
             "methods": [
                 {
@@ -23466,6 +23465,14 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "jojo",
+            "type": "class",
+            "filePath": "C:\\Users\\viski\\OneDrive\\Documents\\GitHub\\CodeSmell\\src\\main\\java\\com\\CodeSmell\\jojo\\jojo.java",
+            "packageName": "src.main.java.com.CodeSmell.jojo",
+            "fields": [],
+            "methods": []
         }
     ]
 }
