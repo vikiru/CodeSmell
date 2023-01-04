@@ -1,8 +1,6 @@
 package com.CodeSmell;
 
-import com.CodeSmell.CPGClass.Attribute;
-import com.CodeSmell.CPGClass.Method;
-import com.CodeSmell.CPGClass.Modifier;
+import com.CodeSmell.CPGClass.*;
 import com.google.gson.Gson;
 import javafx.util.Pair;
 
@@ -19,6 +17,78 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph g = p.buildCPG("");
+    }
+
+    public void getMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
+        String className = cpgClass.name;
+        // Accounting for nested classes (i.e. CPGClass$Method)
+        int separatorIndex = cpgClass.name.indexOf("$");
+        if (separatorIndex != -1) {
+            className = className.substring(separatorIndex).replace("$", "");
+        }
+        ArrayList<Method> classMethods = cpgClass.getMethods();
+        String originalType = attribute.type;
+        for (Method currentMethod : classMethods) {
+            int index = currentMethod.methodBody.indexOf("(");
+            if (index != -1) {
+                String methodBodyWithoutParams = currentMethod.methodBody.substring(0, index);
+                // First, check the constructor of the class, if it is present to see if the type of the field can be
+                // identified
+                if (methodBodyWithoutParams.equals(className)) {
+                    for (Method.Instruction instruction : currentMethod.instructions) {
+                        // Check the constructor, if the desired field is a parameter this will obtain the type
+                        if (instruction.label.equals("METHOD")) {
+                            HashMap<String, String> currentMethodsParameters = currentMethod.parameters;
+                            if (currentMethodsParameters.containsKey(attribute.name)) {
+                                attribute.type = currentMethodsParameters.get(attribute.name);
+                            }
+                        }
+                        // Check the constructor's instructions, if the desired field is defined within the constructor, this will obtain the
+                        // type
+                        if (instruction.label.equals("CALL") && instruction.code.contains("<") && !instruction.code.contains("<>")) {
+                            String fullInstruction = instruction.code;
+                            int startIndex = fullInstruction.indexOf("<");
+                            int endIndex = fullInstruction.indexOf(">");
+
+                            String type = fullInstruction.substring(startIndex, endIndex + 1);
+                            attribute.type += type;
+                        }
+                        if (!originalType.equals(attribute.type)) break;
+                    }
+                } else {
+                    // Check all other methods apart from the constructor to determine if the desired field is used somewhere.
+                    if (originalType.equals(attribute.type)) {
+                        for (Method.Instruction instruction : currentMethod.instructions) {
+                            String stringToFind = "this." + attribute.name;
+                            if (instruction.code.contains(stringToFind) && instruction.label.equals("CALL")) {
+                                if (instruction.code.contains("put") || instruction.code.contains("add")) {
+                                    int indexToFind = instruction.code.indexOf("(");
+                                    String parameter = instruction.code.substring(indexToFind).replace("(", "").replace(")", "");
+                                    HashMap<String, String> currentMethodsParameters = currentMethod.parameters;
+                                    if (currentMethodsParameters.containsKey(parameter)) {
+                                        if (!parameter.contains("<")) {
+                                            attribute.type += "<" + currentMethodsParameters.get(parameter) + ">";
+                                        } else attribute.type += currentMethodsParameters.get(parameter);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void getMissingInfo(CodePropertyGraph cpg) {
+        // Get all the fields that are a part of Collection (i.e. contain "< >" in their declaration)
+        HashMap<CPGClass, Attribute> missingFieldMap = new HashMap<>();
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            for (Attribute attribute : cpgClass.getAttributes()) {
+                if (attribute.packageName.equals("java.util") && !attribute.type.contains("<")) {
+                    this.getMissingAttributeType(cpgClass, attribute);
+                }
+            }
+        }
     }
 
     /**
@@ -71,6 +141,8 @@ public class Parser {
             }
         }
         updateMethodCalls(allMethods, cpg, calls);
+        getMissingInfo(cpg);
+
         return cpg;
     }
 
@@ -105,7 +177,7 @@ public class Parser {
             for (int i = 0; i < methodInstructions.size(); i++) {
                 Map<?, ?> completeInstructionMap = (Map<?, ?>) methodInstructions.get(i);
                 String label = (String) completeInstructionMap.get("_label");
-                String code = (String) completeInstructionMap.get("instruction");
+                String code = (String) completeInstructionMap.get("code");
                 String lineNumber = String.valueOf(completeInstructionMap.get("lineNumber"));
                 calledMethod = (String) completeInstructionMap.get("methodCall");
                 methodInstruct[i] = new Method.Instruction(label, code, lineNumber);
