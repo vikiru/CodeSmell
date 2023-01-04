@@ -3,14 +3,19 @@ package com.CodeSmell;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-// A class within the source code
+/**
+ * A class within the source code.
+ */
 public class CPGClass {
 
-    // the name of the class
+    // The name of the class
     public final String name;
 
     // the filePath of the class (full path)
     public final String filePath;
+
+    // the package name of the class
+    public final String packageName;
 
     // the type of the object (class, enum, abstract class, interface)
     public final String type;
@@ -21,9 +26,10 @@ public class CPGClass {
     // the list of fields within the class
     private ArrayList<Attribute> attributes;
 
-    CPGClass(String name, String filePath, String type) {
+    CPGClass(String name, String filePath, String packageName, String type) {
         this.name = name;
         this.filePath = filePath;
+        this.packageName = packageName;
         this.type = type;
         this.methods = new ArrayList<Method>();
         this.attributes = new ArrayList<Attribute>();
@@ -144,14 +150,17 @@ public class CPGClass {
                 this.lineNumber = lineNumber;
             }
         }
-
-
     }
 
-    // An attribute belong to a class
+    /**
+     * An attribute belonging to a class
+     */
     public static class Attribute {
         // the name of the attribute
         public final String name;
+
+        // the package name of the field
+        public final String packageName;
 
         // list of modifiers the attribute has (0 or more)
         public final Modifier[] modifiers;
@@ -159,8 +168,9 @@ public class CPGClass {
         // the type of the attribute
         public final String type;
 
-        protected Attribute(String name, String type, Modifier[] modifiers) {
+        protected Attribute(String name, String packageName, String type, Modifier[] modifiers) {
             this.name = name;
+            this.packageName = packageName;
             this.type = type;
             this.modifiers = modifiers;
         }

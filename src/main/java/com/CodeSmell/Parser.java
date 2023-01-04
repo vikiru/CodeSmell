@@ -31,7 +31,6 @@ public class Parser {
         HashMap<Method, String> calls = new HashMap<>();
         try {
             Reader reader = Files.newBufferedReader(Paths.get("src/main/python/joernFiles/sourceCode.json"));
-
             // convert JSON file to map
             Map<?, ?> map = gson.fromJson(reader, Map.class);
             Object[] entryValues;
@@ -44,7 +43,8 @@ public class Parser {
                     String name = (String) completeClassMap.get("name");
                     String type = (String) completeClassMap.get("type");
                     String filePath = (String) completeClassMap.get("filePath");
-                    cpg.addClass(new CPGClass(name, filePath, type));
+                    String packageName = (String) completeClassMap.get("packageName");
+                    cpg.addClass(new CPGClass(name, filePath, packageName, type));
                     classCount++;
                     ArrayList methods = parseSourceCodeMethods(cpg.getClasses().get(classCount), (ArrayList) completeClassMap.get("methods"), calls);
                     for (Object method : methods) {
@@ -159,6 +159,7 @@ public class Parser {
             Map<?, ?> completeFieldMap = (Map<?, ?>) field;
             String fieldName = (String) completeFieldMap.get("name");
             String fieldType = (String) completeFieldMap.get("type");
+            String packageName = (String) completeFieldMap.get("packageName");
             ArrayList fieldModifiers = (ArrayList) completeFieldMap.get("modifiers");
 
             // Add all modifiers of a field
@@ -174,14 +175,14 @@ public class Parser {
             } else {
                 modifiers = new Modifier[]{};
             }
-            parsedFields.add(new Attribute(fieldName, fieldType, modifiers));
+            parsedFields.add(new Attribute(fieldName, packageName, fieldType, modifiers));
         }
         return parsedFields;
     }
 
     private class JavaAttribute extends Attribute {
-        JavaAttribute(String name, String type, Modifier[] m) {
-            super(name, type, m);
+        JavaAttribute(String name, String packageName, String type, Modifier[] m) {
+            super(name, packageName, type, m);
         }
     }
 
