@@ -1,6 +1,7 @@
 package com.CodeSmell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -51,6 +52,18 @@ public class CPGClass {
         this.attributes.add(a);
     }
 
+    @Override
+    public String toString() {
+        return "CPGClass{" +
+                "name='" + name + '\'' +
+                ", filePath='" + filePath + '\'' +
+                ", packageName='" + packageName + '\'' +
+                ", type='" + type + '\'' +
+                ", methods=" + methods +
+                ", attributes=" + attributes +
+                '}';
+    }
+
     public enum Modifier {
         PUBLIC("public"),
         PRIVATE("private"),
@@ -71,6 +84,40 @@ public class CPGClass {
         @Override
         public String toString() {
             return this.modString;
+        }
+    }
+
+    /**
+     * An attribute belonging to a class
+     */
+    public static class Attribute {
+        // the name of the attribute
+        public final String name;
+
+        // the package name of the field
+        public final String packageName;
+
+        // list of modifiers the attribute has (0 or more)
+        public final Modifier[] modifiers;
+
+        // the type of the attribute
+        public String type;
+
+        protected Attribute(String name, String packageName, String type, Modifier[] modifiers) {
+            this.name = name;
+            this.packageName = packageName;
+            this.type = type;
+            this.modifiers = modifiers;
+        }
+
+        @Override
+        public String toString() {
+            return "Attribute{" +
+                    "name='" + name + '\'' +
+                    ", packageName='" + packageName + '\'' +
+                    ", modifiers=" + Arrays.toString(modifiers) +
+                    ", type='" + type + '\'' +
+                    '}';
         }
     }
 
@@ -132,7 +179,9 @@ public class CPGClass {
 
         @Override
         public String toString() {
-            return this.methodBody + ": " + this.returnType;
+            if (!returnType.equals("")) {
+                return this.methodBody + ":" + this.returnType;
+            } else return this.methodBody;
         }
 
         // The instructions (lines of code) within each method body
@@ -149,30 +198,18 @@ public class CPGClass {
                 this.code = code;
                 this.lineNumber = lineNumber;
             }
+
+            @Override
+            public String toString() {
+                return "Instruction{" +
+                        "label='" + label + '\'' +
+                        ", code='" + code + '\'' +
+                        ", lineNumber='" + lineNumber + '\'' +
+                        '}';
+            }
+
         }
     }
 
-    /**
-     * An attribute belonging to a class
-     */
-    public static class Attribute {
-        // the name of the attribute
-        public final String name;
 
-        // the package name of the field
-        public final String packageName;
-
-        // list of modifiers the attribute has (0 or more)
-        public final Modifier[] modifiers;
-
-        // the type of the attribute
-        public final String type;
-
-        protected Attribute(String name, String packageName, String type, Modifier[] modifiers) {
-            this.name = name;
-            this.packageName = packageName;
-            this.type = type;
-            this.modifiers = modifiers;
-        }
-    }
 }
