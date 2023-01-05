@@ -1,24 +1,31 @@
 package com.CodeSmell;
 
-import com.CodeSmell.CPGClass.*;
+import com.CodeSmell.CPGClass.Attribute;
+import com.CodeSmell.CPGClass.Method;
+import com.CodeSmell.CPGClass.Modifier;
 import com.google.gson.Gson;
-import javafx.util.Pair;
 
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Parser {
 
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph g = p.buildCPG("");
+        p.getAllMultiplicities(g);
     }
 
+    /**
+     * @param cpgClass
+     * @param attribute
+     */
     public void getMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
         String className = cpgClass.name;
         // Accounting for nested classes (i.e. CPGClass$Method)
@@ -26,69 +33,118 @@ public class Parser {
         if (separatorIndex != -1) {
             className = className.substring(separatorIndex).replace("$", "");
         }
-        ArrayList<Method> classMethods = cpgClass.getMethods();
+        ArrayList<Method> classMethods = cpgClass.methods;
+        String finalClassName = className;
+        String stringToFind = "this." + attribute.name;
         String originalType = attribute.type;
-        for (Method currentMethod : classMethods) {
-            int index = currentMethod.methodBody.indexOf("(");
-            if (index != -1) {
-                String methodBodyWithoutParams = currentMethod.methodBody.substring(0, index);
-                // First, check the constructor of the class, if it is present to see if the type of the field can be
-                // identified
-                if (methodBodyWithoutParams.equals(className)) {
-                    for (Method.Instruction instruction : currentMethod.instructions) {
-                        // Check the constructor, if the desired field is a parameter this will obtain the type
-                        if (instruction.label.equals("METHOD")) {
-                            HashMap<String, String> currentMethodsParameters = currentMethod.parameters;
-                            if (currentMethodsParameters.containsKey(attribute.name)) {
-                                attribute.type = currentMethodsParameters.get(attribute.name);
-                            }
-                        }
-                        // Check the constructor's instructions, if the desired field is defined within the constructor, this will obtain the
-                        // type
-                        if (instruction.label.equals("CALL") && instruction.code.contains("<") && !instruction.code.contains("<>")) {
-                            String fullInstruction = instruction.code;
-                            int startIndex = fullInstruction.indexOf("<");
-                            int endIndex = fullInstruction.indexOf(">");
-
-                            String type = fullInstruction.substring(startIndex, endIndex + 1);
-                            attribute.type += type;
-                        }
-                        if (!originalType.equals(attribute.type)) break;
+        var result = classMethods.stream().
+                filter(method -> method.name.equals(finalClassName)).collect(Collectors.toList());
+        if (!result.isEmpty()) {
+            Method constructor = result.get(0);
+            var instructionResult = Arrays.stream(constructor.instructions).
+                    filter(instruction -> instruction.label.equals("METHOD"))
+                    .collect(Collectors.toList());
+            String constructorBody = instructionResult.get(0).code;
+            // Check the constructor, if the desired field is a parameter, this will obtain the type
+            if (constructorBody.contains(attribute.name)) {
+                var attributeResult = constructor.parameters.stream().
+                        filter(parameter -> parameter.name.equals(attribute.name)).collect(Collectors.toList());
+                if (!attributeResult.isEmpty()) {
+                    attribute.type = attributeResult.get(0).type;
+                }
+            }
+            // Check the constructor's instructions, if the desired field is defined within the constructor, this will obtain the
+            // type
+            else {
+                instructionResult = Arrays.stream(constructor.instructions).
+                        filter(instruction -> instruction.label.equals("CALL") &&
+                                instruction.code.contains("<") && !instruction.code.contains("<>")
+                                && instruction.code.contains(stringToFind)).collect(Collectors.toList());
+                if (!instructionResult.isEmpty()) {
+                    int startingIndex = instructionResult.get(0).code.indexOf("<");
+                    int endingIndex = instructionResult.get(0).code.indexOf(">");
+                    if (startingIndex != -1) {
+                        String type = instructionResult.get(0).code.substring(startingIndex, endingIndex + 1);
+                        attribute.type += type;
                     }
-                } else {
-                    // Check all other methods apart from the constructor to determine if the desired field is used somewhere.
-                    if (originalType.equals(attribute.type)) {
-                        for (Method.Instruction instruction : currentMethod.instructions) {
-                            String stringToFind = "this." + attribute.name;
-                            if (instruction.code.contains(stringToFind) && instruction.label.equals("CALL")) {
-                                if (instruction.code.contains("put") || instruction.code.contains("add")) {
-                                    int indexToFind = instruction.code.indexOf("(");
-                                    String parameter = instruction.code.substring(indexToFind).replace("(", "").replace(")", "");
-                                    HashMap<String, String> currentMethodsParameters = currentMethod.parameters;
-                                    if (currentMethodsParameters.containsKey(parameter)) {
-                                        if (!parameter.contains("<")) {
-                                            attribute.type += "<" + currentMethodsParameters.get(parameter) + ">";
-                                        } else attribute.type += currentMethodsParameters.get(parameter);
-                                    }
-                                }
-                            }
-                        }
+                }
+            }
+        }
+        // Check all other methods apart from the constructor to determine if the desired field is used somewhere.
+        if (originalType.equals(attribute.type)) {
+            for (Method method : classMethods) {
+                Method.Instruction[] instructions = method.instructions;
+                var instructionResult = Arrays.stream(instructions)
+                        .filter(instruction -> instruction.code.contains(stringToFind)
+                                && instruction.label.equals("CALL")
+                                && (instruction.code.contains("add") || instruction.code.contains("put"))).collect(Collectors.toList());
+                if (!instructionResult.isEmpty()) {
+                    int indexToFind = instructionResult.get(0).code.indexOf("(");
+                    String parameter = instructionResult.get(0).code.substring(indexToFind).replace("(", "").replace(")", "");
+                    ArrayList<Method.Parameter> parameters = new ArrayList<>();
+                    var parameterResult = method.parameters.stream().
+                            filter(parameterToFind -> parameterToFind.name.equals(parameter)).collect(Collectors.toList());
+                    if (!parameterResult.isEmpty()) {
+                        if (!parameter.contains("<")) {
+                            attribute.type += "<" + parameterResult.get(0).type + ">";
+                        } else attribute.type += parameterResult.get(0).type;
                     }
                 }
             }
         }
     }
 
-    public void getMissingInfo(CodePropertyGraph cpg) {
+    /**
+     * @param cpg
+     */
+    public void getAllMissingInfo(CodePropertyGraph cpg) {
         // Get all the fields that are a part of Collection (i.e. contain "< >" in their declaration)
-        HashMap<CPGClass, Attribute> missingFieldMap = new HashMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            for (Attribute attribute : cpgClass.getAttributes()) {
+            for (Attribute attribute : cpgClass.attributes) {
                 if (attribute.packageName.equals("java.util") && !attribute.type.contains("<")) {
                     this.getMissingAttributeType(cpgClass, attribute);
                 }
             }
         }
+    }
+
+    /**
+     * @param cpg
+     */
+    public void getAllMultiplicities(CodePropertyGraph cpg) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            ArrayList<CPGClass> classesToCheck = new ArrayList<>();
+            for (Attribute attribute : cpgClass.attributes) {
+                if (!attribute.type.equals(cpgClass.name) && attribute.packageName.contains("java.util")) {
+                    String attributeType = attribute.type;
+                    int index = attributeType.indexOf("<");
+                    //String attributeGenerics = attributeType.substring(index).replace("<", "").replace(">", "");
+                    String attributeGenerics = "";
+                    ArrayList<String> types = new ArrayList<>();
+                    if (attributeGenerics.contains(",")) {
+                        String[] splittedString = attributeGenerics.split(",");
+                        types.add(splittedString[0].trim());
+                        types.add(splittedString[1].trim());
+                    } else {
+                        types.add(attributeGenerics);
+                    }
+                    for (String currentType : types) {
+                        for (CPGClass currentClass : cpg.getClasses()) {
+                            String className = currentClass.name;
+                            int separatorIndex = currentClass.name.indexOf("$");
+                            if (separatorIndex != -1) {
+                                className = className.substring(separatorIndex).replace("$", "");
+                            }
+                            if (className.equals(currentType)) {
+                                classesToCheck.add(currentClass);
+                            }
+                        }
+                    }
+                }
+            }
+//////
+        }
+
     }
 
     /**
@@ -116,14 +172,13 @@ public class Parser {
                     String packageName = (String) completeClassMap.get("packageName");
                     cpg.addClass(new CPGClass(name, filePath, packageName, type));
                     classCount++;
-                    ArrayList methods = parseSourceCodeMethods(cpg.getClasses().get(classCount), (ArrayList) completeClassMap.get("methods"), calls);
-                    for (Object method : methods) {
-                        Method thisMethod = (Method) method;
-                        cpg.getClasses().get(classCount).addMethod(thisMethod);
+                    ArrayList<Method> methods = parseSourceCodeMethods(cpg.getClasses().get(classCount), (ArrayList) completeClassMap.get("methods"), calls);
+                    for (Method method : methods) {
+                        cpg.getClasses().get(classCount).methods.add(method);
                     }
-                    ArrayList fields = parseSourceCodeFields((ArrayList) completeClassMap.get("fields"));
-                    for (Object field : fields) {
-                        cpg.getClasses().get(classCount).addAttribute((Attribute) field);
+                    ArrayList<Attribute> fields = parseSourceCodeFields((ArrayList) completeClassMap.get("fields"));
+                    for (Attribute field : fields) {
+                        cpg.getClasses().get(classCount).attributes.add(field);
                     }
                 }
             }
@@ -133,25 +188,24 @@ public class Parser {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        //cpg.addRelation(new CodePropertyGraph.Relation(cpg.getClasses().get(0), cpg.getClasses().get(1), ClassRelation.Type.ASSOCIATION));
         HashMap<String, Method> allMethods = new HashMap();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            for (Method method : cpgClass.getMethods()) {
+            for (Method method : cpgClass.methods) {
                 allMethods.put(method.name, method);
             }
         }
         updateMethodCalls(allMethods, cpg, calls);
-        getMissingInfo(cpg);
+        getAllMissingInfo(cpg);
 
         return cpg;
     }
 
     private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg, HashMap<Method, String> calls) {
         for (CPGClass cpgClass : cpg.getClasses()) {
-            for (Method method : cpgClass.getMethods()) {
+            for (Method method : cpgClass.methods) {
                 for (String calledMethod : calls.values()) {
                     if (allMethods.containsKey(calledMethod)) {
-                        method.addMethodCall(allMethods.get(calledMethod));
+                        method.methodCalls.add(allMethods.get(calledMethod));
                     }
                 }
             }
@@ -160,9 +214,7 @@ public class Parser {
 
     private ArrayList<Method> parseSourceCodeMethods(CPGClass parentClass, ArrayList methods, HashMap<Method, String> calls) {
         ArrayList<Method> parsedMethods = new ArrayList<>();
-        Pair<Method, String> methodToCalledMethod;
         String calledMethod = "";
-        HashMap<String, String> parameters = new HashMap<>();
         for (Object method : methods) {
             Map<?, ?> completeMethodMap = (Map<?, ?>) method;
             String methodName = (String) completeMethodMap.get("name");
@@ -178,19 +230,18 @@ public class Parser {
                 Map<?, ?> completeInstructionMap = (Map<?, ?>) methodInstructions.get(i);
                 String label = (String) completeInstructionMap.get("_label");
                 String code = (String) completeInstructionMap.get("code");
-                String lineNumber = String.valueOf(completeInstructionMap.get("lineNumber"));
+                String lineNumber = String.valueOf(completeInstructionMap.get("lineNumber")).replace(".0", "");
                 calledMethod = (String) completeInstructionMap.get("methodCall");
                 methodInstruct[i] = new Method.Instruction(label, code, lineNumber);
             }
 
             // Add all the parameters of a method
+            ArrayList<Method.Parameter> parameters = new ArrayList<>();
             for (Object parametersTree : methodParameters) {
                 Map<?, ?> completeParametersMap = (Map<?, ?>) parametersTree;
                 String name = (String) completeParametersMap.get("name");
                 String type = (String) completeParametersMap.get("type");
-                if (!(name.equals("") && type.equals(""))) {
-                    parameters.put(name, type);
-                }
+                parameters.add(new Method.Parameter(name, type));
             }
 
             // Add all the modifiers of a method
@@ -208,15 +259,6 @@ public class Parser {
             }
 
             Method thisMethod = new Method(parentClass, methodName, methodBody, methodInstruct, modifiers, parameters, returnType);
-
-            // Getting a Set of Key-value pairs
-            Set<Map.Entry<String, String>> entrySet = parameters.entrySet();
-
-            // Iterate through HashMap entries(Key-Value pairs)
-            for (Object o : entrySet) {
-                Map.Entry param = (Map.Entry) o;
-                thisMethod.addToParameters((String) param.getKey(), (String) param.getValue());
-            }
             if (!(calledMethod.equals(""))) {
                 calls.put(thisMethod, calledMethod);
             }
@@ -259,7 +301,7 @@ public class Parser {
     }
 
     private class JavaMethod extends Method {
-        JavaMethod(CPGClass parentClass, String name, String methodBody, Instruction[] instructions, Modifier[] modifiers, HashMap<String, String> parameters, String returnType) {
+        JavaMethod(CPGClass parentClass, String name, String methodBody, Instruction[] instructions, Modifier[] modifiers, ArrayList<Parameter> parameters, String returnType) {
             super(parentClass, name, methodBody, instructions, modifiers, parameters, returnType);
         }
     }
