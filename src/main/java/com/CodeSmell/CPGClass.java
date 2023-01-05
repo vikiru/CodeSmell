@@ -2,7 +2,6 @@ package com.CodeSmell;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * A class within the source code.
@@ -22,10 +21,10 @@ public class CPGClass {
     public final String type;
 
     // the list of methods within the class
-    private ArrayList<Method> methods;
+    public ArrayList<Method> methods;
 
     // the list of fields within the class
-    private ArrayList<Attribute> attributes;
+    public ArrayList<Attribute> attributes;
 
     CPGClass(String name, String filePath, String packageName, String type) {
         this.name = name;
@@ -36,32 +35,9 @@ public class CPGClass {
         this.attributes = new ArrayList<Attribute>();
     }
 
-    protected ArrayList<Method> getMethods() {
-        return this.methods;
-    }
-
-    protected ArrayList<Attribute> getAttributes() {
-        return this.attributes;
-    }
-
-    protected void addMethod(Method m) {
-        this.methods.add(m);
-    }
-
-    protected void addAttribute(Attribute a) {
-        this.attributes.add(a);
-    }
-
     @Override
     public String toString() {
-        return "CPGClass{" +
-                "name='" + name + '\'' +
-                ", filePath='" + filePath + '\'' +
-                ", packageName='" + packageName + '\'' +
-                ", type='" + type + '\'' +
-                ", methods=" + methods +
-                ", attributes=" + attributes +
-                '}';
+        return String.format("CPGClass{name='%s', filePath='%s', packageName='%s', type='%s', methods=%s, attributes=%s}", name, filePath, packageName, type, methods, attributes);
     }
 
     public enum Modifier {
@@ -141,19 +117,18 @@ public class CPGClass {
         // list of modifiers the method has (0 or more)
         public final Modifier[] modifiers;
 
-        // a hashmap of all the method parameters, key is the name of the parameters
-        // and value is the type
-        public final HashMap<String, String> parameters;
+        // a arraylist containing all the method parameters
+        public final ArrayList<Parameter> parameters;
 
         // the return type of the method
         public final String returnType;
 
         // return a list of methods which this calls
-        private ArrayList<Method> methodCalls;
+        public ArrayList<Method> methodCalls;
 
         protected Method(CPGClass parentClass, String name, String methodBody, Instruction[] instructions,
                          Modifier[] modifiers,
-                         HashMap<String, String> parameters, String returnType) {
+                         ArrayList<Parameter> parameters, String returnType) {
 
             this.parentClass = parentClass;
             this.name = name;
@@ -165,23 +140,32 @@ public class CPGClass {
             this.methodCalls = new ArrayList<>();
         }
 
-        protected void addMethodCall(Method m) {
-            this.methodCalls.add(m);
-        }
-
-        public ArrayList<Method> getMethodCalls() {
-            return methodCalls;
-        }
-
-        protected void addToParameters(String paramName, String type) {
-            parameters.put(paramName, type);
-        }
-
         @Override
         public String toString() {
             if (!returnType.equals("")) {
                 return this.methodBody + ":" + this.returnType;
             } else return this.methodBody;
+        }
+
+        public static class Parameter {
+            // the name of the method parameter
+            public final String name;
+
+            // the type of the method parameter
+            public final String type;
+
+            public Parameter(String name, String type) {
+                this.name = name;
+                this.type = type;
+            }
+
+            @Override
+            public String toString() {
+                return "Parameter{" +
+                        "name='" + name + '\'' +
+                        ", type='" + type + '\'' +
+                        '}';
+            }
         }
 
         // The instructions (lines of code) within each method body
@@ -210,6 +194,4 @@ public class CPGClass {
 
         }
     }
-
-
 }
