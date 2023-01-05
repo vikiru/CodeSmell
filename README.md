@@ -16,7 +16,7 @@ A tool for detection and visualization of code smells for object-oriented langua
 
 - [Chart of Each Member's Progress](https://github.com/users/vikiru/projects/2/insights/1)
 - [Chart of Each Milestone's Progress](https://github.com/users/vikiru/projects/2/insights/4)
-- [Documentation]()
+- [Documentation](#)
 - [Kanban Board](https://github.com/users/vikiru/projects/2)
 
 ## Prerequisites
@@ -63,7 +63,7 @@ mvn clean javafx:run
 In order to run the program through the executable jar via the terminal, the following command can be used:
 
 ```bash
-java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar`
+java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar
 ```
 
 To do this, the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
