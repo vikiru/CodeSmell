@@ -37,10 +37,10 @@ public class MainApp extends Application {
         for (CPGClass graphClass : cpg.getClasses()) {
             UMLClass c = new UMLClass(graphClass.name);
             classMap.put(graphClass, c);
-            for (CPGClass.Method m : graphClass.getMethods()) {
+            for (CPGClass.Method m : graphClass.methods) {
                 c.addMethod(m);
             }
-            for (CPGClass.Attribute a : graphClass.getAttributes()) {
+            for (CPGClass.Attribute a : graphClass.attributes) {
                 c.addAttribute(a);
             }
 
