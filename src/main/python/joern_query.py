@@ -24,7 +24,7 @@ def write_to_file(source_code_json, file_name):
         json.dump(source_code_json, f, indent=4)
 
 
-# For every field, create a dictionary and return it.
+# For every attribute, create a dictionary and return it.
 def create_field_dict(curr_field):
     type = curr_field["_1"]["typeFullName"]
     package_name = ""
@@ -34,7 +34,7 @@ def create_field_dict(curr_field):
         type = curr_field["_1"]["typeFullName"][index + 1: len(curr_field["_1"]["typeFullName"])]
     curr_field_dict = {
         "name": curr_field["_1"]["name"],
-        "modifiers": [x.lower() for x in curr_field["_2"]],
+        "modifiers": [modifier.lower() for modifier in curr_field["_2"]],
         "typeFullName": curr_field["_1"]["typeFullName"],
         "packageName": package_name,
         "type": type,
@@ -156,7 +156,7 @@ def create_instruction_dict(curr_label, curr_instruction, curr_line_number):
             method_call = calls[0].replace("(", "")
 
         curr_instruction_dict = {
-            "_label": curr_label,
+            "label": curr_label,
             "code": curr_instruction.replace("\r\n", ""),
             "lineNumber": curr_line_number or "none",
             "methodCall": method_call,
@@ -183,16 +183,16 @@ def create_class_dict(curr_class):
                 for list in list_method_modifiers:
                     single_list_method_modifiers.extend(list)
 
-                # Get all of the modifiers and types of each field and combine each into a single list.
+                # Get all of the modifiers and types of each attribute and combine each into a single list.
                 list_field_modifiers = [
-                    fields["modifiers"]
-                    for fields in curr_class_dict["fields"]
-                    if not fields["modifiers"]
+                    attribute["modifiers"]
+                    for attribute in curr_class_dict["attributes"]
+                    if not attribute["modifiers"]
                 ]
                 list_field_types = [
-                    fields["type"]
-                    for fields in curr_class_dict["fields"]
-                    if fields["type"] == class_name
+                    attribute["type"]
+                    for attribute in curr_class_dict["attributes"]
+                    if attribute["type"] == class_name
                 ]
                 single_list_field_modifiers = []
                 single_list_field_types = []
@@ -238,7 +238,7 @@ def create_class_dict(curr_class):
         return name
 
     # _1 corresponds to class name, _2 corresponds to class code declaration (i.e. "public class A")
-    # _3 corresponds to class fields
+    # _3 corresponds to class attribute
     # _4 corresponds to class methods
     # _5 corresponds to class filename (full path)
     curr_class_dict = {
@@ -247,7 +247,7 @@ def create_class_dict(curr_class):
         "type": "",
         "filePath": curr_class["_5"],
         "packageName": get_package_name(curr_class["_5"]),
-        "fields": list(map(create_field_dict, curr_class["_3"])),
+        "attributes": list(map(create_field_dict, curr_class["_3"])),
         "methods": list(
             filter(None, list(map(create_method_dict, curr_class["_4"])))
         ),
@@ -260,7 +260,7 @@ def create_class_dict(curr_class):
 
 # Execute a single joern query to get all the data required to create a json representation of the source code.
 def source_code_json_creation():
-    # Obtain the classes, fields and modifiers, methods and their instructions
+    # Obtain the classes, attribute and modifiers, methods and their instructions
     query = (
         "cpg.typeDecl.isExternal(false).map(node => (node.name, node.code, node.astChildren.isMember.l.map(node => (node, "
         "node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, "
