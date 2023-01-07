@@ -115,7 +115,7 @@ def create_method_dict(curr_method):
             return param_list
 
         curr_method_dict = {
-            "parentClass": "",
+            "parentClassName": "",
             "code": curr_method["_1"]["code"],
             "name": curr_method["_1"]["name"].replace("<init>", constructor_name),
             "modifiers": modifiers_pattern.findall(curr_method["_1"]["code"]),
@@ -254,7 +254,7 @@ def create_class_dict(curr_class):
     }
     curr_class_dict["type"] = get_type(curr_class["_2"], curr_class_dict)
     for method in curr_class_dict["methods"]:
-        method["parentClass"] = curr_class["_1"]
+        method["parentClassName"] = curr_class["_1"]
     return curr_class_dict
 
 

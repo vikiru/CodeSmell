@@ -118,8 +118,8 @@ public class CPGClass {
 
         // the parent class of the method (used to differentiate between methods within
         // methodCalls)
-        @Expose(serialize = true, deserialize = false)
-        public final CPGClass parentClass;
+        @Expose(serialize = true, deserialize = true)
+        public final String parentClassName;
 
         @Expose(serialize = true, deserialize = true)
         public final String code;
@@ -153,11 +153,11 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final Method[] methodCalls;
 
-        protected Method(CPGClass parentClass, String code, String name, Modifier[] modifiers,
+        protected Method(String parentClassName, String code, String name, Modifier[] modifiers,
                          String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions,
                          Method[] methodCalls) {
 
-            this.parentClass = parentClass;
+            this.parentClassName = parentClassName;
             this.code = code;
             this.name = name;
             this.modifiers = modifiers;
