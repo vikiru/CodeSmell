@@ -11,6 +11,9 @@ public class CPGClass {
     // The name of the class
     public final String name;
 
+    // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
+    public final String classFullName;
+
     // the filePath of the class (full path)
     public final String filePath;
 
@@ -26,8 +29,9 @@ public class CPGClass {
     // the list of fields within the class
     public ArrayList<Attribute> attributes;
 
-    CPGClass(String name, String filePath, String packageName, String type) {
+    CPGClass(String name, String classFullName, String filePath, String packageName, String type) {
         this.name = name;
+        this.classFullName = classFullName;
         this.filePath = filePath;
         this.packageName = packageName;
         this.type = type;
