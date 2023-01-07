@@ -222,10 +222,11 @@ public class Parser {
                 Map<?, ?> completeClassMap = (Map<?, ?>) classMap;
                 if (completeClassMap != null) {
                     String name = (String) completeClassMap.get("name");
+                    String classFullName = (String) completeClassMap.get("classFullName");
                     String type = (String) completeClassMap.get("type");
                     String filePath = (String) completeClassMap.get("filePath");
                     String packageName = (String) completeClassMap.get("packageName");
-                    cpg.addClass(new CPGClass(name, filePath, packageName, type));
+                    cpg.addClass(new CPGClass(name, classFullName, filePath, packageName, type));
                     classCount++;
                     ArrayList<Method> methods = parseSourceCodeMethods(cpg.getClasses().get(classCount), (ArrayList) completeClassMap.get("methods"), calls);
                     for (Method method : methods) {
