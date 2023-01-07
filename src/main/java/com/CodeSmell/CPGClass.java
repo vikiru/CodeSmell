@@ -128,11 +128,11 @@ public class CPGClass {
         public final String returnType;
 
         // return a list of methods which this calls
-        public ArrayList<Method> methodCalls;
+        public final ArrayList<Method> methodCalls;
 
         protected Method(CPGClass parentClass, String name, String methodBody, Instruction[] instructions,
                          Modifier[] modifiers,
-                         ArrayList<Parameter> parameters, String returnType) {
+                         ArrayList<Parameter> parameters, String returnType, ArrayList<Method> methodCalls) {
 
             this.parentClass = parentClass;
             this.name = name;
@@ -141,7 +141,7 @@ public class CPGClass {
             this.modifiers = modifiers;
             this.parameters = parameters;
             this.returnType = returnType;
-            this.methodCalls = new ArrayList<>();
+            this.methodCalls = methodCalls;
         }
 
         @Override
