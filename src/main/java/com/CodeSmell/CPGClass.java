@@ -2,7 +2,6 @@ package com.CodeSmell;
 
 import com.google.gson.annotations.Expose;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -32,13 +31,13 @@ public class CPGClass {
 
     // the list of fields within the class
     @Expose(serialize = true, deserialize = true)
-    public ArrayList<Attribute> attributes;
+    public final Attribute[] attributes;
 
     // the list of methods within the class
     @Expose(serialize = true, deserialize = true)
-    public ArrayList<Method> methods;
+    public final Method[] methods;
 
-    CPGClass(String name, String classFullName, String type, String filePath, String packageName, ArrayList<Attribute> attributes, ArrayList<Method> methods) {
+    CPGClass(String name, String classFullName, String type, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.classFullName = classFullName;
         this.type = type;
@@ -144,7 +143,7 @@ public class CPGClass {
 
         // a arraylist containing all the method parameters
         @Expose(serialize = true, deserialize = true)
-        public final ArrayList<Parameter> parameters;
+        public final Parameter[] parameters;
 
         // a print out of the method instructions
         @Expose(serialize = true, deserialize = true)
@@ -152,11 +151,11 @@ public class CPGClass {
 
         // return a list of methods which this calls
         @Expose(serialize = true, deserialize = true)
-        public final ArrayList<Method> methodCalls;
+        public final Method[] methodCalls;
 
         protected Method(CPGClass parentClass, String code, String name, Modifier[] modifiers,
-                         String returnType, String methodBody, ArrayList<Parameter> parameters, Instruction[] instructions,
-                         ArrayList<Method> methodCalls) {
+                         String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions,
+                         Method[] methodCalls) {
 
             this.parentClass = parentClass;
             this.code = code;
@@ -178,9 +177,11 @@ public class CPGClass {
 
         public static class Parameter {
             // the name of the method parameter
+            @Expose(serialize = true, deserialize = true)
             public final String name;
 
             // the type of the method parameter
+            @Expose(serialize = true, deserialize = true)
             public final String type;
 
             public Parameter(String name, String type) {
@@ -200,13 +201,17 @@ public class CPGClass {
         // The instructions (lines of code) within each method body
         public static class Instruction {
             // The label associated with each line of code (i.e. METHOD_RETURN, CALL, etc)
+            @Expose(serialize = true, deserialize = true)
             public final String label;
             // The line of code
+            @Expose(serialize = true, deserialize = true)
             public final String code;
             // The line number of where the line of code occurs within the method body.
+            @Expose(serialize = true, deserialize = true)
             public final String lineNumber;
 
             // The name of the method that the instruction is calling, if any
+            @Expose(serialize = true, deserialize = true)
             public final String methodCall;
 
             public Instruction(String label, String code, String lineNumber, String methodCall) {
