@@ -109,42 +109,97 @@ public class Parser {
     }
 
     /**
+     * @param sourceClass
+     * @param destinationClass
+     */
+    public void compareClassMultiplicities(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass) {
+        System.out.println(sourceClass.name + "---------------------" + destinationClass.name);
+        String sourceType = sourceClass.name;
+        String destinationType = destinationClass.name;
+        ArrayList<Attribute> sourceAttributes = sourceClass.attributes;
+        ArrayList<Attribute> destinationAttributes = destinationClass.attributes;
+
+        String srcToDestCardinality = "";
+        var sourceToDestResult = sourceAttributes.stream()
+                .filter(attribute -> attribute.type.contains(destinationType)).collect(Collectors.toList());
+        if (!sourceToDestResult.isEmpty()) {
+            Attribute currentAttribute = sourceToDestResult.get(0);
+            if (currentAttribute.type.contains("[]") || currentAttribute.type.contains("<")) {
+                srcToDestCardinality = "1..*";
+            } else {
+                srcToDestCardinality = "1..1";
+            }
+        }
+        String destToSrcCardinality = "";
+        var destinationToSrcResult = destinationAttributes.stream()
+                .filter(attribute -> attribute.type.contains(sourceType)).collect(Collectors.toList());
+        if (!destinationToSrcResult.isEmpty()) {
+            Attribute currentAttribute = destinationToSrcResult.get(0);
+            if (currentAttribute.type.contains("[]") || currentAttribute.type.contains("<")) {
+                destToSrcCardinality = "1..*";
+            } else {
+                destToSrcCardinality = "1..1";
+            }
+        } else {
+            StringBuilder sb = new StringBuilder();
+            destToSrcCardinality = String.valueOf(sb.append(srcToDestCardinality).reverse());
+        }
+        System.out.println(sourceClass.name + " and " + destinationClass.name + " have a " + srcToDestCardinality);
+        System.out.println(destinationClass.name + " and " + sourceClass.name + " have a " + destToSrcCardinality);
+    }
+
+    /**
      * @param cpg
      */
     public void getAllMultiplicities(CodePropertyGraph cpg) {
+        // multiplicities is easy, just compare fields of classes
+        // relationships
+        ArrayList<String> classNames = new ArrayList<>();
+        cpg.getClasses().stream().forEach(cpgClass -> classNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
-            ArrayList<CPGClass> classesToCheck = new ArrayList<>();
-            for (Attribute attribute : cpgClass.attributes) {
-                if (!attribute.type.equals(cpgClass.name) && attribute.packageName.contains("java.util")) {
-                    String attributeType = attribute.type;
-                    int index = attributeType.indexOf("<");
-                    //String attributeGenerics = attributeType.substring(index).replace("<", "").replace(">", "");
-                    String attributeGenerics = "";
-                    ArrayList<String> types = new ArrayList<>();
-                    if (attributeGenerics.contains(",")) {
-                        String[] splittedString = attributeGenerics.split(",");
-                        types.add(splittedString[0].trim());
-                        types.add(splittedString[1].trim());
-                    } else {
-                        types.add(attributeGenerics);
+            ArrayList<Attribute> attributes = cpgClass.attributes;
+            for (Attribute a : attributes) {
+                String attributeType = a.type;
+                // Check for prescence of arrays
+                if (attributeType.contains("[]")) {
+                    attributeType = attributeType.replace("[]", "");
+                    int checkIndex = classNames.indexOf(attributeType);
+                    if (checkIndex != -1 && !attributeType.equals(cpgClass.name)) {
+                        // compareClassMultiplicities(cpg, cpgClass, cpg.getClasses().get(checkIndex));
                     }
-                    for (String currentType : types) {
-                        for (CPGClass currentClass : cpg.getClasses()) {
-                            String className = currentClass.name;
-                            int separatorIndex = currentClass.name.indexOf("$");
-                            if (separatorIndex != -1) {
-                                className = className.substring(separatorIndex).replace("$", "");
+                }
+                // Check for prescence of Java Collections (i.e. ArrayList, Set, HashMap, etc)
+                if (attributeType.contains("<")) {
+                    // Extract the type enclosed within the "< >"
+                    int startIndex = attributeType.indexOf("<");
+                    int endIndex = attributeType.indexOf(">");
+                    attributeType = attributeType.substring(startIndex, endIndex + 1).replace("<", "").replace(">", "");
+                    if (attributeType.contains(",")) {
+                    } else {
+                        // Find the class which the attribute belongs to.
+                        int checkIndex = -1;
+                        for (String name : classNames) {
+                            if (name.contains(attributeType)) {
+                                int index = name.lastIndexOf("$");
+                                String cleanedName = name;
+                                if (index != -1) {
+                                    cleanedName = name.substring(index + 1);
+                                }
+                                if (attributeType.equals(cleanedName)) {
+                                    checkIndex = classNames.indexOf(name);
+                                    break;
+                                }
                             }
-                            if (className.equals(currentType)) {
-                                classesToCheck.add(currentClass);
-                            }
+                        }
+                        // If checkIndex is not -1, then the class was a valid class in the source code.
+                        // Compare the multiplicities between source (cpgClass) and dest class (the class which the attribute belongs to)
+                        if (checkIndex != -1) {
+                            compareClassMultiplicities(cpg, cpgClass, cpg.getClasses().get(checkIndex));
                         }
                     }
                 }
             }
-//////
         }
-
     }
 
     /**
@@ -200,6 +255,11 @@ public class Parser {
         return cpg;
     }
 
+    /**
+     * @param allMethods
+     * @param cpg
+     * @param calls
+     */
     private void updateMethodCalls(HashMap<String, Method> allMethods, CodePropertyGraph cpg, HashMap<Method, String> calls) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (Method method : cpgClass.methods) {
@@ -212,6 +272,12 @@ public class Parser {
         }
     }
 
+    /**
+     * @param parentClass
+     * @param methods
+     * @param calls
+     * @return
+     */
     private ArrayList<Method> parseSourceCodeMethods(CPGClass parentClass, ArrayList methods, HashMap<Method, String> calls) {
         ArrayList<Method> parsedMethods = new ArrayList<>();
         String calledMethod = "";
@@ -267,6 +333,10 @@ public class Parser {
         return parsedMethods;
     }
 
+    /**
+     * @param fields
+     * @return
+     */
     private ArrayList<Attribute> parseSourceCodeFields(ArrayList fields) {
         ArrayList<Attribute> parsedFields = new ArrayList<>();
         for (Object field : fields) {
