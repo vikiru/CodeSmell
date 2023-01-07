@@ -81,7 +81,7 @@ public class CPGClass {
         public final Modifier[] modifiers;
 
         // the type of the attribute
-        public String type;
+        public final String type;
 
         protected Attribute(String name, String packageName, String type, Modifier[] modifiers) {
             this.name = name;
