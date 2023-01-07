@@ -2,17 +2,28 @@ package com.CodeSmell;
 
 import com.CodeSmell.ClassRelation.Type;
 import com.CodeSmell.ClassRelation.Multiplicity;
+import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
 
 public class CodePropertyGraph {
 
+    @Expose(deserialize = false)
     private ArrayList<Relation> relations;
+    @Expose(serialize = true, deserialize = true)
     private ArrayList<CPGClass> classes;
 
     protected CodePropertyGraph() {
         this.classes = new ArrayList<CPGClass>();
         this.relations = new ArrayList<Relation>();
+    }
+
+    @Override
+    public String toString() {
+        return "CodePropertyGraph{" +
+                "relations=" + relations +
+                ", classes=" + classes +
+                '}';
     }
 
     protected ArrayList<CPGClass> getClasses() {
