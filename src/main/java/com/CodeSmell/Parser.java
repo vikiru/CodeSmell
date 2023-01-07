@@ -2,7 +2,6 @@ package com.CodeSmell;
 
 import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Method;
-import com.CodeSmell.CPGClass.Modifier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -18,7 +17,28 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-        p.assignAllMultiplicities(g);
+        // p.assignAllMultiplicities(g);
+    }
+
+    /**
+     * @param destination
+     * @return
+     */
+    public CodePropertyGraph initializeCPG(String destination) {
+        GsonBuilder builder = new GsonBuilder();
+        builder.excludeFieldsWithoutExposeAnnotation();
+        Gson gson = builder.create();
+        CodePropertyGraph cpg = new CodePropertyGraph();
+        try {
+            Reader reader = Files.newBufferedReader(Paths.get(destination));
+            cpg = gson.fromJson(reader, CodePropertyGraph.class);
+            // todo comment - explaining why this needs 2 calls.
+            CodePropertyGraph tempGraph = assignProperFieldsAndMethods(cpg);
+            cpg = assignProperFieldsAndMethods(tempGraph);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return cpg;
     }
 
     /**
@@ -36,10 +56,10 @@ public class Parser {
      */
     public String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
         String className = cpgClass.name;
-        ArrayList<Method> classMethods = cpgClass.methods;
+        Method[] classMethods = cpgClass.methods;
         String stringToFind = "this." + attribute.name;
         String finalAttributeType = attribute.type;
-        var result = classMethods.stream().
+        var result = Arrays.stream(classMethods).
                 filter(method -> method.name.equals(className)).collect(Collectors.toList());
         if (!result.isEmpty()) {
             Method constructor = result.get(0);
@@ -49,7 +69,7 @@ public class Parser {
             String constructorBody = instructionResult.get(0).code;
             // Check the constructor, if the desired field is a parameter, this will obtain the type
             if (constructorBody.contains(attribute.name)) {
-                var attributeResult = constructor.parameters.stream().
+                var attributeResult = Arrays.stream(constructor.parameters).
                         filter(parameter -> parameter.name.equals(attribute.name)).collect(Collectors.toList());
                 if (!attributeResult.isEmpty()) {
                     finalAttributeType = attributeResult.get(0).type;
@@ -83,7 +103,7 @@ public class Parser {
                 if (!instructionResult.isEmpty()) {
                     int indexToFind = instructionResult.get(0).code.indexOf("(");
                     String parameter = instructionResult.get(0).code.substring(indexToFind).replace("(", "").replace(")", "");
-                    var parameterResult = method.parameters.stream().
+                    var parameterResult = Arrays.stream(method.parameters).
                             filter(parameterToFind -> parameterToFind.name.equals(parameter)).collect(Collectors.toList());
                     if (!parameterResult.isEmpty()) {
                         if (!parameter.contains("<")) {
@@ -97,24 +117,84 @@ public class Parser {
     }
 
     /**
+     * @param cpg
+     * @param methodToUpdate
+     * @return
+     */
+    public Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate) {
+        ArrayList<Method> allMethodsInCPG = new ArrayList<>();
+        ArrayList<String> allMethodNames = new ArrayList<>();
+        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
+        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+
+        // Get the indexes of the names of each Method called by methodToUpdate
+        ArrayList<Integer> indexes = new ArrayList<>();
+        for (Method.Instruction instruction : methodToUpdate.instructions) {
+            String label = instruction.label;
+            String methodCall = instruction.methodCall;
+            if (label.equals("CALL") && (!methodCall.equals("") || !methodCall.equals("toString"))) {
+                int indexOfMethodCalled = allMethodNames.indexOf(methodCall);
+                if (indexOfMethodCalled != -1) {
+                    indexes.add(indexOfMethodCalled);
+                }
+            }
+        }
+        ArrayList<Method> methodCalls = new ArrayList<>();
+        indexes.stream().forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
+        Method[] methodsCalled = methodCalls.toArray(new Method[methodCalls.size()]);
+        return new Method(methodToUpdate.parentClassName,
+                methodToUpdate.code, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
+                methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions,
+                methodsCalled);
+    }
+
+    /**
+     * @param cpg
+     * @return
+     */
+    public CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg) {
+        CodePropertyGraph graph = new CodePropertyGraph();
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            ArrayList<Attribute> properAttributes = new ArrayList<>();
+            ArrayList<Method> properMethods = new ArrayList<>();
+            for (Attribute a : cpgClass.attributes) {
+                if (a.packageName.equals("java.util") && !a.type.contains("<")) {
+                    String provisionalType = assignMissingAttributeType(cpgClass, a);
+                    properAttributes.add(new Attribute(a.name, a.packageName, provisionalType, a.modifiers));
+                } else {
+                    properAttributes.add(a);
+                }
+            }
+            for (Method m : cpgClass.methods) {
+                Method properMethod = updateMethodWithMethodCalls(cpg, m);
+                properMethods.add(properMethod);
+            }
+            CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.classFullName,
+                    cpgClass.type, cpgClass.filePath, cpgClass.packageName,
+                    properAttributes.toArray(new Attribute[properAttributes.size()]),
+                    properMethods.toArray(new Method[properMethods.size()]));
+            graph.addClass(properClass);
+        }
+        return graph;
+    }
+
+    /**
      * //todo HAS A, IS A , USES A
      *
      * @param cpg
      * @param sourceClass
      * @param destinationClass
-     * @return
-     */
-    public CodePropertyGraph.Relation determineAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, String sourceToDestCardinality) {
-        ArrayList<Method> sourceClassMethods = sourceClass.methods;
-        ArrayList<Method> destinationClassMethods = destinationClass.methods;
+     * @return public CodePropertyGraph.Relation determineAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, String sourceToDestCardinality) {
+    Method[] sourceClassMethods = sourceClass.methods;
+    Method[] destinationClassMethods = destinationClass.methods;
 
-        // Get the constructors of both the source and destination classes, if present.
-        List<Method> constructorSrc = sourceClassMethods.stream().filter(method -> method.name.contains(sourceClass.name)).collect(Collectors.toList());
-        List<Method> constructorDst = destinationClassMethods.stream().filter(method -> method.name.contains(destinationClass.name)).collect(Collectors.toList());
+    // Get the constructors of both the source and destination classes, if present.
+    List<Method> constructorSrc = sourceClassMethods.stream().filter(method -> method.name.contains(sourceClass.name)).collect(Collectors.toList());
+    List<Method> constructorDst = destinationClassMethods.stream().filter(method -> method.name.contains(destinationClass.name)).collect(Collectors.toList());
 
-        // todo fix
-        return null;
-    }
+    // todo fix
+    return null;
+    }*/
 
     /**
      * @param sourceClass
@@ -123,11 +203,11 @@ public class Parser {
     // TODO
     public void compareClassMultiplicities(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass) {
         String destinationType = destinationClass.name;
-        ArrayList<Attribute> sourceAttributes = sourceClass.attributes;
+        Attribute[] sourceAttributes = sourceClass.attributes;
 
         // Determine the multiplicity of the source class to the dest class (i.e. how many instance of the dest class are present within the source class?)
         String cardinality = "";
-        var sourceToDestResult = sourceAttributes.stream()
+        var sourceToDestResult = Arrays.stream(sourceAttributes)
                 .filter(attribute -> attribute.type.contains(destinationType)).collect(Collectors.toList());
         if (!sourceToDestResult.isEmpty()) {
             Attribute currentAttribute = sourceToDestResult.get(0);
@@ -147,7 +227,7 @@ public class Parser {
         cpg.getClasses().stream().forEach(cpgClass -> classNames.add(cpgClass.name));
         // Iterate through each cpgClass within cpg and determine the multiplicities between classes.
         for (CPGClass cpgClass : cpg.getClasses()) {
-            ArrayList<Attribute> attributes = cpgClass.attributes;
+            Attribute[] attributes = cpgClass.attributes;
             for (Attribute a : attributes) {
                 String attributeType = a.type;
                 // Check for single instance of another class
@@ -210,237 +290,16 @@ public class Parser {
         }
     }
 
-    public CodePropertyGraph initializeCPG(String destination) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
-        Gson gson = builder.create();
-        CodePropertyGraph cpg = new CodePropertyGraph();
-        HashMap<CPGClass, HashMap<String, ArrayList<String>>> allMethodCallsOfClasses = new HashMap<>();
-        try {
-            Reader reader = Files.newBufferedReader(Paths.get(destination));
-            CodePropertyGraph newGraph = gson.fromJson(reader, CodePropertyGraph.class);
-            System.out.println(newGraph);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+    private class JavaAttribute extends Attribute {
+        JavaAttribute(String name, String packageName, String type, CPGClass.Modifier[] m) {
+            super(name, packageName, type, m);
         }
-        return cpg;
     }
 
-    /**
-     * @param destination A file location for source code
-     * @return cpg A code property graph of the source code containing all classes and their fields and methods
-     */
-    public CodePropertyGraph buildCPG(String destination) {
-        Gson gson = new Gson();
-        CodePropertyGraph cpg = new CodePropertyGraph();
-        HashMap<CPGClass, HashMap<String, ArrayList<String>>> allMethodCallsOfClasses = new HashMap<>();
-        try {
-            Reader reader = Files.newBufferedReader(Paths.get(destination));
-            // convert JSON file to map
-            Map<?, ?> map = gson.fromJson(reader, Map.class);
-            Object[] entryValues;
-            entryValues = map.values().toArray();
-            ArrayList classes = (ArrayList) entryValues[0];
-            int classCount = -1;
-            for (Object classMap : classes) {
-                Map<?, ?> completeClassMap = (Map<?, ?>) classMap;
-                if (completeClassMap != null) {
-                    // Extract the values neccessary to create a CPGClass from the classMap
-                    String name = (String) completeClassMap.get("name");
-                    String classFullName = (String) completeClassMap.get("classFullName");
-                    String type = (String) completeClassMap.get("type");
-                    String filePath = (String) completeClassMap.get("filePath");
-                    String packageName = (String) completeClassMap.get("packageName");
-                    ArrayList methods = (ArrayList) completeClassMap.get("methods");
-                    // cpg.addClass(new CPGClass(name, classFullName, filePath, packageName, type));
-                    classCount++;
-                    // Add the methods to each class and additionally create a HashMap to store a class and
-                    // each of the methods that each method within that class calls
-                    allMethodCallsOfClasses.put(cpg.getClasses().get(classCount), parseSourceCodeMethods(cpg.getClasses().get(classCount), methods));
-                    // Add the fields of a class, accounting for any missing attribute types
-                    ArrayList<Attribute> fields = parseSourceCodeAttributes((ArrayList) completeClassMap.get("fields"));
-                    for (Attribute field : fields) {
-                        if (field.packageName.equals("java.util") && !field.type.contains("<")) {
-                            String provisionalType = assignMissingAttributeType(cpg.getClasses().get(classCount), field);
-                            Attribute properField = new Attribute(field.name, field.packageName, provisionalType, field.modifiers);
-                            cpg.getClasses().get(classCount).attributes.add(properField);
-                        } else cpg.getClasses().get(classCount).attributes.add(field);
-                    }
-                }
-            }
-            // close reader
-            reader.close();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
+    private class JavaMethod extends Method {
+        JavaMethod(String parentClassName, String code, String name, CPGClass.Modifier[] modifiers, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions, Method[] methodCalls) {
+            super(parentClassName, code, name, modifiers, returnType, methodBody, parameters, instructions, methodCalls);
         }
-        // Obtain the proper Method references for each method called by a method and replace the Method objects of each class,
-        // with the same fields and the only difference will be the methodCalls array
-        updateMethodsAndMethodCalls(cpg, allMethodCallsOfClasses);
-        return cpg;
     }
-
-    /**
-     * Iterate through each CPGClass within the CodePropertyGraph and update each class's Method's so that
-     * they no longer have an empty ArrayList for the methodCalls field.
-     *
-     * @param cpg                     The CodePropertyGraph representation of the source code
-     * @param allMethodCallsOfClasses A HashMap containing Every Method and Each Method Called by Every Method for Every CPGClass
-     */
-    private void updateMethodsAndMethodCalls(CodePropertyGraph cpg, HashMap<CPGClass, HashMap<String, ArrayList<String>>> allMethodCallsOfClasses) {
-        // Obtain lists of all the Methods and names of Method's within the cpg.
-        ArrayList<Method> allMethodsInCPG = new ArrayList<>();
-        ArrayList<String> allMethodNames = new ArrayList<>();
-        cpg.getClasses().stream().forEach(cpgClass -> cpgClass.methods.stream().forEach(method -> allMethodsInCPG.add(method)));
-        cpg.getClasses().stream().forEach(cpgClass -> cpgClass.methods.stream().forEach(method -> allMethodNames.add(method.name)));
-        // Iterate through each CPGClass within cpg and create the proper methodCalls field of Methods within each class and then
-        // create a new proper Method for that class and append this to properMethodsOfClass which will replace
-        // the original methods of the CPGClass.
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            // Create two lists, one which will be used to traverse the original methods of a class and
-            // another which will be used to store the proper methods of a class (with a non-empty methodCalls ArrayList, if possible).
-            ArrayList<Method> originalMethodsOfClass = cpgClass.methods;
-            ArrayList<Method> properMethodsOfClass = new ArrayList<>();
-            // Extract the HashMap which contains each Method and the list of Methods that Method calls.
-            HashMap<String, ArrayList<String>> allMethodCallsOfClass = allMethodCallsOfClasses.get(cpgClass);
-            // Traverse through each Method present within cpgClass and determine the Methods that it calls
-            // Create a new Method based on the original Method fields and a new updated methodCalls ArrayList.
-            for (Method method : originalMethodsOfClass) {
-                String methodName = method.name;
-                ArrayList<Method> methodCalls = new ArrayList<>();
-                if (allMethodCallsOfClass.containsKey(methodName)) {
-                    ArrayList<String> allMethodCallsOfMethod = allMethodCallsOfClass.get(methodName);
-                    var validMethods = allMethodCallsOfMethod.stream()
-                            .filter(string -> allMethodNames.contains(string) && !string.equals("toString")).collect(Collectors.toList());
-                    Set<String> uniqueMethods = new LinkedHashSet<>(validMethods);
-                    ArrayList<Integer> indexes = new ArrayList<>();
-                    uniqueMethods.stream().forEach(methodStr -> indexes.add(allMethodNames.indexOf(methodStr)));
-                    indexes.stream().forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
-                    //  Method properMethod = new Method(cpgClass, method.name, method.methodBody, method.instructions,
-                    //  method.modifiers, method.parameters, method.returnType, methodCalls);
-                    // properMethodsOfClass.add(properMethod);
-                }
-            }
-            // Finally, repalce the original methods of the cpgClass with the new proper methods.
-            cpgClass.methods = new ArrayList<>(properMethodsOfClass);
-        }
-
-    }
-
-    /**
-     * Iterates through a given ArrayList to create and append Method's to a given parent CPGClass object.
-     * Finally, returning a HashMap containing the parent CPGClass alongside each Method and each Method called
-     * by each of the methods present within the parent class.
-     *
-     * @param parentClass The parent CPGClass which posseses the method
-     * @param methods     An ArrayList of Objects parsed from the sourceCode json
-     * @return a HashMap containing the CPGClass alongside each of the Method's within that class and each of
-     * the Method calls within each Method body.
-     */
-    private HashMap<String, ArrayList<String>> parseSourceCodeMethods(CPGClass parentClass, ArrayList methods) {
-        HashMap<String, ArrayList<String>> allMethodCallsOfClass = new HashMap<>();
-        for (Object method : methods) {
-            Map<?, ?> completeMethodMap = (Map<?, ?>) method;
-            String methodName = (String) completeMethodMap.get("name");
-            ArrayList methodModifiers = (ArrayList) completeMethodMap.get("modifiers");
-            String methodBody = (String) completeMethodMap.get("methodBody");
-            String returnType = (String) completeMethodMap.get("returnType");
-            ArrayList methodParameters = (ArrayList) completeMethodMap.get("parameters");
-            ArrayList methodInstructions = (ArrayList) completeMethodMap.get("instructions");
-
-            // Add all the instructions of a method
-            Method.Instruction[] methodInstruct = new Method.Instruction[methodInstructions.size()];
-            ArrayList<String> allMethodCallInstructions = new ArrayList<String>();
-            for (int i = 0; i < methodInstructions.size(); i++) {
-                Map<?, ?> completeInstructionMap = (Map<?, ?>) methodInstructions.get(i);
-                String label = (String) completeInstructionMap.get("_label");
-                String code = (String) completeInstructionMap.get("code");
-                String lineNumber = String.valueOf(completeInstructionMap.get("lineNumber")).replace(".0", "");
-                String calledMethod = (String) completeInstructionMap.get("methodCall");
-                if (!calledMethod.equals("")) {
-                    allMethodCallInstructions.add(calledMethod);
-                }
-                //methodInstruct[i] = new Method.Instruction(label, code, lineNumber);
-            }
-
-            // Add all the parameters of a method
-            ArrayList<Method.Parameter> parameters = new ArrayList<>();
-            for (Object parametersTree : methodParameters) {
-                Map<?, ?> completeParametersMap = (Map<?, ?>) parametersTree;
-                String name = (String) completeParametersMap.get("name");
-                String type = (String) completeParametersMap.get("type");
-                parameters.add(new Method.Parameter(name, type));
-            }
-
-            // Add all the modifiers of a method
-            Modifier[] modifiers = new Modifier[methodModifiers.size()];
-            if (!methodModifiers.isEmpty()) {
-                for (int i = 0; i < methodModifiers.size(); i++) {
-                    for (Modifier m : Modifier.values()) {
-                        if (methodModifiers.get(i).equals(m.modString)) {
-                            modifiers[i] = m;
-                        }
-                    }
-                }
-            } else {
-                modifiers = new Modifier[]{};
-            }
-            // Create a new Method and add it to the parent CPGClass
-            //  Method thisMethod = new Method(parentClass, methodName, methodBody, methodInstruct, modifiers, parameters, returnType, new ArrayList<>());
-            // parentClass.methods.add(thisMethod);
-            // Additionally, add this to the HashMap which contains the Method calls the current Method makes within its body.
-            allMethodCallsOfClass.put(methodName, allMethodCallInstructions);
-        }
-        // Finally, return the HashMap containing the CPGClass alongside each of the Method's within that class and each of
-        // the Method calls within each Method body.
-        return allMethodCallsOfClass;
-    }
-
-    /**
-     * Iterates through a given ArrayList to create Attributes and finally
-     * returns an ArrayList containing all the Attributes.
-     *
-     * @param fields An ArrayList of Objects parsed from the sourceCode json
-     * @return An ArrayList containing all the parsed and created Attributes
-     */
-    private ArrayList<Attribute> parseSourceCodeAttributes(ArrayList fields) {
-        ArrayList<Attribute> parsedFields = new ArrayList<>();
-        for (Object field : fields) {
-            Map<?, ?> completeFieldMap = (Map<?, ?>) field;
-            String fieldName = (String) completeFieldMap.get("name");
-            String fieldType = (String) completeFieldMap.get("type");
-            String packageName = (String) completeFieldMap.get("packageName");
-            ArrayList fieldModifiers = (ArrayList) completeFieldMap.get("modifiers");
-
-            // Add all modifiers of a field
-            Modifier[] modifiers = new Modifier[fieldModifiers.size()];
-            if (!fieldModifiers.isEmpty()) {
-                for (int i = 0; i < fieldModifiers.size(); i++) {
-                    for (Modifier m : Modifier.values()) {
-                        if (fieldModifiers.get(i).equals(m.modString)) {
-                            modifiers[i] = m;
-                        }
-                    }
-                }
-            } else {
-                modifiers = new Modifier[]{};
-            }
-            parsedFields.add(new Attribute(fieldName, packageName, fieldType, modifiers));
-        }
-        return parsedFields;
-    }
-
-    /**
-     private class JavaAttribute extends Attribute {
-     JavaAttribute(String name, String packageName, String type, Modifier[] m) {
-     super(name, packageName, type, m);
-     }
-     }
-
-     private class JavaMethod extends Method {
-     JavaMethod(CPGClass parentClass, String name, String methodBody, Instruction[] instructions, Modifier[] modifiers, ArrayList<Parameter> parameters, String returnType, ArrayList<Method> methodCalls) {
-     super();
-     //super(parentClass, name, methodBody, instructions, modifiers, parameters, returnType, methodCalls);
-     }
-     }**/
 }
