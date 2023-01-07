@@ -1,5 +1,7 @@
 package com.CodeSmell;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,34 +11,41 @@ import java.util.Arrays;
 public class CPGClass {
 
     // The name of the class
+    @Expose(serialize = true, deserialize = true)
     public final String name;
 
     // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
+    @Expose(serialize = true, deserialize = true)
     public final String classFullName;
 
+    // the type of the object (class, enum, abstract class, interface)
+    @Expose(serialize = true, deserialize = true)
+    public final String type;
+
     // the filePath of the class (full path)
+    @Expose(serialize = true, deserialize = true)
     public final String filePath;
 
     // the package name of the class
+    @Expose(serialize = true, deserialize = true)
     public final String packageName;
 
-    // the type of the object (class, enum, abstract class, interface)
-    public final String type;
-
-    // the list of methods within the class
-    public ArrayList<Method> methods;
-
     // the list of fields within the class
+    @Expose(serialize = true, deserialize = true)
     public ArrayList<Attribute> attributes;
 
-    CPGClass(String name, String classFullName, String filePath, String packageName, String type) {
+    // the list of methods within the class
+    @Expose(serialize = true, deserialize = true)
+    public ArrayList<Method> methods;
+
+    CPGClass(String name, String classFullName, String type, String filePath, String packageName, ArrayList<Attribute> attributes, ArrayList<Method> methods) {
         this.name = name;
         this.classFullName = classFullName;
+        this.type = type;
         this.filePath = filePath;
         this.packageName = packageName;
-        this.type = type;
-        this.methods = new ArrayList<Method>();
-        this.attributes = new ArrayList<Attribute>();
+        this.attributes = attributes;
+        this.methods = methods;
     }
 
     @Override
@@ -72,15 +81,19 @@ public class CPGClass {
      */
     public static class Attribute {
         // the name of the attribute
+        @Expose(serialize = true, deserialize = true)
         public final String name;
 
         // the package name of the field
+        @Expose(serialize = true, deserialize = true)
         public final String packageName;
 
         // list of modifiers the attribute has (0 or more)
+        @Expose(serialize = true, deserialize = true)
         public final Modifier[] modifiers;
 
         // the type of the attribute
+        @Expose(serialize = true, deserialize = true)
         public final String type;
 
         protected Attribute(String name, String packageName, String type, Modifier[] modifiers) {
@@ -106,41 +119,53 @@ public class CPGClass {
 
         // the parent class of the method (used to differentiate between methods within
         // methodCalls)
+        @Expose(serialize = true, deserialize = false)
         public final CPGClass parentClass;
 
+        @Expose(serialize = true, deserialize = true)
+        public final String code;
+
         // the name of the method
+        @Expose(serialize = true, deserialize = true)
         public final String name;
+
+        // list of modifiers the method has (0 or more)
+        @Expose(serialize = true, deserialize = true)
+        public final Modifier[] modifiers;
+
+        // the return type of the method
+        @Expose(serialize = true, deserialize = true)
+        public final String returnType;
 
         // the method body of the method with parameters excluding the modifiers and
         // return type i.e. "CPGClass(String name, String filePath, String type)"
+        @Expose(serialize = true, deserialize = true)
         public final String methodBody;
 
-        // a print out of the method instructions
-        public final Instruction[] instructions;
-
-        // list of modifiers the method has (0 or more)
-        public final Modifier[] modifiers;
-
         // a arraylist containing all the method parameters
+        @Expose(serialize = true, deserialize = true)
         public final ArrayList<Parameter> parameters;
 
-        // the return type of the method
-        public final String returnType;
+        // a print out of the method instructions
+        @Expose(serialize = true, deserialize = true)
+        public final Instruction[] instructions;
 
         // return a list of methods which this calls
+        @Expose(serialize = true, deserialize = true)
         public final ArrayList<Method> methodCalls;
 
-        protected Method(CPGClass parentClass, String name, String methodBody, Instruction[] instructions,
-                         Modifier[] modifiers,
-                         ArrayList<Parameter> parameters, String returnType, ArrayList<Method> methodCalls) {
+        protected Method(CPGClass parentClass, String code, String name, Modifier[] modifiers,
+                         String returnType, String methodBody, ArrayList<Parameter> parameters, Instruction[] instructions,
+                         ArrayList<Method> methodCalls) {
 
             this.parentClass = parentClass;
+            this.code = code;
             this.name = name;
-            this.methodBody = methodBody;
-            this.instructions = instructions;
             this.modifiers = modifiers;
-            this.parameters = parameters;
             this.returnType = returnType;
+            this.methodBody = methodBody;
+            this.parameters = parameters;
+            this.instructions = instructions;
             this.methodCalls = methodCalls;
         }
 
@@ -181,10 +206,14 @@ public class CPGClass {
             // The line number of where the line of code occurs within the method body.
             public final String lineNumber;
 
-            public Instruction(String label, String code, String lineNumber) {
+            // The name of the method that the instruction is calling, if any
+            public final String methodCall;
+
+            public Instruction(String label, String code, String lineNumber, String methodCall) {
                 this.label = label;
                 this.code = code;
                 this.lineNumber = lineNumber;
+                this.methodCall = methodCall;
             }
 
             @Override
@@ -193,9 +222,9 @@ public class CPGClass {
                         "label='" + label + '\'' +
                         ", code='" + code + '\'' +
                         ", lineNumber='" + lineNumber + '\'' +
+                        ", methodCall='" + methodCall + '\'' +
                         '}';
             }
-
         }
     }
 }
