@@ -230,12 +230,20 @@ def create_class_dict(curr_class):
             package_name = package_name[0: package_name.rindex(".")]
         return package_name
 
+    def get_name_without_separators(class_name):
+        name = class_name
+        if "$" in class_name:
+            index = class_name.rindex("$")
+            name = class_name[index + 1: len(class_name)]
+        return name
+
     # _1 corresponds to class name, _2 corresponds to class code declaration (i.e. "public class A")
     # _3 corresponds to class fields
     # _4 corresponds to class methods
     # _5 corresponds to class filename (full path)
     curr_class_dict = {
-        "name": curr_class["_1"],
+        "name": get_name_without_separators(curr_class["_1"]),
+        "classFullName": curr_class["_1"],
         "type": "",
         "filePath": curr_class["_5"],
         "packageName": get_package_name(curr_class["_5"]),
