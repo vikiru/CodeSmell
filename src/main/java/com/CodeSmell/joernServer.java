@@ -18,9 +18,11 @@ public class joernServer {
 
         // Open terminal and start the joern server once process for joernServerBuilder starts
         windowsPortFinderBuilder = new ProcessBuilder("cmd.exe", "/c", "netstat -ano | findstr 8080");
-        joernServerBuilder = new ProcessBuilder("joern",  "--server");
+        if (System.getProperty("os.name").contains("Windows")) {
+            joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
+        } else joernServerBuilder = new ProcessBuilder("joern", "--server");
         joernQueryBuilder = new ProcessBuilder("python", "joern_query.py").directory(new File(directoryPath));
-    
+
         try {
             // Start the server
             Process joernServerProcess = joernServerBuilder.start();
@@ -31,7 +33,7 @@ public class joernServer {
             Process joernQueryProcess = joernQueryBuilder.start();
 
             BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()));
-            BufferedReader errorReader  = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
             int exitCode = joernQueryProcess.waitFor();
             System.out.println("Joern exit code: " + exitCode);
             String line;
@@ -48,13 +50,13 @@ public class joernServer {
                 if (joernServerProcess.isAlive()) {
                     joernServerProcess.destroyForcibly();
                 }
-                
+
                 // For Windows OS, find the process bound to port 8080 and kill it.
                 // todo - add commands for other OS such as linux.
                 if (System.getProperty("os.name").contains("Windows")) {
                     Process findProcess = windowsPortFinderBuilder.start();
                     BufferedReader findProcessReader = new BufferedReader(new InputStreamReader(findProcess.getInputStream()));
-                    
+
                     // Obtain the PID of the process bound to port 8080
                     String lineFree = findProcessReader.readLine();
                     String processID = lineFree.substring(lineFree.lastIndexOf(" ")).trim();
