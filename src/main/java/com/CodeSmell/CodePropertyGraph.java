@@ -27,11 +27,11 @@ public class CodePropertyGraph {
     }
 
     protected ArrayList<CPGClass> getClasses() {
-        return this.classes;
+        return new ArrayList(this.classes);
     }
 
     protected ArrayList<Relation> getRelations() {
-        return this.relations;
+        return new ArrayList(this.relations);
     }
 
     public void addClass(CPGClass c) {
