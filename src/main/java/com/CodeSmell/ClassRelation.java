@@ -42,12 +42,12 @@ public class ClassRelation extends RenderObject {
     }
 
     public enum Type {
-        DEPENDENCY,
         ASSOCIATION,
         AGGREGATION,
         COMPOSITION,
+        DEPENDENCY,
         INHERITANCE,
-        INTERFACE
+        REALIZATION,
     }
 
     public enum Multiplicity {
@@ -56,16 +56,23 @@ public class ClassRelation extends RenderObject {
         ZERO_TO_MANY("0..*"),
         ONE_TO_ZERO("1..0"),
         ONE_TO_ONE("1..1"),
+        ONE_TO_N("1..n"),
         ONE_TO_MANY("1..*"),
         MANY_TO_ZERO("*..0"),
         MANY_TO_ONE("*..1"),
         MANY_TO_MANY("*..*");
 
         // Represents the cardinality of the Multiplicity enum as a String.
-        public final String cardinality;
+        public String cardinality;
 
         Multiplicity(String cardinality) {
             this.cardinality = cardinality;
+        }
+
+        public void setCardinality(String cardinality) {
+            if (this.equals(Multiplicity.ONE_TO_N)) {
+                this.cardinality = cardinality;
+            }
         }
 
         @Override
