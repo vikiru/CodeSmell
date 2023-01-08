@@ -1,18 +1,11 @@
 package com.CodeSmell;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import javafx.scene.web.WebEngine;
-
-import com.CodeSmell.UMLClass;
-import com.CodeSmell.RenderEvent;
-import com.CodeSmell.ClassRelation;
-import com.CodeSmell.Pair;
-import com.CodeSmell.Shape;
+import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Method;
 import com.CodeSmell.CPGClass.Modifier;
-import com.CodeSmell.CPGClass.Attribute;
+import javafx.scene.web.WebEngine;
+
+import java.util.ArrayList;
 
 // todo: support this in maven run configuration
 //import com.sun.webkit.dom.JSObject;
@@ -22,7 +15,7 @@ public class WebControl implements RenderEventListener {
     private WebEngine engine;
 
     WebControl(WebEngine engine) {
-    	this.engine = engine;
+        this.engine = engine;
     }
 
 
@@ -35,9 +28,11 @@ public class WebControl implements RenderEventListener {
         ArrayList<String> modStrings = new ArrayList<String>();
 
         // add the methods
-        for (Method m: c.getMethods()) {
-            for (Modifier m2 : m.modifiers) {
-                modStrings.add(m2.name());
+        for (Method m : c.getMethods()) {
+            for (Modifier methodModifier : m.modifiers) {
+                if (methodModifier != null) {
+                    modStrings.add(methodModifier.modString);
+                }
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
             js = String.format("addField(false, %d, '%s', '%s');",
@@ -47,12 +42,14 @@ public class WebControl implements RenderEventListener {
         }
 
         // add the attributes
-        for (Attribute a: c.getAttributes()) {
-            for (Modifier m2 : a.modifiers) {
-                modStrings.add(m2.name());
+        for (Attribute a : c.getAttributes()) {
+            for (Modifier attributeModifier : a.modifiers) {
+                if (attributeModifier != null) {
+                    modStrings.add(attributeModifier.modString);
+                }
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
-            js = String.format("addField(true, %d, '%s', '%s');", 
+            js = String.format("addField(true, %d, '%s', '%s');",
                     id, a.name, modifiers);
             this.engine.executeScript(js);
             modStrings.clear();
@@ -70,8 +67,8 @@ public class WebControl implements RenderEventListener {
         ArrayList<Position> path = cr.getPath();
         // Create the path DOM object and ensure the first 
         // node of the path borders a class object
-        String js = String.format("createRelationPath(%d, %f, %f)", 
-               classId , path.get(0).x, path.get(0).y);
+        String js = String.format("createRelationPath(%d, %f, %f)",
+                classId, path.get(0).x, path.get(0).y);
         Integer pathNumber = (Integer) this.engine.executeScript(js);
         if (pathNumber < 0) {
             // the given coordinates cr.position.x, cr.position.y were
@@ -91,7 +88,7 @@ public class WebControl implements RenderEventListener {
     private void repositionClass(int id, double x, double y) {
         // reposition a box with given id 
         // todo: make considerations for dpi-scaling solution
-        String js = String.format("repositionClass(%d, %f, %f);", 
+        String js = String.format("repositionClass(%d, %f, %f);",
                 id, x, y);
         this.engine.executeScript(js);
     }
@@ -114,27 +111,27 @@ public class WebControl implements RenderEventListener {
         String getHeight = String.format("getClassHeight(%d);", id);
         String w, h;
         w = (String) this.engine.executeScript(getWidth);
-        h =  (String) this.engine.executeScript(getHeight);
-        return new Pair(Double.parseDouble(w.substring(0, w.length() - 2)), 
-                 Double.parseDouble(h.substring(0, h.length() - 2)));
+        h = (String) this.engine.executeScript(getHeight);
+        return new Pair(Double.parseDouble(w.substring(0, w.length() - 2)),
+                Double.parseDouble(h.substring(0, h.length() - 2)));
     }
 
     private void drawShape(Shape s) {
         String js;
         for (Position p : s.vertex) {
-            js = String.format("drawDot(%f, %f, \"%s\");", 
+            js = String.format("drawDot(%f, %f, \"%s\");",
                     p.x, p.y, s.colour);
             this.engine.executeScript(js);
         }
     }
 
     public void renderEventPerformed(RenderEvent e) {
-        Object source = e.source; 
-        if (( source instanceof RenderObject ) == false) {
+        Object source = e.source;
+        if ((source instanceof RenderObject) == false) {
             throw new RuntimeException("Bad RenderEvent dispatcher.");
         }
         if (e.type == RenderEvent.Type.RENDER) {
-            if ( source instanceof UMLClass) {
+            if (source instanceof UMLClass) {
                 Integer id = renderClass((UMLClass) source);
                 Pair<Double, Double> size = getClassDimensions(id);
                 Pair<Integer, Pair<Double, Double>> p = new Pair(id, size);
@@ -143,12 +140,12 @@ public class WebControl implements RenderEventListener {
             } else if (source instanceof ClassRelation) {
                 Integer id = renderPath((ClassRelation) source);
                 e.setResponse((Object) id);
-            }  else if (source instanceof Shape ) {
+            } else if (source instanceof Shape) {
                 drawShape((Shape) source);
             }
         } else if (e.type == RenderEvent.Type.REPOSITION) {
-            UMLClass c =  (UMLClass) source;
+            UMLClass c = (UMLClass) source;
             repositionClass(c.getId(), c.getPosition().x, c.getPosition().y);
         }
-    } 
+    }
 }
