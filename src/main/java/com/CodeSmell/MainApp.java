@@ -69,6 +69,14 @@ public class MainApp extends Application {
         lm.setRelationPaths(relations);
     }
 
+    private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
+        if (newState == Worker.State.SUCCEEDED) {
+            Parser p = new Parser();
+            CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+            initializeMainView(cpg);
+        }
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("jfx.fxml"));
@@ -87,11 +95,7 @@ public class MainApp extends Application {
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                Parser p = new Parser();
-                CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-                initializeMainView(cpg);
-            }
+            removeWhenParserLambdaLimitationFixed(newState);
         });
 
         // hide scroll bars from the webview. source:

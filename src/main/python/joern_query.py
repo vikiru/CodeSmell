@@ -56,10 +56,10 @@ def create_method_dict(curr_method):
             modifiers_pattern, "", curr_method["_1"]["code"]
         ).strip()
 
-        method_name_pattern = re.compile("(^[a-zA-z]*)")
+        method_name_pattern = re.compile(r"(^[a-zA-z]*)")
 
         # Get the return type of the method, if any.
-        return_type_pattern = re.compile("(^[a-zA-z]*\s)")
+        return_type_pattern = re.compile(r"(^[a-zA-z]*\s)")
         method_return_type = return_type_pattern.findall(method_with_return)
         return_type = ""
         if method_return_type:
@@ -91,7 +91,7 @@ def create_method_dict(curr_method):
                     .replace(")", "")
                 )
                 paramater_pattern = re.compile(
-                    "(\w*\[?\]?(\<\w*\,\s\w*\>)?(\<\w*\>)?)"
+                    r"(\w*\[?\]?(\<\w*\,\s\w*\>)?(\<\w*\>)?)"
                 )
                 all_parameter_matches = paramater_pattern.findall(all_parameters)
                 all_parameters = list(
@@ -150,7 +150,7 @@ def create_instruction_dict(curr_label, curr_instruction, curr_line_number):
         return
     else:
         # Get the method call in each line of code, if any.
-        method_call_pattern = re.compile("([a-zA-Z]*\()")
+        method_call_pattern = re.compile(r"([a-zA-Z]*\()")
         calls = method_call_pattern.findall(curr_instruction)
         method_call = ""
         if calls and curr_label == "CALL":
@@ -221,7 +221,7 @@ def create_class_dict(curr_class):
 
     def get_package_name(file_path):
         package_name = ""
-        path_without_separators = file_path.replace("\\", " ").split(" ")
+        path_without_separators = file_path.replace(os.sep, " ").split(" ")        
         index_of_src = path_without_separators.index("src")
         if index != -1:
             full_package_name = ".".join(
