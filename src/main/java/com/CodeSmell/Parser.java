@@ -180,6 +180,7 @@ public class Parser {
 
     /**
      * @param cpg
+     * @param iterations
      * @return
      */
     public CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg, int iterations) {
@@ -217,24 +218,62 @@ public class Parser {
     //public void assignDependencyRelationships(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass){}
 
     // has - a
-    public void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, String sourceToDestCardinality) {
-        //Method[] sourceClassMethods = sourceClass.methods;
-        //Method[] destinationClassMethods = destinationClass.methods;
+    public void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, ClassRelation.Multiplicity multiplicity) {
+        // ASSOCIATION, AGGREGATION, COMPOSITION
+        CodePropertyGraph.Relation relationToAdd;
+        ClassRelation.Type type = null;
 
-        // Get the constructors of both the source and destination classes, if present.
-        //List<Method> constructorSrc = sourceClassMethods.stream()
-        // .filter(method -> method.name.contains(sourceClass.name)).collect(Collectors.toList());
-        //List<Method> constructorDst = destinationClassMethods.stream()
-        // .filter(method -> method.name.contains(destinationClass.name)).collect(Collectors.toList());
+        // ASSOCIATION (1..1 OR 1..N)
+        if (!multiplicity.getCardinality().equals("1..*")) {
+            type = ClassRelation.Type.ASSOCIATION;
+        }
+        // AGGREGATION OR COMPOSITION (1..* OR *..*)
+        else {
+            var attributeResult = Arrays.stream(sourceClass.attributes).
+                    filter(attribute -> attribute.type.contains(destinationClass.name)).collect(Collectors.toList());
+            String attributeToFind = attributeResult.get(0).name;
+            var constructorResult = Arrays.stream(sourceClass.methods).
+                    filter(method -> method.name.equals(sourceClass.name)).collect(Collectors.toList());
+            if (!constructorResult.isEmpty()) {
+                Method constructor = constructorResult.get(0);
+                var parameterResult = Arrays.stream(constructor.parameters).
+                        filter(parameter -> parameter.name.equals(attributeToFind)).collect(Collectors.toList());
+                // Check if the destination class is within the constructor params, if so then this is aggregation.
+                if (!parameterResult.isEmpty()) {
+                    type = ClassRelation.Type.AGGREGATION;
+                }
+                // If not, check the constructor's instructions.
+                else {
+                    String stringToFind = "this." + attributeToFind;
+                    var instructionResult = Arrays.stream(constructor.instructions).
+                            filter(instruction -> instruction.label.equals("CALL")
+                                    && instruction.code.contains(stringToFind) && instruction.code.contains("= new")).collect(Collectors.toList());
+                    if (!instructionResult.isEmpty()) {
+                        type = ClassRelation.Type.COMPOSITION;
+                    } else type = ClassRelation.Type.COMPOSITION;
+                }
+            } else {
+                var methodResult = Arrays.stream(sourceClass.methods).
+                        filter(method -> method.name.contains("set") && method.methodBody.contains(destinationClass.name)).collect(Collectors.toList());
+                if (!methodResult.isEmpty()) {
+                    type = ClassRelation.Type.AGGREGATION;
+                } else {
+                    type = ClassRelation.Type.COMPOSITION;
+                }
+            }
+        }
 
-        var multiplicityResult = Arrays.stream(ClassRelation.Multiplicity.values())
-                .filter(multiplicity -> multiplicity.cardinality.equals(sourceToDestCardinality)).collect(Collectors.toList());
+        relationToAdd = new CodePropertyGraph.Relation(sourceClass, destinationClass, type, multiplicity);
 
-        ClassRelation.Multiplicity sourceToDestMultiplicity = multiplicityResult.get(0);
+        var result = cpg.getRelations().stream().
+                filter(relation -> relation.source.equals(relationToAdd.source)
+                        && relation.destination.equals(relationToAdd.destination)
+                        && relation.type.equals(relationToAdd.type)
+                        && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
+        if (result.isEmpty()) {
+            cpg.addRelation(relationToAdd);
+        }
 
-        cpg.addRelation(new CodePropertyGraph.
-                Relation(sourceClass, destinationClass,
-                ClassRelation.Type.ASSOCIATION, sourceToDestMultiplicity));
     }
 
     /**
@@ -243,9 +282,6 @@ public class Parser {
      */
     // TODO
     public void compareClassMultiplicity(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass) {
-        String destinationType = destinationClass.name;
-        Attribute[] sourceAttributes = sourceClass.attributes;
-
         // Determine the multiplicity of the source class to the dest class
         // (i.e. how many instance of the dest class are present within the source class)
         String cardinality = "";
@@ -260,12 +296,21 @@ public class Parser {
             String currentType = newTypesList.get(0);
             if (currentType.contains("<") || currentType.contains("[]")) {
                 cardinality = "1..*";
+                assignAssociationRelationshipType(cpg, sourceClass, destinationClass, ClassRelation.Multiplicity.ONE_TO_MANY);
             } else {
-                cardinality = "1..1";
+                if (types.size() > 1) {
+                    cardinality = "1.." + types.size();
+                    ClassRelation.Multiplicity multiplicity = ClassRelation.Multiplicity.ONE_TO_N;
+                    multiplicity.setCardinality(cardinality);
+                    assignAssociationRelationshipType(cpg, sourceClass, destinationClass, multiplicity);
+                } else if (types.size() == 1) {
+                    cardinality = "1..1";
+                    assignAssociationRelationshipType(cpg, sourceClass, destinationClass, ClassRelation.Multiplicity.ONE_TO_ONE);
+                }
             }
         }
         System.out.println("Source Class: " + sourceClass.name + " has a " + cardinality + " with Dest Class: " + destinationClass.name);
-        assignAssociationRelationshipType(cpg, sourceClass, destinationClass, cardinality);
+
     }
 
     /**
