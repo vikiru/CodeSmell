@@ -140,8 +140,10 @@ public class Parser {
             }
         }
         ArrayList<Method> methodCalls = new ArrayList<>();
-        indexes.stream().forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
+        Set<Integer> uniqueIndexes = new LinkedHashSet<>(indexes);
+        uniqueIndexes.stream().forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
         Method[] methodsCalled = methodCalls.toArray(new Method[methodCalls.size()]);
+        
         return new Method(methodToUpdate.parentClassName,
                 methodToUpdate.code, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
                 methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions,

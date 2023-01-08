@@ -141,7 +141,7 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final String methodBody;
 
-        // a arraylist containing all the method parameters
+        // an array containing all the method parameters
         @Expose(serialize = true, deserialize = true)
         public final Parameter[] parameters;
 
