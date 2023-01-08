@@ -61,7 +61,7 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         PROTECTED("protected"),
         @Expose(serialize = true, deserialize = true)
-        STATIC("protected"),
+        STATIC("static"),
         @Expose(serialize = true, deserialize = true)
         SYNCHRONIZED("synchronized"),
         @Expose(serialize = true, deserialize = true)
@@ -159,6 +159,7 @@ public class CPGClass {
         // a print out of the method instructions
         @Expose(serialize = true, deserialize = true)
         public final Instruction[] instructions;
+
         // return a list of methods which this calls
         @Expose(serialize = true, deserialize = true)
         private ArrayList<Method> methodCalls;
