@@ -8,7 +8,8 @@ public class ParserTest {
 
     @Test
     public void testInitializeCPG() {
-        CodePropertyGraph g = Parser.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        Parser p = new Parser();
+        CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
         assertEquals(g.getRelations().size(), g.getClasses().size(), 0);
     }
 
