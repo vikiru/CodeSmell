@@ -33,8 +33,7 @@ public class Parser {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
             cpg = gson.fromJson(reader, CodePropertyGraph.class);
             // todo comment - explaining why this needs 2 calls.
-            CodePropertyGraph tempGraph = assignProperFieldsAndMethods(cpg);
-            cpg = assignProperFieldsAndMethods(tempGraph);
+            cpg = assignProperFieldsAndMethods(cpg, 5);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -172,7 +171,7 @@ public class Parser {
      * @param cpg
      * @return
      */
-    public CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg) {
+    public CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
             ArrayList<Attribute> properAttributes = new ArrayList<>();
@@ -195,7 +194,9 @@ public class Parser {
                     properMethods.toArray(new Method[properMethods.size()]));
             graph.addClass(properClass);
         }
-        return graph;
+        if (iterations - 1 == 0) {
+            return graph;
+        } else return assignProperFieldsAndMethods(graph, iterations - 1);
     }
 
     //todo HAS A, IS A , USES A
