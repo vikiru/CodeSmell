@@ -72,7 +72,7 @@ public class MainApp extends Application {
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
         if (newState == Worker.State.SUCCEEDED) {
             Parser p = new Parser();
-            CodePropertyGraph cpg = p.initializeCPG("");
+            CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
             initializeMainView(cpg);
         }
     }
