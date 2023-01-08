@@ -128,7 +128,7 @@
             <plugin>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-maven-plugin</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.8</version>
             <executions>
                 <execution>
                     <!-- Default configuration for running -->
@@ -136,6 +136,7 @@
                     <id>default-cli</id>
                     <configuration>
                         <mainClass>com.CodeSmell.Launcher</mainClass>
+                        <commandlineArgs>--skip-joern=${skip}</commandlineArgs>
                     </configuration>
                 </execution>
             </executions>
