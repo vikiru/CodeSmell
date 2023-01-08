@@ -32,8 +32,7 @@ public class Parser {
         try {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
             cpg = gson.fromJson(reader, CodePropertyGraph.class);
-            // todo comment - explaining why this needs 2 calls.
-            cpg = assignProperFieldsAndMethods(cpg, 5);
+            cpg = assignProperFieldsAndMethods(cpg, 2);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -120,7 +119,7 @@ public class Parser {
      * @param methodToUpdate
      * @return
      */
-    public Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate) {
+    public Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
@@ -159,12 +158,24 @@ public class Parser {
         ArrayList<Method> methodCalls = new ArrayList<>();
         Set<Integer> uniqueIndexes = new LinkedHashSet<>(indexes);
         uniqueIndexes.stream().forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
-        Method[] methodsCalled = methodCalls.toArray(new Method[methodCalls.size()]);
 
-        return new Method(methodToUpdate.parentClassName,
-                methodToUpdate.code, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
-                methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions,
-                methodsCalled);
+        if (iterationNumber == 1) {
+            Method properMethod = new Method(methodToUpdate.parentClassName,
+                    methodToUpdate.code, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
+                    methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions);
+            properMethod.setMethodCalls(methodCalls);
+            return properMethod;
+        } else {
+            ArrayList<Method> fixMethodReferences = new ArrayList<>();
+            for (Method m : methodToUpdate.getMethodCalls()) {
+                var result = allMethodsInCPG.stream().
+                        filter(method -> method.name.equals(m.name) && method.parentClassName.equals(m.parentClassName))
+                        .collect(Collectors.toList());
+                fixMethodReferences.add(result.get(0));
+            }
+            methodToUpdate.setMethodCalls(fixMethodReferences);
+            return methodToUpdate;
+        }
     }
 
     /**
@@ -185,7 +196,8 @@ public class Parser {
                 }
             }
             for (Method m : cpgClass.methods) {
-                Method properMethod = updateMethodWithMethodCalls(cpg, m);
+                int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
+                Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
                 properMethods.add(properMethod);
             }
             CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.classFullName,
@@ -201,17 +213,28 @@ public class Parser {
 
     //todo HAS A, IS A , USES A
 
-    CodePropertyGraph.Relation determineAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, String sourceToDestCardinality) {
-        Method[] sourceClassMethods = sourceClass.methods;
-        Method[] destinationClassMethods = destinationClass.methods;
+    // uses - a
+    //public void assignDependencyRelationships(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass){}
 
+    // has - a
+    public void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, String sourceToDestCardinality) {
+        //Method[] sourceClassMethods = sourceClass.methods;
+        //Method[] destinationClassMethods = destinationClass.methods;
 
         // Get the constructors of both the source and destination classes, if present.
-        //List<Method> constructorSrc = sourceClassMethods.stream().filter(method -> method.name.contains(sourceClass.name)).collect(Collectors.toList());
-        //List<Method> constructorDst = destinationClassMethods.stream().filter(method -> method.name.contains(destinationClass.name)).collect(Collectors.toList());
+        //List<Method> constructorSrc = sourceClassMethods.stream()
+        // .filter(method -> method.name.contains(sourceClass.name)).collect(Collectors.toList());
+        //List<Method> constructorDst = destinationClassMethods.stream()
+        // .filter(method -> method.name.contains(destinationClass.name)).collect(Collectors.toList());
 
-        // todo fix
-        return null;
+        var multiplicityResult = Arrays.stream(ClassRelation.Multiplicity.values())
+                .filter(multiplicity -> multiplicity.cardinality.equals(sourceToDestCardinality)).collect(Collectors.toList());
+
+        ClassRelation.Multiplicity sourceToDestMultiplicity = multiplicityResult.get(0);
+
+        cpg.addRelation(new CodePropertyGraph.
+                Relation(sourceClass, destinationClass,
+                ClassRelation.Type.ASSOCIATION, sourceToDestMultiplicity));
     }
 
     /**
@@ -219,7 +242,7 @@ public class Parser {
      * @param destinationClass
      */
     // TODO
-    public String compareClassMultiplicity(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass) {
+    public void compareClassMultiplicity(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass) {
         String destinationType = destinationClass.name;
         Attribute[] sourceAttributes = sourceClass.attributes;
 
@@ -242,7 +265,7 @@ public class Parser {
             }
         }
         System.out.println("Source Class: " + sourceClass.name + " has a " + cardinality + " with Dest Class: " + destinationClass.name);
-        return cardinality;
+        assignAssociationRelationshipType(cpg, sourceClass, destinationClass, cardinality);
     }
 
     /**
@@ -260,14 +283,14 @@ public class Parser {
                 // Check for single instance of another class
                 if (classNames.contains(attributeType)) {
                     int checkIndex = classNames.indexOf(attributeType);
-                    cardinality = compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
+                    compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
                 }
                 // Check for presence of arrays
                 else if (attributeType.contains("[]")) {
                     attributeType = attributeType.replace("[]", "");
                     int checkIndex = classNames.indexOf(attributeType);
                     if (checkIndex != -1 && !attributeType.equals(cpgClass.name)) {
-                        cardinality = compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
+                        compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
                     }
                 }
                 // Check for presence of Java Collections (i.e. ArrayList, Set, HashMap, etc)
@@ -291,7 +314,7 @@ public class Parser {
                             compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(firstTypeInd));
                             compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(secondTypeInd));
                         } else {
-                            cardinality = compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(firstTypeInd));
+                            compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(firstTypeInd));
                         }
                     }
                     // Other cases where a comma is not present within a Java collection such as ArrayList
@@ -309,7 +332,7 @@ public class Parser {
                         // If checkIndex is not -1, then the class was a valid class in the source code.
                         // Compare the multiplicities between source (cpgClass) and dest class (the class which the type of the attribute belongs to)
                         if (checkIndex != -1) {
-                            cardinality = compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
+                            compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
                         }
                     }
                 }
@@ -325,8 +348,8 @@ public class Parser {
     }
 
     private class JavaMethod extends Method {
-        JavaMethod(String parentClassName, String code, String name, CPGClass.Modifier[] modifiers, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions, Method[] methodCalls) {
-            super(parentClassName, code, name, modifiers, returnType, methodBody, parameters, instructions, methodCalls);
+        JavaMethod(String parentClassName, String code, String name, CPGClass.Modifier[] modifiers, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
+            super(parentClassName, code, name, modifiers, returnType, methodBody, parameters, instructions);
         }
     }
 }
