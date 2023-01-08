@@ -2,6 +2,7 @@ package com.CodeSmell;
 
 import com.google.gson.annotations.Expose;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -158,14 +159,12 @@ public class CPGClass {
         // a print out of the method instructions
         @Expose(serialize = true, deserialize = true)
         public final Instruction[] instructions;
-
         // return a list of methods which this calls
         @Expose(serialize = true, deserialize = true)
-        public final Method[] methodCalls;
+        private ArrayList<Method> methodCalls;
 
         protected Method(String parentClassName, String code, String name, Modifier[] modifiers,
-                         String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions,
-                         Method[] methodCalls) {
+                         String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
             this.code = code;
@@ -175,6 +174,14 @@ public class CPGClass {
             this.methodBody = methodBody;
             this.parameters = parameters;
             this.instructions = instructions;
+            this.methodCalls = new ArrayList<>();
+        }
+
+        public ArrayList<Method> getMethodCalls() {
+            return new ArrayList<>(methodCalls);
+        }
+
+        protected void setMethodCalls(ArrayList<Method> methodCalls) {
             this.methodCalls = methodCalls;
         }
 
