@@ -89,7 +89,7 @@ public class MainApp extends Application {
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
             if (newState == Worker.State.SUCCEEDED) {
                 Parser p = new Parser();
-                CodePropertyGraph cpg = p.buildCPG("");
+                CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
                 initializeMainView(cpg);
             }
         });
