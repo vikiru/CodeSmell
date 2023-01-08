@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import re
 import time
 from pathlib import Path
@@ -281,11 +282,12 @@ if __name__ == "__main__":
     # For testing purposes. Full file paths are required for joern.
     # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
     our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
-    index = our_project_dir.find(":")
-    win_drive = our_project_dir[0: index + 1]
-    our_project_dir = our_project_dir.replace(win_drive, win_drive.upper()).replace(
-        "\\", "//"
-    )
+    if "Windows" in platform.platform():
+        index = our_project_dir.find(":")
+        win_drive = our_project_dir[0: index + 1]
+        our_project_dir = our_project_dir.replace(win_drive, win_drive.upper()).replace(
+            "\\", "//"
+        )
     project_name = "analyzedProject"
     project_dir = our_project_dir  # Change this as needed for testing purposes. Remember to replace "\\" with "//".
 

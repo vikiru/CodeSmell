@@ -53,16 +53,26 @@ public class CPGClass {
     }
 
     public enum Modifier {
+        @Expose(serialize = true, deserialize = true)
         PUBLIC("public"),
+        @Expose(serialize = true, deserialize = true)
         PRIVATE("private"),
+        @Expose(serialize = true, deserialize = true)
         PROTECTED("protected"),
+        @Expose(serialize = true, deserialize = true)
         STATIC("protected"),
+        @Expose(serialize = true, deserialize = true)
         SYNCHRONIZED("synchronized"),
+        @Expose(serialize = true, deserialize = true)
         VOLATILE("volatile"),
+        @Expose(serialize = true, deserialize = true)
         ABSTRACT("abstract"),
+        @Expose(serialize = true, deserialize = true)
         NATIVE("native"),
+        @Expose(serialize = true, deserialize = true)
         FINAL("final");
 
+        @Expose(serialize = true, deserialize = true)
         public final String modString;
 
         Modifier(String modString) {
@@ -141,7 +151,7 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final String methodBody;
 
-        // a arraylist containing all the method parameters
+        // an array containing all the method parameters
         @Expose(serialize = true, deserialize = true)
         public final Parameter[] parameters;
 
