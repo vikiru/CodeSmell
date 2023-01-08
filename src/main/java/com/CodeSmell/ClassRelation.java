@@ -63,10 +63,14 @@ public class ClassRelation extends RenderObject {
         MANY_TO_MANY("*..*");
 
         // Represents the cardinality of the Multiplicity enum as a String.
-        public String cardinality;
+        private String cardinality;
 
         Multiplicity(String cardinality) {
             this.cardinality = cardinality;
+        }
+
+        public String getCardinality() {
+            return cardinality;
         }
 
         public void setCardinality(String cardinality) {
