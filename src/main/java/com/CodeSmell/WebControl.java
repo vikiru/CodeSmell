@@ -30,9 +30,7 @@ public class WebControl implements RenderEventListener {
         // add the methods
         for (Method m : c.getMethods()) {
             for (Modifier methodModifier : m.modifiers) {
-                if (methodModifier != null) {
-                    modStrings.add(methodModifier.modString);
-                }
+                modStrings.add(methodModifier.modString);
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
             js = String.format("addField(false, %d, '%s', '%s');",
@@ -44,9 +42,7 @@ public class WebControl implements RenderEventListener {
         // add the attributes
         for (Attribute a : c.getAttributes()) {
             for (Modifier attributeModifier : a.modifiers) {
-                if (attributeModifier != null) {
-                    modStrings.add(attributeModifier.modString);
-                }
+                modStrings.add(attributeModifier.modString);
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
             js = String.format("addField(true, %d, '%s', '%s');",
