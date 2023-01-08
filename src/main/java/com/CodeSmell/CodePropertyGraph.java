@@ -8,8 +8,9 @@ import java.util.ArrayList;
 
 public class CodePropertyGraph {
 
-    @Expose(deserialize = false)
+    @Expose(serialize = true, deserialize = false)
     private ArrayList<Relation> relations;
+
     @Expose(serialize = true, deserialize = true)
     private ArrayList<CPGClass> classes;
 
@@ -53,6 +54,16 @@ public class CodePropertyGraph {
             this.destination = destination;
             this.type = type;
             this.multiplicity = multiplicity;
+        }
+
+        @Override
+        public String toString() {
+            return "Relation{" +
+                    "source=" + source +
+                    ", destination=" + destination +
+                    ", type=" + type +
+                    ", multiplicity=" + multiplicity +
+                    '}';
         }
     }
 }
