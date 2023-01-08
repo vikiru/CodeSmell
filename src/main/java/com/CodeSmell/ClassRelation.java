@@ -51,6 +51,7 @@ public class ClassRelation extends RenderObject {
     }
 
     public enum Multiplicity {
+        NONE(""),
         ZERO_TO_ONE("0..1"),
         ZERO_TO_MANY("0..*"),
         ONE_TO_ZERO("1..0"),
