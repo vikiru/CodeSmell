@@ -17,9 +17,46 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-        p.assignAllMultiplicities(g);
+
+        // all of these will be called after initializeCPG(). Only here rn for testing purposes.
+        p.assignAssociationRelationships(g);
+        //p.assignAggregationRelationships(g);
+        //p.assignCompositionRelationships(g);
         p.assignDependencyRelationships(g);
-        p.assignInheritanceRelationships(g);
+        p.assignRealizationRelationships(g);
+        // p.assignInheritanceRelationships(g);
+    }
+
+
+    private ClassRelation.Multiplicity obtainMultiplicity(Attribute attributeToCompare) {
+        if (attributeToCompare.type.contains("[]") || attributeToCompare.type.contains("<")) {
+            return ClassRelation.Multiplicity.ONE_TO_MANY;
+        } else {
+            if (attributeToCompare.type.contains())
+        }
+    }
+
+    private String getProperTypeName(String typeName) {
+        String typeToReturn = typeName;
+        if (typeName.contains("[]")) {
+            typeToReturn = typeName.replace("[]", "");
+        } else if (typeName.contains("<")) {
+            int startingIndex = typeName.indexOf("<");
+            int endingIndex = typeName.indexOf(">");
+            typeToReturn = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", "").replace(">", "");
+        }
+        return typeToReturn;
+    }
+
+    private void assignAssociationRelationships(CodePropertyGraph cpg) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            for (Attribute classAttribute : cpgClass.attributes) {
+                String attributeToCompare = getProperTypeName(classAttribute.type);
+                if (cpg.getClasses().contains(attributeToCompare)) {
+                    ClassRelation.Multiplicity = obtainMultiplicity(classAttribute);
+                }
+            }
+        }
     }
 
     /**
@@ -44,10 +81,15 @@ public class Parser {
     /**
      * Given a CPGClass and an Attribute belonging to that class, assign the proper type to the Attribute.
      * This is for cases where an Attribute may be a part of Java Collections (i.e. HashMap, ArrayList, Set, etc).
+     *
+     * <p>
      * <p>
      * Performs 3 checks to determine the attribute's type:
+     * <p>
      * 1) Check the constructor parameters
+     * <p>
      * 2) Check the instructions of the constructor
+     * <p>
      * 3) Check the instructions of all other methods of that class
      *
      * @param cpgClass  The parent CPGClass containing the Attribute
@@ -124,8 +166,8 @@ public class Parser {
     private Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
-        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
-        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+        cpg.getClasses().forEach(cpgClass -> allMethodsInCPG.addAll(Arrays.asList(cpgClass.methods)));
+        cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
 
         // Get the indexes of the names of each Method called by methodToUpdate
         ArrayList<Integer> indexes = new ArrayList<>();
@@ -159,7 +201,7 @@ public class Parser {
         }
         ArrayList<Method> methodCalls = new ArrayList<>();
         Set<Integer> uniqueIndexes = new LinkedHashSet<>(indexes);
-        uniqueIndexes.stream().forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
+        uniqueIndexes.forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
 
         if (iterationNumber == 1) {
             Method properMethod = new Method(methodToUpdate.parentClassName,
@@ -214,11 +256,14 @@ public class Parser {
         } else return assignProperFieldsAndMethods(graph, iterations - 1);
     }
 
-    private void assignInheritanceRelationships(CodePropertyGraph cpg) {
-        ArrayList<String> allClassNames = new ArrayList<String>();
+    /**
+     * @param cpg
+     */
+    private void assignRealizationRelationships(CodePropertyGraph cpg) {
+        ArrayList<String> allClassNames = new ArrayList<>();
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
-        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
+        cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
         cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
 
@@ -248,12 +293,7 @@ public class Parser {
                                 ClassRelation.Type.REALIZATION, ClassRelation.Multiplicity.NONE);
                     }
                     CodePropertyGraph.Relation finalRelationToAdd = relationToAdd;
-                    var result = cpg.getRelations().stream().
-                            filter(relation -> relation.source.equals(finalRelationToAdd.source)
-                                    && relation.destination.equals(finalRelationToAdd.destination)
-                                    && relation.type.equals(finalRelationToAdd.type)
-                                    && relation.multiplicity.equals(finalRelationToAdd.multiplicity)).collect(Collectors.toList());
-                    if (result.isEmpty()) {
+                    if (!checkExistingRelation(cpg, relationToAdd)) {
                         cpg.addRelation(relationToAdd);
                     }
                 }
@@ -266,7 +306,6 @@ public class Parser {
      * @param cpg
      */
     private void assignDependencyRelationships(CodePropertyGraph cpg) {
-        //DEPENDENCY
         ArrayList<String> allClassNames = new ArrayList<String>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
@@ -291,13 +330,7 @@ public class Parser {
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
                                     Relation(cpgClass, destinationClass,
                                     ClassRelation.Type.DEPENDENCY, ClassRelation.Multiplicity.NONE);
-
-                            var result = cpg.getRelations().stream().
-                                    filter(relation -> relation.source.equals(relationToAdd.source)
-                                            && relation.destination.equals(relationToAdd.destination)
-                                            && relation.type.equals(relationToAdd.type)
-                                            && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
-                            if (result.isEmpty()) {
+                            if (!checkExistingRelation(cpg, relationToAdd)) {
                                 cpg.addRelation(relationToAdd);
                             }
                         }
@@ -310,186 +343,19 @@ public class Parser {
 
     /**
      * @param cpg
-     * @param sourceClass
-     * @param destinationClass
-     * @param multiplicity
+     * @param relationToAdd
+     * @return
      */
-    private void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, ClassRelation.Multiplicity multiplicity) {
-        // ASSOCIATION, AGGREGATION, COMPOSITION
-        CodePropertyGraph.Relation relationToAdd;
-        ClassRelation.Type type;
-
-        // ASSOCIATION (1..1 OR 1..N)
-        if (!multiplicity.getCardinality().equals("1..*") && !multiplicity.getCardinality().equals("*..*")) {
-            type = ClassRelation.Type.ASSOCIATION;
-        }
-        // AGGREGATION OR COMPOSITION (1..* OR *..*)
-        else {
-            var attributeResult = Arrays.stream(sourceClass.attributes).
-                    filter(attribute -> attribute.type.contains(destinationClass.name)).collect(Collectors.toList());
-            String attributeToFind = attributeResult.get(0).name;
-            var constructorResult = Arrays.stream(sourceClass.methods).
-                    filter(method -> method.name.equals(sourceClass.name)).collect(Collectors.toList());
-            // Check for the prescence of a constructor
-            if (!constructorResult.isEmpty()) {
-                Method constructor = constructorResult.get(0);
-                var parameterResult = Arrays.stream(constructor.parameters).
-                        filter(parameter -> parameter.name.equals(attributeToFind)).collect(Collectors.toList());
-                // Check if the destination class is within the constructor params, if so then this is aggregation.
-                if (!parameterResult.isEmpty()) {
-                    type = ClassRelation.Type.AGGREGATION;
-                }
-                // If not, check the constructor's instructions.
-                else {
-                    String stringToFind = "this." + attributeToFind;
-                    var instructionResult = Arrays.stream(constructor.instructions).
-                            filter(instruction -> instruction.label.equals("CALL")
-                                    && instruction.code.contains(stringToFind) && instruction.code.contains("= new")).collect(Collectors.toList());
-                    // Check if the field is declared within the constructor, if yes - composition and
-                    // if no - that means it is declared elsewhere
-                    // Since it was not passed within the constructor, it is not aggregation. Therefore, composition is only option.
-                    if (!instructionResult.isEmpty()) {
-                        type = ClassRelation.Type.COMPOSITION;
-                    } else type = ClassRelation.Type.COMPOSITION;
-                }
-            }
-            // Constructor does not exist
-            else {
-                var methodResult = Arrays.stream(sourceClass.methods).
-                        filter(method -> method.name.contains("set") && method.methodBody.contains(destinationClass.name)).collect(Collectors.toList());
-                // Check for the prescence of a setter, if it exists then this is an aggregation
-                if (!methodResult.isEmpty()) {
-                    type = ClassRelation.Type.AGGREGATION;
-                }
-                // If setter does not exist, this means relation is a composition
-                else {
-                    type = ClassRelation.Type.COMPOSITION;
-                }
-            }
-        }
-
-        // Finally, create the relation and determine if it is possible to add it (i.e. the relation does not already exist)
-        relationToAdd = new CodePropertyGraph.Relation(sourceClass, destinationClass, type, multiplicity);
-
+    private boolean checkExistingRelation(CodePropertyGraph cpg, CodePropertyGraph.Relation relationToAdd) {
         var result = cpg.getRelations().stream().
                 filter(relation -> relation.source.equals(relationToAdd.source)
                         && relation.destination.equals(relationToAdd.destination)
                         && relation.type.equals(relationToAdd.type)
                         && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
-        if (result.isEmpty()) {
-            cpg.addRelation(relationToAdd);
-        }
-
+        if (!result.isEmpty()) {
+            return false;
+        } else return true;
     }
-
-    /**
-     * @param sourceClass
-     * @param destinationClass
-     */
-    // TODO
-    public void compareClassMultiplicity(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass) {
-        // Determine the multiplicity of the source class to the dest class
-        // (i.e. how many instance of the dest class are present within the source class)
-        String cardinality = "";
-        ArrayList<String> types = new ArrayList<>();
-        Arrays.stream(sourceClass.attributes)
-                .filter(attributes -> attributes.type.contains(destinationClass.name)).
-                collect(Collectors.toList()).
-                stream().forEach(attribute -> types.add(attribute.type));
-        Set<String> uniqueTypes = new HashSet<>(types);
-        if (!uniqueTypes.isEmpty()) {
-            ArrayList<String> newTypesList = new ArrayList<>(uniqueTypes);
-            String currentType = newTypesList.get(0);
-            if (currentType.contains("<") || currentType.contains("[]")) {
-                cardinality = "1..*";
-                assignAssociationRelationshipType(cpg, sourceClass, destinationClass, ClassRelation.Multiplicity.ONE_TO_MANY);
-            } else {
-                if (types.size() > 1) {
-                    cardinality = "1.." + types.size();
-                    ClassRelation.Multiplicity multiplicity = ClassRelation.Multiplicity.ONE_TO_N;
-                    multiplicity.setCardinality(cardinality);
-                    assignAssociationRelationshipType(cpg, sourceClass, destinationClass, multiplicity);
-                } else if (types.size() == 1) {
-                    cardinality = "1..1";
-                    assignAssociationRelationshipType(cpg, sourceClass, destinationClass, ClassRelation.Multiplicity.ONE_TO_ONE);
-                }
-            }
-        }
-        System.out.println("Source Class: " + sourceClass.name + " has a " + cardinality + " with Dest Class: " + destinationClass.name);
-    }
-
-    /**
-     * @param cpg
-     */
-    public void assignAllMultiplicities(CodePropertyGraph cpg) {
-        ArrayList<String> classNames = new ArrayList<>();
-        cpg.getClasses().stream().forEach(cpgClass -> classNames.add(cpgClass.name));
-        // Iterate through each cpgClass within cpg and determine the multiplicities between classes.
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            Attribute[] attributes = cpgClass.attributes;
-            for (Attribute a : attributes) {
-                String attributeType = a.type;
-                String cardinality = "";
-                // Check for single instance of another class
-                if (classNames.contains(attributeType)) {
-                    int checkIndex = classNames.indexOf(attributeType);
-                    compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
-                }
-                // Check for presence of arrays
-                else if (attributeType.contains("[]")) {
-                    attributeType = attributeType.replace("[]", "");
-                    int checkIndex = classNames.indexOf(attributeType);
-                    if (checkIndex != -1 && !attributeType.equals(cpgClass.name)) {
-                        compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
-                    }
-                }
-                // Check for presence of Java Collections (i.e. ArrayList, Set, HashMap, etc)
-                else if (attributeType.contains("<")) {
-                    // Extract the type enclosed within the "< >"
-                    int startIndex = attributeType.indexOf("<");
-                    int endIndex = attributeType.indexOf(">");
-                    attributeType = attributeType.substring(startIndex, endIndex + 1).replace("<", "").replace(">", "");
-                    // Check for presence of a comma, this is useful for cases where a field is a HashMap for example.
-                    if (attributeType.contains(",")) {
-                        String[] types = attributeType.split(",");
-                        String typeOne = types[0].trim();
-                        String typeTwo = types[1].trim();
-                        int firstTypeInd = classNames.indexOf(typeOne);
-                        int secondTypeInd = classNames.indexOf(typeTwo);
-                        // Compare the multiplicities between source (cpgClass) and
-                        // dest class (the class which the type of the attribute belongs to) for both types
-                        // If typeOne and typeTwo are the same (i.e. Attribute, Attribute) then only compare one instance of it
-                        // Else compare both types
-                        if (!typeOne.equals(typeTwo)) {
-                            compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(firstTypeInd));
-                            compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(secondTypeInd));
-                        } else {
-                            compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(firstTypeInd));
-                        }
-                    }
-                    // Other cases where a comma is not present within a Java collection such as ArrayList
-                    else {
-                        // Find the class which the type of the attribute belongs to.
-                        int checkIndex = -1;
-                        for (String name : classNames) {
-                            if (name.contains(attributeType)) {
-                                if (attributeType.equals(name)) {
-                                    checkIndex = classNames.indexOf(name);
-                                    break;
-                                }
-                            }
-                        }
-                        // If checkIndex is not -1, then the class was a valid class in the source code.
-                        // Compare the multiplicities between source (cpgClass) and dest class (the class which the type of the attribute belongs to)
-                        if (checkIndex != -1) {
-                            compareClassMultiplicity(cpg, cpgClass, cpg.getClasses().get(checkIndex));
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     private class JavaAttribute extends Attribute {
         JavaAttribute(String name, String packageName, String type, CPGClass.Modifier[] m) {
