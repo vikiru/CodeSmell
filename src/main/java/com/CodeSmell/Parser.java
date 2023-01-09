@@ -19,6 +19,7 @@ public class Parser {
         CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
         p.assignAllMultiplicities(g);
         p.assignDependencyRelationships(g);
+        p.assignInheritanceRelationships(g);
     }
 
     /**
@@ -213,17 +214,65 @@ public class Parser {
         } else return assignProperFieldsAndMethods(graph, iterations - 1);
     }
 
-    //todo HAS A, IS A , USES A
+    private void assignInheritanceRelationships(CodePropertyGraph cpg) {
+        ArrayList<String> allClassNames = new ArrayList<String>();
+        ArrayList<Method> allMethodsInCPG = new ArrayList<>();
+        ArrayList<String> allMethodNames = new ArrayList<>();
+        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
+        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+        cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
 
-    // uses - a
+        var interfacesResult = cpg.getClasses().stream().
+                filter(cpgClass -> cpgClass.type.equals("interface")).collect(Collectors.toList());
+
+        CodePropertyGraph.Relation relationToAdd;
+        if (!interfacesResult.isEmpty()) {
+            for (CPGClass interfaceClass : interfacesResult) {
+                System.out.println(interfaceClass.name);
+                for (Method method : interfaceClass.methods) {
+                    int firstIndex = allMethodNames.indexOf(method.name);
+                    int lastIndex = allMethodNames.lastIndexOf(method.name);
+                    Method firstMethod = allMethodsInCPG.get(firstIndex);
+                    Method secondMethod = allMethodsInCPG.get(lastIndex);
+                    int parentFirst = allClassNames.indexOf(firstMethod.parentClassName);
+                    int parentSecond = allClassNames.indexOf(secondMethod.parentClassName);
+                    CPGClass parentFirstClass = cpg.getClasses().get(parentFirst);
+                    CPGClass parentSecondClass = cpg.getClasses().get(parentSecond);
+                    if (!parentFirstClass.type.equals("interface")) {
+                        relationToAdd = new CodePropertyGraph.
+                                Relation(parentFirstClass, parentSecondClass,
+                                ClassRelation.Type.REALIZATION, ClassRelation.Multiplicity.NONE);
+                    } else {
+                        relationToAdd = new CodePropertyGraph.
+                                Relation(parentSecondClass, parentFirstClass,
+                                ClassRelation.Type.REALIZATION, ClassRelation.Multiplicity.NONE);
+                    }
+                    CodePropertyGraph.Relation finalRelationToAdd = relationToAdd;
+                    var result = cpg.getRelations().stream().
+                            filter(relation -> relation.source.equals(finalRelationToAdd.source)
+                                    && relation.destination.equals(finalRelationToAdd.destination)
+                                    && relation.type.equals(finalRelationToAdd.type)
+                                    && relation.multiplicity.equals(finalRelationToAdd.multiplicity)).collect(Collectors.toList());
+                    if (result.isEmpty()) {
+                        cpg.addRelation(relationToAdd);
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * @param cpg
+     */
     private void assignDependencyRelationships(CodePropertyGraph cpg) {
         //DEPENDENCY
         ArrayList<String> allClassNames = new ArrayList<String>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
-        for (CPGClass c : cpg.getClasses()) {
-            for (Method m : c.methods) {
-                for (Method.Parameter p : m.parameters) {
-                    String typeProperName = p.type;
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            for (Method method : cpgClass.methods) {
+                for (Method.Parameter parameter : method.parameters) {
+                    String typeProperName = parameter.type;
                     if (typeProperName.contains("[]")) {
                         typeProperName.replace("[]", "");
                     } else if (typeProperName.contains("<")) {
@@ -234,13 +283,13 @@ public class Parser {
                     if (allClassNames.contains(typeProperName)) {
                         int classIndex = allClassNames.indexOf(typeProperName);
                         CPGClass destinationClass = cpg.getClasses().get(classIndex);
-                        var checkAttributes = Arrays.stream(c.attributes).
+                        var checkAttributes = Arrays.stream(cpgClass.attributes).
                                 filter(attribute -> attribute.type.contains(destinationClass.name)).collect(Collectors.toList());
                         // Only add the dependency relationship if the destination class is not present within the source class's
                         // attributes.
                         if (checkAttributes.isEmpty()) {
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
-                                    Relation(c, destinationClass,
+                                    Relation(cpgClass, destinationClass,
                                     ClassRelation.Type.DEPENDENCY, ClassRelation.Multiplicity.NONE);
 
                             var result = cpg.getRelations().stream().
@@ -259,7 +308,12 @@ public class Parser {
         }
     }
 
-    // has - a
+    /**
+     * @param cpg
+     * @param sourceClass
+     * @param destinationClass
+     * @param multiplicity
+     */
     private void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, ClassRelation.Multiplicity multiplicity) {
         // ASSOCIATION, AGGREGATION, COMPOSITION
         CodePropertyGraph.Relation relationToAdd;
@@ -291,8 +345,9 @@ public class Parser {
                     var instructionResult = Arrays.stream(constructor.instructions).
                             filter(instruction -> instruction.label.equals("CALL")
                                     && instruction.code.contains(stringToFind) && instruction.code.contains("= new")).collect(Collectors.toList());
-                    // Check if the field is declared within the constuctor, if yes - composition and if no - that means it is declared elsewhere
-                    // Since it was not passed within the constructor, it is not aggregation. Therefore composition is only option.
+                    // Check if the field is declared within the constructor, if yes - composition and
+                    // if no - that means it is declared elsewhere
+                    // Since it was not passed within the constructor, it is not aggregation. Therefore, composition is only option.
                     if (!instructionResult.isEmpty()) {
                         type = ClassRelation.Type.COMPOSITION;
                     } else type = ClassRelation.Type.COMPOSITION;
