@@ -90,29 +90,18 @@ def create_method_dict(curr_method):
                     .replace("(", "")
                     .replace(")", "")
                 )
-                paramater_pattern = re.compile(
-                    r"(\w*\[?\]?(\<\w*\,\s\w*\>)?(\<\w*\>)?)"
-                )
-                all_parameter_matches = paramater_pattern.findall(all_parameters)
-                all_parameters = list(
-                    filter(None, [t[0] for t in all_parameter_matches])
-                )
-            if not all_parameters:
-                return param_list
-            else:
-                # Append all parameters to the param_list
-                count = 0
-                for i in range(0, len(all_parameters)):
-                    if (i + 1 + count) < len(all_parameters):
-                        param_list.append(
-                            dict(
-                                name=all_parameters[i + 1 + count],
-                                type=all_parameters[i + count],
-                            )
-                        )
-                        count += 1
-                    else:
-                        break
+                split_params = all_parameters.split()
+                maxCalls = len(split_params) / 2
+
+                def map_parameters(split_params, start, iterations):
+                    type = split_params[start].strip()
+                    name = split_params[start + 1].strip()
+                    param_list.append(dict(name=name, type=type))
+                    if iterations - 1 != 0:
+                        map_parameters(split_params, start + 2, iterations - 1)
+
+                if split_params:
+                    map_parameters(split_params, 0, maxCalls)
             return param_list
 
         curr_method_dict = {
@@ -221,7 +210,7 @@ def create_class_dict(curr_class):
 
     def get_package_name(file_path):
         package_name = ""
-        path_without_separators = file_path.replace(os.sep, " ").split(" ")        
+        path_without_separators = file_path.replace(os.sep, " ").split(" ")
         index_of_src = path_without_separators.index("src")
         if index != -1:
             full_package_name = ".".join(
