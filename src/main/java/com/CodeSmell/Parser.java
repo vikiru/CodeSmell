@@ -18,6 +18,7 @@ public class Parser {
         Parser p = new Parser();
         CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
         p.assignAllMultiplicities(g);
+        p.assignDependencyRelationships(g);
     }
 
     /**
@@ -52,7 +53,7 @@ public class Parser {
      * @param attribute The attribute that is missing a proper type (i.e. a type given as "ArrayList")
      * @return A String containing the proper Attribute type
      */
-    public String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
+    private String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
         String className = cpgClass.name;
         Method[] classMethods = cpgClass.methods;
         String stringToFind = "this." + attribute.name;
@@ -119,7 +120,7 @@ public class Parser {
      * @param methodToUpdate
      * @return
      */
-    public Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
+    private Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
@@ -183,7 +184,7 @@ public class Parser {
      * @param iterations
      * @return
      */
-    public CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg, int iterations) {
+    private CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
             ArrayList<Attribute> properAttributes = new ArrayList<>();
@@ -215,16 +216,57 @@ public class Parser {
     //todo HAS A, IS A , USES A
 
     // uses - a
-    //public void assignDependencyRelationships(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass){}
+    private void assignDependencyRelationships(CodePropertyGraph cpg) {
+        //DEPENDENCY
+        ArrayList<String> allClassNames = new ArrayList<String>();
+        cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
+        for (CPGClass c : cpg.getClasses()) {
+            for (Method m : c.methods) {
+                for (Method.Parameter p : m.parameters) {
+                    String typeProperName = p.type;
+                    if (typeProperName.contains("[]")) {
+                        typeProperName.replace("[]", "");
+                    } else if (typeProperName.contains("<")) {
+                        int startIndex = typeProperName.indexOf("<");
+                        int endIndex = typeProperName.indexOf(">");
+                        typeProperName = typeProperName.substring(startIndex, endIndex + 1);
+                    }
+                    if (allClassNames.contains(typeProperName)) {
+                        int classIndex = allClassNames.indexOf(typeProperName);
+                        CPGClass destinationClass = cpg.getClasses().get(classIndex);
+                        var checkAttributes = Arrays.stream(c.attributes).
+                                filter(attribute -> attribute.type.contains(destinationClass.name)).collect(Collectors.toList());
+                        // Only add the dependency relationship if the destination class is not present within the source class's
+                        // attributes.
+                        if (checkAttributes.isEmpty()) {
+                            CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
+                                    Relation(c, destinationClass,
+                                    ClassRelation.Type.DEPENDENCY, ClassRelation.Multiplicity.NONE);
+
+                            var result = cpg.getRelations().stream().
+                                    filter(relation -> relation.source.equals(relationToAdd.source)
+                                            && relation.destination.equals(relationToAdd.destination)
+                                            && relation.type.equals(relationToAdd.type)
+                                            && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
+                            if (result.isEmpty()) {
+                                cpg.addRelation(relationToAdd);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+    }
 
     // has - a
-    public void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, ClassRelation.Multiplicity multiplicity) {
+    private void assignAssociationRelationshipType(CodePropertyGraph cpg, CPGClass sourceClass, CPGClass destinationClass, ClassRelation.Multiplicity multiplicity) {
         // ASSOCIATION, AGGREGATION, COMPOSITION
         CodePropertyGraph.Relation relationToAdd;
-        ClassRelation.Type type = null;
+        ClassRelation.Type type;
 
         // ASSOCIATION (1..1 OR 1..N)
-        if (!multiplicity.getCardinality().equals("1..*")) {
+        if (!multiplicity.getCardinality().equals("1..*") && !multiplicity.getCardinality().equals("*..*")) {
             type = ClassRelation.Type.ASSOCIATION;
         }
         // AGGREGATION OR COMPOSITION (1..* OR *..*)
@@ -234,6 +276,7 @@ public class Parser {
             String attributeToFind = attributeResult.get(0).name;
             var constructorResult = Arrays.stream(sourceClass.methods).
                     filter(method -> method.name.equals(sourceClass.name)).collect(Collectors.toList());
+            // Check for the prescence of a constructor
             if (!constructorResult.isEmpty()) {
                 Method constructor = constructorResult.get(0);
                 var parameterResult = Arrays.stream(constructor.parameters).
@@ -248,21 +291,29 @@ public class Parser {
                     var instructionResult = Arrays.stream(constructor.instructions).
                             filter(instruction -> instruction.label.equals("CALL")
                                     && instruction.code.contains(stringToFind) && instruction.code.contains("= new")).collect(Collectors.toList());
+                    // Check if the field is declared within the constuctor, if yes - composition and if no - that means it is declared elsewhere
+                    // Since it was not passed within the constructor, it is not aggregation. Therefore composition is only option.
                     if (!instructionResult.isEmpty()) {
                         type = ClassRelation.Type.COMPOSITION;
                     } else type = ClassRelation.Type.COMPOSITION;
                 }
-            } else {
+            }
+            // Constructor does not exist
+            else {
                 var methodResult = Arrays.stream(sourceClass.methods).
                         filter(method -> method.name.contains("set") && method.methodBody.contains(destinationClass.name)).collect(Collectors.toList());
+                // Check for the prescence of a setter, if it exists then this is an aggregation
                 if (!methodResult.isEmpty()) {
                     type = ClassRelation.Type.AGGREGATION;
-                } else {
+                }
+                // If setter does not exist, this means relation is a composition
+                else {
                     type = ClassRelation.Type.COMPOSITION;
                 }
             }
         }
 
+        // Finally, create the relation and determine if it is possible to add it (i.e. the relation does not already exist)
         relationToAdd = new CodePropertyGraph.Relation(sourceClass, destinationClass, type, multiplicity);
 
         var result = cpg.getRelations().stream().
@@ -310,7 +361,6 @@ public class Parser {
             }
         }
         System.out.println("Source Class: " + sourceClass.name + " has a " + cardinality + " with Dest Class: " + destinationClass.name);
-
     }
 
     /**
