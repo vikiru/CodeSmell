@@ -5,13 +5,13 @@ import java.util.ArrayList;
 public class ClassRelation extends RenderObject {
 
     public final Type type;
-    public final Multiplicity multiplicity;
+    public final String multiplicity;
     public final UMLClass source;
     public final UMLClass target;
     private int pathContainerId;
     private ArrayList<Position> path;
 
-    public ClassRelation(UMLClass source, UMLClass target, Type type, Multiplicity multiplicity) {
+    public ClassRelation(UMLClass source, UMLClass target, Type type, String multiplicity) {
         this.type = type;
         this.multiplicity = multiplicity;
         this.source = source;
@@ -29,16 +29,10 @@ public class ClassRelation extends RenderObject {
         pathContainerId = (Integer) re.getResponse();
     }
 
-    public Multiplicity reverseMultiplicity() {
+    public String reverseMultiplicity() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.multiplicity.cardinality).reverse();
-        Multiplicity reverseMultiplicity = null;
-        for (Multiplicity m : Multiplicity.values()) {
-            if (m.cardinality.equals(String.valueOf(sb))) {
-                reverseMultiplicity = m;
-            }
-        }
-        return reverseMultiplicity;
+        sb.append(this.multiplicity).reverse();
+        return sb.toString();
     }
 
     public enum Type {
@@ -48,40 +42,5 @@ public class ClassRelation extends RenderObject {
         DEPENDENCY,
         INHERITANCE,
         REALIZATION,
-    }
-
-    public enum Multiplicity {
-        NONE(""),
-        ZERO_TO_ONE("0..1"),
-        ZERO_TO_MANY("0..*"),
-        ONE_TO_ZERO("1..0"),
-        ONE_TO_ONE("1..1"),
-        ONE_TO_N("1..n"),
-        ONE_TO_MANY("1..*"),
-        MANY_TO_ZERO("*..0"),
-        MANY_TO_ONE("*..1"),
-        MANY_TO_MANY("*..*");
-
-        // Represents the cardinality of the Multiplicity enum as a String.
-        private String cardinality;
-
-        Multiplicity(String cardinality) {
-            this.cardinality = cardinality;
-        }
-
-        public String getCardinality() {
-            return cardinality;
-        }
-
-        public void setCardinality(String cardinality) {
-            if (this.equals(Multiplicity.ONE_TO_N)) {
-                this.cardinality = cardinality;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return this.cardinality;
-        }
     }
 }
