@@ -14,6 +14,12 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final String name;
 
+    @Expose(serialize = true, deserialize = false)
+    public final String code;
+
+    @Expose(serialize = true, deserialize = false)
+    public final String[] importStatements;
+
     // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
     @Expose(serialize = true, deserialize = true)
     public final String classFullName;
@@ -38,8 +44,10 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final Method[] methods;
 
-    CPGClass(String name, String classFullName, String type, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, String[] importStatements, String classFullName, String type, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
+        this.code = code;
+        this.importStatements = importStatements;
         this.classFullName = classFullName;
         this.type = type;
         this.filePath = filePath;
@@ -94,6 +102,9 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final String name;
 
+        @Expose(serialize = true, deserialize = false)
+        public final String code;
+
         // the package name of the field
         @Expose(serialize = true, deserialize = true)
         public final String packageName;
@@ -106,8 +117,9 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final String type;
 
-        protected Attribute(String name, String packageName, String type, Modifier[] modifiers) {
+        protected Attribute(String name, String code, String packageName, String type, Modifier[] modifiers) {
             this.name = name;
+            this.code = code;
             this.packageName = packageName;
             this.type = type;
             this.modifiers = modifiers;
