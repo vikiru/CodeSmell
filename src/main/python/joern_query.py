@@ -2,6 +2,7 @@ import json
 import os
 import platform
 import re
+import sys
 import time
 from pathlib import Path
 from cpgqls_client import CPGQLSClient, import_code_query
@@ -212,12 +213,16 @@ def create_class_dict(curr_class):
         package_name = ""
         path_without_separators = file_path.replace(os.sep, " ").split(" ")
         index_of_src = path_without_separators.index("src")
-        if index != -1:
-            full_package_name = ".".join(
-                path_without_separators[index_of_src: len(path_without_separators)])
-            file_name_index = full_package_name.rindex(".java")
-            package_name = full_package_name[0: file_name_index]
-            package_name = package_name[0: package_name.rindex(".")]
+        if index_of_src < 0:
+            index_of_src = path_without_separators.index("test")
+        if index_of_src < 0:
+            raise Exception("joern_query could not parse folder structure. No src/test")
+        full_package_name = ".".join(
+            path_without_separators[index_of_src: len(path_without_separators)])
+        file_name_index = full_package_name.rindex(".java")
+        package_name = full_package_name[0: file_name_index]
+        package_name = package_name[0: package_name.rindex(".")]
+
         return package_name
 
     def get_name_without_separators(class_name):
@@ -270,15 +275,26 @@ if __name__ == "__main__":
 
     # For testing purposes. Full file paths are required for joern.
     # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
+    project_dir = ""
     our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
+    test_project_dir = str(Path(__file__).parent.parent.parent)  + "/test/java/com/testproject"
+    
+    print(test_project_dir)
+    print(sys.argv)
+    if sys.argv[-1] == "load_test_directory":
+        project_dir = test_project_dir
+    else:
+        project_dir = our_project_dir
+
+    print(project_dir, "<<<< project")
     if "Windows" in platform.platform():
-        index = our_project_dir.find(":")
-        win_drive = our_project_dir[0: index + 1]
-        our_project_dir = our_project_dir.replace(win_drive, win_drive.upper()).replace(
+        index = project_dir.find(":")
+        win_drive = project_dir[0: index + 1]
+        project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
     project_name = "analyzedProject"
-    project_dir = our_project_dir  # Change this as needed for testing purposes. Remember to replace "\\" with "//".
+    project_dir = project_dir  # Change this as needed for testing purposes. Remember to replace "\\" with "//".
 
     # Import the source code to Joern for analyzing.
     total_time = 0

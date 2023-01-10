@@ -10,7 +10,7 @@ public class Launcher {
                 skipJoern = true;
             }
         }
-        if (!skipJoern) joernServer.main(args);
+        if (!skipJoern) JoernServer.start(false);
         MainApp.main(args);
     }
 }

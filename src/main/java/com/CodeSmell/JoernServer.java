@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.io.File;
 
-public class joernServer {
-    public static void main(String[] args) {
+public class JoernServer {
+    public static void start(boolean testDirectory) {
 
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
@@ -21,7 +21,11 @@ public class joernServer {
         if (System.getProperty("os.name").contains("Windows")) {
             joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
         } else joernServerBuilder = new ProcessBuilder("joern", "--server");
-        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py").directory(new File(directoryPath));
+        String target = "load_test_directory";
+        if (!testDirectory) {
+            target = "our_project_directory";
+        }
+        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", target).directory(new File(directoryPath));
 
         try {
             // Start the server
