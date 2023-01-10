@@ -1,7 +1,6 @@
 package com.CodeSmell;
 
 import com.CodeSmell.ClassRelation.Type;
-import com.CodeSmell.ClassRelation.Multiplicity;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
@@ -47,9 +46,9 @@ public class CodePropertyGraph {
         public final CPGClass source;
         public final CPGClass destination;
         public final Type type;
-        public final Multiplicity multiplicity;
+        public final String multiplicity;
 
-        Relation(CPGClass source, CPGClass destination, Type type, Multiplicity multiplicity) {
+        Relation(CPGClass source, CPGClass destination, Type type, String multiplicity) {
             this.source = source;
             this.destination = destination;
             this.type = type;
