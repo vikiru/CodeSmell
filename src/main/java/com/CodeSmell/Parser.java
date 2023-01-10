@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Parser {
@@ -17,47 +18,95 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-
         // all of these will be called after initializeCPG(). Only here rn for testing purposes.
-        p.assignAssociationRelationships(g);
-        //p.assignAggregationRelationships(g);
+        //p.assignAssociationRelationships(g);
         //p.assignCompositionRelationships(g);
-        p.assignDependencyRelationships(g);
-        p.assignRealizationRelationships(g);
+        //p.assignDependencyRelationships(g);
+        //p.assignRealizationRelationships(g);
         // p.assignInheritanceRelationships(g);
     }
 
-
-    private ClassRelation.Multiplicity obtainMultiplicity(Attribute attributeToCompare) {
-        if (attributeToCompare.type.contains("[]") || attributeToCompare.type.contains("<")) {
-            return ClassRelation.Multiplicity.ONE_TO_MANY;
+    private String obtainMultiplicity(String attribute, Long count) {
+        String multiplicityToReturn = "";
+        if (attribute.contains("[]") || attribute.contains("<")) {
+            multiplicityToReturn = "1..*";
         } else {
-            if (attributeToCompare.type.contains())
+            if (count == 1) {
+                multiplicityToReturn = "1..1";
+            } else if (count > 1) {
+                multiplicityToReturn = "1.." + count;
+            }
         }
+        return multiplicityToReturn;
     }
 
     private String getProperTypeName(String typeName) {
-        String typeToReturn = typeName;
-        if (typeName.contains("[]")) {
-            typeToReturn = typeName.replace("[]", "");
+        if (typeName.contains("$")) {
+            int index = typeName.lastIndexOf("$");
+            typeName = typeName.substring(index + 1);
+        } else if (typeName.contains("[]")) {
+            typeName = typeName.replace("[]", "");
         } else if (typeName.contains("<")) {
             int startingIndex = typeName.indexOf("<");
             int endingIndex = typeName.indexOf(">");
-            typeToReturn = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", "").replace(">", "");
+            typeName = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", "").replace(">", "");
         }
-        return typeToReturn;
+        return typeName;
     }
 
     private void assignAssociationRelationships(CodePropertyGraph cpg) {
+        ArrayList<String> allClassNames = new ArrayList<>();
+        cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
+            ArrayList<String> allAttributeNames = new ArrayList<>();
             for (Attribute classAttribute : cpgClass.attributes) {
-                String attributeToCompare = getProperTypeName(classAttribute.type);
-                if (cpg.getClasses().contains(attributeToCompare)) {
-                    ClassRelation.Multiplicity = obtainMultiplicity(classAttribute);
+                String properName = getProperTypeName(classAttribute.type);
+                if (properName.contains(",")) {
+                    String[] types = properName.split(",");
+                    types[0] = types[0].trim();
+                    types[1] = types[1].trim();
+                    for (String t : types) {
+                        // Handle HashMaps
+                        if (allClassNames.contains(t)) {
+                            int destClassIndex = allClassNames.indexOf(t);
+                            CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
+                                    (cpgClass, cpg.getClasses().get(destClassIndex),
+                                            ClassRelation.Type.ASSOCIATION, "1..*");
+                            if (!checkExistingRelation(cpg, relationToAdd)) {
+                                cpg.addRelation(relationToAdd);
+                            }
+                        }
+                    }
+                } else {
+                    if (allClassNames.contains(getProperTypeName(classAttribute.type))) {
+                        allAttributeNames.add(classAttribute.type);
+                    }
+                }
+            }
+
+            Map<String, Long> result
+                    = allAttributeNames.stream().collect(
+                    Collectors.groupingBy(
+                            Function.identity(),
+                            Collectors.counting()));
+            if (!result.isEmpty()) {
+                for (Map.Entry<String, Long> entry : result.entrySet()) {
+                    String attributeType = entry.getKey();
+                    Long count = entry.getValue();
+                    int destClassIndex = allClassNames.indexOf(getProperTypeName(attributeType));
+                    CodePropertyGraph.Relation relationToAdd = new
+                            CodePropertyGraph.Relation(cpgClass, cpg.getClasses().get(destClassIndex),
+                            ClassRelation.Type.ASSOCIATION, obtainMultiplicity(attributeType, count));
+                    if (!checkExistingRelation(cpg, relationToAdd)) {
+                        cpg.addRelation(relationToAdd);
+                    }
                 }
             }
         }
     }
+
+    //private void assignCompositionRelationships(CodePropertyGraph cpg) {
+    //}
 
     /**
      * @param destination
@@ -72,6 +121,7 @@ public class Parser {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
             cpg = gson.fromJson(reader, CodePropertyGraph.class);
             cpg = assignProperFieldsAndMethods(cpg, 2);
+            assignAssociationRelationships(cpg);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -81,8 +131,6 @@ public class Parser {
     /**
      * Given a CPGClass and an Attribute belonging to that class, assign the proper type to the Attribute.
      * This is for cases where an Attribute may be a part of Java Collections (i.e. HashMap, ArrayList, Set, etc).
-     *
-     * <p>
      * <p>
      * Performs 3 checks to determine the attribute's type:
      * <p>
@@ -273,7 +321,6 @@ public class Parser {
         CodePropertyGraph.Relation relationToAdd;
         if (!interfacesResult.isEmpty()) {
             for (CPGClass interfaceClass : interfacesResult) {
-                System.out.println(interfaceClass.name);
                 for (Method method : interfaceClass.methods) {
                     int firstIndex = allMethodNames.indexOf(method.name);
                     int lastIndex = allMethodNames.lastIndexOf(method.name);
@@ -286,13 +333,12 @@ public class Parser {
                     if (!parentFirstClass.type.equals("interface")) {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentFirstClass, parentSecondClass,
-                                ClassRelation.Type.REALIZATION, ClassRelation.Multiplicity.NONE);
+                                ClassRelation.Type.REALIZATION, "");
                     } else {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentSecondClass, parentFirstClass,
-                                ClassRelation.Type.REALIZATION, ClassRelation.Multiplicity.NONE);
+                                ClassRelation.Type.REALIZATION, "");
                     }
-                    CodePropertyGraph.Relation finalRelationToAdd = relationToAdd;
                     if (!checkExistingRelation(cpg, relationToAdd)) {
                         cpg.addRelation(relationToAdd);
                     }
@@ -329,7 +375,7 @@ public class Parser {
                         if (checkAttributes.isEmpty()) {
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
                                     Relation(cpgClass, destinationClass,
-                                    ClassRelation.Type.DEPENDENCY, ClassRelation.Multiplicity.NONE);
+                                    ClassRelation.Type.DEPENDENCY, "");
                             if (!checkExistingRelation(cpg, relationToAdd)) {
                                 cpg.addRelation(relationToAdd);
                             }
@@ -352,7 +398,7 @@ public class Parser {
                         && relation.destination.equals(relationToAdd.destination)
                         && relation.type.equals(relationToAdd.type)
                         && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
-        if (!result.isEmpty()) {
+        if (result.isEmpty()) {
             return false;
         } else return true;
     }
