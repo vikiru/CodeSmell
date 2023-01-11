@@ -23,8 +23,6 @@ public class Parser {
         var result = cpg.getRelations().stream().filter(relation -> relation.multiplicity.equals("*..*"));
         result.forEach(r -> System.out.println(r.source.name + "->" + r.destination.name + ": " + r.multiplicity));
         // temp using a diff path to showcase differences in .json files (eventually this will just replace sourceCode.json
-        String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
-        p.writeToJson(cpg, filePath);
     }
 
     /**
@@ -39,7 +37,6 @@ public class Parser {
         try {
             try (Writer writer = new FileWriter(filePath)) {
                 gson.toJson(cpg, writer);
-                writer.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -68,6 +65,9 @@ public class Parser {
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
+
+            String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
+            this.writeToJson(cpg, filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -368,13 +368,16 @@ public class Parser {
         }
 
         // get package
-        var packageResult = nonEmptyLines.stream().filter(line -> line.startsWith("package ") && line.contains(";")).collect(Collectors.toList());
+        var packageResult = nonEmptyLines.stream().
+                filter(line -> line.startsWith("package ") && line.contains(";")).collect(Collectors.toList());
 
         // get all imports
-        var importStatements = nonEmptyLines.stream().filter(line -> line.startsWith("import ") && line.contains(";")).collect(Collectors.toList());
+        var importStatements = nonEmptyLines.stream().
+                filter(line -> line.startsWith("import ") && line.contains(";")).collect(Collectors.toList());
 
         // get class declaration
-        var classDeclResult = nonEmptyLines.stream().filter(line -> line.contains(cpgClass.name) && line.contains("{") && !line.contains("(")).collect(Collectors.toList());
+        var classDeclResult = nonEmptyLines.stream().
+                filter(line -> line.contains(cpgClass.name) && line.endsWith("{") && !line.contains("(") && !line.contains(")")).collect(Collectors.toList());
 
         if (!packageResult.isEmpty()) {
             packageName = packageResult.get(0).replace("package ", "").replace(";", "").trim();
