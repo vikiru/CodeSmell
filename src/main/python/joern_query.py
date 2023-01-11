@@ -40,7 +40,7 @@ def create_field_dict(curr_field):
         "name": curr_field["_1"]["name"],
         "typeFullName": curr_field["_1"]["typeFullName"],
         "packageName": package_name,
-        "type": type,
+        "attributeType": type,
         "modifiers": [modifier.lower() for modifier in curr_field["_2"]],
     }
     return curr_field_dict
@@ -183,9 +183,9 @@ def create_class_dict(curr_class):
                     if not attribute["modifiers"]
                 ]
                 list_field_types = [
-                    attribute["type"]
+                    attribute["attributeType"]
                     for attribute in curr_class_dict["attributes"]
-                    if attribute["type"] == class_name
+                    if attribute["attributeType"] == class_name
                 ]
                 single_list_field_modifiers = []
                 single_list_field_types = []
@@ -237,7 +237,7 @@ def create_class_dict(curr_class):
     curr_class_dict = {
         "name": get_name_without_separators(curr_class["_1"]),
         "classFullName": curr_class["_1"],
-        "type": "",
+        "classType": "",
         "filePath": curr_class["_5"],
         "packageName": get_package_name(curr_class["_5"]),
         "attributes": list(map(create_field_dict, curr_class["_3"])),
@@ -245,7 +245,7 @@ def create_class_dict(curr_class):
             filter(None, list(map(create_method_dict, curr_class["_4"])))
         ),
     }
-    curr_class_dict["type"] = get_type(curr_class["_2"], curr_class_dict)
+    curr_class_dict["classType"] = get_type(curr_class["_2"], curr_class_dict)
     for method in curr_class_dict["methods"]:
         method["parentClassName"] = curr_class["_1"]
     return curr_class_dict

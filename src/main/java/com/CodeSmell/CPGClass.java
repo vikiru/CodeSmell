@@ -29,7 +29,7 @@ public class CPGClass {
 
     // the type of the object (class, enum, abstract class, interface)
     @Expose(serialize = true, deserialize = true)
-    public final String type;
+    public final String classType;
 
     // the filePath of the class (full path)
     @Expose(serialize = true, deserialize = true)
@@ -47,13 +47,13 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final Method[] methods;
 
-    CPGClass(String name, String code, String[] importStatements, Modifier[] modifiers, String classFullName, String type, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, String[] importStatements, Modifier[] modifiers, String classFullName, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
         this.importStatements = importStatements;
         this.modifiers = modifiers;
         this.classFullName = classFullName;
-        this.type = type;
+        this.classType = classType;
         this.filePath = filePath;
         this.packageName = packageName;
         this.attributes = attributes;
@@ -62,7 +62,7 @@ public class CPGClass {
 
     @Override
     public String toString() {
-        return String.format("CPGClass{name='%s', code='%s', importStatements=%s, classFullName='%s', type='%s', filePath='%s', packageName='%s', attributes=%s, methods=%s}", name, code, Arrays.toString(importStatements), classFullName, type, filePath, packageName, Arrays.toString(attributes), Arrays.toString(methods));
+        return String.format("CPGClass{name='%s', code='%s', importStatements=%s, classFullName='%s', type='%s', filePath='%s', packageName='%s', attributes=%s, methods=%s}", name, code, Arrays.toString(importStatements), classFullName, classType, filePath, packageName, Arrays.toString(attributes), Arrays.toString(methods));
     }
 
     public enum Modifier {
@@ -119,24 +119,31 @@ public class CPGClass {
 
         // the type of the attribute
         @Expose(serialize = true, deserialize = true)
-        public final String type;
+        public final String attributeType;
 
         // the full type decl obtained from Joern (Without modification)
         @Expose(serialize = true, deserialize = true)
         public final String typeFullName;
 
-        protected Attribute(String name, String code, String packageName, String type, Modifier[] modifiers, String typeFullName) {
+        protected Attribute(String name, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
             this.name = name;
             this.code = code;
             this.packageName = packageName;
-            this.type = type;
+            this.attributeType = attributeType;
             this.modifiers = modifiers;
             this.typeFullName = typeFullName;
         }
 
         @Override
         public String toString() {
-            return String.format("Attribute{name='%s', code='%s', packageName='%s', modifiers=%s, type='%s'}", name, code, packageName, Arrays.toString(modifiers), type);
+            return "Attribute{" +
+                    "name='" + name + '\'' +
+                    ", code='" + code + '\'' +
+                    ", packageName='" + packageName + '\'' +
+                    ", modifiers=" + Arrays.toString(modifiers) +
+                    ", attributeType='" + attributeType + '\'' +
+                    ", typeFullName='" + typeFullName + '\'' +
+                    '}';
         }
     }
 
