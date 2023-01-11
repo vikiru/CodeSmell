@@ -3,7 +3,6 @@ package com.CodeSmell;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A class within the source code.
@@ -62,7 +61,7 @@ public class CPGClass {
 
     @Override
     public String toString() {
-        return String.format("CPGClass{name='%s', code='%s', importStatements=%s, classFullName='%s', type='%s', filePath='%s', packageName='%s', attributes=%s, methods=%s}", name, code, Arrays.toString(importStatements), classFullName, classType, filePath, packageName, Arrays.toString(attributes), Arrays.toString(methods));
+        return this.code;
     }
 
     public enum Modifier {
@@ -136,14 +135,7 @@ public class CPGClass {
 
         @Override
         public String toString() {
-            return "Attribute{" +
-                    "name='" + name + '\'' +
-                    ", code='" + code + '\'' +
-                    ", packageName='" + packageName + '\'' +
-                    ", modifiers=" + Arrays.toString(modifiers) +
-                    ", attributeType='" + attributeType + '\'' +
-                    ", typeFullName='" + typeFullName + '\'' +
-                    '}';
+            return this.name + " : " + this.attributeType;
         }
     }
 
@@ -212,7 +204,7 @@ public class CPGClass {
         @Override
         public String toString() {
             if (!returnType.equals("")) {
-                return this.methodBody + ":" + this.returnType;
+                return this.methodBody + " : " + this.returnType;
             } else return this.methodBody;
         }
 
@@ -232,7 +224,7 @@ public class CPGClass {
 
             @Override
             public String toString() {
-                return String.format("Parameter{name='%s', type='%s'}", name, type);
+                return this.type + " : " + this.name;
             }
         }
 
@@ -261,7 +253,7 @@ public class CPGClass {
 
             @Override
             public String toString() {
-                return String.format("Instruction{label='%s', code='%s', lineNumber='%s', methodCall='%s'}", label, code, lineNumber, methodCall);
+                return this.code;
             }
         }
     }
