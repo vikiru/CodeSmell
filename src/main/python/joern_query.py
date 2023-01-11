@@ -33,12 +33,15 @@ def create_field_dict(curr_field):
     if index != -1:
         package_name = curr_field["_1"]["typeFullName"][0: index].replace("<unresolvedNamespace>", "")
         type = curr_field["_1"]["typeFullName"][index + 1: len(curr_field["_1"]["typeFullName"])]
+    index_nested = type.rfind("$")
+    if index != -1:
+        type = type[index_nested + 1: len(type)]
     curr_field_dict = {
         "name": curr_field["_1"]["name"],
-        "modifiers": [modifier.lower() for modifier in curr_field["_2"]],
         "typeFullName": curr_field["_1"]["typeFullName"],
         "packageName": package_name,
         "type": type,
+        "modifiers": [modifier.lower() for modifier in curr_field["_2"]],
     }
     return curr_field_dict
 
