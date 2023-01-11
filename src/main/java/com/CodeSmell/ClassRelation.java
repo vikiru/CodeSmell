@@ -28,13 +28,7 @@ public class ClassRelation extends RenderObject {
         dispatchToRenderEventListeners(re);
         pathContainerId = (Integer) re.getResponse();
     }
-
-    public String reverseMultiplicity() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.multiplicity).reverse();
-        return sb.toString();
-    }
-
+    
     public enum Type {
         ASSOCIATION,
         UNIDIRECTIONAL_ASSOCIATION,
