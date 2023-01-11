@@ -12,11 +12,16 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// todo - composition, refactor and comment as much as possible, add tests for relations'
+// add package names for attributes where package name = "", simply look at import statements
+
 public class Parser {
 
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        var result = cpg.getRelations().stream().filter(relation -> relation.multiplicity.equals("*..*"));
+        result.forEach(r -> System.out.println(r.source.name + "->" + r.destination.name + ": " + r.multiplicity));
         // temp using a diff path to showcase differences in .json files (eventually this will just replace sourceCode.json
         String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
         p.writeToJson(cpg, filePath);
@@ -76,9 +81,9 @@ public class Parser {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
-            ArrayList<String> allAttributeNames = new ArrayList<>();
+            ArrayList<String> allAttributeTypes = new ArrayList<>();
             for (Attribute classAttribute : cpgClass.attributes) {
-                String properName = getProperTypeName(classAttribute.type);
+                String properName = getProperTypeName(classAttribute.attributeType);
                 if (properName.contains(",")) {
                     String[] types = properName.split(",");
                     types[0] = types[0].trim();
@@ -97,12 +102,12 @@ public class Parser {
                     }
                 } else {
                     if (allClassNames.contains(properName)) {
-                        allAttributeNames.add(classAttribute.type);
+                        allAttributeTypes.add(classAttribute.attributeType);
                     }
                 }
             }
             Map<String, Long> result
-                    = allAttributeNames.stream().collect(
+                    = allAttributeTypes.stream().collect(
                     Collectors.groupingBy(
                             Function.identity(),
                             Collectors.counting()));
@@ -111,11 +116,34 @@ public class Parser {
                     String attributeType = entry.getKey();
                     Long count = entry.getValue();
                     int destClassIndex = allClassNames.indexOf(getProperTypeName(attributeType));
+                    CPGClass destClass = cpg.getClasses().get(destClassIndex);
+                    ArrayList<String> destClassAttributes = new ArrayList<>();
+                    Arrays.stream(destClass.attributes).forEach(attribute -> destClassAttributes.add(attribute.attributeType));
+                    Map<String, Long> destClassResult
+                            = destClassAttributes.stream().collect(
+                            Collectors.groupingBy(
+                                    Function.identity(),
+                                    Collectors.counting()));
+                    String multiplicity = obtainMultiplicity(attributeType, count);
+                    // Handle many-to-many
+                    for (String key : destClassResult.keySet()) {
+                        if (key.contains(cpgClass.name) && (key.contains("[]") || key.contains("<"))) {
+                            if (multiplicity.equals("1..*")) {
+                                multiplicity = "*..*";
+                                break;
+                            }
+                        }
+                    }
                     CodePropertyGraph.Relation relationToAdd = new
-                            CodePropertyGraph.Relation(cpgClass, cpg.getClasses().get(destClassIndex),
-                            ClassRelation.Type.ASSOCIATION, obtainMultiplicity(attributeType, count));
+                            CodePropertyGraph.Relation(cpgClass, destClass,
+                            ClassRelation.Type.ASSOCIATION, multiplicity);
                     if (!checkExistingRelation(cpg, relationToAdd)) {
-                        cpg.addRelation(relationToAdd);
+                        var additionalCheck = cpg.getRelations().stream().
+                                filter(relation -> relation.source.equals(cpgClass)
+                                        && relation.destination.equals(destClass)).collect(Collectors.toList());
+                        if (additionalCheck.isEmpty()) {
+                            cpg.addRelation(relationToAdd);
+                        }
                     }
                 }
             }
@@ -135,17 +163,22 @@ public class Parser {
                         String typeProperName = getProperTypeName(parameter.type);
                         if (allClassNames.contains(typeProperName)) {
                             int classIndex = allClassNames.indexOf(typeProperName);
-                            CPGClass destinationClass = cpg.getClasses().get(classIndex);
+                            CPGClass destClass = cpg.getClasses().get(classIndex);
                             var checkAttributes = Arrays.stream(cpgClass.attributes).
-                                    filter(attribute -> attribute.type.contains(destinationClass.name)).collect(Collectors.toList());
+                                    filter(attribute -> attribute.attributeType.contains(destClass.name)).collect(Collectors.toList());
                             // Only add the dependency relationship if the destination class is not present within the source class's
                             // attributes.
                             if (checkAttributes.isEmpty()) {
                                 CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
-                                        Relation(cpgClass, destinationClass,
+                                        Relation(cpgClass, destClass,
                                         ClassRelation.Type.DEPENDENCY, "");
                                 if (!checkExistingRelation(cpg, relationToAdd)) {
-                                    cpg.addRelation(relationToAdd);
+                                    var additionalCheck = cpg.getRelations().stream().
+                                            filter(relation -> relation.source.equals(cpgClass)
+                                                    && relation.destination.equals(destClass)).collect(Collectors.toList());
+                                    if (additionalCheck.isEmpty()) {
+                                        cpg.addRelation(relationToAdd);
+                                    }
                                 }
                             }
                         }
@@ -197,7 +230,7 @@ public class Parser {
         }
         return new CPGClass(subClass.name, subClass.code,
                 subClass.importStatements, subClass.modifiers, subClass.classFullName,
-                subClass.type, subClass.filePath, subClass.packageName, subClass.attributes,
+                subClass.classType, subClass.filePath, subClass.packageName, subClass.attributes,
                 methods.toArray(new Method[methods.size()]));
     }
 
@@ -214,7 +247,7 @@ public class Parser {
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
 
         var interfacesResult = cpg.getClasses().stream().
-                filter(cpgClass -> cpgClass.type.equals("interface")).collect(Collectors.toList());
+                filter(cpgClass -> cpgClass.classType.equals("interface")).collect(Collectors.toList());
 
         CodePropertyGraph.Relation relationToAdd;
         if (!interfacesResult.isEmpty()) {
@@ -228,7 +261,7 @@ public class Parser {
                     int parentSecond = allClassNames.indexOf(secondMethod.parentClassName);
                     CPGClass parentFirstClass = cpg.getClasses().get(parentFirst);
                     CPGClass parentSecondClass = cpg.getClasses().get(parentSecond);
-                    if (!parentFirstClass.type.equals("interface")) {
+                    if (!parentFirstClass.classType.equals("interface")) {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentFirstClass, parentSecondClass,
                                 ClassRelation.Type.REALIZATION, "");
@@ -272,7 +305,7 @@ public class Parser {
             ArrayList<Attribute> properAttributes = new ArrayList<>();
             ArrayList<Method> properMethods = new ArrayList<>();
             for (Attribute a : cpgClass.attributes) {
-                if (a.packageName.equals("java.util") && !a.type.contains("<")) {
+                if (a.packageName.equals("java.util") && !a.attributeType.contains("<")) {
                     String provisionalType = assignMissingAttributeType(cpgClass, a);
                     properAttributes.add(new Attribute(a.name, "", a.packageName, provisionalType, a.modifiers, a.typeFullName));
                 } else {
@@ -286,7 +319,7 @@ public class Parser {
             }
 
             CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{}, cpgClass.classFullName,
-                    cpgClass.type, cpgClass.filePath, cpgClass.packageName,
+                    cpgClass.classType, cpgClass.filePath, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
             graph.addClass(properClass);
@@ -341,7 +374,7 @@ public class Parser {
         var importStatements = nonEmptyLines.stream().filter(line -> line.startsWith("import ") && line.contains(";")).collect(Collectors.toList());
 
         // get class declaration
-        var classDeclResult = nonEmptyLines.stream().filter(line -> line.contains(cpgClass.name) && line.contains("{")).collect(Collectors.toList());
+        var classDeclResult = nonEmptyLines.stream().filter(line -> line.contains(cpgClass.name) && line.contains("{") && !line.contains("(")).collect(Collectors.toList());
 
         if (!packageResult.isEmpty()) {
             packageName = packageResult.get(0).replace("package ", "").replace(";", "").trim();
@@ -372,7 +405,7 @@ public class Parser {
         // extract missing info from attributes
         for (Attribute a : cpgClass.attributes) {
             String name = a.name;
-            String type = a.type;
+            String type = a.attributeType;
             if (type.contains("$")) {
                 type = getProperTypeName(type);
             }
@@ -388,6 +421,13 @@ public class Parser {
                     if (line.contains(modStr.modString)) {
                         line = line.replace(modStr.modString, "").trim();
                         fieldModifiers.add(modStr);
+                    }
+                }
+                if (a.packageName.equals("java.util") && !type.contains("<")) {
+                    int startIndex = line.indexOf("<");
+                    int endIndex = line.lastIndexOf(">");
+                    if (startIndex != -1 && endIndex != -1) {
+                        type += line.substring(startIndex, endIndex + 1).trim();
                     }
                 }
                 Attribute properAttribute = new Attribute(name, code, a.packageName,
@@ -426,7 +466,7 @@ public class Parser {
         String className = cpgClass.name;
         Method[] classMethods = cpgClass.methods;
         String stringToFind = "this." + attribute.name;
-        String finalAttributeType = attribute.type;
+        String finalAttributeType = attribute.attributeType;
         var result = Arrays.stream(classMethods).
                 filter(method -> method.name.equals(className)).collect(Collectors.toList());
         if (!result.isEmpty()) {
@@ -461,7 +501,7 @@ public class Parser {
             }
         }
         // Check all other methods apart from the constructor to determine if the desired field is used somewhere.
-        if (finalAttributeType.equals(attribute.type)) {
+        if (finalAttributeType.equals(attribute.attributeType)) {
             for (Method method : classMethods) {
                 Method.Instruction[] instructions = method.instructions;
                 var instructionResult = Arrays.stream(instructions)
@@ -510,7 +550,7 @@ public class Parser {
                             filter(cpgClass -> cpgClass.name.equals(firstMethod.parentClassName) ||
                                     cpgClass.name.equals(secondMethod.parentClassName)).collect(Collectors.toList());
                     var result = filteredClasses.stream().
-                            filter(cpgClass -> cpgClass.type.equals("interface")).collect(Collectors.toList());
+                            filter(cpgClass -> cpgClass.classType.equals("interface")).collect(Collectors.toList());
                     if (!result.isEmpty()) {
                         if (firstMethod.parentClassName.equals(result.get(0).name)) {
                             indexes.add(lastIndexOfMethodCalled);
