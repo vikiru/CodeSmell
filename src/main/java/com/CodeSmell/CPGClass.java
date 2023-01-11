@@ -20,6 +20,9 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = false)
     public final String[] importStatements;
 
+    @Expose(serialize = true, deserialize = false)
+    public final Modifier[] modifiers;
+
     // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
     @Expose(serialize = true, deserialize = true)
     public final String classFullName;
@@ -44,10 +47,11 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final Method[] methods;
 
-    CPGClass(String name, String code, String[] importStatements, String classFullName, String type, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, String[] importStatements, Modifier[] modifiers, String classFullName, String type, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
         this.importStatements = importStatements;
+        this.modifiers = modifiers;
         this.classFullName = classFullName;
         this.type = type;
         this.filePath = filePath;
@@ -58,7 +62,7 @@ public class CPGClass {
 
     @Override
     public String toString() {
-        return String.format("CPGClass{name='%s', filePath='%s', packageName='%s', type='%s', methods=%s, attributes=%s}", name, filePath, packageName, type, methods, attributes);
+        return String.format("CPGClass{name='%s', code='%s', importStatements=%s, classFullName='%s', type='%s', filePath='%s', packageName='%s', attributes=%s, methods=%s}", name, code, Arrays.toString(importStatements), classFullName, type, filePath, packageName, Arrays.toString(attributes), Arrays.toString(methods));
     }
 
     public enum Modifier {
@@ -127,12 +131,7 @@ public class CPGClass {
 
         @Override
         public String toString() {
-            return "Attribute{" +
-                    "name='" + name + '\'' +
-                    ", packageName='" + packageName + '\'' +
-                    ", modifiers=" + Arrays.toString(modifiers) +
-                    ", type='" + type + '\'' +
-                    '}';
+            return String.format("Attribute{name='%s', code='%s', packageName='%s', modifiers=%s, type='%s'}", name, code, packageName, Arrays.toString(modifiers), type);
         }
     }
 
@@ -221,10 +220,7 @@ public class CPGClass {
 
             @Override
             public String toString() {
-                return "Parameter{" +
-                        "name='" + name + '\'' +
-                        ", type='" + type + '\'' +
-                        '}';
+                return String.format("Parameter{name='%s', type='%s'}", name, type);
             }
         }
 
@@ -253,12 +249,7 @@ public class CPGClass {
 
             @Override
             public String toString() {
-                return "Instruction{" +
-                        "label='" + label + '\'' +
-                        ", code='" + code + '\'' +
-                        ", lineNumber='" + lineNumber + '\'' +
-                        ", methodCall='" + methodCall + '\'' +
-                        '}';
+                return String.format("Instruction{label='%s', code='%s', lineNumber='%s', methodCall='%s'}", label, code, lineNumber, methodCall);
             }
         }
     }
