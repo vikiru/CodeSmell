@@ -93,7 +93,6 @@ public class Parser {
                         if (allClassNames.contains(t)) {
                             int destClassIndex = allClassNames.indexOf(t);
                             CPGClass destClass = cpg.getClasses().get(destClassIndex);
-                            ArrayList<String> destClassAttributes = new ArrayList<>();
                             String multiplicity = "1..*";
                             ClassRelation.Type type;
                             var destResult = Arrays.stream(destClass.attributes).
@@ -106,9 +105,11 @@ public class Parser {
                             } else {
                                 type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
                             }
-
+                            if (cpgClass == destClass) {
+                                type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                            }
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
-                                    (cpgClass, cpg.getClasses().get(destClassIndex),
+                                    (cpgClass, destClass,
                                             type, multiplicity);
                             if (!checkExistingRelation(cpg, relationToAdd)) {
                                 cpg.addRelation(relationToAdd);
@@ -147,6 +148,9 @@ public class Parser {
                     } else {
                         type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
                     }
+                    if (cpgClass == destClass) {
+                        type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                    }
                     CodePropertyGraph.Relation relationToAdd = new
                             CodePropertyGraph.Relation(cpgClass, destClass,
                             type, multiplicity);
@@ -167,7 +171,7 @@ public class Parser {
      * @param cpg
      */
     private void assignDependencyRelationships(CodePropertyGraph cpg) {
-        ArrayList<String> allClassNames = new ArrayList<String>();
+        ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (Method method : cpgClass.methods) {
