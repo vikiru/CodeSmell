@@ -43,9 +43,13 @@ public class CodePropertyGraph {
     }
 
     public static class Relation {
+        @Expose(serialize = true, deserialize = true)
         public final CPGClass source;
+        @Expose(serialize = true, deserialize = true)
         public final CPGClass destination;
+        @Expose(serialize = true, deserialize = true)
         public final Type type;
+        @Expose(serialize = true, deserialize = true)
         public final String multiplicity;
 
         Relation(CPGClass source, CPGClass destination, Type type, String multiplicity) {
