@@ -61,12 +61,7 @@ public class CodePropertyGraph {
 
         @Override
         public String toString() {
-            return "Relation{" +
-                    "source=" + source +
-                    ", destination=" + destination +
-                    ", type=" + type +
-                    ", multiplicity=" + multiplicity +
-                    '}';
+            return this.source.name + " -> " + destination.name + " : " + this.multiplicity + " " + this.type;
         }
     }
 }
