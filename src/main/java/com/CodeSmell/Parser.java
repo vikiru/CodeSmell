@@ -92,9 +92,24 @@ public class Parser {
                         // Handle HashMaps
                         if (allClassNames.contains(t)) {
                             int destClassIndex = allClassNames.indexOf(t);
+                            CPGClass destClass = cpg.getClasses().get(destClassIndex);
+                            ArrayList<String> destClassAttributes = new ArrayList<>();
+                            String multiplicity = "1..*";
+                            ClassRelation.Type type;
+                            var destResult = Arrays.stream(destClass.attributes).
+                                    filter(attribute -> attribute.attributeType.contains(cpgClass.name)
+                                            && (attribute.attributeType.contains("[]")
+                                            || attribute.attributeType.contains("<"))).collect(Collectors.toList());
+                            if (!destResult.isEmpty()) {
+                                multiplicity = "*..*";
+                                type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
+                            } else {
+                                type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
+                            }
+
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
                                     (cpgClass, cpg.getClasses().get(destClassIndex),
-                                            ClassRelation.Type.ASSOCIATION, "1..*");
+                                            type, multiplicity);
                             if (!checkExistingRelation(cpg, relationToAdd)) {
                                 cpg.addRelation(relationToAdd);
                             }
@@ -117,26 +132,24 @@ public class Parser {
                     Long count = entry.getValue();
                     int destClassIndex = allClassNames.indexOf(getProperTypeName(attributeType));
                     CPGClass destClass = cpg.getClasses().get(destClassIndex);
-                    ArrayList<String> destClassAttributes = new ArrayList<>();
-                    Arrays.stream(destClass.attributes).forEach(attribute -> destClassAttributes.add(attribute.attributeType));
-                    Map<String, Long> destClassResult
-                            = destClassAttributes.stream().collect(
-                            Collectors.groupingBy(
-                                    Function.identity(),
-                                    Collectors.counting()));
                     String multiplicity = obtainMultiplicity(attributeType, count);
                     // Handle many-to-many
-                    for (String key : destClassResult.keySet()) {
-                        if (key.contains(cpgClass.name) && (key.contains("[]") || key.contains("<"))) {
-                            if (multiplicity.equals("1..*")) {
-                                multiplicity = "*..*";
-                                break;
-                            }
+                    ClassRelation.Type type;
+                    var destResult = Arrays.stream(destClass.attributes).
+                            filter(attribute -> attribute.attributeType.contains(cpgClass.name)
+                                    && (attribute.attributeType.contains("[]")
+                                    || attribute.attributeType.contains("<"))).collect(Collectors.toList());
+                    if (!destResult.isEmpty()) {
+                        if (multiplicity.equals("1..*")) {
+                            multiplicity = "*..*";
                         }
+                        type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
+                    } else {
+                        type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
                     }
                     CodePropertyGraph.Relation relationToAdd = new
                             CodePropertyGraph.Relation(cpgClass, destClass,
-                            ClassRelation.Type.ASSOCIATION, multiplicity);
+                            type, multiplicity);
                     if (!checkExistingRelation(cpg, relationToAdd)) {
                         var additionalCheck = cpg.getRelations().stream().
                                 filter(relation -> relation.source.equals(cpgClass)
