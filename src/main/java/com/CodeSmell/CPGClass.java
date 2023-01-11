@@ -121,12 +121,17 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final String type;
 
-        protected Attribute(String name, String code, String packageName, String type, Modifier[] modifiers) {
+        // the full type decl obtained from Joern (Without modification)
+        @Expose(serialize = true, deserialize = true)
+        public final String typeFullName;
+
+        protected Attribute(String name, String code, String packageName, String type, Modifier[] modifiers, String typeFullName) {
             this.name = name;
             this.code = code;
             this.packageName = packageName;
             this.type = type;
             this.modifiers = modifiers;
+            this.typeFullName = typeFullName;
         }
 
         @Override
