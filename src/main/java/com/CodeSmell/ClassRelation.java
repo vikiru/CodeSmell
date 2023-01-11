@@ -37,6 +37,8 @@ public class ClassRelation extends RenderObject {
 
     public enum Type {
         ASSOCIATION,
+        UNIDIRECTIONAL_ASSOCIATION,
+        BIDIRECTIONAL_ASSOCIATION,
         AGGREGATION,
         COMPOSITION,
         DEPENDENCY,
