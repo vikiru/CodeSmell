@@ -27,32 +27,30 @@ public class Parser {
      * @return
      */
     private CPGClass assignMissingClassInfo(CPGClass cpgClass) {
+
+        System.out.println("CLASS: " + cpgClass.name);
+        System.out.println("ATTRIBUTES: " + Arrays.toString(cpgClass.attributes));
         // KNOWN INFO
         File classFile = new File(cpgClass.filePath);
         String className = cpgClass.name;
-        ArrayList<String> attributeNames = new ArrayList<>();
-        ArrayList<Attribute> existingAttributes = new ArrayList<>();
-        for (Attribute a : cpgClass.attributes) {
-            existingAttributes.add(a);
-            attributeNames.add(a.name);
-        }
         String constructorBody = "";
-        var constructorResult = Arrays.stream(cpgClass.methods).filter(method -> method.name.equals(className)).collect(Collectors.toList());
+        var constructorResult = Arrays.stream(cpgClass.methods).
+                filter(method -> method.name.equals(className)).collect(Collectors.toList());
         if (!constructorResult.isEmpty()) {
-            constructorBody = constructorResult.get(0).methodBody;
+            constructorBody = constructorResult.get(0).code;
         }
-
         // HELPER VARIABLES
-        HashMap<Integer, String> crucialIndexes = new HashMap<>();
+        TreeMap<Integer, String> crucialIndexes = new TreeMap<>();
+        HashSet<Integer> attributeIndexes = new HashSet<>();
+        HashSet<Integer> methodIndexes = new HashSet<>();
         ArrayList<String> nonEmptyLines = new ArrayList<>();
 
         // INFO TO FIND
         String classType = "";
         String classDeclaration = "";
         String packageName = "";
-        ArrayList<String> importStatements = new ArrayList<>();
         ArrayList<CPGClass.Modifier> classModifiers = new ArrayList<>();
-        ArrayList<Attribute> updatedFields = new ArrayList<>();
+        HashSet<Attribute> updatedAttributes = new HashSet<>();
 
         // Read in Java file and append non-empty lines to an ArrayList
         try {
@@ -68,122 +66,73 @@ public class Parser {
             throw new RuntimeException(e);
         }
 
-        // Iterate through all of the nonEmptyLines to find crucialMissingInfo
-        for (String line : nonEmptyLines) {
-            int index = nonEmptyLines.indexOf(line);
-            // Obtain the package the class belongs to
-            if (line.contains("package") && packageName.equals("")) {
-                int startIndex = line.indexOf("package ");
-                int endIndex = line.indexOf(";");
-                if (startIndex != -1 && endIndex != -1) {
-                    crucialIndexes.put(index, "PACKAGE");
-                    packageName = line.substring(startIndex, endIndex).replace("package", "")
-                            .replace("{", "").trim();
+        // get package
+        var packageResult = nonEmptyLines.stream().filter(line -> line.startsWith("package ") && line.contains(";")).collect(Collectors.toList());
+
+        // get all imports
+        var importStatements = nonEmptyLines.stream().filter(line -> line.startsWith("import ") && line.contains(";")).collect(Collectors.toList());
+
+        // get class declaration
+        var classDeclResult = nonEmptyLines.stream().filter(line -> line.contains(cpgClass.name) && line.contains("{")).collect(Collectors.toList());
+
+        if (!packageResult.isEmpty()) {
+            packageName = packageResult.get(0).replace("package ", "").replace(";", "").trim();
+        }
+
+        // extract missing info from class decl
+        if (!classDeclResult.isEmpty()) {
+            classDeclaration = classDeclResult.get(0).replace("{", "").trim();
+            String[] types = {"class", "enum", "abstract class", "interface"};
+            String line = classDeclaration.trim();
+            line = line.replace(className, "").replace("{", "").trim();
+            for (CPGClass.Modifier m : CPGClass.Modifier.values()) {
+                if (line.contains(m.modString)) {
+                    line = line.replace(m.modString, "").trim();
+                    classModifiers.add(m);
                 }
             }
-            // Obtain import statement(s)
-            if (line.contains("import")) {
-                int startIndex = line.indexOf("import ");
-                int endIndex = line.indexOf(";");
-                if (startIndex != -1 && endIndex != -1) {
-                    crucialIndexes.put(index, "IMPORT_STATEMENT");
-                    importStatements.add(line.substring(startIndex, endIndex).replace(";", ""));
-                }
-            }
-            // Obtain class declaration and class modifiers
-            if (line.contains(cpgClass.name) && line.contains("{") && !line.contains("(") && !line.contains(")")) {
-                crucialIndexes.put(index, "CLASS_DECLARATION_START");
-                classDeclaration = line.replace("{", "").trim();
-                classType = classDeclaration.replace(className, "");
-                String[] splitSpaces = classType.split(" ");
-                for (String str : splitSpaces) {
-                    for (CPGClass.Modifier m : CPGClass.Modifier.values()) {
-                        if (m.modString.equals(str)) {
-                            classModifiers.add(m);
-                            classType = classType.replace(str, "").trim();
-                        }
+            if (!classModifiers.contains(CPGClass.Modifier.ABSTRACT)) {
+                for (String typeStr : types) {
+                    if (line.contains(typeStr)) {
+                        classType = typeStr;
                     }
                 }
-                String[] types = {"class", "enum", "abstract class", "interface"};
-                classType = classType.replace("extends", "").replace("implements", "");
-                String[] leftOverStr = classType.split(" ");
-                if (!classModifiers.contains(CPGClass.Modifier.ABSTRACT)) {
-                    for (String s : leftOverStr) {
-                        for (String typeStr : types) {
-                            if (s.equals(typeStr)) {
-                                classType = typeStr;
-                            }
-                        }
-                    }
-                } else {
-                    classType = "abstract class";
-                }
-            }
-            if (line.contains(constructorBody) && !constructorBody.equals("")) {
-                crucialIndexes.put(index, "CLASS_CONSTRUCTOR");
-                break;
-            } else if (constructorBody.equals("") && !classDeclaration.equals("")) {
-                crucialIndexes.put(index, "END");
+            } else {
+                classType = "abstract class";
             }
         }
 
-        // Prepare to find the missing info for fields
-        int startIndex = 0;
-        int endIndex = 0;
-        for (Map.Entry<Integer, String> entry : crucialIndexes.entrySet()) {
-            int index = entry.getKey();
-            String value = entry.getValue();
-            if (value.equals("CLASS_DECLARATION_START")) {
-                startIndex = index;
+        // extract missing info from attributes
+        for (Attribute a : cpgClass.attributes) {
+            String name = a.name;
+            String type = a.type;
+            if (type.contains("$")) {
+                type = getProperTypeName(type);
             }
-            if (value.equals("CLASS_CONSTRUCTOR") || value.equals("END")) {
-                endIndex = index;
-            }
-        }
-        if (endIndex == 0) {
-            endIndex = Collections.max(crucialIndexes.keySet());
-        }
-        // Iterate through nonEmptyLines from startIndex + 1 until endIndex to get all info about the field
-        for (int i = startIndex + 1; i < endIndex; i++) {
-            String line = nonEmptyLines.get(i);
-            if (line.contains(";")) {
-                for (String attrName : attributeNames) {
-                    if (line.contains(attrName)) {
-                        int index = attributeNames.indexOf(attrName);
-                        Attribute currentAttribute = existingAttributes.get(index);
-                        ArrayList<CPGClass.Modifier> modifiers = new ArrayList<>(Arrays.asList(currentAttribute.modifiers));
-                        String attributeCode = line.trim();
-                        String toRemove = "";
-                        if (line.contains("=")) {
-                            int startingIndex = line.indexOf("=");
-                            toRemove = line.substring(0, startingIndex).replace("=", "").trim();
-                        }
-                        String name = currentAttribute.name;
-                        String type = getProperTypeName(currentAttribute.type);
-                        toRemove = line.replace(name, "").replace(type, "").trim();
-                        for (CPGClass.Modifier m : currentAttribute.modifiers) {
-                            toRemove = toRemove.replace(m.modString, "").trim();
-                        }
-                        toRemove = toRemove.replace(";", "").trim();
-                        for (CPGClass.Modifier mod : CPGClass.Modifier.values()) {
-                            if (toRemove.equals(mod.modString)) {
-                                modifiers.add(mod);
-                            }
-                        }
-
-                        Attribute properAttribute = new Attribute(currentAttribute.name, currentAttribute.type,
-                                attributeCode, currentAttribute.packageName, modifiers.toArray(new CPGClass.Modifier[modifiers.size()]));
-                        updatedFields.add(properAttribute);
-                        break;
+            String toFind = type + " " + name;
+            var attributeResult = nonEmptyLines.stream().filter(line -> (line.contains(toFind) || line.contains(name)) && !line.contains("{")).collect(Collectors.toList());
+            if (!attributeResult.isEmpty()) {
+                ArrayList<CPGClass.Modifier> fieldModifiers = new ArrayList<>();
+                String code = attributeResult.get(0).trim();
+                String line = code.replace(a.name, "").trim();
+                for (CPGClass.Modifier modStr : CPGClass.Modifier.values()) {
+                    if (line.contains(modStr.modString)) {
+                        line = line.replace(modStr.modString, "").trim();
+                        fieldModifiers.add(modStr);
                     }
                 }
+                Attribute properAttribute = new Attribute(name, code, a.packageName,
+                        type, fieldModifiers.toArray(new CPGClass.Modifier[fieldModifiers.size()]));
+                updatedAttributes.add(properAttribute);
             }
         }
+
 
         return new CPGClass(className, classDeclaration,
                 importStatements.toArray(new String[importStatements.size()]),
+                classModifiers.toArray(new CPGClass.Modifier[classModifiers.size()]),
                 cpgClass.classFullName, classType, cpgClass.filePath, packageName,
-                updatedFields.toArray(new Attribute[updatedFields.size()]),
+                updatedAttributes.toArray(new Attribute[updatedAttributes.size()]),
                 cpgClass.methods);
     }
 
@@ -382,11 +331,10 @@ public class Parser {
                 properMethods.add(properMethod);
             }
 
-            CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, cpgClass.classFullName,
+            CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{}, cpgClass.classFullName,
                     cpgClass.type, cpgClass.filePath, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
-
             graph.addClass(properClass);
         }
         if (iterations - 1 == 0) {
@@ -539,7 +487,6 @@ public class Parser {
         for (CPGClass cpgClass : cpg.getClasses()) {
             String code = cpgClass.code;
             if (code.contains("extends")) {
-                System.out.println(code);
                 int startIndex = code.indexOf(cpgClass.name);
                 String destClass = code.substring(startIndex).replace(cpgClass.name, "").replace("extends", "").trim();
                 if (allClassNames.contains(destClass)) {
