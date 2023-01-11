@@ -16,7 +16,10 @@ public class Parser {
 
     public static void main(String[] args) {
         Parser p = new Parser();
-        CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        // temp using a diff path to showcase differences in .json files (eventually this will just replace sourceCode.json
+        String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
+        p.writeToJson(cpg, filePath);
     }
 
     /**
@@ -31,6 +34,7 @@ public class Parser {
         try {
             try (Writer writer = new FileWriter(filePath)) {
                 gson.toJson(cpg, writer);
+                writer.close();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -55,18 +59,16 @@ public class Parser {
             for (CPGClass cpgClass : tempCPG.getClasses()) {
                 cpg.addClass(assignMissingClassInfo(cpgClass));
             }
+            cpg = this.assignInheritanceRelationship(cpg);
+            this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
-            this.assignInheritanceRelationship(cpg);
-            this.assignRealizationRelationships(cpg);
-            String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
-            this.writeToJson(cpg, filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return cpg;
     }
-    
+
     /**
      * @param cpg
      */
@@ -136,8 +138,6 @@ public class Parser {
                             CPGClass destinationClass = cpg.getClasses().get(classIndex);
                             var checkAttributes = Arrays.stream(cpgClass.attributes).
                                     filter(attribute -> attribute.type.contains(destinationClass.name)).collect(Collectors.toList());
-                            System.out.println(cpgClass.name + " HAS: ");
-                            checkAttributes.forEach(attribute -> System.out.println(attribute.name));
                             // Only add the dependency relationship if the destination class is not present within the source class's
                             // attributes.
                             if (checkAttributes.isEmpty()) {
@@ -156,12 +156,12 @@ public class Parser {
     }
 
     /**
-     * @param cpg // todo add methods of superclass to subclass
+     * @param cpg
      */
-    private void assignInheritanceRelationship(CodePropertyGraph cpg) {
+    private CodePropertyGraph assignInheritanceRelationship(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
-
+        CodePropertyGraph updatedGraph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
             String code = cpgClass.code;
             if (code.contains("extends")) {
@@ -172,12 +172,35 @@ public class Parser {
                     CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation(cpgClass,
                             cpg.getClasses().get(destClassIndex), ClassRelation.Type.INHERITANCE, "");
                     if (!checkExistingRelation(cpg, relationToAdd)) {
-                        cpg.addRelation(relationToAdd);
+                        CPGClass properClass = appendSuperClassMethods(cpgClass, cpg.getClasses().get(destClassIndex));
+                        updatedGraph.addClass(properClass);
+                        CodePropertyGraph.Relation properRelation = new CodePropertyGraph.Relation(properClass,
+                                cpg.getClasses().get(destClassIndex), ClassRelation.Type.INHERITANCE, "");
+                        updatedGraph.addRelation(properRelation);
                     }
                 }
+            } else updatedGraph.addClass(cpgClass);
+        }
+        return updatedGraph;
+    }
+
+    private CPGClass appendSuperClassMethods(CPGClass subClass, CPGClass superClass) {
+        ArrayList<Method> methods = new ArrayList<>(Arrays.asList(subClass.methods));
+        ArrayList<String> existingMethodNames = new ArrayList<>();
+        methods.forEach(method -> existingMethodNames.add(method.name));
+        ArrayList<Method> superClassMethods = new ArrayList<>(Arrays.asList(superClass.methods));
+        for (Method method : superClassMethods) {
+            String name = method.name;
+            if (!existingMethodNames.contains(name)) {
+                methods.add(method);
             }
         }
+        return new CPGClass(subClass.name, subClass.code,
+                subClass.importStatements, subClass.modifiers, subClass.classFullName,
+                subClass.type, subClass.filePath, subClass.packageName, subClass.attributes,
+                methods.toArray(new Method[methods.size()]));
     }
+
 
     /**
      * @param cpg
@@ -222,6 +245,21 @@ public class Parser {
         }
     }
 
+    /**
+     * @param cpg
+     * @param relationToAdd
+     * @return
+     */
+    private boolean checkExistingRelation(CodePropertyGraph cpg, CodePropertyGraph.Relation relationToAdd) {
+        var result = cpg.getRelations().stream().
+                filter(relation -> relation.source.equals(relationToAdd.source)
+                        && relation.destination.equals(relationToAdd.destination)
+                        && relation.type.equals(relationToAdd.type)
+                        && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
+        if (result.isEmpty()) {
+            return false;
+        } else return true;
+    }
 
     /**
      * @param cpg
@@ -308,8 +346,6 @@ public class Parser {
         if (!packageResult.isEmpty()) {
             packageName = packageResult.get(0).replace("package ", "").replace(";", "").trim();
         }
-        System.out.println(packageName);
-
         // extract missing info from class decl
         if (!classDeclResult.isEmpty()) {
             classDeclaration = classDeclResult.get(0).replace("{", "").trim();
@@ -514,23 +550,8 @@ public class Parser {
 
 
     /**
-     * @param cpg
-     * @param relationToAdd
-     * @return
-     */
-    private boolean checkExistingRelation(CodePropertyGraph cpg, CodePropertyGraph.Relation relationToAdd) {
-        var result = cpg.getRelations().stream().
-                filter(relation -> relation.source.equals(relationToAdd.source)
-                        && relation.destination.equals(relationToAdd.destination)
-                        && relation.type.equals(relationToAdd.type)
-                        && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
-        if (result.isEmpty()) {
-            return false;
-        } else return true;
-    }
-
-
-    /**
+     * // todo - many-to-many support (simple to do, got an idea and will do)
+     *
      * @param attribute
      * @param count
      * @return
