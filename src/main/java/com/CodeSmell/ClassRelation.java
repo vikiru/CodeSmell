@@ -39,6 +39,7 @@ public class ClassRelation extends RenderObject {
         ASSOCIATION,
         UNIDIRECTIONAL_ASSOCIATION,
         BIDIRECTIONAL_ASSOCIATION,
+        REFLEXIVE_ASSOCIATION,
         AGGREGATION,
         COMPOSITION,
         DEPENDENCY,
