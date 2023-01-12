@@ -139,7 +139,9 @@ public class CPGClass {
         }
     }
 
-    // A method belonging to a class
+    /**
+     * A method belonging to a class
+     */
     public static class Method {
 
         // the parent class of the method (used to differentiate between methods within
@@ -239,7 +241,6 @@ public class CPGClass {
             // The line number of where the line of code occurs within the method body.
             @Expose(serialize = true, deserialize = true)
             public final String lineNumber;
-
             // The name of the method that the instruction is calling, if any
             @Expose(serialize = true, deserialize = true)
             public final String methodCall;
