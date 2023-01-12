@@ -74,10 +74,10 @@ public class WebControl implements RenderEventListener {
 
         for (Position p : path) {
             this.engine.executeScript(String.format(
-                    "appendPathNode(%d, %d, %f, %f)", classId, pathNumber, p.x, p.y));
+                "appendPathNode(%d, %d, %f, %f)", classId, pathNumber, p.x, p.y));
         }
         this.engine.executeScript(String.format(
-                "renderPath(%d, %d)", classId, pathNumber));
+                "renderPath(%d, %d, \"%s\")", classId, pathNumber, cr.type));
         return pathNumber;
     }
 

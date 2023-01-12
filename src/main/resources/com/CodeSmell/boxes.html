@@ -130,7 +130,7 @@ function appendPathNode(classId, pathNumber, x, y) {
     pathContainer.appendChild(node);
 }
 
-function renderPath(classId, pathNumber) {
+function renderPath(classId, pathNumber, type) {   
     let lineContainer = document.getElementById("lines");
     let relationsContainer = document.getElementById('relationContainer' + classId);
     let nodes = relationsContainer.children.item(pathNumber).children;
@@ -156,7 +156,7 @@ function renderPath(classId, pathNumber) {
         let angle = Math.acos((endX - startX) / magnitude);
         if (endX <= startX && endY <= startY) {
             angle *= -1;
-        } 
+        }  
 
         let line = document.createElement('div');
         line.className = 'line';
@@ -165,6 +165,13 @@ function renderPath(classId, pathNumber) {
         line.style.width = magnitude - 7 + 'px';
         line.id = nodes[i].id;
         rotateLine(line, angle);
+
+        if (type == "DEPENDENCY" || type == "REALIZATION") {
+            line.style.borderStyle = 'dashed';
+        } else{
+            line.style.borderStyle = 'solid';
+        }
+
         lineContainer.appendChild(line);
     }
 }
