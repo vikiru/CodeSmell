@@ -26,7 +26,7 @@ public class Parser {
      * @param cpg      - The CodePropertyGraph containing all the classes and relations of the source code
      * @param filePath - The filePath to where the .json will be outputted
      */
-    private void writeToJson(CodePropertyGraph cpg, String filePath) {
+    void writeToJson(CodePropertyGraph cpg, String filePath) {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         builder.setPrettyPrinting();
@@ -69,7 +69,7 @@ public class Parser {
             this.assignDependencyRelationships(cpg);
 
             // finally write the resulting cpg to a json at a given filePath
-            String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
+            String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelations.json";
             this.writeToJson(cpg, filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -108,15 +108,16 @@ public class Parser {
                         if (allClassNames.contains(t)) {
                             int destClassIndex = allClassNames.indexOf(t);
                             CPGClass destClass = cpg.getClasses().get(destClassIndex);
-
                             String multiplicity = "1..*";
                             ClassRelation.Type type;
                             var destResult = Arrays.stream(destClass.attributes).
-                                    filter(attribute -> attribute.attributeType.contains(cpgClass.name)
-                                            && (attribute.attributeType.contains("[]")
-                                            || attribute.attributeType.contains("<"))).collect(Collectors.toList());
+                                    filter(attribute -> attribute.attributeType.contains(cpgClass.name))
+                                    .collect(Collectors.toList());
                             if (!destResult.isEmpty()) {
-                                multiplicity = "*..*";
+                                String destMultiplicity = obtainMultiplicity(destResult.get(0).attributeType, 0L);
+                                if (destMultiplicity.equals("1..*")) {
+                                    multiplicity = "*..*";
+                                }
                                 type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
                             } else {
                                 type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
@@ -156,11 +157,10 @@ public class Parser {
                     // Handle many-to-many
                     ClassRelation.Type type;
                     var destResult = Arrays.stream(destClass.attributes).
-                            filter(attribute -> attribute.attributeType.contains(cpgClass.name)
-                                    && (attribute.attributeType.contains("[]")
-                                    || attribute.attributeType.contains("<"))).collect(Collectors.toList());
+                            filter(attribute -> attribute.attributeType.contains(cpgClass.name)).collect(Collectors.toList());
                     if (!destResult.isEmpty()) {
-                        if (multiplicity.equals("1..*")) {
+                        String destMultiplicity = obtainMultiplicity(destResult.get(0).attributeType, 0L);
+                        if (destMultiplicity.equals("1..*")) {
                             multiplicity = "*..*";
                         }
                         type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
@@ -224,7 +224,8 @@ public class Parser {
             }
         } else {
             // Check if the field is declared and initialized in the same line
-            if (matchingAttribute.get(0).code.contains("= new")) {
+            // Additonally ensure the field is not static.
+            if (matchingAttribute.get(0).code.contains("= new") && !matchingAttribute.get(0).code.contains("static")) {
                 compositionExists = true;
             }
         }
