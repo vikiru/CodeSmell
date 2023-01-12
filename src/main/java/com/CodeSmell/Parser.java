@@ -691,7 +691,10 @@ public class Parser {
                         && allClassNames.contains(ins.code)).collect(Collectors.toList());
         var methodCallResult = allMethodInstructions.stream().
                 filter(ins -> ins.label.equals("CALL") && !ins.methodCall.equals("")).collect(Collectors.toList());
+        var localResult = allMethodInstructions.stream().
+                filter(ins -> ins.label.equals("LOCAL")).collect(Collectors.toList());
 
+        // Check for identifier and calls
         for (Method.Instruction identifier : identifierResult) {
             String parentName = identifier.code;
             for (Method.Instruction mc : methodCallResult) {
@@ -713,6 +716,26 @@ public class Parser {
                                 && method.parameters.length == finalParamCount).collect(Collectors.toList());
                 if (!methodResult.isEmpty()) {
                     indexes.add(allMethodsInCPG.indexOf(methodResult.get(0)));
+                }
+            }
+        }
+        // Check for local variable creation
+        for (Method.Instruction localIns : localResult) {
+            String[] localInstanceVar = localIns.code.split(" ");
+            if (localInstanceVar.length == 2) {
+                String type = localInstanceVar[0];
+                String name = localInstanceVar[1];
+                if (allClassNames.contains(type)) {
+                    var checkCreation = methodCallResult.stream().
+                            filter(i -> i.methodCall.contains(type) && i.code.contains("=")).collect(Collectors.toList());
+                    checkCreation.forEach(s -> System.out.println(s.code));
+                    for (Method.Instruction creation : checkCreation) {
+                        String methodCalled = creation.methodCall;
+                        int index = allMethodNames.indexOf(methodCalled);
+                        if (index != -1) {
+                            indexes.add(index);
+                        }
+                    }
                 }
             }
         }
