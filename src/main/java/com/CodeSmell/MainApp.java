@@ -63,10 +63,7 @@ public class MainApp extends Application {
             target.addRelationship(cr);
             relations.add(cr);
         }
-
-        LayoutManager lm = new LayoutManager();
-        lm.positionClasses(new ArrayList<UMLClass>(classMap.values()));
-        lm.setRelationPaths(relations);
+	LayoutManager lm = new LayoutManager(new ArrayList<UMLClass>(classMap.values()), relations);
     }
 
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
