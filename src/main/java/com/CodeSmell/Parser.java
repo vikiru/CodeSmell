@@ -12,9 +12,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-// todo - composition, refactor and comment as much as possible, add tests for relations'
-// add package names for attributes where package name = "", simply look at import statements
-
 public class Parser {
 
     public static void main(String[] args) {
@@ -60,16 +57,18 @@ public class Parser {
         try {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
             CodePropertyGraph tempCPG = gson.fromJson(reader, CodePropertyGraph.class);
+            // get missing info for CPGClasses and their fields and methods.
             tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
-            // temp
             for (CPGClass cpgClass : tempCPG.getClasses()) {
                 cpg.addClass(assignMissingClassInfo(cpgClass));
             }
+            // assign all relations (association of diff types, composition, realization, inheritance, dependency)
             cpg = this.assignInheritanceRelationship(cpg);
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
 
+            // finally write the resulting cpg to a json at a given filePath
             String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelation.json";
             this.writeToJson(cpg, filePath);
         } catch (IOException e) {
@@ -124,6 +123,9 @@ public class Parser {
                             }
                             if (cpgClass == destClass) {
                                 type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                            }
+                            if (determineCompositionRelationship(cpgClass, destClass)) {
+                                type = ClassRelation.Type.COMPOSITION;
                             }
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
                                     (cpgClass, destClass,
@@ -187,6 +189,20 @@ public class Parser {
         }
     }
 
+    /**
+     * Given a source and destination CPGClass, determine if the source class has a composition relation
+     * with the destination class.
+     * <p>
+     * Checks for the presence of a constructor and if yes, then checks that the constructor parameters does not
+     * contain a parameter matching the type of destination class.
+     * <p>
+     * If no constructor is present, checks the attribute's code to see if the attribute was declared and initialized on the same line.
+     * </p>
+     *
+     * @param source      - The source class containing an attribute matching the destination class.
+     * @param destination - The destination class which is being compared with to determine if source has composition relation with it.
+     * @return True or False, depending on if a composition relation exists.
+     */
     private boolean determineCompositionRelationship(CPGClass source, CPGClass destination) {
         boolean compositionExists = false;
         var constructorResult = Arrays.stream(source.methods).
@@ -281,7 +297,15 @@ public class Parser {
     }
 
     /**
-     * @param cpg
+     * Iterates through the CodePropertyGraph and assigns inheritance relations for every class
+     * which extends another class. Additionally, call a helper method so that the super class's methods are
+     * appended to the subclass.
+     * <p>
+     * Once this is done, a new class is created and appended to a new CodePropertyGraph object. After all classes
+     * are iterated through, relations are added and finally, the updatedGraph is returned.
+     *
+     * @param cpg - The CodePropertyGraph containing existing CPGClass and Relations.
+     * @return A CodePropertyGraph containing the updated CPGClasses and Relations.
      */
     private CodePropertyGraph assignInheritanceRelationship(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -560,6 +584,7 @@ public class Parser {
             var attributeResult = nonEmptyLines.stream().
                     filter(line -> (line.contains(toFind) || line.contains(name))
                             && !line.contains("{") && !line.contains("//") && !line.contains("*")).collect(Collectors.toList());
+            // add all modifiers
             if (!attributeResult.isEmpty()) {
                 ArrayList<CPGClass.Modifier> fieldModifiers = new ArrayList<>();
                 String code = attributeResult.get(0).trim();
@@ -570,6 +595,7 @@ public class Parser {
                         fieldModifiers.add(modStr);
                     }
                 }
+                // get proper type of attribute
                 if (a.packageName.equals("java.util") && !type.contains("<")) {
                     int startIndex = line.indexOf("<");
                     int endIndex = line.lastIndexOf(">");
@@ -577,7 +603,12 @@ public class Parser {
                         type += line.substring(startIndex, endIndex + 1).trim();
                     }
                 }
-                Attribute properAttribute = new Attribute(name, code, a.packageName,
+                String attrPackage = a.typeFullName;
+                if (a.typeFullName.contains(packageName)) {
+                    attrPackage = a.typeFullName.replace("$", ".").replace("[]", "");
+                }
+                // create new attribute with proper info and add to updatedAttributes list
+                Attribute properAttribute = new Attribute(name, code, attrPackage,
                         type, fieldModifiers.toArray(new CPGClass.Modifier[fieldModifiers.size()]), a.typeFullName);
                 updatedAttributes.add(properAttribute);
             }
