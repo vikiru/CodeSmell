@@ -20,9 +20,6 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-        var result = cpg.getRelations().stream().filter(relation -> relation.multiplicity.equals("*..*"));
-        result.forEach(r -> System.out.println(r.source.name + "->" + r.destination.name + ": " + r.multiplicity));
-        // temp using a diff path to showcase differences in .json files (eventually this will just replace sourceCode.json
     }
 
     /**
@@ -187,7 +184,10 @@ public class Parser {
     }
 
     /**
-     * @param cpg
+     * Iterates through the cpg and assigns dependency relationships if the source class uses another class within
+     * a method and the source class does not have the dest class as one of the types for its fields.
+     *
+     * @param cpg The CodePropertyGraph containing source code and existing relations.
      */
     private void assignDependencyRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -231,24 +231,39 @@ public class Parser {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         CodePropertyGraph updatedGraph = new CodePropertyGraph();
+        // Handle adding superclass methods to sub class
         for (CPGClass cpgClass : cpg.getClasses()) {
             String code = cpgClass.code;
             if (code.contains("extends")) {
-                int startIndex = code.indexOf(cpgClass.name);
-                String destClass = code.substring(startIndex).replace(cpgClass.name, "").replace("extends", "").trim();
-                if (allClassNames.contains(destClass)) {
-                    int destClassIndex = allClassNames.indexOf(destClass);
-                    CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation(cpgClass,
-                            cpg.getClasses().get(destClassIndex), ClassRelation.Type.INHERITANCE, "");
-                    if (!checkExistingRelation(cpg, relationToAdd)) {
-                        CPGClass properClass = appendSuperClassMethods(cpgClass, cpg.getClasses().get(destClassIndex));
-                        updatedGraph.addClass(properClass);
-                        CodePropertyGraph.Relation properRelation = new CodePropertyGraph.Relation(properClass,
-                                cpg.getClasses().get(destClassIndex), ClassRelation.Type.INHERITANCE, "");
-                        updatedGraph.addRelation(properRelation);
-                    }
+                int startingIndex = code.indexOf("extends");
+                String destClassName = code.substring(startingIndex).replace("extends", "").trim();
+                if (allClassNames.contains(destClassName)) {
+                    int destClassIndex = allClassNames.indexOf(destClassName);
+                    CPGClass destClass = cpg.getClasses().get(destClassIndex);
+                    CPGClass properClass = appendSuperClassMethods(cpgClass, destClass);
+                    updatedGraph.addClass(properClass);
+                } else {
+                    updatedGraph.addClass(cpgClass);
                 }
             } else updatedGraph.addClass(cpgClass);
+        }
+
+        // Handle adding inheritance relations
+        for (CPGClass newClass : updatedGraph.getClasses()) {
+            String code = newClass.code;
+            if (code.contains("extends")) {
+                int startingIndex = code.indexOf("extends");
+                String destClassName = code.substring(startingIndex).replace("extends", "").trim();
+                int destClassIndex = allClassNames.indexOf(destClassName);
+                if (destClassIndex != -1) {
+                    CPGClass destClass = updatedGraph.getClasses().get(destClassIndex);
+                    CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
+                            (newClass, destClass, ClassRelation.Type.INHERITANCE, "");
+                    if (!checkExistingRelation(updatedGraph, relationToAdd)) {
+                        updatedGraph.addRelation(relationToAdd);
+                    }
+                }
+            }
         }
         return updatedGraph;
     }
