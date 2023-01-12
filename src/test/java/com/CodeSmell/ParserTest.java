@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import com.CodeSmell.CPGClass;
 import com.CodeSmell.JoernServer;
@@ -56,16 +57,16 @@ public class ParserTest {
             boolean destCheck = connectedClasses.get(r.destination);
             // ensure the classes in the relation are the
             // ones in the classes list
-            String s = "Class in relation not found in cpg class list\n" + r;
-            assertEquals(s, sourceCheck, false);
-            assertEquals(s, destCheck, false);
+            String s = "Class in relation not found in cpg class list\n";
+            assertNotNull( s + r.source, sourceCheck);
+            assertNotNull(s + r.destination, destCheck);
 
             connectedClasses.put(r.source, true);
             connectedClasses.put(r.destination, true);
         }
 
         connectedClasses.forEach( (c, isConnected) -> {
-            assertEquals("Disconnected class\n" + c, isConnected, true);
+            assertEquals("Disconnected class: " + c, isConnected, true);
         });
     }
 
