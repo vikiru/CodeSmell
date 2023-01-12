@@ -20,14 +20,14 @@ public class Parser {
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-        var result = cpg.getRelations().stream().filter(relation -> relation.multiplicity.equals("*..*"));
-        result.forEach(r -> System.out.println(r.source.name + "->" + r.destination.name + ": " + r.multiplicity));
-        // temp using a diff path to showcase differences in .json files (eventually this will just replace sourceCode.json
     }
 
     /**
-     * @param cpg
-     * @param filePath
+     * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
+     * pretty printing and write to the given path.
+     *
+     * @param cpg      - The CodePropertyGraph containing all the classes and relations of the source code
+     * @param filePath - The filePath to where the .json will be outputted
      */
     private void writeToJson(CodePropertyGraph cpg, String filePath) {
         GsonBuilder builder = new GsonBuilder();
@@ -45,8 +45,12 @@ public class Parser {
     }
 
     /**
-     * @param destination
-     * @return
+     * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
+     * and update neccessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
+     * serializes it into a .json file.
+     *
+     * @param destination - The filePath containing the .json file
+     * @return A CodePropertyGraph object containing the source code classes and all relations
      */
     public CodePropertyGraph initializeCPG(String destination) {
         GsonBuilder builder = new GsonBuilder();
@@ -56,7 +60,7 @@ public class Parser {
         try {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
             CodePropertyGraph tempCPG = gson.fromJson(reader, CodePropertyGraph.class);
-            tempCPG = assignProperFieldsAndMethods(tempCPG, 2);
+            tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
             // temp
             for (CPGClass cpgClass : tempCPG.getClasses()) {
                 cpg.addClass(assignMissingClassInfo(cpgClass));
@@ -75,7 +79,19 @@ public class Parser {
     }
 
     /**
-     * @param cpg
+     * Iterates through the cpg and iterates through every attribute of every class assigining association
+     * relationships.
+     * <p>
+     * BIDIRECTIONAL_ASSOCIATION assigned if the source and dest class both store each other as fields.
+     * </p>
+     * <p>
+     * UNIDIRECTIONAL_ASSOCIATION assigned if only one class has the other as a field.
+     * </p>
+     * <p>
+     * REFLEXIVE_ASSOCIATION assigned if the source and dest class are the same CPGClass object.
+     * </p>
+     *
+     * @param cpg The CodePropertyGraph containing classes and existing relations.
      */
     private void assignAssociationRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -168,7 +184,10 @@ public class Parser {
     }
 
     /**
-     * @param cpg
+     * Iterates through the cpg and assigns dependency relationships if the source class uses another class within
+     * a method and the source class does not have the dest class as one of the types for its fields.
+     *
+     * @param cpg The CodePropertyGraph containing source code and existing relations.
      */
     private void assignDependencyRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -212,28 +231,50 @@ public class Parser {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         CodePropertyGraph updatedGraph = new CodePropertyGraph();
+        // Handle adding superclass methods to sub class
         for (CPGClass cpgClass : cpg.getClasses()) {
             String code = cpgClass.code;
             if (code.contains("extends")) {
-                int startIndex = code.indexOf(cpgClass.name);
-                String destClass = code.substring(startIndex).replace(cpgClass.name, "").replace("extends", "").trim();
-                if (allClassNames.contains(destClass)) {
-                    int destClassIndex = allClassNames.indexOf(destClass);
-                    CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation(cpgClass,
-                            cpg.getClasses().get(destClassIndex), ClassRelation.Type.INHERITANCE, "");
-                    if (!checkExistingRelation(cpg, relationToAdd)) {
-                        CPGClass properClass = appendSuperClassMethods(cpgClass, cpg.getClasses().get(destClassIndex));
-                        updatedGraph.addClass(properClass);
-                        CodePropertyGraph.Relation properRelation = new CodePropertyGraph.Relation(properClass,
-                                cpg.getClasses().get(destClassIndex), ClassRelation.Type.INHERITANCE, "");
-                        updatedGraph.addRelation(properRelation);
-                    }
+                int startingIndex = code.indexOf("extends");
+                String destClassName = code.substring(startingIndex).replace("extends", "").trim();
+                if (allClassNames.contains(destClassName)) {
+                    int destClassIndex = allClassNames.indexOf(destClassName);
+                    CPGClass destClass = cpg.getClasses().get(destClassIndex);
+                    CPGClass properClass = appendSuperClassMethods(cpgClass, destClass);
+                    updatedGraph.addClass(properClass);
+                } else {
+                    updatedGraph.addClass(cpgClass);
                 }
             } else updatedGraph.addClass(cpgClass);
+        }
+
+        // Handle adding inheritance relations
+        for (CPGClass newClass : updatedGraph.getClasses()) {
+            String code = newClass.code;
+            if (code.contains("extends")) {
+                int startingIndex = code.indexOf("extends");
+                String destClassName = code.substring(startingIndex).replace("extends", "").trim();
+                int destClassIndex = allClassNames.indexOf(destClassName);
+                if (destClassIndex != -1) {
+                    CPGClass destClass = updatedGraph.getClasses().get(destClassIndex);
+                    CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
+                            (newClass, destClass, ClassRelation.Type.INHERITANCE, "");
+                    if (!checkExistingRelation(updatedGraph, relationToAdd)) {
+                        updatedGraph.addRelation(relationToAdd);
+                    }
+                }
+            }
         }
         return updatedGraph;
     }
 
+    /**
+     * Adds all the existing methods of a superclass to a subclass and returns a new CPGClass object for the subclass.
+     *
+     * @param subClass   The CPGClass which inherits from the superclass
+     * @param superClass The CPGClass which is inherited by the subclass
+     * @return The updated CPGClass object for the subclass, with the super class's methods added.
+     */
     private CPGClass appendSuperClassMethods(CPGClass subClass, CPGClass superClass) {
         ArrayList<Method> methods = new ArrayList<>(Arrays.asList(subClass.methods));
         ArrayList<String> existingMethodNames = new ArrayList<>();
@@ -253,7 +294,16 @@ public class Parser {
 
 
     /**
-     * @param cpg
+     * Iterates through the provided CodePropertyGraph to determine whether a realization relationship exists.
+     * This is determined by first checking for the presence of interfaces within the cpg and collecting them within a list.
+     * <p>
+     * If the list (List<CPGClass>) is not empty, it is iterated and for every method within that interface,
+     * it is compared with other existing method names to determine if there is more than one instance of a method name.
+     * <p>
+     * Ignoring toString() methods, if there is more than one method match, a comparison is made between the parentClass of both
+     * methods and whichever is not an interface is the source of the realization relationship.
+     *
+     * @param cpg -The CodePropertyGraph containing source code classes and existing relations
      */
     private void assignRealizationRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -296,9 +346,14 @@ public class Parser {
     }
 
     /**
-     * @param cpg
-     * @param relationToAdd
-     * @return
+     * Determines whether or not a relation exists within the CodePropertyGraph (matching the exact source, target, type
+     * and multiplicity)
+     * <p>
+     * If the relation exists, return true and if it does not exist, return false.
+     *
+     * @param cpg           The CodePropertyGraph object containing all the classes and existing relations
+     * @param relationToAdd The relation to be added to the provided CodePropertyGraph object.
+     * @return boolean - True or False, depending on if the relation exists within cpg
      */
     private boolean checkExistingRelation(CodePropertyGraph cpg, CodePropertyGraph.Relation relationToAdd) {
         var result = cpg.getRelations().stream().
@@ -312,11 +367,16 @@ public class Parser {
     }
 
     /**
-     * @param cpg
-     * @param iterations
+     * Iterates through the provided CodePropertyGraph object, calling helper
+     * methods to update the attributes and methods. Once each attribute and method is updated,
+     * a new CPGClass is created containing these new Attribute and Method objects. This class is then added to a
+     * new CodePropertyGraph which will finally be returned at the end.
+     *
+     * @param cpg        - The CodePropertyGraph object containing the updated Attribute and Methods
+     * @param iterations - The number of iterations that the method must be called in order to properly update fields and methods.
      * @return
      */
-    private CodePropertyGraph assignProperFieldsAndMethods(CodePropertyGraph cpg, int iterations) {
+    private CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
             ArrayList<Attribute> properAttributes = new ArrayList<>();
@@ -343,12 +403,25 @@ public class Parser {
         }
         if (iterations - 1 == 0) {
             return graph;
-        } else return assignProperFieldsAndMethods(graph, iterations - 1);
+        } else return assignProperAttributesAndMethods(graph, iterations - 1);
     }
 
     /**
-     * @param cpgClass
-     * @return
+     * <p>
+     * Given a CPGClass object, this method will read in the .java file by reading the file
+     * based on the filePath field of the class. This method is necessary to address certain
+     * limitations of Joern.
+     * </p>
+     *
+     * <p>
+     * This method will update the CPGClass's code, packageName, classType, classModifiers, importStatements fields.
+     * Additionally, updating each the type, code, and modifiers fields of each Attribute within the class as needed.
+     * <p>
+     * Finally, a new CPGClass object is returned.
+     * </p>
+     *
+     * @param cpgClass - The existing CPGClass object which will be updated.
+     * @return A new CPGClass containing the updated CPGClass fields and Attribute objects.
      */
     private CPGClass assignMissingClassInfo(CPGClass cpgClass) {
         // KNOWN INFO
@@ -495,7 +568,7 @@ public class Parser {
                     filter(instruction -> instruction.label.equals("METHOD"))
                     .collect(Collectors.toList());
             String constructorBody = instructionResult.get(0).code;
-            // Check the constructor, if the desired field is a parameter, this will obtain the type
+            // Check the constructor, if the desired attribute is a parameter, this will obtain the type
             if (constructorBody.contains(attribute.name)) {
                 var attributeResult = Arrays.stream(constructor.parameters).
                         filter(parameter -> parameter.name.equals(attribute.name)).collect(Collectors.toList());
@@ -503,7 +576,7 @@ public class Parser {
                     finalAttributeType = attributeResult.get(0).type;
                 }
             }
-            // Check the constructor's instructions, if the desired field is defined within the constructor, this will obtain the
+            // Check the constructor's instructions, if the desired attribute is defined within the constructor, this will obtain the
             // type
             else {
                 instructionResult = Arrays.stream(constructor.instructions).
@@ -520,7 +593,7 @@ public class Parser {
                 }
             }
         }
-        // Check all other methods apart from the constructor to determine if the desired field is used somewhere.
+        // Check all other methods apart from the constructor to determine if the desired attribute is used somewhere.
         if (finalAttributeType.equals(attribute.attributeType)) {
             for (Method method : classMethods) {
                 Method.Instruction[] instructions = method.instructions;
@@ -610,8 +683,6 @@ public class Parser {
 
 
     /**
-     * // todo - many-to-many support (simple to do, got an idea and will do)
-     *
      * @param attribute
      * @param count
      * @return
@@ -631,8 +702,11 @@ public class Parser {
     }
 
     /**
-     * @param typeName
-     * @return
+     * Returns a String containing the type name after removing extra characters such as "[]", "< >" so
+     * that the resulting string can be used in comparisons within cpg.
+     *
+     * @param typeName The name of the attribute's type.
+     * @return The name of the attribute's type without special characters and extra info.
      */
     private String getProperTypeName(String typeName) {
         if (typeName.contains("$")) {
