@@ -109,6 +109,7 @@ public class Parser {
                         if (allClassNames.contains(t)) {
                             int destClassIndex = allClassNames.indexOf(t);
                             CPGClass destClass = cpg.getClasses().get(destClassIndex);
+
                             String multiplicity = "1..*";
                             ClassRelation.Type type;
                             var destResult = Arrays.stream(destClass.attributes).
@@ -167,6 +168,9 @@ public class Parser {
                     if (cpgClass == destClass) {
                         type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
                     }
+                    if (determineCompositionRelationship(cpgClass, destClass)) {
+                        type = ClassRelation.Type.COMPOSITION;
+                    }
                     CodePropertyGraph.Relation relationToAdd = new
                             CodePropertyGraph.Relation(cpgClass, destClass,
                             type, multiplicity);
@@ -181,6 +185,34 @@ public class Parser {
                 }
             }
         }
+    }
+
+    private boolean determineCompositionRelationship(CPGClass source, CPGClass destination) {
+        boolean compositionExists = false;
+        var constructorResult = Arrays.stream(source.methods).
+                filter(method -> method.name.equals(source.name)).collect(Collectors.toList());
+        var matchingAttribute = Arrays.stream(source.attributes).
+                filter(attribute -> attribute.attributeType.contains(destination.name)).collect(Collectors.toList());
+        // Check for presence of a constructor
+        if (!constructorResult.isEmpty()) {
+            // Check that the destination class's type is not present within the constructor
+            Method constructor = constructorResult.get(0);
+            if (!constructor.methodBody.contains(destination.name)) {
+                var constructorInstructions = Arrays.stream(constructor.instructions).
+                        filter(instruction -> instruction.label.equals("CALL")
+                                && instruction.code.contains(destination.name)
+                                && instruction.code.contains("=")).collect(Collectors.toList());
+                if (!constructorInstructions.isEmpty()) {
+                    compositionExists = true;
+                }
+            }
+        } else {
+            // Check if the field is declared and initialized in the same line
+            if (matchingAttribute.get(0).code.contains("= new")) {
+                compositionExists = true;
+            }
+        }
+        return compositionExists;
     }
 
     /**
@@ -517,7 +549,6 @@ public class Parser {
                 classType = "abstract class";
             }
         }
-
         // extract missing info from attributes
         for (Attribute a : cpgClass.attributes) {
             String name = a.name;
@@ -728,7 +759,6 @@ public class Parser {
                 if (allClassNames.contains(type)) {
                     var checkCreation = methodCallResult.stream().
                             filter(i -> i.methodCall.contains(type) && i.code.contains("=")).collect(Collectors.toList());
-                    checkCreation.forEach(s -> System.out.println(s.code));
                     for (Method.Instruction creation : checkCreation) {
                         String methodCalled = creation.methodCall;
                         int index = allMethodNames.indexOf(methodCalled);
