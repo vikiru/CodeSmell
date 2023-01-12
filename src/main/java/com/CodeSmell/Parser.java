@@ -470,8 +470,11 @@ public class Parser {
             }
             for (Method m : cpgClass.methods) {
                 int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
-                Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
-                properMethods.add(properMethod);
+                // ignore lambdas for now
+                if (!m.name.contains("lambda")) {
+                    Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
+                    properMethods.add(properMethod);
+                }
             }
 
             CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{}, cpgClass.classFullName,
