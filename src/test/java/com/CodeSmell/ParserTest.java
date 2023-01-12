@@ -1,7 +1,11 @@
 package com.CodeSmell;
 
+import java.util.HashMap;
+
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import com.CodeSmell.CPGClass;
 import com.CodeSmell.JoernServer;
 
@@ -35,6 +39,35 @@ public class ParserTest {
             System.out.print("\t" + r);
             System.out.println("\n----------");
         }
+    }
+
+    @Test
+    public void testOwnProject() {
+        Parser p = new Parser();
+        JoernServer.start(false);
+        CodePropertyGraph g = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        HashMap<CPGClass, Boolean> connectedClasses = new HashMap<CPGClass, Boolean>(); 
+         for (CPGClass c : g.getClasses()) {
+            connectedClasses.put(c, false);
+        }
+
+
+        for (CodePropertyGraph.Relation r : g.getRelations()) {
+            boolean sourceCheck = connectedClasses.get(r.source); 
+            boolean destCheck = connectedClasses.get(r.destination);
+            // ensure the classes in the relation are the
+            // ones in the classes list
+            String s = "Class in relation not found in cpg class list\n";
+            assertNotNull( s + r.source, sourceCheck);
+            assertNotNull(s + r.destination, destCheck);
+
+            connectedClasses.put(r.source, true);
+            connectedClasses.put(r.destination, true);
+        }
+
+        connectedClasses.forEach( (c, isConnected) -> {
+            assertEquals("Disconnected class: " + c, isConnected, true);
+        });
     }
 
     @Test

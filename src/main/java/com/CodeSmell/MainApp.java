@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXMLLoader;
+import javafx.stage.Screen;
+import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.geometry.Rectangle2D;
 
 import java.io.File;
 import java.net.URL;
@@ -63,10 +66,7 @@ public class MainApp extends Application {
             target.addRelationship(cr);
             relations.add(cr);
         }
-
-        LayoutManager lm = new LayoutManager();
-        lm.positionClasses(new ArrayList<UMLClass>(classMap.values()));
-        lm.setRelationPaths(relations);
+	LayoutManager lm = new LayoutManager(new ArrayList<UMLClass>(classMap.values()), relations);
     }
 
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
@@ -80,13 +80,21 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("jfx.fxml"));
-        primaryStage.setScene(new Scene(root, 400, 300));
-        primaryStage.setTitle("CodeSmell Detector");
-
+        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
         String location = new File(System.getProperty("user.dir") + "/boxes.html"
         ).toURI().toURL().toExternalForm();
+
+        double startWidth = screenBounds.getWidth() / 2;
+        double startHeight = screenBounds.getHeight() * 0.8;
         WebView webView = new WebView();
+        webView.setMaxSize(screenBounds.getWidth() ,screenBounds.getHeight());
+        webView.prefHeightProperty().bind(primaryStage.heightProperty());
+        webView.prefWidthProperty().bind(primaryStage.heightProperty());
         webView.getEngine().load(location);
+        VBox vBox = new VBox(webView);
+        Scene scene = new Scene(vBox, startWidth, startHeight);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("CodeSmell Detector");
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
@@ -98,21 +106,18 @@ public class MainApp extends Application {
             removeWhenParserLambdaLimitationFixed(newState);
         });
 
+  
         // hide scroll bars from the webview. source:
         // https://stackoverflow.com/questions/11206942/how-to-hide-scrollbars-in-the-javafx-webview
         webView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
             @Override
             public void onChanged(Change<? extends Node> change) {
-                Set<Node> deadSeaScrolls = webView.lookupAll(".scroll-bar");
-                for (Node scroll : deadSeaScrolls) {
+                Set<Node> scrollBar = webView.lookupAll(".scroll-bar");
+                for (Node scroll : scrollBar) {
                     scroll.setVisible(false);
                 }
             }
         });
-
-        VBox vBox = new VBox(webView);
-        Scene scene = new Scene(vBox, 960, 600);
-        primaryStage.setScene(scene);
         primaryStage.show();
     }
 }
