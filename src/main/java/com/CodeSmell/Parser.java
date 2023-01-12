@@ -195,6 +195,7 @@ public class Parser {
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (Method method : cpgClass.methods) {
                 if (!method.name.equals(cpgClass.name)) {
+                    // Assign dependencies based off of method parameters
                     for (Method.Parameter parameter : method.parameters) {
                         String typeProperName = getProperTypeName(parameter.type);
                         if (allClassNames.contains(typeProperName)) {
@@ -214,6 +215,29 @@ public class Parser {
                                                     && relation.destination.equals(destClass)).collect(Collectors.toList());
                                     if (additionalCheck.isEmpty()) {
                                         cpg.addRelation(relationToAdd);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Assign dependencies off of method calls
+                    if (!method.getMethodCalls().isEmpty()) {
+                        for (Method calls : method.getMethodCalls()) {
+                            String parentClass = calls.parentClassName;
+                            int indexParent = allClassNames.indexOf(parentClass);
+                            if (indexParent != -1) {
+                                CPGClass destClass = cpg.getClasses().get(indexParent);
+                                if (destClass != cpgClass) {
+                                    CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
+                                            Relation(cpgClass, destClass,
+                                            ClassRelation.Type.DEPENDENCY, "");
+                                    if (!checkExistingRelation(cpg, relationToAdd)) {
+                                        var additionalCheck = cpg.getRelations().stream().
+                                                filter(relation -> relation.source.equals(cpgClass)
+                                                        && relation.destination.equals(destClass)).collect(Collectors.toList());
+                                        if (additionalCheck.isEmpty()) {
+                                            cpg.addRelation(relationToAdd);
+                                        }
                                     }
                                 }
                             }
@@ -247,7 +271,6 @@ public class Parser {
                 }
             } else updatedGraph.addClass(cpgClass);
         }
-
         // Handle adding inheritance relations
         for (CPGClass newClass : updatedGraph.getClasses()) {
             String code = newClass.code;
@@ -625,13 +648,18 @@ public class Parser {
     private Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
+        ArrayList<String> allClassNames = new ArrayList<>();
+        ArrayList<Method.Instruction> allMethodInstructions = new ArrayList<>(Arrays.asList(methodToUpdate.instructions));
         cpg.getClasses().forEach(cpgClass -> allMethodsInCPG.addAll(Arrays.asList(cpgClass.methods)));
         cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+        cpg.getClasses().forEach(cpgClass -> allClassNames.add(cpgClass.name));
 
         // Get the indexes of the names of each Method called by methodToUpdate
         ArrayList<Integer> indexes = new ArrayList<>();
         for (Method.Instruction instruction : methodToUpdate.instructions) {
             String label = instruction.label;
+            String code = instruction.code;
+            String lineNumber = instruction.lineNumber;
             String methodCall = instruction.methodCall;
             if (label.equals("CALL") && (!methodCall.equals("") || !methodCall.equals("toString"))) {
                 int indexOfMethodCalled = allMethodNames.indexOf(methodCall);
@@ -655,6 +683,36 @@ public class Parser {
                     if (indexOfMethodCalled != -1) {
                         indexes.add(indexOfMethodCalled);
                     }
+                }
+            }
+        }
+        var identifierResult = allMethodInstructions.stream().
+                filter(ins -> ins.label.equals("IDENTIFIER")
+                        && allClassNames.contains(ins.code)).collect(Collectors.toList());
+        var methodCallResult = allMethodInstructions.stream().
+                filter(ins -> ins.label.equals("CALL") && !ins.methodCall.equals("")).collect(Collectors.toList());
+
+        for (Method.Instruction identifier : identifierResult) {
+            String parentName = identifier.code;
+            for (Method.Instruction mc : methodCallResult) {
+                String methodCalled = mc.methodCall;
+                // Determine the number of method parameters provided by the instruction code
+                String code = mc.code;
+                int startIndex = code.indexOf("(");
+                code = code.substring(startIndex).replace("(", "").replace(")", "").trim();
+                int paramCount = 0;
+                if (code.contains(",")) {
+                    String[] params = code.split(",");
+                    paramCount = params.length;
+                } else paramCount = 1;
+                int finalParamCount = paramCount;
+                // Find the method matching parentClassName, methodName, and parameter count
+                var methodResult = allMethodsInCPG.stream().
+                        filter(method -> method.name.equals(methodCalled)
+                                && method.parentClassName.equals(parentName)
+                                && method.parameters.length == finalParamCount).collect(Collectors.toList());
+                if (!methodResult.isEmpty()) {
+                    indexes.add(allMethodsInCPG.indexOf(methodResult.get(0)));
                 }
             }
         }
