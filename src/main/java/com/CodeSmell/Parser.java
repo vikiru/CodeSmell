@@ -26,7 +26,7 @@ public class Parser {
      * @param cpg      - The CodePropertyGraph containing all the classes and relations of the source code
      * @param filePath - The filePath to where the .json will be outputted
      */
-    void writeToJson(CodePropertyGraph cpg, String filePath) {
+    public void writeToJson(CodePropertyGraph cpg, String filePath) {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         builder.setPrettyPrinting();
@@ -92,7 +92,7 @@ public class Parser {
      *
      * @param cpg The CodePropertyGraph containing classes and existing relations.
      */
-    private void assignAssociationRelationships(CodePropertyGraph cpg) {
+    void assignAssociationRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
@@ -203,7 +203,7 @@ public class Parser {
      * @param destination - The destination class which is being compared with to determine if source has composition relation with it.
      * @return True or False, depending on if a composition relation exists.
      */
-    private boolean determineCompositionRelationship(CPGClass source, CPGClass destination) {
+    boolean determineCompositionRelationship(CPGClass source, CPGClass destination) {
         boolean compositionExists = false;
         var constructorResult = Arrays.stream(source.methods).
                 filter(method -> method.name.equals(source.name)).collect(Collectors.toList());
@@ -355,7 +355,7 @@ public class Parser {
      * @param superClass The CPGClass which is inherited by the subclass
      * @return The updated CPGClass object for the subclass, with the super class's methods added.
      */
-    private CPGClass appendSuperClassMethods(CPGClass subClass, CPGClass superClass) {
+    CPGClass appendSuperClassMethods(CPGClass subClass, CPGClass superClass) {
         ArrayList<Method> methods = new ArrayList<>(Arrays.asList(subClass.methods));
         ArrayList<String> existingMethodNames = new ArrayList<>();
         methods.forEach(method -> existingMethodNames.add(method.name));
@@ -385,7 +385,7 @@ public class Parser {
      *
      * @param cpg -The CodePropertyGraph containing source code classes and existing relations
      */
-    private void assignRealizationRelationships(CodePropertyGraph cpg) {
+    void assignRealizationRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
@@ -456,7 +456,7 @@ public class Parser {
      * @param iterations - The number of iterations that the method must be called in order to properly update fields and methods.
      * @return
      */
-    private CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
+    CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
             ArrayList<Attribute> properAttributes = new ArrayList<>();
@@ -506,7 +506,7 @@ public class Parser {
      * @param cpgClass - The existing CPGClass object which will be updated.
      * @return A new CPGClass containing the updated CPGClass fields and Attribute objects.
      */
-    private CPGClass assignMissingClassInfo(CPGClass cpgClass) {
+    CPGClass assignMissingClassInfo(CPGClass cpgClass) {
         // KNOWN INFO
         File classFile = new File(cpgClass.filePath);
         String className = cpgClass.name;
@@ -644,7 +644,7 @@ public class Parser {
      * @param attribute The attribute that is missing a proper type (i.e. a type given as "ArrayList")
      * @return A String containing the proper Attribute type
      */
-    private String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
+    String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
         String className = cpgClass.name;
         Method[] classMethods = cpgClass.methods;
         String stringToFind = "this." + attribute.name;
@@ -711,7 +711,7 @@ public class Parser {
      * @param methodToUpdate
      * @return
      */
-    private Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
+    Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -833,7 +833,7 @@ public class Parser {
      * @param count
      * @return
      */
-    private String obtainMultiplicity(String attribute, Long count) {
+    String obtainMultiplicity(String attribute, Long count) {
         String multiplicityToReturn = "";
         if (attribute.contains("[]") || attribute.contains("<")) {
             multiplicityToReturn = "1..*";
@@ -854,7 +854,7 @@ public class Parser {
      * @param typeName The name of the attribute's type.
      * @return The name of the attribute's type without special characters and extra info.
      */
-    private String getProperTypeName(String typeName) {
+    String getProperTypeName(String typeName) {
         if (typeName.contains("$")) {
             int index = typeName.lastIndexOf("$");
             typeName = typeName.substring(index + 1);
@@ -862,8 +862,8 @@ public class Parser {
             typeName = typeName.replace("[]", "");
         } else if (typeName.contains("<")) {
             int startingIndex = typeName.indexOf("<");
-            int endingIndex = typeName.indexOf(">");
-            typeName = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", "").replace(">", "");
+            int endingIndex = typeName.lastIndexOf(">");
+            typeName = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", " ").replace(">", "").replace(", ", " ");
         }
         return typeName;
     }
