@@ -37,7 +37,7 @@ public class ParserTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        // Read from the JSON obtained after Joern integration
+        // Read from the JSON obtained after Joern
         CodePropertyGraph g = p.initializeCPG(jsonPath);
         assertNotNull(g);
         assertEquals("CPG has relations within it", true, g.getRelations().size() > 0);
@@ -68,6 +68,23 @@ public class ParserTest {
         // Delete the empty file
         File fileToDelete = new File(filePath);
         assertTrue(fileToDelete.delete());
+    }
+
+    @Test
+    public void testDuplicateRelations() {
+        String filePath = "src/main/python/joernFiles/sourceCodeWithRelations.json";
+        CodePropertyGraph cpg = p.initializeCPG(filePath);
+        for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+            CPGClass cpgClass = r.source;
+            CPGClass destClass = r.destination;
+
+            var additionalCheck = cpg.getRelations().stream().
+                    filter(relation -> relation.source.equals(cpgClass)
+                            && relation.destination.equals(destClass)).collect(Collectors.toList());
+
+            assertEquals("There should be no duplicate relations between src and dest class",
+                    true, additionalCheck.size() == 1);
+        }
     }
 
     @Test
@@ -185,6 +202,11 @@ public class ParserTest {
         for (CodePropertyGraph.Relation r : allInheritanceRelationships) {
             CPGClass subClass = r.source;
             CPGClass superClass = r.destination;
+
+            var subClassAllMethods = Arrays.stream(subClass.methods).
+                    filter(method -> method.parentClassName.equals(superClass.name)).collect(Collectors.toList());
+
+            assertEquals("Subclass should have the methods of superclass", true, !subClassAllMethods.isEmpty());
             assertEquals("Subclass extends superclass", true,
                     subClass.code.contains("extends") && subClass.code.contains(superClass.name));
             assertEquals("Superclass does not extend subclass", true, !superClass.code.contains(subClass.name));
@@ -238,6 +260,41 @@ public class ParserTest {
     }
 
     @Test
+    public void testAssignProperFieldsAndMethods() {
+        try (Reader reader = Files.newBufferedReader(Paths.get(jsonPath))) {
+            CodePropertyGraph badCPG = gson.fromJson(reader, CodePropertyGraph.class);
+            for (CPGClass c : badCPG.getClasses()) {
+                for (CPGClass.Attribute a : c.attributes) {
+                    assertNotNull(a);
+                    if (a.packageName.equals("java.util") && !a.attributeType.contains("<")) {
+                        assertEquals("Type should be just ArrayList", "ArrayList", a.attributeType);
+                    }
+                }
+                for (CPGClass.Method m : c.methods) {
+                    assertNotNull(m);
+                }
+            }
+            CodePropertyGraph goodCPG = p.assignProperAttributesAndMethods(badCPG, 2);
+            for (CPGClass c2 : goodCPG.getClasses()) {
+                for (CPGClass.Attribute a2 : c2.attributes) {
+                    assertNotNull(a2);
+                    if (a2.packageName.equals("java.util")) {
+                        assertEquals("Type should not be just ArrayList", true, a2.attributeType.contains("<"));
+                    }
+                }
+                for (CPGClass.Method m2 : c2.methods) {
+                    assertNotNull(m2);
+                    assertEquals("Method calls should be greater than or equal to 0",
+                            true, m2.getMethodCalls().size() >= 0);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Test
     public void testMultiplicity() {
         String singularInstance = "UMLClass source";
         String hashMap = "HashMap<CPGClass, Modifier>";
@@ -261,11 +318,10 @@ public class ParserTest {
 
         assertEquals("Type should not have changed", singularInstance, p.getProperTypeName(singularInstance));
         assertEquals("Type should remove the []", "Position", p.getProperTypeName(arr));
-        assertEquals("Type should be a comma separated string", " CPGClass Modifier", p.getProperTypeName(hashMap));
-        assertEquals("Type should be a comma separated string",
-                " HashMap HashMap HashMap HashMap String String String String String String",
+        assertEquals("Type should be a space separated string", "CPGClass Modifier", p.getProperTypeName(hashMap));
+        assertEquals("Type should be a space separated string",
+                "HashMap HashMap HashMap HashMap String String String String String String",
                 p.getProperTypeName(complexType));
-
         assertEquals("Type should not have the $ or CPGClass", "Modifier", p.getProperTypeName(nestedClass));
     }
     // ----------------------------------------------------------------------------------------------------------
