@@ -214,7 +214,60 @@ public class ParserTest {
         }
     }
 
+    @Test
+    public void testMissingClassInfo() {
+        // Read the joern file using only gson, check to make sure classes are present and no relations are present
+        try (Reader reader = Files.newBufferedReader(Paths.get(jsonPath))) {
+            CodePropertyGraph withoutRelations = gson.fromJson(reader, CodePropertyGraph.class);
+            for (CPGClass cpgClass : withoutRelations.getClasses()) {
+                assertNull("Class code should be null", cpgClass.code);
+                assertNull("Class import statements should be null", cpgClass.importStatements);
+                assertNull("Class modifiers should be null", cpgClass.modifiers);
+                assertEquals("Package name should contain src", true, cpgClass.packageName.contains("src"));
 
+                CPGClass updatedClass = p.assignMissingClassInfo(cpgClass);
+                assertNotNull("Class code should not be null", updatedClass.code);
+                assertNotNull("Class import statements should not be null", updatedClass.importStatements);
+                assertNotNull("Class modifiers should not be null", updatedClass.modifiers);
+                assertEquals("Package name should not contain src", false,
+                        updatedClass.packageName.contains("src"));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testMultiplicity() {
+        String singularInstance = "UMLClass source";
+        String hashMap = "HashMap<CPGClass, Modifier>";
+        String arr = "Position[]";
+        String complexType = "HashMap<HashMap<HashMap<HashMap<HashMap<String, String>, String>, String>, String>, String>";
+        assertEquals("Multiplicity should be 1..*", "1..*", p.obtainMultiplicity(hashMap, 1L));
+        assertEquals("Multiplicity should be 1..*", "1..*", p.obtainMultiplicity(arr, 1L));
+        assertEquals("Multiplicity should be 1..*", "1..*", p.obtainMultiplicity(complexType, 1L));
+        assertEquals("Multiplicity should not be 1..*", "1..1", p.obtainMultiplicity(singularInstance, 1L));
+        assertEquals("Multiplicity should be 1..N", "1..2", p.obtainMultiplicity(singularInstance, 2L));
+        assertEquals("Multiplicity should be 1..N", "1..999", p.obtainMultiplicity(singularInstance, 999L));
+    }
+
+    @Test
+    public void testGetProperName() {
+        String singularInstance = "UMLClass";
+        String hashMap = "HashMap<CPGClass, Modifier>";
+        String arr = "Position[]";
+        String nestedClass = "CPGClass$Modifier";
+        String complexType = "HashMap<HashMap<HashMap<HashMap<HashMap<String, String>, String>, String>, String>, String>";
+
+        assertEquals("Type should not have changed", singularInstance, p.getProperTypeName(singularInstance));
+        assertEquals("Type should remove the []", "Position", p.getProperTypeName(arr));
+        assertEquals("Type should be a comma separated string", " CPGClass Modifier", p.getProperTypeName(hashMap));
+        assertEquals("Type should be a comma separated string",
+                " HashMap HashMap HashMap HashMap String String String String String String",
+                p.getProperTypeName(complexType));
+
+        assertEquals("Type should not have the $ or CPGClass", "Modifier", p.getProperTypeName(nestedClass));
+    }
     // ----------------------------------------------------------------------------------------------------------
 
     @Test
