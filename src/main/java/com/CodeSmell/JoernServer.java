@@ -1,5 +1,6 @@
 package com.CodeSmell;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,7 +9,7 @@ import java.io.File;
 
 public class JoernServer {
 
-    public static void start(boolean testDirectory) {
+    public static void start(boolean testDirectory, String Directory) {
 
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
@@ -77,4 +78,26 @@ public class JoernServer {
             throw new RuntimeException(e);
         }
     }
+
+    public String chooseDirectory()
+    {
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (UnsupportedLookAndFeelException e) {
+            throw new RuntimeException(e);
+        }
+        JFileChooser fc=new JFileChooser();
+        //fc.setFileSelectionMode(fc.FILES_AND_DIRECTORIES);
+        fc.showOpenDialog(null);
+
+        File selectedDirectory = fc.getCurrentDirectory();
+        return selectedDirectory.getPath();
+    }
+
 }
