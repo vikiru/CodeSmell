@@ -601,7 +601,7 @@ public class Parser {
                     if (!type.contains(",")) {
                         attrPackage = packageName + "." + properType;
                     }
-                } else if (a.typeFullName.contains("<unresolvedNameSpace>")) {
+                } else if (a.typeFullName.contains("<unresolvedNameSpace>") && attrPackage.equals("")) {
                     attrPackage = packageName;
                 }
                 // create new attribute with proper info and add to updatedAttributes list
