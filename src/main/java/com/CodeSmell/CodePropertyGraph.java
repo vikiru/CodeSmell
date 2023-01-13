@@ -1,13 +1,13 @@
 package com.CodeSmell;
 
-import com.CodeSmell.ClassRelation.Type;
+import com.CodeSmell.ClassRelation.RelationshipType;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
 
 public class CodePropertyGraph {
 
-    @Expose(serialize = true, deserialize = false)
+    @Expose(serialize = true, deserialize = true)
     private ArrayList<Relation> relations;
 
     @Expose(serialize = true, deserialize = true)
@@ -48,11 +48,11 @@ public class CodePropertyGraph {
         @Expose(serialize = true, deserialize = true)
         public final CPGClass destination;
         @Expose(serialize = true, deserialize = true)
-        public final Type type;
+        public final RelationshipType type;
         @Expose(serialize = true, deserialize = true)
         public final String multiplicity;
 
-        Relation(CPGClass source, CPGClass destination, Type type, String multiplicity) {
+        Relation(CPGClass source, CPGClass destination, RelationshipType type, String multiplicity) {
             this.source = source;
             this.destination = destination;
             this.type = type;

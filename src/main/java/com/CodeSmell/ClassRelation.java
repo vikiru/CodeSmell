@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class ClassRelation extends RenderObject {
 
-    public final Type type;
+    public final RelationshipType type;
     public final String multiplicity;
     public final UMLClass source;
     public final UMLClass target;
     private int pathContainerId;
     private ArrayList<Position> path;
 
-    public ClassRelation(UMLClass source, UMLClass target, Type type, String multiplicity) {
+    public ClassRelation(UMLClass source, UMLClass target, RelationshipType type, String multiplicity) {
         this.type = type;
         this.multiplicity = multiplicity;
         this.source = source;
@@ -28,9 +28,8 @@ public class ClassRelation extends RenderObject {
         dispatchToRenderEventListeners(re);
         pathContainerId = (Integer) re.getResponse();
     }
-    
-    public enum Type {
-        ASSOCIATION,
+
+    public enum RelationshipType {
         UNIDIRECTIONAL_ASSOCIATION,
         BIDIRECTIONAL_ASSOCIATION,
         REFLEXIVE_ASSOCIATION,

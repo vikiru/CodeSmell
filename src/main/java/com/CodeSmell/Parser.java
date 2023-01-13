@@ -26,7 +26,6 @@ public class Parser {
      */
     public void writeToJson(CodePropertyGraph cpg, String filePath) {
         GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
         builder.setPrettyPrinting();
         Gson gson = builder.create();
         try {
@@ -48,9 +47,7 @@ public class Parser {
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
     public CodePropertyGraph initializeCPG(String destination) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
-        Gson gson = builder.create();
+        Gson gson = new Gson();
         CodePropertyGraph cpg = new CodePropertyGraph();
         try {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
@@ -100,7 +97,7 @@ public class Parser {
                             int destClassIndex = allClassNames.indexOf(t);
                             CPGClass destClass = cpg.getClasses().get(destClassIndex);
                             String multiplicity = "1..*";
-                            ClassRelation.Type type;
+                            ClassRelation.RelationshipType type;
                             var destResult = Arrays.stream(destClass.attributes).
                                     filter(attribute -> attribute.attributeType.contains(cpgClass.name))
                                     .collect(Collectors.toList());
@@ -109,15 +106,15 @@ public class Parser {
                                 if (destMultiplicity.equals("1..*")) {
                                     multiplicity = "*..*";
                                 }
-                                type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
+                                type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
                             } else {
-                                type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
+                                type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
                             }
                             if (cpgClass == destClass) {
-                                type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                                type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
                             }
                             if (determineCompositionRelationship(cpgClass, destClass)) {
-                                type = ClassRelation.Type.COMPOSITION;
+                                type = ClassRelation.RelationshipType.COMPOSITION;
                             }
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
                                     (cpgClass, destClass,
@@ -146,7 +143,7 @@ public class Parser {
                     CPGClass destClass = cpg.getClasses().get(destClassIndex);
                     String multiplicity = obtainMultiplicity(attributeType, count);
                     // Handle many-to-many
-                    ClassRelation.Type type;
+                    ClassRelation.RelationshipType type;
                     var destResult = Arrays.stream(destClass.attributes).
                             filter(attribute -> attribute.attributeType.contains(cpgClass.name)).collect(Collectors.toList());
                     if (!destResult.isEmpty()) {
@@ -154,15 +151,15 @@ public class Parser {
                         if (destMultiplicity.equals("1..*")) {
                             multiplicity = "*..*";
                         }
-                        type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
+                        type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
                     } else {
-                        type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
+                        type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
                     }
                     if (cpgClass == destClass) {
-                        type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                        type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
                     }
                     if (determineCompositionRelationship(cpgClass, destClass)) {
-                        type = ClassRelation.Type.COMPOSITION;
+                        type = ClassRelation.RelationshipType.COMPOSITION;
                     }
                     CodePropertyGraph.Relation relationToAdd = new
                             CodePropertyGraph.Relation(cpgClass, destClass,
@@ -248,7 +245,7 @@ public class Parser {
                             if (checkAttributes.isEmpty()) {
                                 CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
                                         Relation(cpgClass, destClass,
-                                        ClassRelation.Type.DEPENDENCY, "");
+                                        ClassRelation.RelationshipType.DEPENDENCY, "");
                                 if (!checkExistingRelation(cpg, relationToAdd)) {
                                     var additionalCheck = cpg.getRelations().stream().
                                             filter(relation -> relation.source.equals(cpgClass)
@@ -270,7 +267,7 @@ public class Parser {
                                 if (destClass != cpgClass) {
                                     CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
                                             Relation(cpgClass, destClass,
-                                            ClassRelation.Type.DEPENDENCY, "");
+                                            ClassRelation.RelationshipType.DEPENDENCY, "");
                                     if (!checkExistingRelation(cpg, relationToAdd)) {
                                         var additionalCheck = cpg.getRelations().stream().
                                                 filter(relation -> relation.source.equals(cpgClass)
@@ -329,7 +326,7 @@ public class Parser {
                 if (destClassIndex != -1) {
                     CPGClass destClass = updatedGraph.getClasses().get(destClassIndex);
                     CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
-                            (newClass, destClass, ClassRelation.Type.INHERITANCE, "");
+                            (newClass, destClass, ClassRelation.RelationshipType.INHERITANCE, "");
                     if (!checkExistingRelation(updatedGraph, relationToAdd)) {
                         updatedGraph.addRelation(relationToAdd);
                     }
@@ -402,11 +399,11 @@ public class Parser {
                     if (!parentFirstClass.classType.equals("interface")) {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentFirstClass, parentSecondClass,
-                                ClassRelation.Type.REALIZATION, "");
+                                ClassRelation.RelationshipType.REALIZATION, "");
                     } else {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentSecondClass, parentFirstClass,
-                                ClassRelation.Type.REALIZATION, "");
+                                ClassRelation.RelationshipType.REALIZATION, "");
                     }
                     if (!checkExistingRelation(cpg, relationToAdd)) {
                         cpg.addRelation(relationToAdd);
@@ -625,9 +622,12 @@ public class Parser {
     }
 
     /**
-     * @param cpg
-     * @param methodToUpdate
-     * @return
+     * Updates a given method with its proper methodCalls, requires two iterations to get all the proper method
+     * calls of each method called within this list.
+     *
+     * @param cpg            - The CodePropertyGraph containing the source code information
+     * @param methodToUpdate - The method that is having its methodCalls field updated
+     * @return The updated method with its methodCalls
      */
     Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
@@ -746,9 +746,12 @@ public class Parser {
     }
 
     /**
-     * @param attribute
-     * @param count
-     * @return
+     * Returns the multiplicity given an attribute type and a count of how many instances that attribute
+     * has within a given class.
+     *
+     * @param attribute - A String representation of the attribute type
+     * @param count     - A Long representing the count of how many instances of this attribute exist within source class
+     * @return A string representing the multiplicity
      */
     String obtainMultiplicity(String attribute, Long count) {
         String multiplicityToReturn = "";

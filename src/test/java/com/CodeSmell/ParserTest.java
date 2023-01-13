@@ -93,14 +93,14 @@ public class ParserTest {
         CodePropertyGraph cpg = p.initializeCPG(filePath);
 
         var allAssociationRelationships = cpg.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION) ||
-                        relation.type.equals(ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION) ||
-                        relation.type.equals(ClassRelation.Type.REFLEXIVE_ASSOCIATION)).collect(Collectors.toList());
+                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
+                        relation.type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION) ||
+                        relation.type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION)).collect(Collectors.toList());
 
         for (CodePropertyGraph.Relation r : allAssociationRelationships) {
             CPGClass sourceClass = r.source;
             CPGClass destClass = r.destination;
-            ClassRelation.Type type = r.type;
+            ClassRelation.RelationshipType type = r.type;
 
             // collect all attributes of destClass where the attributeType matches sourceClass's name
             // list should be empty for unidirectional and should not be empty for bidirectional association
@@ -111,23 +111,23 @@ public class ParserTest {
             // reflexive association check
             boolean sameClass = sourceClass == destClass;
             assertEquals("Same class should have a reflexive association", sameClass,
-                    type.equals(ClassRelation.Type.REFLEXIVE_ASSOCIATION));
+                    type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION));
 
             // unidirectional association check (1 way association, src -> dest)
             assertEquals("Unidirectional relation is valid", true,
                     destClassHasNoSrcClassAttribute &&
-                            type.equals(ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION));
+                            type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION));
 
             assertEquals("Unidirectional relation should not be valid", false,
                     !destClassHasNoSrcClassAttribute &&
-                            type.equals(ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION));
+                            type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION));
 
             // bidirectional association check (2 way association, src -> dest)
             assertEquals("Bidirectionl association is valid", true,
-                    !destClassHasNoSrcClassAttribute && type.equals(ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION));
+                    !destClassHasNoSrcClassAttribute && type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION));
 
             assertEquals("Bidirectional association should not be valid", false,
-                    destClassHasNoSrcClassAttribute && type.equals(ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION));
+                    destClassHasNoSrcClassAttribute && type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION));
 
             assertEquals("Multiplicity should not be empty", false, r.multiplicity.equals(""));
         }
@@ -138,7 +138,7 @@ public class ParserTest {
         String filePath = "src/main/python/joernFiles/sourceCodeWithRelations.json";
         CodePropertyGraph cpg = p.initializeCPG(filePath);
         var allCompositonRelationships = cpg.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.Type.COMPOSITION)).collect(Collectors.toList());
+                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.COMPOSITION)).collect(Collectors.toList());
         for (CodePropertyGraph.Relation r : allCompositonRelationships) {
             CPGClass sourceClass = r.source;
             CPGClass destClass = r.destination;
@@ -168,7 +168,7 @@ public class ParserTest {
         String filePath = "src/main/python/joernFiles/sourceCodeWithRelations.json";
         CodePropertyGraph cpg = p.initializeCPG(filePath);
         var allDependencyRelationships = cpg.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.Type.INHERITANCE)).collect(Collectors.toList());
+                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.INHERITANCE)).collect(Collectors.toList());
 
         for (CodePropertyGraph.Relation r : allDependencyRelationships) {
             CPGClass sourceClass = r.source;
@@ -197,7 +197,7 @@ public class ParserTest {
         String filePath = "src/main/python/joernFiles/sourceCodeWithRelations.json";
         CodePropertyGraph cpg = p.initializeCPG(filePath);
         var allInheritanceRelationships = cpg.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.Type.INHERITANCE)).collect(Collectors.toList());
+                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.INHERITANCE)).collect(Collectors.toList());
 
         for (CodePropertyGraph.Relation r : allInheritanceRelationships) {
             CPGClass subClass = r.source;
@@ -219,7 +219,7 @@ public class ParserTest {
         String filePath = "src/main/python/joernFiles/sourceCodeWithRelations.json";
         CodePropertyGraph cpg = p.initializeCPG(filePath);
         var allRealizationRelationships = cpg.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.Type.REALIZATION)).collect(Collectors.toList());
+                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.REALIZATION)).collect(Collectors.toList());
 
         for (CodePropertyGraph.Relation r : allRealizationRelationships) {
             CPGClass source = r.source;
@@ -267,7 +267,7 @@ public class ParserTest {
                 for (CPGClass.Attribute a : c.attributes) {
                     assertNotNull(a);
                     if (a.packageName.equals("java.util") && !a.attributeType.contains("<")) {
-                        assertEquals("Type should be just ArrayList", "ArrayList", a.attributeType);
+                        assertEquals("RelationshipType should be just ArrayList", "ArrayList", a.attributeType);
                     }
                 }
                 for (CPGClass.Method m : c.methods) {
@@ -279,7 +279,7 @@ public class ParserTest {
                 for (CPGClass.Attribute a2 : c2.attributes) {
                     assertNotNull(a2);
                     if (a2.packageName.equals("java.util")) {
-                        assertEquals("Type should not be just ArrayList", true, a2.attributeType.contains("<"));
+                        assertEquals("RelationshipType should not be just ArrayList", true, a2.attributeType.contains("<"));
                     }
                 }
                 for (CPGClass.Method m2 : c2.methods) {
@@ -316,19 +316,19 @@ public class ParserTest {
         String nestedClass = "CPGClass$Modifier";
         String complexType = "HashMap<HashMap<HashMap<HashMap<HashMap<String, String>, String>, String>, String>, String>";
 
-        assertEquals("Type should not have changed", singularInstance, p.getProperTypeName(singularInstance));
-        assertEquals("Type should remove the []", "Position", p.getProperTypeName(arr));
-        assertEquals("Type should be a space separated string", "CPGClass Modifier", p.getProperTypeName(hashMap));
-        assertEquals("Type should be a space separated string",
+        assertEquals("RelationshipType should not have changed", singularInstance, p.getProperTypeName(singularInstance));
+        assertEquals("RelationshipType should remove the []", "Position", p.getProperTypeName(arr));
+        assertEquals("RelationshipType should be a space separated string", "CPGClass Modifier", p.getProperTypeName(hashMap));
+        assertEquals("RelationshipType should be a space separated string",
                 "HashMap HashMap HashMap HashMap String String String String String String",
                 p.getProperTypeName(complexType));
-        assertEquals("Type should not have the $ or CPGClass", "Modifier", p.getProperTypeName(nestedClass));
+        assertEquals("RelationshipType should not have the $ or CPGClass", "Modifier", p.getProperTypeName(nestedClass));
     }
     // ----------------------------------------------------------------------------------------------------------
 
     @Test
     public void testInitializeCPG() {
-        JoernServer.start(true);
+        JoernServer.start(true, "");
         CodePropertyGraph g = p.initializeCPG(jsonPath);
         //assertEquals(g.getRelations().size(), g.getClasses().size(), 0);
         //int[] arr = new int[] {1, 2, 3};
@@ -345,7 +345,7 @@ public class ParserTest {
 
     @Test
     public void testOwnProject() {
-        JoernServer.start(false);
+        JoernServer.start(false, jsonPath);
         CodePropertyGraph g = p.initializeCPG(jsonPath);
         HashMap<CPGClass, Boolean> connectedClasses = new HashMap<CPGClass, Boolean>();
         for (CPGClass c : g.getClasses()) {
