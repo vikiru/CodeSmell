@@ -27,7 +27,7 @@ def write_to_file(source_code_json, file_name):
 
 
 # For every attribute, create a dictionary and return it.
-def create_field_dict(curr_field):
+def create_attribute_dict(curr_field):
     type = curr_field["_1"]["typeFullName"]
     package_name = ""
     index = curr_field["_1"]["typeFullName"].rfind(".")
@@ -37,12 +37,14 @@ def create_field_dict(curr_field):
     index_nested = type.rfind("$")
     if index_nested != -1:
         type = type[index_nested + 1: len(type)]
+        
     curr_field_dict = {
         "name": curr_field["_1"]["name"],
-        "typeFullName": curr_field["_1"]["typeFullName"],
+        "code": "",
         "packageName": package_name,
-        "attributeType": type,
         "modifiers": [modifier.lower() for modifier in curr_field["_2"]],
+        "attributeType": type,
+        "typeFullName": curr_field["_1"]["typeFullName"],
     }
     return curr_field_dict
 
@@ -241,11 +243,14 @@ def create_class_dict(curr_class):
     # _5 corresponds to class filename (full path)
     curr_class_dict = {
         "name": get_name_without_separators(curr_class["_1"]),
+        "code": "",
+        "importStatements": [],
+        "modifiers": [],
         "classFullName": curr_class["_1"],
         "classType": "",
         "filePath": curr_class["_5"],
         "packageName": get_package_name(curr_class["_5"]),
-        "attributes": list(map(create_field_dict, curr_class["_3"])),
+        "attributes": list(map(create_attribute_dict, curr_class["_3"])),
         "methods": list(
             filter(None, list(map(create_method_dict, curr_class["_4"])))
         ),
@@ -280,8 +285,8 @@ if __name__ == "__main__":
     # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
     project_dir = ""
     our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
-    test_project_dir = str(Path(__file__).parent.parent.parent)  + "/test/java/com/testproject"
-    
+    test_project_dir = str(Path(__file__).parent.parent.parent) + "/test/java/com/testproject"
+
     print(test_project_dir)
     print(sys.argv)
     if sys.argv[-1] == "load_test_directory":
