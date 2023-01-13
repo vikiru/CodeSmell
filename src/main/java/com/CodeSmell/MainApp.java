@@ -15,6 +15,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.geometry.Rectangle2D;
 
+import javax.swing.*;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.Set;
 
 public class MainApp extends Application {
 
-    public static void main(String[] args) {
+    public static void main(String[] args, String directory) {
         launch(args);
     }
 

@@ -7,12 +7,14 @@ import com.google.gson.GsonBuilder;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
+import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import static javafx.application.Application.launch;
 
 /**
  * The Parser class that reads in the JSON source code of the project that is being analysed and then
@@ -26,19 +28,9 @@ public class Parser {
      */
     public static void main(String[] args) {
         Parser p = new Parser();
-        CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        //CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        //System.out.println(p.chooseDirectory());
         //CodePropertyGraph cpg = p.initializeCPG(p.chooseDirectory());
-    }
-
-
-    public String chooseDirectory()
-    {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setInitialDirectory(new File("src"));
-
-
-        File selectedDirectory = directoryChooser.showDialog(new Stage());
-        return selectedDirectory.getPath();
     }
     /**
      * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
