@@ -4,34 +4,19 @@ import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Method;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 
-import javax.swing.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import static javafx.application.Application.launch;
 
 /**
  * The Parser class that reads in the JSON source code of the project that is being analysed and then
  * converts the JSON code to a code property object that can be
  */
 public class Parser {
-
-    /**
-     * The main method of the Parser class that builds the code property graph
-     * @param args
-     */
-    public static void main(String[] args) {
-        Parser p = new Parser();
-        //CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-        //System.out.println(p.chooseDirectory());
-        //CodePropertyGraph cpg = p.initializeCPG(p.chooseDirectory());
-    }
     /**
      * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
      * pretty printing and write to the given path.
@@ -72,11 +57,8 @@ public class Parser {
             CodePropertyGraph tempCPG = gson.fromJson(reader, CodePropertyGraph.class);
             // get missing info for CPGClasses and their fields and methods.
             tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
-            for (CPGClass cpgClass : tempCPG.getClasses()) {
-                cpg.addClass(assignMissingClassInfo(cpgClass));
-            }
             // assign all relations (association of diff types, composition, realization, inheritance, dependency)
-            cpg = this.assignInheritanceRelationship(cpg);
+            cpg = this.assignInheritanceRelationship(tempCPG);
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
@@ -472,16 +454,8 @@ public class Parser {
     CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            ArrayList<Attribute> properAttributes = new ArrayList<>();
+            ArrayList<Attribute> properAttributes = new ArrayList<>(Arrays.asList(cpgClass.attributes));
             ArrayList<Method> properMethods = new ArrayList<>();
-            for (Attribute a : cpgClass.attributes) {
-                if (a.packageName.equals("java.util") && !a.attributeType.contains("<")) {
-                    String provisionalType = assignMissingAttributeType(cpgClass, a);
-                    properAttributes.add(new Attribute(a.name, "", a.packageName, provisionalType, a.modifiers, a.typeFullName));
-                } else {
-                    properAttributes.add(a);
-                }
-            }
             for (Method m : cpgClass.methods) {
                 int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
                 // ignore lambdas for now
@@ -491,10 +465,11 @@ public class Parser {
                 }
             }
 
-            CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{}, cpgClass.classFullName,
-                    cpgClass.classType, cpgClass.filePath, cpgClass.packageName,
+            CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{},
+                    cpgClass.classFullName, cpgClass.classType, cpgClass.filePath, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
+            properClass = assignMissingClassInfo(properClass);
             graph.addClass(properClass);
         }
         if (iterations - 1 == 0) {
@@ -620,9 +595,14 @@ public class Parser {
                         type += line.substring(startIndex, endIndex + 1).trim();
                     }
                 }
-                String attrPackage = a.typeFullName;
-                if (a.typeFullName.contains(packageName)) {
-                    attrPackage = a.typeFullName.replace("$", ".").replace("[]", "");
+                String attrPackage = a.packageName;
+                if (a.typeFullName.contains(packageName) && attrPackage.equals("")) {
+                    String properType = getProperTypeName(type).trim();
+                    if (!type.contains(",")) {
+                        attrPackage = packageName + "." + properType;
+                    }
+                } else if (a.typeFullName.contains("<unresolvedNameSpace>")) {
+                    attrPackage = packageName;
                 }
                 // create new attribute with proper info and add to updatedAttributes list
                 Attribute properAttribute = new Attribute(name, code, attrPackage,
@@ -638,85 +618,6 @@ public class Parser {
                 cpgClass.classFullName, classType, cpgClass.filePath, packageName,
                 updatedAttributes.toArray(new Attribute[updatedAttributes.size()]),
                 cpgClass.methods);
-    }
-
-
-    /**
-     * Given a CPGClass and an Attribute belonging to that class, assign the proper type to the Attribute.
-     * This is for cases where an Attribute may be a part of Java Collections (i.e. HashMap, ArrayList, Set, etc).
-     * <p>
-     * Performs 3 checks to determine the attribute's type:
-     * <p>
-     * 1) Check the constructor parameters
-     * <p>
-     * 2) Check the instructions of the constructor
-     * <p>
-     * 3) Check the instructions of all other methods of that class
-     *
-     * @param cpgClass  The parent CPGClass containing the Attribute
-     * @param attribute The attribute that is missing a proper type (i.e. a type given as "ArrayList")
-     * @return A String containing the proper Attribute type
-     */
-    String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
-        String className = cpgClass.name;
-        Method[] classMethods = cpgClass.methods;
-        String stringToFind = "this." + attribute.name;
-        String finalAttributeType = attribute.attributeType;
-        var result = Arrays.stream(classMethods).
-                filter(method -> method.name.equals(className)).collect(Collectors.toList());
-        if (!result.isEmpty()) {
-            Method constructor = result.get(0);
-            var instructionResult = Arrays.stream(constructor.instructions).
-                    filter(instruction -> instruction.label.equals("METHOD"))
-                    .collect(Collectors.toList());
-            String constructorBody = instructionResult.get(0).code;
-            // Check the constructor, if the desired attribute is a parameter, this will obtain the type
-            if (constructorBody.contains(attribute.name)) {
-                var attributeResult = Arrays.stream(constructor.parameters).
-                        filter(parameter -> parameter.name.equals(attribute.name)).collect(Collectors.toList());
-                if (!attributeResult.isEmpty()) {
-                    finalAttributeType = attributeResult.get(0).type;
-                }
-            }
-            // Check the constructor's instructions, if the desired attribute is defined within the constructor, this will obtain the
-            // type
-            else {
-                instructionResult = Arrays.stream(constructor.instructions).
-                        filter(instruction -> instruction.label.equals("CALL") &&
-                                instruction.code.contains("<") && !instruction.code.contains("<>")
-                                && instruction.code.contains(stringToFind)).collect(Collectors.toList());
-                if (!instructionResult.isEmpty()) {
-                    int startingIndex = instructionResult.get(0).code.indexOf("<");
-                    int endingIndex = instructionResult.get(0).code.indexOf(">");
-                    if (startingIndex != -1) {
-                        String type = instructionResult.get(0).code.substring(startingIndex, endingIndex + 1);
-                        finalAttributeType += type;
-                    }
-                }
-            }
-        }
-        // Check all other methods apart from the constructor to determine if the desired attribute is used somewhere.
-        if (finalAttributeType.equals(attribute.attributeType)) {
-            for (Method method : classMethods) {
-                Method.Instruction[] instructions = method.instructions;
-                var instructionResult = Arrays.stream(instructions)
-                        .filter(instruction -> instruction.code.contains(stringToFind)
-                                && instruction.label.equals("CALL")
-                                && (instruction.code.contains("add") || instruction.code.contains("put"))).collect(Collectors.toList());
-                if (!instructionResult.isEmpty()) {
-                    int indexToFind = instructionResult.get(0).code.indexOf("(");
-                    String parameter = instructionResult.get(0).code.substring(indexToFind).replace("(", "").replace(")", "");
-                    var parameterResult = Arrays.stream(method.parameters).
-                            filter(parameterToFind -> parameterToFind.name.equals(parameter)).collect(Collectors.toList());
-                    if (!parameterResult.isEmpty()) {
-                        if (!parameter.contains("<")) {
-                            finalAttributeType += "<" + parameterResult.get(0).type + ">";
-                        } else finalAttributeType += parameterResult.get(0).type;
-                    }
-                }
-            }
-        }
-        return finalAttributeType;
     }
 
     /**
@@ -840,7 +741,6 @@ public class Parser {
         }
     }
 
-
     /**
      * @param attribute
      * @param count
@@ -876,7 +776,10 @@ public class Parser {
         } else if (typeName.contains("<")) {
             int startingIndex = typeName.indexOf("<");
             int endingIndex = typeName.lastIndexOf(">");
-            typeName = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", " ").replace(">", "").replace(", ", " ");
+            typeName = typeName.substring(startingIndex, endingIndex + 1).
+                    trim().replace("<", " ").
+                    replace(">", "").
+                    replace(", ", " ");
         }
         return typeName;
     }
