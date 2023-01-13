@@ -62,10 +62,6 @@ public class Parser {
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
-
-            // finally write the resulting cpg to a json at a given filePath
-            String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelations.json";
-            this.writeToJson(cpg, filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -581,11 +577,19 @@ public class Parser {
                 ArrayList<CPGClass.Modifier> fieldModifiers = new ArrayList<>();
                 String code = attributeResult.get(0).trim();
                 String line = code.replace(a.name, "").trim();
-                for (CPGClass.Modifier modStr : CPGClass.Modifier.values()) {
-                    if (line.contains(modStr.modString)) {
-                        line = line.replace(modStr.modString, "").trim();
-                        fieldModifiers.add(modStr);
+                if (!type.equals(cpgClass.name) && !classType.equals("enum")) {
+                    for (CPGClass.Modifier modStr : CPGClass.Modifier.values()) {
+                        if (line.contains(modStr.modString)) {
+                            line = line.replace(modStr.modString, "").trim();
+                            fieldModifiers.add(modStr);
+                        }
                     }
+                }
+                // enum constants are implicitly declared as public static final.
+                else {
+                    fieldModifiers.add(CPGClass.Modifier.PUBLIC);
+                    fieldModifiers.add(CPGClass.Modifier.STATIC);
+                    fieldModifiers.add(CPGClass.Modifier.FINAL);
                 }
                 // get proper type of attribute
                 if (a.packageName.equals("java.util") && !type.contains("<")) {
