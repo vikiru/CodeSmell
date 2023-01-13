@@ -4,6 +4,8 @@ import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Method;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,13 +14,32 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * The Parser class that reads in the JSON source code of the project that is being analysed and then
+ * converts the JSON code to a code property object that can be
+ */
 public class Parser {
 
+    /**
+     * The main method of the Parser class that builds the code property graph
+     * @param args
+     */
     public static void main(String[] args) {
         Parser p = new Parser();
         CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+        //CodePropertyGraph cpg = p.initializeCPG(p.chooseDirectory());
     }
 
+
+    public String chooseDirectory()
+    {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setInitialDirectory(new File("src"));
+
+
+        File selectedDirectory = directoryChooser.showDialog(new Stage());
+        return selectedDirectory.getPath();
+    }
     /**
      * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
      * pretty printing and write to the given path.
