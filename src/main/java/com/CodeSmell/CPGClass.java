@@ -178,7 +178,6 @@ public class CPGClass {
         public final Instruction[] instructions;
 
         // return a list of methods which this calls
-        @Expose(serialize = true, deserialize = true)
         private ArrayList<Method> methodCalls;
 
         protected Method(String parentClassName, String code, String name, Modifier[] modifiers,
