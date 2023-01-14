@@ -274,7 +274,7 @@ def source_code_json_creation():
     all_data = json.loads(clean_json(result["stdout"]))
 
     # Create a dictionary with all the info about the source code and write it to a .json file.
-    source_code_json = {"classes": list(filter(None, list(map(create_class_dict, all_data))))}
+    source_code_json = {"relations": [], "classes": list(filter(None, list(map(create_class_dict, all_data))))}
     write_to_file(source_code_json, "sourceCode")
 
 
