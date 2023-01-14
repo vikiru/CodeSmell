@@ -37,7 +37,7 @@ def create_attribute_dict(curr_field):
     index_nested = type.rfind("$")
     if index_nested != -1:
         type = type[index_nested + 1: len(type)]
-        
+
     curr_field_dict = {
         "name": curr_field["_1"]["name"],
         "code": "",
@@ -100,11 +100,12 @@ def create_method_dict(curr_method):
                 maxCalls = len(split_params) / 2
 
                 def map_parameters(split_params, start, iterations):
-                    type = split_params[start].strip()
-                    name = split_params[start + 1].strip()
-                    param_list.append(dict(name=name, type=type))
-                    if iterations - 1 != 0:
-                        map_parameters(split_params, start + 2, iterations - 1)
+                    if start + 1 < len(split_params):
+                        type = split_params[start].strip()
+                        name = split_params[start + 1].strip()
+                        param_list.append(dict(name=name, type=type))
+                        if iterations - 1 != 0:
+                            map_parameters(split_params, start + 2, iterations - 1)
 
                 if split_params:
                     map_parameters(split_params, 0, maxCalls)
@@ -292,7 +293,7 @@ if __name__ == "__main__":
     if sys.argv[-1] == "load_test_directory":
         project_dir = test_project_dir
     else:
-        project_dir = our_project_dir
+        project_dir = str(Path(sys.argv[2]))
 
     print(project_dir, "<<<< project")
     if "Windows" in platform.platform():
