@@ -26,6 +26,8 @@ public class Parser {
      */
     public void writeToJson(CodePropertyGraph cpg, String filePath) {
         GsonBuilder builder = new GsonBuilder();
+        builder.excludeFieldsWithoutExposeAnnotation();
+        builder.disableHtmlEscaping();
         builder.setPrettyPrinting();
         Gson gson = builder.create();
         try {
@@ -47,7 +49,7 @@ public class Parser {
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
     public CodePropertyGraph initializeCPG(String destination) {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         CodePropertyGraph cpg = new CodePropertyGraph();
         try {
             Reader reader = Files.newBufferedReader(Paths.get(destination));
@@ -59,6 +61,7 @@ public class Parser {
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
+            this.writeToJson(cpg, "src/main/python/joernFiles/sourceCodeWithRelations.json");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
