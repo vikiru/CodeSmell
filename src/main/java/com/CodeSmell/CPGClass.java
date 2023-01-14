@@ -46,6 +46,10 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final Method[] methods;
 
+    // a list of relations starting from this class
+    @Expose(serialize = false, deserialize = false)
+    private ArrayList<CodePropertyGraph.Relation> outwardRelations;
+
     CPGClass(String name, String code, String[] importStatements, Modifier[] modifiers, String classFullName, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
@@ -57,7 +61,17 @@ public class CPGClass {
         this.packageName = packageName;
         this.attributes = attributes;
         this.methods = methods;
+        this.outwardRelations = new ArrayList<>();
     }
+
+    public void addOutwardRelation(CodePropertyGraph.Relation r) {
+        this.outwardRelations.add(r);  
+    }
+
+    public ArrayList<CodePropertyGraph.Relation> getOutwardRelations() {
+        return new ArrayList<>(this.outwardRelations);
+    }
+
 
     @Override
     public String toString() {
@@ -177,7 +191,7 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final Instruction[] instructions;
 
-        // return a list of methods which this calls
+        // a list of methods which this calls
         @Expose(serialize = true, deserialize = true)
         private ArrayList<Method> methodCalls;
 

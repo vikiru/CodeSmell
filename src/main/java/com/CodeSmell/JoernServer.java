@@ -5,10 +5,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 public class JoernServer {
 
-    public static void start(boolean testDirectory) {
+
+    BufferedReader joernReader;
+
+    public BufferedReader getReader() {
+        return this.joernReader;
+    }
+
+    public void start(boolean testDirectory) {
 
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
@@ -28,6 +37,7 @@ public class JoernServer {
         }
         joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", target).directory(new File(directoryPath));
 
+
         try {
             // Start the server
             Process joernServerProcess = joernServerBuilder.start();
@@ -40,11 +50,9 @@ public class JoernServer {
             BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
             int exitCode = joernQueryProcess.waitFor();
+            this.joernReader = joernQueryReader;
             System.out.println("Joern exit code: " + exitCode);
             String line;
-            while ((line = joernQueryReader.readLine()) != null) {
-                System.out.println(line);
-            }
             while ((line = errorReader.readLine()) != null) {
                 System.out.println(line);
             }
@@ -70,9 +78,12 @@ public class JoernServer {
                     ProcessBuilder portFreerBuilder = new ProcessBuilder("cmd.exe", "/c", "taskkill /F /PID " + processID);
                     Process freeProcess = portFreerBuilder.start();
                 }
+                return;
             }
+            throw new RuntimeException("Joern server error");
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

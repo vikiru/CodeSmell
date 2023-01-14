@@ -271,25 +271,9 @@ public class ParserTest {
     // ----------------------------------------------------------------------------------------------------------
 
     @Test
-    public void testInitializeCPG() {
-        JoernServer.start(true);
-        CodePropertyGraph g = p.initializeCPG(jsonPath);
-        //assertEquals(g.getRelations().size(), g.getClasses().size(), 0);
-        //int[] arr = new int[] {1, 2, 3};
-        //ClassA a = new ClassA(arr);
-        //ClassA a2 = new ClassA(arr);
-        // System.out.println(a.compare(a2));
-
-        for (CodePropertyGraph.Relation r : g.getRelations()) {
-            System.out.println("----------");
-            System.out.print("\t" + r);
-            System.out.println("\n----------");
-        }
-    }
-
-    @Test
     public void testOwnProject() {
-        JoernServer.start(false);
+        JoernServer js = new JoernServer();
+        js.start(false);
         CodePropertyGraph g = p.initializeCPG(jsonPath);
         HashMap<CPGClass, Boolean> connectedClasses = new HashMap<CPGClass, Boolean>();
         for (CPGClass c : g.getClasses()) {
@@ -313,18 +297,4 @@ public class ParserTest {
             assertEquals("Disconnected class: " + c, isConnected, true);
         });
     }
-
-    public class ClassA {
-        public final int[] arr;
-
-        ClassA(int[] arr) {
-            this.arr = arr;
-        }
-
-        public boolean compare(ClassA other) {
-            return other.arr == this.arr;
-        }
-    }
-
-
 }

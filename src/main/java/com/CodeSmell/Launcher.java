@@ -10,7 +10,11 @@ public class Launcher {
                 skipJoern = true;
             }
         }
-        if (!skipJoern) JoernServer.start(false);
+        if (!skipJoern) {
+            JoernServer server = new JoernServer();
+            server.start(false);
+            MainApp.joernReader = server.getReader();
+        }
         MainApp.main(args);
     }
 }

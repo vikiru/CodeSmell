@@ -25,7 +25,7 @@ public class Common {
 	// return classes where nested classes are values in hashmap 
 	public static HashMap<CPGClass, CPGClass[]> collapseNestedClasses(
 			List<CPGClass> classes) {
-		HashMap<CPGClass, CPGClass[]> collapsedClasses;
+		HashMap<CPGClass, CPGClass[]> collapsedClasses = new HashMap();
 		for (CPGClass c : classes) {
 				ArrayList<CPGClass> nestedClasses = new ArrayList<>();
 				for (CPGClass c2 : classes) {
@@ -38,7 +38,7 @@ public class Common {
 		return  collapsedClasses;
 	} 
 
-	protected abstract class ClassSorter {
+	protected static abstract class ClassSorter {
 		private ArrayList<Pair<CPGClass, Integer>> items = new ArrayList<>();
 		private int total = 0;
 
@@ -50,7 +50,7 @@ public class Common {
 
 		// returns the sorted key values of the hash set of nested classes
 		public void sortNested(HashMap<CPGClass, CPGClass[]> classes) {
-			HashMap<CPGClass, Integer> nestedValues = new HashMap<>();
+				HashMap<CPGClass, Integer> nestedValues = new HashMap<>();
 			Comparator<Map.Entry<CPGClass, CPGClass[]>> comparator = new 
 					Comparator<>() {
 				public int compare(HashMap.Entry e1, HashMap.Entry e2) {
@@ -122,7 +122,11 @@ public class Common {
 
 	public static class ContentSorter extends ClassSorter {
 		protected int order(CPGClass c) {
-			return c.contentSize();
+			return contentSize(c);
+		}
+
+		private int contentSize(CPGClass c) {
+			return 0;
 		}
 	}
 }

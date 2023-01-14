@@ -19,24 +19,11 @@ import java.util.stream.Collectors;
  * converts the JSON code to a code property object that can be
  */
 public class Parser {
-
-    /**
-     * The main method of the Parser class that builds the code property graph
-     * @param args
-     */
-    public static void main(String[] args) {
-        Parser p = new Parser();
-        CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
-        //CodePropertyGraph cpg = p.initializeCPG(p.chooseDirectory());
-    }
-
-
+    
     public String chooseDirectory()
     {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setInitialDirectory(new File("src"));
-
-
         File selectedDirectory = directoryChooser.showDialog(new Stage());
         return selectedDirectory.getPath();
     }
@@ -70,31 +57,35 @@ public class Parser {
      * @param destination - The filePath containing the .json file
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public CodePropertyGraph initializeCPG(String destination) {
+    public CodePropertyGraph initializeCPG(Reader joernReader) {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         Gson gson = builder.create();
         CodePropertyGraph cpg = new CodePropertyGraph();
-        try {
-            Reader reader = Files.newBufferedReader(Paths.get(destination));
-            CodePropertyGraph tempCPG = gson.fromJson(reader, CodePropertyGraph.class);
-            // get missing info for CPGClasses and their fields and methods.
-            tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
-            for (CPGClass cpgClass : tempCPG.getClasses()) {
-                cpg.addClass(assignMissingClassInfo(cpgClass));
-            }
-            // assign all relations (association of diff types, composition, realization, inheritance, dependency)
-            cpg = this.assignInheritanceRelationship(cpg);
-            this.assignRealizationRelationships(cpg);
-            this.assignAssociationRelationships(cpg);
-            this.assignDependencyRelationships(cpg);
-
-            // finally write the resulting cpg to a json at a given filePath
-            String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelations.json";
-            this.writeToJson(cpg, filePath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        CodePropertyGraph tempCPG = gson.fromJson(joernReader, CodePropertyGraph.class);
+        if (tempCPG == null) {
+            throw new RuntimeException("Bad JSON read by parser");
         }
+        // get missing info for CPGClasses and their fields and methods.
+        tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
+        for (CPGClass cpgClass : tempCPG.getClasses()) {
+            cpg.addClass(assignMissingClassInfo(cpgClass));
+        }
+        // assign all relations (association of diff types, composition, realization, inheritance, dependency)
+        cpg = this.assignInheritanceRelationship(cpg);
+        this.assignRealizationRelationships(cpg);
+        this.assignAssociationRelationships(cpg);
+        this.assignDependencyRelationships(cpg);
+
+
+        for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+            r.source.addOutwardRelation(r);
+        }
+
+        // finally write the resulting cpg to a json at a given filePath
+        String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelations.json";
+        this.writeToJson(cpg, filePath);
+
         return cpg;
     }
 

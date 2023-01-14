@@ -6,7 +6,7 @@ import sys
 import time
 from pathlib import Path
 from cpgqls_client import CPGQLSClient, import_code_query
-
+import logging
 
 # Cleans up json output from joern so that it can be a proper JSON file.
 def clean_json(joern_result):
@@ -269,7 +269,7 @@ def source_code_json_creation():
 
     # Create a dictionary with all the info about the source code and write it to a .json file.
     source_code_json = {"classes": list(filter(None, list(map(create_class_dict, all_data))))}
-    write_to_file(source_code_json, "sourceCode")
+    print(source_code_json)
 
 
 if __name__ == "__main__":
@@ -282,14 +282,12 @@ if __name__ == "__main__":
     our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
     test_project_dir = str(Path(__file__).parent.parent.parent)  + "/test/java/com/testproject"
     
-    print(test_project_dir)
-    print(sys.argv)
+
     if sys.argv[-1] == "load_test_directory":
         project_dir = test_project_dir
     else:
         project_dir = our_project_dir
 
-    print(project_dir, "<<<< project")
     if "Windows" in platform.platform():
         index = project_dir.find(":")
         win_drive = project_dir[0: index + 1]
@@ -297,8 +295,6 @@ if __name__ == "__main__":
             "\\", "//"
         )
     project_name = "analyzedProject"
-    project_dir = project_dir  # Change this as needed for testing purposes. Remember to replace "\\" with "//".
-
     # Import the source code to Joern for analyzing.
     total_time = 0
     start = time.time()
@@ -307,20 +303,22 @@ if __name__ == "__main__":
     end = time.time()
 
     if result["success"]:
-        print(
+        logging.info(
             "The source code has been successfully imported. Completed in {0} seconds.".format(
                 format(end - start, ".2f"))
         )
         total_time += end - start
+    else:
+        print("import failure", file=sys.stderr)
+        exit(1)
 
     # Create the source code json representation
     start = time.time()
     source_code_json_creation()
     end = time.time()
-    print(
+    logging.info(
         "A .json representation of the source code has been created. Completed in {0} seconds.".format(
-            format(end - start, ".2f"))
-    )
+            format(end - start, ".2f")))
     total_time += end - start
 
     # Close and delete the project from user's bin/joern/joern-cli/workspace
@@ -329,14 +327,11 @@ if __name__ == "__main__":
     result = client.execute(query)
     end = time.time()
     if result["success"]:
-        print(
-            "The source code has been successfully removed. Completed in {0} seconds.".format(
-                format(end - start, ".2f"))
-        )
+        logging.info("The source code has been successfully removed. Completed in {0} seconds.".format(
+                format(end - start, ".2f")))
         total_time += end - start
-    print("Total time taken: {0} seconds.".format(
-        format(total_time, ".2f"))
-    )
+    logging.info("Total time taken: {0} seconds.".format(
+        format(total_time, ".2f")))
 
 """
 SnakeViz and cProfile diagnostics.
