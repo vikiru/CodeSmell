@@ -417,7 +417,7 @@ public class Parser {
     }
 
     /**
-     * Determines whether or not a relation exists within the CodePropertyGraph (matching the exact source, target, type
+     * Determines whether a relation exists within the CodePropertyGraph (matching the exact source, target, type
      * and multiplicity)
      * <p>
      * If the relation exists, return true and if it does not exist, return false.
@@ -787,9 +787,9 @@ public class Parser {
             int startingIndex = typeName.indexOf("<");
             int endingIndex = typeName.lastIndexOf(">");
             typeName = typeName.substring(startingIndex, endingIndex + 1).
-                    trim().replace("<", " ").
+                    replace("<", " ").
                     replace(">", "").
-                    replace(", ", " ");
+                    replace(", ", " ").trim();
         }
         return typeName;
     }
