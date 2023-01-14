@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class JoernServer {
 
-    public static void start(boolean testDirectory, String Directory) {
+    public static void start(boolean testDirectory, String directory) {
 
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
@@ -23,10 +23,11 @@ public class JoernServer {
             joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
         } else joernServerBuilder = new ProcessBuilder("joern", "--server");
         String target = "load_test_directory";
+        System.out.println(new File(directory));
         if (!testDirectory) {
-            target = "our_project_directory";
+            target = "project_directory";
         }
-        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", target).directory(new File(directoryPath));
+        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", target, directory).directory(new File(directoryPath));
 
         try {
             // Start the server
