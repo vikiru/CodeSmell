@@ -42,17 +42,23 @@ public class JoernServer {
             // Start the server
             Process joernServerProcess = joernServerBuilder.start();
             BufferedReader joernServerReader = new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()));
-            System.out.println(joernServerReader.readLine());
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(joernServerProcess.getErrorStream()));;
+            String line;
+            while ((line = joernServerReader.readLine()) != null) {
+                System.out.println(joernServerReader.readLine());
+            }
+            while ((line = errorReader.readLine()) != null) {
+                System.out.println(line);
+            }
 
             // Execute queries against the local joern server instance.
             Process joernQueryProcess = joernQueryBuilder.start();
 
             BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
+            errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
             int exitCode = joernQueryProcess.waitFor();
             this.joernReader = joernQueryReader;
             System.out.println("Joern exit code: " + exitCode);
-            String line;
             while ((line = errorReader.readLine()) != null) {
                 System.out.println(line);
             }
