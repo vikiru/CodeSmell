@@ -13,13 +13,13 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final String name;
 
-    @Expose(serialize = true, deserialize = false)
+    @Expose(serialize = true, deserialize = true)
     public final String code;
 
-    @Expose(serialize = true, deserialize = false)
+    @Expose(serialize = true, deserialize = true)
     public final String[] importStatements;
 
-    @Expose(serialize = true, deserialize = false)
+    @Expose(serialize = true, deserialize = true)
     public final Modifier[] modifiers;
 
     // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
@@ -119,7 +119,7 @@ public class CPGClass {
         @Expose(serialize = true, deserialize = true)
         public final String name;
 
-        @Expose(serialize = true, deserialize = false)
+        @Expose(serialize = true, deserialize = true)
         public final String code;
 
         // the package name of the field
@@ -192,7 +192,6 @@ public class CPGClass {
         public final Instruction[] instructions;
 
         // a list of methods which this calls
-        @Expose(serialize = true, deserialize = true)
         private ArrayList<Method> methodCalls;
 
         protected Method(String parentClassName, String code, String name, Modifier[] modifiers,

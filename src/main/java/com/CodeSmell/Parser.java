@@ -4,8 +4,6 @@ import com.CodeSmell.CPGClass.Attribute;
 import com.CodeSmell.CPGClass.Method;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Stage;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -19,14 +17,9 @@ import java.util.stream.Collectors;
  * converts the JSON code to a code property object that can be
  */
 public class Parser {
-    
-    public String chooseDirectory()
-    {
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setInitialDirectory(new File("src"));
-        File selectedDirectory = directoryChooser.showDialog(new Stage());
-        return selectedDirectory.getPath();
-    }
+
+    public static final String CPG_BACKUP_JSON = "cpg_backup.json";
+
     /**
      * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
      * pretty printing and write to the given path.
@@ -37,6 +30,7 @@ public class Parser {
     public void writeToJson(CodePropertyGraph cpg, String filePath) {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
+        builder.disableHtmlEscaping();
         builder.setPrettyPrinting();
         Gson gson = builder.create();
         try {
@@ -55,37 +49,51 @@ public class Parser {
      * serializes it into a .json file.
      *
      * @param destination - The filePath containing the .json file
+     * @param complete - if true read as CPG.json output file, if false read as 
+     * joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public CodePropertyGraph initializeCPG(Reader joernReader) {
+    public CodePropertyGraph initializeCPG(Reader joernReader, boolean complete) {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         Gson gson = builder.create();
         CodePropertyGraph cpg = new CodePropertyGraph();
         CodePropertyGraph tempCPG = gson.fromJson(joernReader, CodePropertyGraph.class);
         if (tempCPG == null) {
-            throw new RuntimeException("Bad JSON read by parser");
+            throw new RuntimeException("Bad JSON read by parser.");
         }
-        // get missing info for CPGClasses and their fields and methods.
+
+         // get missing info for CPGClasses and their fields and methods.
         tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
         for (CPGClass cpgClass : tempCPG.getClasses()) {
             cpg.addClass(assignMissingClassInfo(cpgClass));
         }
-        // assign all relations (association of diff types, composition, realization, inheritance, dependency)
-        cpg = this.assignInheritanceRelationship(cpg);
-        this.assignRealizationRelationships(cpg);
-        this.assignAssociationRelationships(cpg);
-        this.assignDependencyRelationships(cpg);
 
+        if (!complete) {
+            System.out.println("Parser　processed joern_query.py output");
+            // assign all relations (association of diff types, composition, realization, inheritance, dependency)
+            cpg = this.assignInheritanceRelationship(cpg);
+            this.assignRealizationRelationships(cpg);
+            this.assignAssociationRelationships(cpg);
+            this.assignDependencyRelationships(cpg);
+            // finally write the resulting cpg to a json at a given filePath
+            this.writeToJson(cpg, CPG_BACKUP_JSON);
+        } else if (cpg.getRelations().size() == 0) {
+
+            // complete=true was provided as a parameter but 
+            // joearnReader is likely giving the output of joern_query.py, which
+            // it should do with complete=false
+            throw new RuntimeException("complete=true but incomplete json was provided");
+        } else {
+            System.out.println("Parser read backup file");
+        }
+
+        System.out.printf("Project read: %d classes, %d relations",
+            cpg.getClasses().size(), cpg.getRelations().size());
 
         for (CodePropertyGraph.Relation r : cpg.getRelations()) {
             r.source.addOutwardRelation(r);
         }
-
-        // finally write the resulting cpg to a json at a given filePath
-        String filePath = "src/main/python/joernFiles/" + "sourceCodeWithRelations.json";
-        this.writeToJson(cpg, filePath);
-
         return cpg;
     }
 
@@ -121,7 +129,7 @@ public class Parser {
                             int destClassIndex = allClassNames.indexOf(t);
                             CPGClass destClass = cpg.getClasses().get(destClassIndex);
                             String multiplicity = "1..*";
-                            ClassRelation.Type type;
+                            ClassRelation.RelationshipType type;
                             var destResult = Arrays.stream(destClass.attributes).
                                     filter(attribute -> attribute.attributeType.contains(cpgClass.name))
                                     .collect(Collectors.toList());
@@ -130,15 +138,15 @@ public class Parser {
                                 if (destMultiplicity.equals("1..*")) {
                                     multiplicity = "*..*";
                                 }
-                                type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
+                                type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
                             } else {
-                                type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
+                                type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
                             }
                             if (cpgClass == destClass) {
-                                type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                                type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
                             }
                             if (determineCompositionRelationship(cpgClass, destClass)) {
-                                type = ClassRelation.Type.COMPOSITION;
+                                type = ClassRelation.RelationshipType.COMPOSITION;
                             }
                             CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
                                     (cpgClass, destClass,
@@ -167,7 +175,7 @@ public class Parser {
                     CPGClass destClass = cpg.getClasses().get(destClassIndex);
                     String multiplicity = obtainMultiplicity(attributeType, count);
                     // Handle many-to-many
-                    ClassRelation.Type type;
+                    ClassRelation.RelationshipType type;
                     var destResult = Arrays.stream(destClass.attributes).
                             filter(attribute -> attribute.attributeType.contains(cpgClass.name)).collect(Collectors.toList());
                     if (!destResult.isEmpty()) {
@@ -175,15 +183,15 @@ public class Parser {
                         if (destMultiplicity.equals("1..*")) {
                             multiplicity = "*..*";
                         }
-                        type = ClassRelation.Type.BIDIRECTIONAL_ASSOCIATION;
+                        type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
                     } else {
-                        type = ClassRelation.Type.UNIDIRECTIONAL_ASSOCIATION;
+                        type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
                     }
                     if (cpgClass == destClass) {
-                        type = ClassRelation.Type.REFLEXIVE_ASSOCIATION;
+                        type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
                     }
                     if (determineCompositionRelationship(cpgClass, destClass)) {
-                        type = ClassRelation.Type.COMPOSITION;
+                        type = ClassRelation.RelationshipType.COMPOSITION;
                     }
                     CodePropertyGraph.Relation relationToAdd = new
                             CodePropertyGraph.Relation(cpgClass, destClass,
@@ -269,7 +277,7 @@ public class Parser {
                             if (checkAttributes.isEmpty()) {
                                 CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
                                         Relation(cpgClass, destClass,
-                                        ClassRelation.Type.DEPENDENCY, "");
+                                        ClassRelation.RelationshipType.DEPENDENCY, "");
                                 if (!checkExistingRelation(cpg, relationToAdd)) {
                                     var additionalCheck = cpg.getRelations().stream().
                                             filter(relation -> relation.source.equals(cpgClass)
@@ -291,7 +299,7 @@ public class Parser {
                                 if (destClass != cpgClass) {
                                     CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.
                                             Relation(cpgClass, destClass,
-                                            ClassRelation.Type.DEPENDENCY, "");
+                                            ClassRelation.RelationshipType.DEPENDENCY, "");
                                     if (!checkExistingRelation(cpg, relationToAdd)) {
                                         var additionalCheck = cpg.getRelations().stream().
                                                 filter(relation -> relation.source.equals(cpgClass)
@@ -350,7 +358,7 @@ public class Parser {
                 if (destClassIndex != -1) {
                     CPGClass destClass = updatedGraph.getClasses().get(destClassIndex);
                     CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
-                            (newClass, destClass, ClassRelation.Type.INHERITANCE, "");
+                            (newClass, destClass, ClassRelation.RelationshipType.INHERITANCE, "");
                     if (!checkExistingRelation(updatedGraph, relationToAdd)) {
                         updatedGraph.addRelation(relationToAdd);
                     }
@@ -423,11 +431,11 @@ public class Parser {
                     if (!parentFirstClass.classType.equals("interface")) {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentFirstClass, parentSecondClass,
-                                ClassRelation.Type.REALIZATION, "");
+                                ClassRelation.RelationshipType.REALIZATION, "");
                     } else {
                         relationToAdd = new CodePropertyGraph.
                                 Relation(parentSecondClass, parentFirstClass,
-                                ClassRelation.Type.REALIZATION, "");
+                                ClassRelation.RelationshipType.REALIZATION, "");
                     }
                     if (!checkExistingRelation(cpg, relationToAdd)) {
                         cpg.addRelation(relationToAdd);
@@ -438,7 +446,7 @@ public class Parser {
     }
 
     /**
-     * Determines whether or not a relation exists within the CodePropertyGraph (matching the exact source, target, type
+     * Determines whether a relation exists within the CodePropertyGraph (matching the exact source, target, type
      * and multiplicity)
      * <p>
      * If the relation exists, return true and if it does not exist, return false.
@@ -471,16 +479,8 @@ public class Parser {
     CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            ArrayList<Attribute> properAttributes = new ArrayList<>();
+            ArrayList<Attribute> properAttributes = new ArrayList<>(Arrays.asList(cpgClass.attributes));
             ArrayList<Method> properMethods = new ArrayList<>();
-            for (Attribute a : cpgClass.attributes) {
-                if (a.packageName.equals("java.util") && !a.attributeType.contains("<")) {
-                    String provisionalType = assignMissingAttributeType(cpgClass, a);
-                    properAttributes.add(new Attribute(a.name, "", a.packageName, provisionalType, a.modifiers, a.typeFullName));
-                } else {
-                    properAttributes.add(a);
-                }
-            }
             for (Method m : cpgClass.methods) {
                 int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
                 // ignore lambdas for now
@@ -490,10 +490,11 @@ public class Parser {
                 }
             }
 
-            CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{}, cpgClass.classFullName,
-                    cpgClass.classType, cpgClass.filePath, cpgClass.packageName,
+            CPGClass properClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{},
+                    cpgClass.classFullName, cpgClass.classType, cpgClass.filePath, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
+            properClass = assignMissingClassInfo(properClass);
             graph.addClass(properClass);
         }
         if (iterations - 1 == 0) {
@@ -605,11 +606,19 @@ public class Parser {
                 ArrayList<CPGClass.Modifier> fieldModifiers = new ArrayList<>();
                 String code = attributeResult.get(0).trim();
                 String line = code.replace(a.name, "").trim();
-                for (CPGClass.Modifier modStr : CPGClass.Modifier.values()) {
-                    if (line.contains(modStr.modString)) {
-                        line = line.replace(modStr.modString, "").trim();
-                        fieldModifiers.add(modStr);
+                if (!type.equals(cpgClass.name) && !classType.equals("enum")) {
+                    for (CPGClass.Modifier modStr : CPGClass.Modifier.values()) {
+                        if (line.contains(modStr.modString)) {
+                            line = line.replace(modStr.modString, "").trim();
+                            fieldModifiers.add(modStr);
+                        }
                     }
+                }
+                // enum constants are implicitly declared as public static final.
+                else {
+                    fieldModifiers.add(CPGClass.Modifier.PUBLIC);
+                    fieldModifiers.add(CPGClass.Modifier.STATIC);
+                    fieldModifiers.add(CPGClass.Modifier.FINAL);
                 }
                 // get proper type of attribute
                 if (a.packageName.equals("java.util") && !type.contains("<")) {
@@ -619,9 +628,14 @@ public class Parser {
                         type += line.substring(startIndex, endIndex + 1).trim();
                     }
                 }
-                String attrPackage = a.typeFullName;
-                if (a.typeFullName.contains(packageName)) {
-                    attrPackage = a.typeFullName.replace("$", ".").replace("[]", "");
+                String attrPackage = a.packageName;
+                if (a.typeFullName.contains(packageName) && attrPackage.equals("")) {
+                    String properType = getProperTypeName(type).trim();
+                    if (!type.contains(",")) {
+                        attrPackage = packageName + "." + properType;
+                    }
+                } else if (a.typeFullName.contains("<unresolvedNameSpace>") && attrPackage.equals("")) {
+                    attrPackage = packageName;
                 }
                 // create new attribute with proper info and add to updatedAttributes list
                 Attribute properAttribute = new Attribute(name, code, attrPackage,
@@ -639,89 +653,13 @@ public class Parser {
                 cpgClass.methods);
     }
 
-
     /**
-     * Given a CPGClass and an Attribute belonging to that class, assign the proper type to the Attribute.
-     * This is for cases where an Attribute may be a part of Java Collections (i.e. HashMap, ArrayList, Set, etc).
-     * <p>
-     * Performs 3 checks to determine the attribute's type:
-     * <p>
-     * 1) Check the constructor parameters
-     * <p>
-     * 2) Check the instructions of the constructor
-     * <p>
-     * 3) Check the instructions of all other methods of that class
+     * Updates a given method with its proper methodCalls, requires two iterations to get all the proper method
+     * calls of each method called within this list.
      *
-     * @param cpgClass  The parent CPGClass containing the Attribute
-     * @param attribute The attribute that is missing a proper type (i.e. a type given as "ArrayList")
-     * @return A String containing the proper Attribute type
-     */
-    String assignMissingAttributeType(CPGClass cpgClass, Attribute attribute) {
-        String className = cpgClass.name;
-        Method[] classMethods = cpgClass.methods;
-        String stringToFind = "this." + attribute.name;
-        String finalAttributeType = attribute.attributeType;
-        var result = Arrays.stream(classMethods).
-                filter(method -> method.name.equals(className)).collect(Collectors.toList());
-        if (!result.isEmpty()) {
-            Method constructor = result.get(0);
-            var instructionResult = Arrays.stream(constructor.instructions).
-                    filter(instruction -> instruction.label.equals("METHOD"))
-                    .collect(Collectors.toList());
-            String constructorBody = instructionResult.get(0).code;
-            // Check the constructor, if the desired attribute is a parameter, this will obtain the type
-            if (constructorBody.contains(attribute.name)) {
-                var attributeResult = Arrays.stream(constructor.parameters).
-                        filter(parameter -> parameter.name.equals(attribute.name)).collect(Collectors.toList());
-                if (!attributeResult.isEmpty()) {
-                    finalAttributeType = attributeResult.get(0).type;
-                }
-            }
-            // Check the constructor's instructions, if the desired attribute is defined within the constructor, this will obtain the
-            // type
-            else {
-                instructionResult = Arrays.stream(constructor.instructions).
-                        filter(instruction -> instruction.label.equals("CALL") &&
-                                instruction.code.contains("<") && !instruction.code.contains("<>")
-                                && instruction.code.contains(stringToFind)).collect(Collectors.toList());
-                if (!instructionResult.isEmpty()) {
-                    int startingIndex = instructionResult.get(0).code.indexOf("<");
-                    int endingIndex = instructionResult.get(0).code.indexOf(">");
-                    if (startingIndex != -1) {
-                        String type = instructionResult.get(0).code.substring(startingIndex, endingIndex + 1);
-                        finalAttributeType += type;
-                    }
-                }
-            }
-        }
-        // Check all other methods apart from the constructor to determine if the desired attribute is used somewhere.
-        if (finalAttributeType.equals(attribute.attributeType)) {
-            for (Method method : classMethods) {
-                Method.Instruction[] instructions = method.instructions;
-                var instructionResult = Arrays.stream(instructions)
-                        .filter(instruction -> instruction.code.contains(stringToFind)
-                                && instruction.label.equals("CALL")
-                                && (instruction.code.contains("add") || instruction.code.contains("put"))).collect(Collectors.toList());
-                if (!instructionResult.isEmpty()) {
-                    int indexToFind = instructionResult.get(0).code.indexOf("(");
-                    String parameter = instructionResult.get(0).code.substring(indexToFind).replace("(", "").replace(")", "");
-                    var parameterResult = Arrays.stream(method.parameters).
-                            filter(parameterToFind -> parameterToFind.name.equals(parameter)).collect(Collectors.toList());
-                    if (!parameterResult.isEmpty()) {
-                        if (!parameter.contains("<")) {
-                            finalAttributeType += "<" + parameterResult.get(0).type + ">";
-                        } else finalAttributeType += parameterResult.get(0).type;
-                    }
-                }
-            }
-        }
-        return finalAttributeType;
-    }
-
-    /**
-     * @param cpg
-     * @param methodToUpdate
-     * @return
+     * @param cpg            - The CodePropertyGraph containing the source code information
+     * @param methodToUpdate - The method that is having its methodCalls field updated
+     * @return The updated method with its methodCalls
      */
     Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
@@ -839,11 +777,13 @@ public class Parser {
         }
     }
 
-
     /**
-     * @param attribute
-     * @param count
-     * @return
+     * Returns the multiplicity given an attribute type and a count of how many instances that attribute
+     * has within a given class.
+     *
+     * @param attribute - A String representation of the attribute type
+     * @param count     - A Long representing the count of how many instances of this attribute exist within source class
+     * @return A string representing the multiplicity
      */
     String obtainMultiplicity(String attribute, Long count) {
         String multiplicityToReturn = "";
@@ -875,7 +815,10 @@ public class Parser {
         } else if (typeName.contains("<")) {
             int startingIndex = typeName.indexOf("<");
             int endingIndex = typeName.lastIndexOf(">");
-            typeName = typeName.substring(startingIndex, endingIndex + 1).trim().replace("<", " ").replace(">", "").replace(", ", " ");
+            typeName = typeName.substring(startingIndex, endingIndex + 1).
+                    replace("<", " ").
+                    replace(">", "").
+                    replace(", ", " ").trim();
         }
         return typeName;
     }

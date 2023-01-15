@@ -1,9 +1,11 @@
 package com.CodeSmell;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
+
 import java.io.File;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -17,7 +19,8 @@ public class JoernServer {
         return this.joernReader;
     }
 
-    public void start(boolean testDirectory) {
+
+    public void start(String directory) {
 
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
@@ -31,11 +34,7 @@ public class JoernServer {
         if (System.getProperty("os.name").contains("Windows")) {
             joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
         } else joernServerBuilder = new ProcessBuilder("joern", "--server");
-        String target = "load_test_directory";
-        if (!testDirectory) {
-            target = "our_project_directory";
-        }
-        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", target).directory(new File(directoryPath));
+        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", directory).directory(new File(directoryPath));
 
 
         try {

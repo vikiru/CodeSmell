@@ -16,18 +16,8 @@ def clean_json(joern_result):
     joern_result = joern_result[index: len(joern_result)]
     return joern_result
 
-
-# Write the joern output of a query to a specified filename
-def write_to_file(source_code_json, file_name):
-    final_directory_name = (
-            str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name + ".json"
-    )
-    with open(final_directory_name, "w") as f:
-        json.dump(source_code_json, f, indent=4)
-
-
 # For every attribute, create a dictionary and return it.
-def create_field_dict(curr_field):
+def create_attribute_dict(curr_field):
     type = curr_field["_1"]["typeFullName"]
     package_name = ""
     index = curr_field["_1"]["typeFullName"].rfind(".")
@@ -37,12 +27,14 @@ def create_field_dict(curr_field):
     index_nested = type.rfind("$")
     if index_nested != -1:
         type = type[index_nested + 1: len(type)]
+
     curr_field_dict = {
         "name": curr_field["_1"]["name"],
-        "typeFullName": curr_field["_1"]["typeFullName"],
+        "code": "",
         "packageName": package_name,
-        "attributeType": type,
         "modifiers": [modifier.lower() for modifier in curr_field["_2"]],
+        "attributeType": type,
+        "typeFullName": curr_field["_1"]["typeFullName"],
     }
     return curr_field_dict
 
@@ -98,11 +90,12 @@ def create_method_dict(curr_method):
                 maxCalls = len(split_params) / 2
 
                 def map_parameters(split_params, start, iterations):
-                    type = split_params[start].strip()
-                    name = split_params[start + 1].strip()
-                    param_list.append(dict(name=name, type=type))
-                    if iterations - 1 != 0:
-                        map_parameters(split_params, start + 2, iterations - 1)
+                    if start + 1 < len(split_params):
+                        type = split_params[start].strip()
+                        name = split_params[start + 1].strip()
+                        param_list.append(dict(name=name, type=type))
+                        if iterations - 1 != 0:
+                            map_parameters(split_params, start + 2, iterations - 1)
 
                 if split_params:
                     map_parameters(split_params, 0, maxCalls)
@@ -241,11 +234,14 @@ def create_class_dict(curr_class):
     # _5 corresponds to class filename (full path)
     curr_class_dict = {
         "name": get_name_without_separators(curr_class["_1"]),
+        "code": "",
+        "importStatements": [],
+        "modifiers": [],
         "classFullName": curr_class["_1"],
         "classType": "",
         "filePath": curr_class["_5"],
         "packageName": get_package_name(curr_class["_5"]),
-        "attributes": list(map(create_field_dict, curr_class["_3"])),
+        "attributes": list(map(create_attribute_dict, curr_class["_3"])),
         "methods": list(
             filter(None, list(map(create_method_dict, curr_class["_4"])))
         ),
@@ -268,25 +264,14 @@ def source_code_json_creation():
     all_data = json.loads(clean_json(result["stdout"]))
 
     # Create a dictionary with all the info about the source code and write it to a .json file.
-    source_code_json = {"classes": list(filter(None, list(map(create_class_dict, all_data))))}
+    source_code_json = {"relations": [], "classes": list(filter(None, list(map(create_class_dict, all_data))))}
     print(source_code_json)
 
 
 if __name__ == "__main__":
     server_endpoint = "localhost:8080"
     client = CPGQLSClient(server_endpoint)
-
-    # For testing purposes. Full file paths are required for joern.
-    # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
-    project_dir = ""
-    our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
-    test_project_dir = str(Path(__file__).parent.parent.parent)  + "/test/java/com/testproject"
-    
-
-    if sys.argv[-1] == "load_test_directory":
-        project_dir = test_project_dir
-    else:
-        project_dir = our_project_dir
+    project_dir = sys.argv[-1]
 
     if "Windows" in platform.platform():
         index = project_dir.find(":")
@@ -320,30 +305,3 @@ if __name__ == "__main__":
         "A .json representation of the source code has been created. Completed in {0} seconds.".format(
             format(end - start, ".2f")))
     total_time += end - start
-
-    # Close and delete the project from user's bin/joern/joern-cli/workspace
-    start = time.time()
-    query = 'delete ("' + project_name + '")'
-    result = client.execute(query)
-    end = time.time()
-    if result["success"]:
-        logging.info("The source code has been successfully removed. Completed in {0} seconds.".format(
-                format(end - start, ".2f")))
-        total_time += end - start
-    logging.info("Total time taken: {0} seconds.".format(
-        format(total_time, ".2f")))
-
-"""
-SnakeViz and cProfile diagnostics.
-import cProfile
-    import pstats
-
-    with cProfile.Profile() as pr:
-        source_code_json_creation()
-
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.TIME)
-    # stats.print_stats()
-    stats.dump_stats(filename="profiling.prof")
-
-"""

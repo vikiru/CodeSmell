@@ -25,6 +25,7 @@ import java.util.Set;
 public class MainApp extends Application {
 
     public static BufferedReader joernReader;
+    public static boolean skipJoern;
     
     public static void main(String[] args) {
         launch(args);
@@ -75,7 +76,7 @@ public class MainApp extends Application {
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
         if (newState == Worker.State.SUCCEEDED) {
             Parser p = new Parser();
-            CodePropertyGraph cpg = p.initializeCPG(joernReader);
+            CodePropertyGraph cpg = p.initializeCPG(joernReader, skipJoern);
             initializeMainView(cpg);
         }
     }
