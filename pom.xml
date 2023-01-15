@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.CodeSmell</groupId>
     <artifactId>CodeSmell</artifactId>
@@ -15,6 +15,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.10</version>
+        </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -58,6 +63,16 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                <show>private</show>
+                <nohelp>false</nohelp>
+                <reportOutputDirectory>target/javadoc</reportOutputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.2</version>
                 <configuration>
@@ -73,6 +88,10 @@
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.2.0</version>
+            </plugin>
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
             <plugin>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -118,7 +137,7 @@
             <plugin>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-maven-plugin</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.8</version>
             <executions>
                 <execution>
                     <!-- Default configuration for running -->
@@ -126,6 +145,7 @@
                     <id>default-cli</id>
                     <configuration>
                         <mainClass>com.CodeSmell.Launcher</mainClass>
+                        <commandlineArgs>--skip-joern=${skip}</commandlineArgs>
                     </configuration>
                 </execution>
             </executions>

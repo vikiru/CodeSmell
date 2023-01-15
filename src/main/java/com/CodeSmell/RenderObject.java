@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.CodeSmell.RenderEventListener;
 import com.CodeSmell.RenderEvent;
+import com.CodeSmell.Shape;
 
 public abstract class RenderObject {
 
@@ -17,5 +18,12 @@ public abstract class RenderObject {
 		for (RenderEventListener rel : renderEventListeners) {
 			rel.renderEventPerformed(re);
 		}
+	}
+
+	public void render() {
+		// renders an object (ignores the UI response)
+
+		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
+		dispatchToRenderEventListeners(re);
 	}
 }

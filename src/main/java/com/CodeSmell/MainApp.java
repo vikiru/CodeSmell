@@ -1,51 +1,54 @@
 package com.CodeSmell;
 
-import java.util.Set;
-import java.io.File;
-import java.net.URL;
-import java.util.ListResourceBundle;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import javafx.application.Application;
+import javafx.collections.ListChangeListener;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXMLLoader;
+import javafx.stage.Screen;
+import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebView;
 import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
-import javafx.scene.Node;
-import javafx.concurrent.Worker;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
-import com.CodeSmell.WebControl;
-import com.CodeSmell.UMLClass;
-import com.CodeSmell.LayoutManager;
-import com.CodeSmell.CPGClass;
-import com.CodeSmell.CodePropertyGraph;
-import com.CodeSmell.RenderObject;
+import javafx.geometry.Rectangle2D;
+
+import java.io.InputStream;
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 public class MainApp extends Application {
 
+    public static InputStream joernStream;
+    public static boolean skipJoern;
+    
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     public void initializeMainView(CodePropertyGraph cpg) {
-        /** 
+        /**
          *  Renders the UML diagram
-         * 
+         *
          * */
 
         // Build the UMLClass objects from the CPGClass objects
         // Get a hashmap to associate the latter with the former.
         HashMap<CPGClass, UMLClass> classMap = new HashMap<CPGClass, UMLClass>();
 
-        for ( CPGClass graphClass : cpg.getClasses() ) {
+        for (CPGClass graphClass : cpg.getClasses()) {
             UMLClass c = new UMLClass(graphClass.name);
             classMap.put(graphClass, c);
-            for (CPGClass.Method m : graphClass.getMethods()) {
-                c.addField(true, m.name);
+            for (CPGClass.Method m : graphClass.methods) {
+                c.addMethod(m);
             }
-            for (CPGClass.Attribute a : graphClass.getAttributes()) {
-                c.addField(false, a.name);
+            for (CPGClass.Attribute a : graphClass.attributes) {
+                c.addAttribute(a);
             }
 
             //for (Smell s : SmellDetector.getSmells(cpg)) {
@@ -53,69 +56,73 @@ public class MainApp extends Application {
             //}
             // Render the class at (0, 0) so that it can be sized.
             // Will be moved later when lm.positionClasses() is called.
-            c.render(); 
+            c.render();
         }
 
         // Build the ClassRelation objects from the CPGClass.Relation objects
         ArrayList<ClassRelation> relations = new ArrayList<ClassRelation>();
-        for ( CodePropertyGraph.Relation r : cpg.getRelations() ) {
+        for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+            System.out.println(r);
             UMLClass source, target;
             source = classMap.get(r.source);
             target = classMap.get(r.destination);
-            ClassRelation cr = new ClassRelation(source, target, r.type);
+            ClassRelation cr = new ClassRelation(source, target, r.type, r.multiplicity);
             source.addRelationship(cr);
             target.addRelationship(cr);
             relations.add(cr);
         }
+	LayoutManager lm = new LayoutManager(new ArrayList<UMLClass>(classMap.values()), relations);
+    }
 
-        LayoutManager lm = new LayoutManager();
-        lm.positionClasses(new ArrayList<UMLClass>(classMap.values()));
-        lm.setRelationPaths(relations);
+    private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
+        if (newState == Worker.State.SUCCEEDED) {
+            Parser p = new Parser();
+            CodePropertyGraph cpg = p.initializeCPG(joernStream, skipJoern);
+            initializeMainView(cpg);
+        }
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("jfx.fxml"));
-        primaryStage.setScene(new Scene(root, 400, 300));
-        primaryStage.setTitle("CodeSmell Detector");
-
+        Rectangle2D screenBounds = Screen.getPrimary().getBounds();
         String location = new File(System.getProperty("user.dir") + "/boxes.html"
-                ).toURI().toURL().toExternalForm();
+        ).toURI().toURL().toExternalForm();
+
+        double startWidth = screenBounds.getWidth() / 2;
+        double startHeight = screenBounds.getHeight() * 0.8;
         WebView webView = new WebView();
+        webView.setMaxSize(screenBounds.getWidth() ,screenBounds.getHeight());
+        webView.prefHeightProperty().bind(primaryStage.heightProperty());
+        webView.prefWidthProperty().bind(primaryStage.heightProperty());
         webView.getEngine().load(location);
+        VBox vBox = new VBox(webView);
+        Scene scene = new Scene(vBox, startWidth, startHeight);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("CodeSmell Detector");
 
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
+        webView.setZoom(1.0); // allow resizing for other resolutions
         RenderObject.addRenderEventListener(new WebControl(engine));
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                Parser p = new Parser();
-                CodePropertyGraph cpg = p.buildCPG("");
-                initializeMainView(cpg);
-            }
+            removeWhenParserLambdaLimitationFixed(newState);
         });
 
-        // hide scroll bars from the webview. source: 
+  
+        // hide scroll bars from the webview. source:
         // https://stackoverflow.com/questions/11206942/how-to-hide-scrollbars-in-the-javafx-webview
         webView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
-          @Override public void onChanged(Change<? extends Node> change) {
-            Set<Node> deadSeaScrolls = webView.lookupAll(".scroll-bar");
-            for (Node scroll : deadSeaScrolls) {
-              scroll.setVisible(false);
+            @Override
+            public void onChanged(Change<? extends Node> change) {
+                Set<Node> scrollBar = webView.lookupAll(".scroll-bar");
+                for (Node scroll : scrollBar) {
+                    scroll.setVisible(false);
+                }
             }
-          }
         });
-
-        VBox vBox = new VBox(webView);
-        Scene scene = new Scene(vBox, 960, 600);
-        primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

@@ -1,47 +1,68 @@
 package com.CodeSmell;
 
+import com.CodeSmell.ClassRelation.RelationshipType;
+import com.google.gson.annotations.Expose;
+
 import java.util.ArrayList;
+import java.io.Serializable;
 
-import com.CodeSmell.CPGClass;
-import com.CodeSmell.ClassRelation.Type;
+public class CodePropertyGraph implements Serializable {
 
-public class CodePropertyGraph {
+    @Expose(serialize = true, deserialize = true)
+    private ArrayList<Relation> relations;
 
-	public class Relation {
-		public final CPGClass source;
-		public final CPGClass destination;
-		public final Type type;
-		
-		Relation(CPGClass source, CPGClass destination, Type type) {
-			this.source = source;
-			this.destination = destination;
-			this.type = type;
-		}
-	}
+    @Expose(serialize = true, deserialize = true)
+    private ArrayList<CPGClass> classes;
 
+    protected CodePropertyGraph() {
+        this.classes = new ArrayList<CPGClass>();
+        this.relations = new ArrayList<Relation>();
+    }
 
-	private ArrayList<Relation> relations;
-	private ArrayList<CPGClass> classes;
+    @Override
+    public String toString() {
+        return "CodePropertyGraph{" +
+                "relations=" + relations +
+                ", classes=" + classes +
+                '}';
+    }
 
+    protected ArrayList<CPGClass> getClasses() {
+        return new ArrayList(this.classes);
+    }
 
-	protected ArrayList<CPGClass> getClasses() {
-		return this.classes;
-	} 
+    protected ArrayList<Relation> getRelations() {
+        return new ArrayList(this.relations);
+    }
 
-	protected ArrayList<Relation> getRelations() {
-		return this.relations;
-	} 
+    public void addClass(CPGClass c) {
+        this.classes.add(c);
+    }
 
-	protected CodePropertyGraph() {
-		this.classes = new ArrayList<CPGClass>();
-		this.relations = new ArrayList<Relation>();
-	} 
+    public void addRelation(Relation r) {
+        this.relations.add(r);
+    }
 
-	public void addClass(CPGClass c) {
-		this.classes.add(c);
-	}
+    public static class Relation implements Serializable  {
+        @Expose(serialize = true, deserialize = true)
+        public final CPGClass source;
+        @Expose(serialize = true, deserialize = true)
+        public final CPGClass destination;
+        @Expose(serialize = true, deserialize = true)
+        public final RelationshipType type;
+        @Expose(serialize = true, deserialize = true)
+        public final String multiplicity;
 
-	public void addRelation(Relation r) {
-		this.relations.add(r);
-	}
+        Relation(CPGClass source, CPGClass destination, RelationshipType type, String multiplicity) {
+            this.source = source;
+            this.destination = destination;
+            this.type = type;
+            this.multiplicity = multiplicity;
+        }
+
+        @Override
+        public String toString() {
+            return this.source.name + " -> " + destination.name + " : " + this.multiplicity + " " + this.type;
+        }
+    }
 }

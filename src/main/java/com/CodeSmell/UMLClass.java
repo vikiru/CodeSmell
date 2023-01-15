@@ -5,44 +5,46 @@ import com.CodeSmell.WebControl;
 import com.CodeSmell.Position;
 import com.CodeSmell.RenderEvent;
 import com.CodeSmell.Pair;
+import com.CodeSmell.CPGClass.Method;
+import com.CodeSmell.CPGClass.Attribute;
 
 class UMLClass extends RenderObject {
 	
 	public final String name;
 	private int id;
-	private ArrayList<String> methods;
-	private ArrayList<String> attributes;
-	private ArrayList<ClassRelation> connections;
+	private ArrayList<Method> methods;
+	private ArrayList<Attribute> attributes;
+	private ArrayList<ClassRelation> relations;
 	// private ArrayList<Smell> smells;
 	private Position position;
-	private int width;
-	private int height;
-
+	private double width;
+	private double height;
+  
 	UMLClass(String name) {
 		this.name = name;
 		this.id = -1; // id is set on render
-		this.methods = new ArrayList<String>();
-		this.attributes = new ArrayList<String>();
-		this.connections = new ArrayList<ClassRelation>();
+		this.methods = new ArrayList<Method>();
+		this.attributes = new ArrayList<Attribute>();
+		this.relations = new ArrayList<ClassRelation>();
 		this.position = new Position(0, 0);
-		this.width = 0;
-		this.height = 0;
+		this.width = 0.0;
+		this.height = 0.0;
 	}
 
-	public void addField(boolean isMethod, String s) {
-		if (isMethod) {
-			this.methods.add(s);
-		} else {
-			this.attributes.add(s);
-		}
+	public void addMethod(Method m) {
+		this.methods.add(m);
+	}
+
+	public void addAttribute(Attribute a) {
+		this.attributes.add(a);
 	}
 
 	public void addRelationship(ClassRelation r) {
-		this.connections.add(r);
+		this.relations.add(r);
 	}
 
-	public void setPosition(int x, int y) {
-		this.position = new  Position(x, y);
+	public void setPosition(double x, double y) {
+		this.position = new Position(x, y);
 		RenderEvent re = new RenderEvent(RenderEvent.Type.REPOSITION, this);
 		dispatchToRenderEventListeners(re);
 	}
@@ -57,34 +59,39 @@ class UMLClass extends RenderObject {
 		// first render the object to get its dimensions
 		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
 		dispatchToRenderEventListeners(re);
-		Pair<Integer, Pair<Integer, Integer>> p;
-		p = (Pair<Integer, Pair<Integer, Integer>>) re.getResponse();
+    
+		Pair<Integer, Pair<Double, Double>> p;
+		p = (Pair<Integer, Pair<Double, Double>>) re.getResponse();
 		this.id = p.first;
 		this.width = p.second.first;
 		this.height = p.second.second;
 	}
 
-	public String[] getMethods() {
-		String[] s = new String[this.methods.size()];
-		for (int i=0; i < methods.size(); i++) {
-			s[i] = (String) this.methods.get(i);
-		}  
-		return s;
+	public ArrayList<Attribute> getAttributes() {
+		return this.attributes;
+	}
+
+	public ArrayList<Method> getMethods() {
+		return this.methods;
 	}
 
 	public int getId() {
 		return this.id;
 	}
 
-	public int getWidth() {
+	public Double getWidth() {
 		return this.width;
 	}
 
-	public int getHeight() {
+	public Double getHeight() {
 		return this.height;
 	}
 
 	public Position getPosition() {
 		return this.position;
+	}
+
+	public ArrayList<ClassRelation> getRelations() {
+		return this.relations;
 	}
 }

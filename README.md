@@ -1,22 +1,84 @@
 # CodeSmell
 
-## Building and Running
+## Project Description
 
-0.) Ensure the relevant enviornment variables are set. 
-`export JAVA_HOME=/usr/lib/jvm/default-java/`
+A tool for detection and visualization of code smells for object-oriented languages.
 
-1.) Run `mvn clean` followed by `mvn package`
+## Authors
 
-2.) Build the project files with Maven:
+- Golan Hassin
+- Visakan Kirubakaran
+- Sabin Plaiasu
+- Martin Rivard
+- Kshitij Sawhney
 
-`mvn install`
+## Relevant Links
 
-3.) In order to execute the main program: 
+- [Chart of Each Member's Progress](https://github.com/users/vikiru/projects/2/insights/1)
+- [Chart of Each Milestone's Progress](https://github.com/users/vikiru/projects/2/insights/4)
+- [Documentation](#)
+- [Kanban Board](https://github.com/users/vikiru/projects/2)
 
-`mvn clean javafx:run`
+## Prerequisites
+
+Make sure that the following prerequisites are successfully installed on your machine:
+
+- Java - [Download & Install Java.](https://www.java.com/en/download/manual.jsp) Download Java based on
+  your operating system.
+- Maven - [Download & Install Maven.](https://maven.apache.org/download.cgi) Choosing the latest version will suffice.
+- Python - [Download & Install Python.](https://www.python.org/downloads/) Python 3.7+ is required.
+- Joern - Please see the [joern](https://github.com/joernio/joern) repository for more details on installing joern.
+
+## Build and Run Instructions
+
+### Setup
+
+Ensure the relevant environment variables are set properly:
+
+- `export JAVA_HOME=/usr/lib/jvm/default-java/`
+- `MAVEN_HOME`
+
+### Build Instructions
+
+Run the following command to clean and package the project:
+
+```bash
+mvn clean package
+```
+
+Build the project files with Maven:
+
+```bash
+mvn install
+```
+
+### Run Instructions
+
+In order to execute the main program via the terminal, run the following:
+
+```bash
+mvn clean javafx:run
+```
 
 In order to run the program through the executable jar via the terminal, the following command can be used:
 
-`java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar`
+```bash
+java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar
+```
 
-In order to do this the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
+To do this, the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
+
+## Usage
+
+## Testing Instructions
+
+Run the following command to execute all of the tests:
+
+```bash
+mvn test
+```
+
+In order to skip invoking joern (which can take a sagnificant amount of time on older hardware), pass the command line argument to skip joern through maven like so
+```bash
+mvn -Dskip=true javafx:run
+```

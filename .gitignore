@@ -3,6 +3,8 @@
 .vscode
 *.iml
 target
+src/main/python/cpgqls_client/__pycache__/*
+workspace
 
 # Compiled class file
 *.class
