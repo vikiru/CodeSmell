@@ -279,6 +279,7 @@ if __name__ == "__main__":
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
+        
     project_name = "analyzedProject"
     # Import the source code to Joern for analyzing.
     total_time = 0
@@ -304,4 +305,17 @@ if __name__ == "__main__":
     logging.info(
         "A .json representation of the source code has been created. Completed in {0} seconds.".format(
             format(end - start, ".2f")))
+    total_time += end - start
+    
+    # Close and delete the project from user's bin/joern/joern-cli/workspace
+    start = time.time()
+    query = 'delete ("' + project_name + '")'
+    result = client.execute(query)
+    end = time.time()
+    if result["success"]:
+        logging.info(
+            "The source code has been successfully removed. Completed in "
+            + format(end - start, ".2f")
+            + " seconds."
+        )
     total_time += end - start
