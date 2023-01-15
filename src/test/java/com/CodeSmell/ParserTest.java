@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class ParserTest {
 
-    private final static String jsonPath = "src/main/python/joernFiles/sourceCode.json";
     private static Parser p;
     private static Gson gson;
     private static CodePropertyGraph ourCPGWithRelations;
@@ -25,14 +24,15 @@ public class ParserTest {
     public static void before() {
         p = new Parser();
         gson = new Gson();
-        String ourDirectory = Paths.get("").toAbsolutePath() + "/src/main/java/com/CodeSmell";
+        String ourDirectory = Paths.get("").toAbsolutePath() + "/src/test/java/com/testproject";
 
         JoernServer js = new JoernServer();
         js.start(ourDirectory);
+        System.out.println("started joern");
 
         // Obtain CPG after Parser has properly initialized it, using our project's
         // source code
-        ourCPGWithRelations = p.initializeCPG(js.getReader(), false);
+        ourCPGWithRelations = p.initializeCPG(js.getStream(), false);
         ourCPGWithoutRelations = new CodePropertyGraph();
 
         // Create a CPG object without any relations

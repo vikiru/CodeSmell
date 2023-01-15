@@ -19,7 +19,7 @@ public class Launcher {
         if (!skipJoern) {
             JoernServer server = new JoernServer();
             server.start(Launcher.chooseDirectory());
-            MainApp.joernStream = server.getReader();
+            MainApp.joernStream = server.getStream();
             MainApp.skipJoern = false;
             MainApp.main(args);
         } else {

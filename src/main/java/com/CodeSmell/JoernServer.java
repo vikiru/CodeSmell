@@ -16,13 +16,14 @@ public class JoernServer {
 
     InputStream joernStream;
 
-    public InputStream getReader() {
+    public InputStream getStream() {
         return this.joernStream;
     }
 
 
     public void start(String directory) {
 
+        System.out.println("Starting joern in " + directory);
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
         String directoryPath = Paths.get("").toAbsolutePath() + "/src/main/python";

@@ -21,29 +21,6 @@ public class Parser {
     public static final String CPG_BACKUP_JSON = "bak.cpg";
 
     /**
-     * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
-     * pretty printing and write to the given path.
-     *
-     * @param cpg      - The CodePropertyGraph containing all the classes and relations of the source code
-     * @param filePath - The filePath to where the .json will be outputted
-     */
-    public void writeToJson(CodePropertyGraph cpg, String filePath) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
-        builder.disableHtmlEscaping();
-        builder.setPrettyPrinting();
-        Gson gson = builder.create();
-        try {
-            try (Writer writer = new FileWriter(filePath)) {
-                gson.toJson(cpg, writer);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
      * and update neccessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
      * serializes it into a .json file.
