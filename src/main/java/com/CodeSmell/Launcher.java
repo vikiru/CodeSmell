@@ -38,5 +38,4 @@ public class Launcher {
     {
         return "src/test/java/com/testproject";
     }
-
 }

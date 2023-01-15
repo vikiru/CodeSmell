@@ -212,7 +212,7 @@ public class CPGClass implements Serializable {
         public ArrayList<Method> getMethodCalls() {
             return new ArrayList<>(methodCalls);
         }
-
+        
         protected void setMethodCalls(ArrayList<Method> methodCalls) {
             this.methodCalls = methodCalls;
         }

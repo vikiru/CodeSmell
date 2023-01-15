@@ -19,7 +19,7 @@ class UMLClass extends RenderObject {
 	private Position position;
 	private double width;
 	private double height;
-
+  
 	UMLClass(String name) {
 		this.name = name;
 		this.id = -1; // id is set on render
@@ -59,6 +59,7 @@ class UMLClass extends RenderObject {
 		// first render the object to get its dimensions
 		RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
 		dispatchToRenderEventListeners(re);
+    
 		Pair<Integer, Pair<Double, Double>> p;
 		p = (Pair<Integer, Pair<Double, Double>>) re.getResponse();
 		this.id = p.first;
