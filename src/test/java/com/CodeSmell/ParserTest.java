@@ -1,45 +1,44 @@
 package com.CodeSmell;
 
 import com.google.gson.Gson;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ParserTest {
 
-    private final static String jsonPath = "src/main/python/joernFiles/sourceCode.json";
     private static Parser p;
     private static Gson gson;
     private static CodePropertyGraph ourCPGWithRelations;
     private static CodePropertyGraph ourCPGWithoutRelations;
 
-    // run the test only once
+    // run the before method only once, for all tests
     @BeforeClass
     public static void before() {
         p = new Parser();
         gson = new Gson();
-        String ourDirectory = Paths.get("").toAbsolutePath() + "/src/main/java/com/CodeSmell";
-        JoernServer.start(false, ourDirectory);
-        // Read the joern file using only gson (will only have classes, no relations)
-        try (Reader reader = Files.newBufferedReader(Paths.get(jsonPath))) {
-            ourCPGWithoutRelations = gson.fromJson(reader, CodePropertyGraph.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        String ourDirectory = Paths.get("").toAbsolutePath() + "/src/test/java/com/testproject";
+
+        JoernServer js = new JoernServer();
+        js.start(ourDirectory);
+        System.out.println("started joern");
+
         // Obtain CPG after Parser has properly initialized it, using our project's
         // source code
-        ourCPGWithRelations = p.initializeCPG(jsonPath);
+        ourCPGWithRelations = p.initializeCPG(js.getStream(), false);
+        ourCPGWithoutRelations = new CodePropertyGraph();
+
+        // Create a CPG object without any relations
+        for (CPGClass c : ourCPGWithRelations.getClasses()) {
+            ourCPGWithoutRelations.addClass(c);
+        }
     }
 
     @Test
@@ -47,35 +46,16 @@ public class ParserTest {
         assertEquals("CPG has no relations within it.", true, ourCPGWithoutRelations.getRelations().size() == 0);
         assertEquals("CPG has classes within it", true, ourCPGWithoutRelations.getClasses().size() > 0);
 
-        // Read from the JSON obtained after Parser
         assertNotNull(ourCPGWithRelations);
         assertEquals("CPG has relations within it", true, ourCPGWithRelations.getRelations().size() > 0);
         assertEquals("CPG has classes within it", true, ourCPGWithRelations.getClasses().size() > 0);
 
-        // Compare the CPG obtained after joern_query and reading by gson vs. the CPG
-        // after Parser has properly initialized it
+        // Compare the CPGs with and without relations
         assertEquals("Both CPGs should have same number of classes", true,
                 ourCPGWithRelations.getClasses().size() == ourCPGWithoutRelations.getClasses().size());
-        assertEquals("Both CPGS should not have the same number of relations",
-                ourCPGWithRelations.getRelations().size() != ourCPGWithoutRelations.getRelations().size());
-    }
-
-    @Test
-    public void writeToFile() {
-        String filePath = "src/main/python/joernFiles/sourceCodeEmpty.json";
-        // Write an empty graph to a file
-        CodePropertyGraph graph = new CodePropertyGraph();
-        p.writeToJson(graph, filePath);
-
-        // Read in the empty graph json file and ensure both graphs has 0 classes and 0
-        // relations
-        CodePropertyGraph readGraph = p.initializeCPG(filePath);
-        assertEquals("Both CPGS have no classes", graph.getClasses().size(), readGraph.getClasses().size());
-        assertEquals("Both CPGS have no relations", graph.getRelations().size(), readGraph.getRelations().size());
-
-        // Delete the empty file
-        File fileToDelete = new File(filePath);
-        assertTrue(fileToDelete.delete());
+        assertEquals("Both CPGs should not have the same number of relations", true,
+                (ourCPGWithRelations.getRelations().size() != ourCPGWithoutRelations.getRelations().size()
+                        || ourCPGWithRelations.getRelations().size() == 0));
     }
 
     @Test
@@ -120,8 +100,7 @@ public class ParserTest {
             // reflexive association check
             boolean sameClass = sourceClass == destClass;
             if (type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION)) {
-                assertEquals("Same class should have a reflexive association", sameClass,
-                        type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION));
+                assertEquals("Same class should have a reflexive association", true, sameClass);
             }
 
             if (type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION)) {
@@ -145,6 +124,7 @@ public class ParserTest {
         var allCompositonRelationships = ourCPGWithRelations.getRelations().stream()
                 .filter(relation -> relation.type.equals(ClassRelation.RelationshipType.COMPOSITION))
                 .collect(Collectors.toList());
+
         for (CodePropertyGraph.Relation r : allCompositonRelationships) {
             CPGClass sourceClass = r.source;
             CPGClass destClass = r.destination;
@@ -167,6 +147,7 @@ public class ParserTest {
                     assertEquals("Attribute should not be static", true, !a.code.contains("static"));
                 }
             }
+            assertEquals("Multiplicity should not be left blank", false, r.multiplicity.equals(""));
         }
     }
 
@@ -189,12 +170,13 @@ public class ParserTest {
 
             for (CPGClass.Method m : sourceClassMethods) {
                 var methodCalls = m.getMethodCalls().stream()
-                        .filter(method -> method.parentClassName.equals(destinationClass)).collect(Collectors.toList());
+                        .filter(method -> method.parentClassName.equals(destinationClass.name)).collect(Collectors.toList());
                 boolean destClassWithinMethodBody = m.methodBody.contains(destinationClass.name);
                 boolean destClassWithinMethodCalls = methodCalls.isEmpty();
                 assertEquals("Destination class should be within method params or method calls", true,
                         destClassWithinMethodBody || destClassWithinMethodCalls);
             }
+            assertEquals("Multiplicity should be left blank", "", r.multiplicity);
         }
 
     }
@@ -243,59 +225,39 @@ public class ParserTest {
 
     @Test
     public void testMissingClassInfo() {
-        // Read the joern file using only gson, check to make sure classes are present
-        // and no relations are present
-        try (Reader reader = Files.newBufferedReader(Paths.get(jsonPath))) {
-            CodePropertyGraph withoutRelations = gson.fromJson(reader, CodePropertyGraph.class);
-            for (CPGClass cpgClass : withoutRelations.getClasses()) {
-                assertEquals("Class code should be empty", "", cpgClass.code);
-                assertEquals("Class import statements should be empty", 0, cpgClass.importStatements.length);
-                assertEquals("Class modifiers should be empty", 0, cpgClass.modifiers.length);
-                assertEquals("Package name should contain src", true, cpgClass.packageName.contains("src"));
+        // Simulates behavior of assignMissingClassInfo()
+        for (CPGClass cpgClass : ourCPGWithoutRelations.getClasses()) {
+            CPGClass preUpdateClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{},
+                    cpgClass.classFullName, cpgClass.classType, cpgClass.filePath, "src",
+                    cpgClass.attributes, cpgClass.methods);
 
-                CPGClass updatedClass = p.assignMissingClassInfo(cpgClass);
-                assertNotNull("Class code should not be null", updatedClass.code);
-                assertNotNull("Class import statements should not be null", updatedClass.importStatements);
-                assertNotNull("Class modifiers should not be null", updatedClass.modifiers);
-                assertEquals("Package name should not contain src", false,
-                        updatedClass.packageName.contains("src"));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            assertEquals("Class code should be empty", "", preUpdateClass.code);
+            assertEquals("Class import statements should be empty", 0, preUpdateClass.importStatements.length);
+            assertEquals("Class modifiers should be empty", 0, preUpdateClass.modifiers.length);
+            assertEquals("Package name should contain src", true, preUpdateClass.packageName.contains("src"));
+
+            CPGClass updatedClass = p.assignMissingClassInfo(preUpdateClass);
+            assertEquals("Class code should not be empty", true, updatedClass.code.equals(""));
+            assertEquals("Class import statements should not be empty", true, updatedClass.importStatements.length > 0);
+            assertEquals("Class modifiers should not be empty", true, updatedClass.modifiers.length > 0);
+            assertEquals("Package name should not contain src", false,
+                    updatedClass.packageName.contains("src"));
         }
     }
 
     @Test
     public void testAssignProperFieldsAndMethods() {
-        try (Reader reader = Files.newBufferedReader(Paths.get(jsonPath))) {
-            CodePropertyGraph badCPG = gson.fromJson(reader, CodePropertyGraph.class);
-            for (CPGClass c : badCPG.getClasses()) {
-                for (CPGClass.Attribute a : c.attributes) {
-                    assertNotNull(a);
-                    if (a.packageName.equals("java.util") && !a.attributeType.contains("<")) {
-                        assertEquals("Type should be just ArrayList", "ArrayList", a.attributeType);
-                    }
+        for (CPGClass cpgClass : ourCPGWithoutRelations.getClasses()) {
+            for (CPGClass.Attribute attribute : cpgClass.attributes) {
+                if (attribute.packageName.contains("java.util")) {
+                    assertEquals("Type should contain < >", true, attribute.attributeType.contains("<"));
                 }
-                for (CPGClass.Method m : c.methods) {
-                    assertNotNull(m);
-                }
+                assertEquals("Code should not be blank", false, attribute.code.equals(""));
             }
-            CodePropertyGraph goodCPG = p.assignProperAttributesAndMethods(badCPG, 2);
-            for (CPGClass c2 : goodCPG.getClasses()) {
-                for (CPGClass.Attribute a2 : c2.attributes) {
-                    assertNotNull(a2);
-                    if (a2.packageName.equals("java.util")) {
-                        assertEquals("Type should not be just ArrayList", true, a2.attributeType.contains("<"));
-                    }
-                }
-                for (CPGClass.Method m2 : c2.methods) {
-                    assertNotNull(m2);
-                    assertEquals("Method calls should be greater than or equal to 0",
-                            true, m2.getMethodCalls().size() >= 0);
-                }
+            for (CPGClass.Method method : cpgClass.methods) {
+                assertEquals("Method name should not contain lambda", true, method.name.equals("lambda"));
+                assertEquals("Method calls should be greater than or equal to 0", true, method.getMethodCalls().size() >= 0);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -309,6 +271,7 @@ public class ParserTest {
         assertEquals("Multiplicity should be 1..*", "1..*", p.obtainMultiplicity(arr, 1L));
         assertEquals("Multiplicity should be 1..*", "1..*", p.obtainMultiplicity(complexType, 1L));
         assertEquals("Multiplicity should not be 1..*", "1..1", p.obtainMultiplicity(singularInstance, 1L));
+        assertEquals("Multiplicity should not be 1..N", "1..*", p.obtainMultiplicity(complexType, 9001L));
         assertEquals("Multiplicity should be 1..N", "1..2", p.obtainMultiplicity(singularInstance, 2L));
         assertEquals("Multiplicity should be 1..N", "1..999", p.obtainMultiplicity(singularInstance, 999L));
     }
@@ -331,22 +294,6 @@ public class ParserTest {
     }
     // ----------------------------------------------------------------------------------------------------------
 
-    @Test
-    public void testInitializeCPG() {
-        JoernServer.start(true, "");
-        CodePropertyGraph g = p.initializeCPG(jsonPath);
-        // assertEquals(g.getRelations().size(), g.getClasses().size(), 0);
-        // int[] arr = new int[] {1, 2, 3};
-        // ClassA a = new ClassA(arr);
-        // ClassA a2 = new ClassA(arr);
-        // System.out.println(a.compare(a2));
-
-        for (CodePropertyGraph.Relation r : g.getRelations()) {
-            System.out.println("----------");
-            System.out.print("\t" + r);
-            System.out.println("\n----------");
-        }
-    }
 
     @Test
     public void testOwnProject() {
@@ -372,17 +319,4 @@ public class ParserTest {
             assertEquals("Disconnected class: " + c, isConnected, true);
         });
     }
-
-    public class ClassA {
-        public final int[] arr;
-
-        ClassA(int[] arr) {
-            this.arr = arr;
-        }
-
-        public boolean compare(ClassA other) {
-            return other.arr == this.arr;
-        }
-    }
-
 }

@@ -15,7 +15,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.geometry.Rectangle2D;
 
-import javax.swing.*;
+import java.io.InputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,7 +24,10 @@ import java.util.Set;
 
 public class MainApp extends Application {
 
-    public static void main(String[] args, String directory) {
+    public static InputStream joernStream;
+    public static boolean skipJoern;
+    
+    public static void main(String[] args) {
         launch(args);
     }
 
@@ -59,6 +62,7 @@ public class MainApp extends Application {
         // Build the ClassRelation objects from the CPGClass.Relation objects
         ArrayList<ClassRelation> relations = new ArrayList<ClassRelation>();
         for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+            System.out.println(r);
             UMLClass source, target;
             source = classMap.get(r.source);
             target = classMap.get(r.destination);
@@ -73,7 +77,7 @@ public class MainApp extends Application {
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
         if (newState == Worker.State.SUCCEEDED) {
             Parser p = new Parser();
-            CodePropertyGraph cpg = p.initializeCPG("src/main/python/joernFiles/sourceCode.json");
+            CodePropertyGraph cpg = p.initializeCPG(joernStream, skipJoern);
             initializeMainView(cpg);
         }
     }

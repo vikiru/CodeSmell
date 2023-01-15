@@ -3,13 +3,27 @@ package com.CodeSmell;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 
+import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 public class JoernServer {
 
-    public static void start(boolean testDirectory, String directory) {
 
+    InputStream joernStream;
+
+    public InputStream getStream() {
+        return this.joernStream;
+    }
+
+
+    public void start(String directory) {
+
+        System.out.println("Starting joern in " + directory);
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
         String directoryPath = Paths.get("").toAbsolutePath() + "/src/main/python";
@@ -22,30 +36,31 @@ public class JoernServer {
         if (System.getProperty("os.name").contains("Windows")) {
             joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
         } else joernServerBuilder = new ProcessBuilder("joern", "--server");
-        String target = "load_test_directory";
-        System.out.println(new File(directory));
-        if (!testDirectory) {
-            target = "project_directory";
-        }
-        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", target, directory).directory(new File(directoryPath));
+        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", directory).directory(new File(directoryPath));
+
 
         try {
             // Start the server
             Process joernServerProcess = joernServerBuilder.start();
-            BufferedReader joernServerReader = new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()));
-            System.out.println(joernServerReader.readLine());
+            BufferedReader joernServerReader = new BufferedReader(
+                new InputStreamReader(joernServerProcess.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(
+                new InputStreamReader(joernServerProcess.getErrorStream()));;
+            String line;
+            while ((line = joernServerReader.readLine()) != null) {
+                System.out.println(joernServerReader.readLine());
+            }
+            while ((line = errorReader.readLine()) != null) {
+                System.out.println(line);
+            }
 
             // Execute queries against the local joern server instance.
             Process joernQueryProcess = joernQueryBuilder.start();
 
-            BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
+            this.joernStream = joernQueryProcess.getInputStream();
+            errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
             int exitCode = joernQueryProcess.waitFor();
             System.out.println("Joern exit code: " + exitCode);
-            String line;
-            while ((line = joernQueryReader.readLine()) != null) {
-                System.out.println(line);
-            }
             while ((line = errorReader.readLine()) != null) {
                 System.out.println(line);
             }
@@ -71,9 +86,12 @@ public class JoernServer {
                     ProcessBuilder portFreerBuilder = new ProcessBuilder("cmd.exe", "/c", "taskkill /F /PID " + processID);
                     Process freeProcess = portFreerBuilder.start();
                 }
+                return;
             }
+            throw new RuntimeException("Joern server error");
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

@@ -1,7 +1,9 @@
 package com.CodeSmell;
 
-import javax.swing.*;
 import java.io.File;
+import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 
 public class Launcher {
     public static void main(String[] args) {
@@ -13,31 +15,28 @@ public class Launcher {
                 skipJoern = true;
             }
         }
-        Launcher l = new Launcher();
-        String directory = l.chooseDirectory();
-        if (!skipJoern) JoernServer.start(false, directory);
-        MainApp.main(args, directory);
+
+        if (!skipJoern) {
+            JoernServer server = new JoernServer();
+            server.start(Launcher.chooseDirectory());
+            MainApp.joernStream = server.getStream();
+            MainApp.skipJoern = false;
+            MainApp.main(args);
+        } else {
+            try {
+                MainApp.joernStream = new FileInputStream(new File
+                    (Parser.CPG_BACKUP_JSON));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException("-Dskip=true, but CPG JSON not found on drive");
+            }
+            MainApp.skipJoern = true;
+            MainApp.main(args);
+        }
     }
 
-    public String chooseDirectory()
+    public static String chooseDirectory()
     {
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedLookAndFeelException e) {
-            throw new RuntimeException(e);
-        }
-        JFileChooser fc=new JFileChooser();
-        fc.setFileSelectionMode(1);
-        fc.showOpenDialog(null);
-
-        File selectedDirectory = fc.getSelectedFile();
-        return selectedDirectory.getPath();
+        return "src/test/java/com/testproject";
     }
 
 }

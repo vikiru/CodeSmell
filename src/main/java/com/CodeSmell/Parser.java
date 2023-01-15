@@ -17,28 +17,8 @@ import java.util.stream.Collectors;
  * converts the JSON code to a code property object that can be
  */
 public class Parser {
-    /**
-     * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
-     * pretty printing and write to the given path.
-     *
-     * @param cpg      - The CodePropertyGraph containing all the classes and relations of the source code
-     * @param filePath - The filePath to where the .json will be outputted
-     */
-    public void writeToJson(CodePropertyGraph cpg, String filePath) {
-        GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
-        builder.disableHtmlEscaping();
-        builder.setPrettyPrinting();
-        Gson gson = builder.create();
-        try {
-            try (Writer writer = new FileWriter(filePath)) {
-                gson.toJson(cpg, writer);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
-    }
+    public static final String CPG_BACKUP_JSON = "bak.cpg";
 
     /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
@@ -46,25 +26,61 @@ public class Parser {
      * serializes it into a .json file.
      *
      * @param destination - The filePath containing the .json file
+     * @param serializedObject - if true read serialized backup, if false read as 
+     * joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public CodePropertyGraph initializeCPG(String destination) {
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    public CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) {
+        GsonBuilder builder = new GsonBuilder();
+        builder.excludeFieldsWithoutExposeAnnotation();
+        Gson gson = builder.create();
         CodePropertyGraph cpg = new CodePropertyGraph();
-        try {
-            Reader reader = Files.newBufferedReader(Paths.get(destination));
-            CodePropertyGraph tempCPG = gson.fromJson(reader, CodePropertyGraph.class);
+
+        if (!serializedObject) {
+             System.out.println("Reading in CPG from joern_query.");
+            CodePropertyGraph tempCPG = gson.fromJson(
+                new InputStreamReader(cpgStream),
+                CodePropertyGraph.class);
+            if (tempCPG == null) {
+                throw new RuntimeException("Bad JSON read by parser.");
+            }
             // get missing info for CPGClasses and their fields and methods.
-            tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
+            cpg = assignProperAttributesAndMethods(tempCPG, 2);
+            System.out.println("Parser　processed joern_query.py output");
             // assign all relations (association of diff types, composition, realization, inheritance, dependency)
-            cpg = this.assignInheritanceRelationship(tempCPG);
+            cpg = this.assignInheritanceRelationship(cpg);
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
-            this.writeToJson(cpg, "src/main/python/joernFiles/sourceCodeWithRelations.json");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+                r.source.addOutwardRelation(r);
+            }
+
+            // write the resulting CPG
+            // to a backup file for recovery in the event of a crash
+            try {
+                FileOutputStream fos = new FileOutputStream(CPG_BACKUP_JSON);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(cpg);
+                oos.flush();
+                oos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+
+        } else {
+            System.out.println("Parser reading backup file");
+            try {
+                ObjectInputStream ois = new ObjectInputStream(cpgStream);
+                cpg = (CodePropertyGraph) ois.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
+        System.out.printf("Project read: %d classes, %d relations\n",
+            cpg.getClasses().size(), cpg.getRelations().size());
         return cpg;
     }
 

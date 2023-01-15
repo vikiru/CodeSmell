@@ -6,7 +6,7 @@ import sys
 import time
 from pathlib import Path
 from cpgqls_client import CPGQLSClient, import_code_query
-
+import logging
 
 # Cleans up json output from joern so that it can be a proper JSON file.
 def clean_json(joern_result):
@@ -15,16 +15,6 @@ def clean_json(joern_result):
     joern_result = joern_result.replace('"""', "")
     joern_result = joern_result[index: len(joern_result)]
     return joern_result
-
-
-# Write the joern output of a query to a specified filename
-def write_to_file(source_code_json, file_name):
-    final_directory_name = (
-            str(Path(__file__).parent.parent) + "/python/joernFiles/" + file_name + ".json"
-    )
-    with open(final_directory_name, "w") as f:
-        json.dump(source_code_json, f, indent=4)
-
 
 # For every attribute, create a dictionary and return it.
 def create_attribute_dict(curr_field):
@@ -275,36 +265,22 @@ def source_code_json_creation():
 
     # Create a dictionary with all the info about the source code and write it to a .json file.
     source_code_json = {"relations": [], "classes": list(filter(None, list(map(create_class_dict, all_data))))}
-    write_to_file(source_code_json, "sourceCode")
+    print(source_code_json)
 
 
 if __name__ == "__main__":
     server_endpoint = "localhost:8080"
     client = CPGQLSClient(server_endpoint)
+    project_dir = sys.argv[-1]
 
-    # For testing purposes. Full file paths are required for joern.
-    # Get the path of src/main/java/com/CodeSmell as shown (replace '\\' with '/')
-    project_dir = ""
-    our_project_dir = str(Path(__file__).parent.parent) + "/java/com/CodeSmell/"
-    test_project_dir = str(Path(__file__).parent.parent.parent) + "/test/java/com/testproject"
-
-    print(test_project_dir)
-    print(sys.argv)
-    if sys.argv[-1] == "load_test_directory":
-        project_dir = test_project_dir
-    else:
-        project_dir = str(Path(sys.argv[2]))
-
-    print(project_dir, "<<<< project")
     if "Windows" in platform.platform():
         index = project_dir.find(":")
         win_drive = project_dir[0: index + 1]
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
+        
     project_name = "analyzedProject"
-    project_dir = project_dir  # Change this as needed for testing purposes. Remember to replace "\\" with "//".
-
     # Import the source code to Joern for analyzing.
     total_time = 0
     start = time.time()
@@ -313,48 +289,33 @@ if __name__ == "__main__":
     end = time.time()
 
     if result["success"]:
-        print(
+        logging.info(
             "The source code has been successfully imported. Completed in {0} seconds.".format(
                 format(end - start, ".2f"))
         )
         total_time += end - start
+    else:
+        print("import failure", file=sys.stderr)
+        exit(1)
 
     # Create the source code json representation
     start = time.time()
     source_code_json_creation()
     end = time.time()
-    print(
+    logging.info(
         "A .json representation of the source code has been created. Completed in {0} seconds.".format(
-            format(end - start, ".2f"))
-    )
+            format(end - start, ".2f")))
     total_time += end - start
-
+    
     # Close and delete the project from user's bin/joern/joern-cli/workspace
     start = time.time()
     query = 'delete ("' + project_name + '")'
     result = client.execute(query)
     end = time.time()
     if result["success"]:
-        print(
-            "The source code has been successfully removed. Completed in {0} seconds.".format(
-                format(end - start, ".2f"))
+        logging.info(
+            "The source code has been successfully removed. Completed in "
+            + format(end - start, ".2f")
+            + " seconds."
         )
-        total_time += end - start
-    print("Total time taken: {0} seconds.".format(
-        format(total_time, ".2f"))
-    )
-
-"""
-SnakeViz and cProfile diagnostics.
-import cProfile
-    import pstats
-
-    with cProfile.Profile() as pr:
-        source_code_json_creation()
-
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.TIME)
-    # stats.print_stats()
-    stats.dump_stats(filename="profiling.prof")
-
-"""
+    total_time += end - start
