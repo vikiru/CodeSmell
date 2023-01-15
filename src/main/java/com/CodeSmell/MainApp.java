@@ -62,6 +62,7 @@ public class MainApp extends Application {
         // Build the ClassRelation objects from the CPGClass.Relation objects
         ArrayList<ClassRelation> relations = new ArrayList<ClassRelation>();
         for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+            System.out.println(r);
             UMLClass source, target;
             source = classMap.get(r.source);
             target = classMap.get(r.destination);

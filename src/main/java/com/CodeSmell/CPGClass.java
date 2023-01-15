@@ -3,11 +3,12 @@ package com.CodeSmell;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * A class within the source code.
  */
-public class CPGClass {
+public class CPGClass implements Serializable {
 
     // The name of the class
     @Expose(serialize = true, deserialize = true)
@@ -46,8 +47,8 @@ public class CPGClass {
     @Expose(serialize = true, deserialize = true)
     public final Method[] methods;
 
-    // a list of relations starting from this class
-    @Expose(serialize = false, deserialize = false)
+    // a list of outward relations of the class
+    @Expose(serialize = true, deserialize = true)
     private ArrayList<CodePropertyGraph.Relation> outwardRelations;
 
     CPGClass(String name, String code, String[] importStatements, Modifier[] modifiers, String classFullName, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
@@ -61,7 +62,7 @@ public class CPGClass {
         this.packageName = packageName;
         this.attributes = attributes;
         this.methods = methods;
-        this.outwardRelations = new ArrayList<>();
+        this.outwardRelations = new ArrayList<CodePropertyGraph.Relation>();
     }
 
     public void addOutwardRelation(CodePropertyGraph.Relation r) {
@@ -114,7 +115,7 @@ public class CPGClass {
     /**
      * An attribute belonging to a class
      */
-    public static class Attribute {
+    public static class Attribute implements Serializable  {
         // the name of the attribute
         @Expose(serialize = true, deserialize = true)
         public final String name;
@@ -156,7 +157,7 @@ public class CPGClass {
     /**
      * A method belonging to a class
      */
-    public static class Method {
+    public static class Method implements Serializable {
 
         // the parent class of the method (used to differentiate between methods within
         // methodCalls)
@@ -223,7 +224,7 @@ public class CPGClass {
             } else return this.methodBody;
         }
 
-        public static class Parameter {
+        public static class Parameter implements Serializable  {
             // the name of the method parameter
             @Expose(serialize = true, deserialize = true)
             public final String name;
@@ -244,7 +245,7 @@ public class CPGClass {
         }
 
         // The instructions (lines of code) within each method body
-        public static class Instruction {
+        public static class Instruction implements Serializable {
             // The label associated with each line of code (i.e. METHOD_RETURN, CALL, etc)
             @Expose(serialize = true, deserialize = true)
             public final String label;
