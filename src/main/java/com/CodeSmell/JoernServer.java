@@ -3,6 +3,7 @@ package com.CodeSmell;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 
@@ -13,10 +14,10 @@ import java.nio.charset.StandardCharsets;
 public class JoernServer {
 
 
-    BufferedReader joernReader;
+    InputStream joernStream;
 
-    public BufferedReader getReader() {
-        return this.joernReader;
+    public InputStream getReader() {
+        return this.joernStream;
     }
 
 
@@ -40,8 +41,10 @@ public class JoernServer {
         try {
             // Start the server
             Process joernServerProcess = joernServerBuilder.start();
-            BufferedReader joernServerReader = new BufferedReader(new InputStreamReader(joernServerProcess.getInputStream()));
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(joernServerProcess.getErrorStream()));;
+            BufferedReader joernServerReader = new BufferedReader(
+                new InputStreamReader(joernServerProcess.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(
+                new InputStreamReader(joernServerProcess.getErrorStream()));;
             String line;
             while ((line = joernServerReader.readLine()) != null) {
                 System.out.println(joernServerReader.readLine());
@@ -53,10 +56,9 @@ public class JoernServer {
             // Execute queries against the local joern server instance.
             Process joernQueryProcess = joernQueryBuilder.start();
 
-            BufferedReader joernQueryReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getInputStream()));
+            this.joernStream = joernQueryProcess.getInputStream();
             errorReader = new BufferedReader(new InputStreamReader(joernQueryProcess.getErrorStream()));
             int exitCode = joernQueryProcess.waitFor();
-            this.joernReader = joernQueryReader;
             System.out.println("Joern exit code: " + exitCode);
             while ((line = errorReader.readLine()) != null) {
                 System.out.println(line);

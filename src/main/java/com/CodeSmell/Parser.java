@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 public class Parser {
 
-    public static final String CPG_BACKUP_JSON = "cpg_backup.json";
+    public static final String CPG_BACKUP_JSON = "bak.cpg";
 
     /**
      * Given a filePath and a CodePropertyGraph object, serialize the cpg into a .json file with
@@ -49,20 +49,20 @@ public class Parser {
      * serializes it into a .json file.
      *
      * @param destination - The filePath containing the .json file
-     * @param complete - if true read as CPG.json output file, if false read as 
+     * @param serializedObject - if true read serialized backup, if false read as 
      * joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public CodePropertyGraph initializeCPG(Reader joernReader, boolean complete) {
+    public CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         Gson gson = builder.create();
-
-        System.out.println("Reading in CPG json. " + complete);
         CodePropertyGraph cpg = new CodePropertyGraph();
 
-        if (!complete) {
-            CodePropertyGraph tempCPG = gson.fromJson(joernReader,
+        if (!serializedObject) {
+             System.out.println("Reading in CPG from joern_query.");
+            CodePropertyGraph tempCPG = gson.fromJson(
+                new InputStreamReader(cpgStream),
                 CodePropertyGraph.class);
             if (tempCPG == null) {
                 throw new RuntimeException("Bad JSON read by parser.");
@@ -75,11 +75,12 @@ public class Parser {
             this.assignRealizationRelationships(cpg);
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
-            // finally write the resulting cpg to a json at a given filePath
-            // this.writeToJson(cpg, CPG_BACKUP_JSON);
             for (CodePropertyGraph.Relation r : cpg.getRelations()) {
                 r.source.addOutwardRelation(r);
             }
+
+            // write the resulting CPG
+            // to a backup file for recovery in the event of a crash
             try {
                 FileOutputStream fos = new FileOutputStream(CPG_BACKUP_JSON);
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -90,11 +91,11 @@ public class Parser {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
+
         } else {
             System.out.println("Parser reading backup file");
             try {
-                FileInputStream fis = new FileInputStream(CPG_BACKUP_JSON);
-                ObjectInputStream ois = new ObjectInputStream(fis);
+                ObjectInputStream ois = new ObjectInputStream(cpgStream);
                 cpg = (CodePropertyGraph) ois.readObject();
             } catch (Exception e) {
                 e.printStackTrace();

@@ -15,7 +15,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.geometry.Rectangle2D;
 
-import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class MainApp extends Application {
 
-    public static BufferedReader joernReader;
+    public static InputStream joernStream;
     public static boolean skipJoern;
     
     public static void main(String[] args) {
@@ -77,7 +77,7 @@ public class MainApp extends Application {
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
         if (newState == Worker.State.SUCCEEDED) {
             Parser p = new Parser();
-            CodePropertyGraph cpg = p.initializeCPG(joernReader, skipJoern);
+            CodePropertyGraph cpg = p.initializeCPG(joernStream, skipJoern);
             initializeMainView(cpg);
         }
     }
