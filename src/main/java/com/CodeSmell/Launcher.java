@@ -1,9 +1,9 @@
 package com.CodeSmell;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 
 public class Launcher {
     public static void main(String[] args) {
@@ -19,12 +19,13 @@ public class Launcher {
         if (!skipJoern) {
             JoernServer server = new JoernServer();
             server.start(Launcher.chooseDirectory());
-            MainApp.joernReader = server.getReader();
+            MainApp.joernStream = server.getReader();
             MainApp.skipJoern = false;
             MainApp.main(args);
         } else {
             try {
-                MainApp.joernReader = new BufferedReader(new FileReader(Parser.CPG_BACKUP_JSON));
+                MainApp.joernStream = new FileInputStream(new File
+                    (Parser.CPG_BACKUP_JSON));
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("-Dskip=true, but CPG JSON not found on drive");
             }
