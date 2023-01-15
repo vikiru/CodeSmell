@@ -57,7 +57,6 @@ public class Parser {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         Gson gson = builder.create();
-
         CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!serializedObject) {
