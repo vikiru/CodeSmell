@@ -4,8 +4,9 @@ import com.CodeSmell.ClassRelation.RelationshipType;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class CodePropertyGraph {
+public class CodePropertyGraph implements Serializable {
 
     @Expose(serialize = true, deserialize = true)
     private ArrayList<Relation> relations;
@@ -42,7 +43,7 @@ public class CodePropertyGraph {
         this.relations.add(r);
     }
 
-    public static class Relation {
+    public static class Relation implements Serializable  {
         @Expose(serialize = true, deserialize = true)
         public final CPGClass source;
         @Expose(serialize = true, deserialize = true)

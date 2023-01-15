@@ -57,19 +57,18 @@ public class Parser {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         Gson gson = builder.create();
-        CodePropertyGraph cpg = new CodePropertyGraph();
-        CodePropertyGraph tempCPG = gson.fromJson(joernReader, CodePropertyGraph.class);
-        if (tempCPG == null) {
-            throw new RuntimeException("Bad JSON read by parser.");
-        }
 
-         // get missing info for CPGClasses and their fields and methods.
-        tempCPG = assignProperAttributesAndMethods(tempCPG, 2);
-        for (CPGClass cpgClass : tempCPG.getClasses()) {
-            cpg.addClass(assignMissingClassInfo(cpgClass));
-        }
+        System.out.println("Reading in CPG json. " + complete);
+        CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!complete) {
+            CodePropertyGraph tempCPG = gson.fromJson(joernReader,
+                CodePropertyGraph.class);
+            if (tempCPG == null) {
+                throw new RuntimeException("Bad JSON read by parser.");
+            }
+            // get missing info for CPGClasses and their fields and methods.
+            cpg = assignProperAttributesAndMethods(tempCPG, 2);
             System.out.println("Parser　processed joern_query.py output");
             // assign all relations (association of diff types, composition, realization, inheritance, dependency)
             cpg = this.assignInheritanceRelationship(cpg);
@@ -77,23 +76,33 @@ public class Parser {
             this.assignAssociationRelationships(cpg);
             this.assignDependencyRelationships(cpg);
             // finally write the resulting cpg to a json at a given filePath
-            this.writeToJson(cpg, CPG_BACKUP_JSON);
-        } else if (cpg.getRelations().size() == 0) {
-
-            // complete=true was provided as a parameter but 
-            // joearnReader is likely giving the output of joern_query.py, which
-            // it should do with complete=false
-            throw new RuntimeException("complete=true but incomplete json was provided");
+            // this.writeToJson(cpg, CPG_BACKUP_JSON);
+            for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+                r.source.addOutwardRelation(r);
+            }
+            try {
+                FileOutputStream fos = new FileOutputStream(CPG_BACKUP_JSON);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(cpg);
+                oos.flush();
+                oos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         } else {
-            System.out.println("Parser read backup file");
+            System.out.println("Parser reading backup file");
+            try {
+                FileInputStream fis = new FileInputStream(CPG_BACKUP_JSON);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                cpg = (CodePropertyGraph) ois.readObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
-
-        System.out.printf("Project read: %d classes, %d relations",
+        System.out.printf("Project read: %d classes, %d relations\n",
             cpg.getClasses().size(), cpg.getRelations().size());
-
-        for (CodePropertyGraph.Relation r : cpg.getRelations()) {
-            r.source.addOutwardRelation(r);
-        }
         return cpg;
     }
 
