@@ -6,8 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,9 +23,9 @@ public class Parser {
      * and update neccessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
      * serializes it into a .json file.
      *
-     * @param destination - The filePath containing the .json file
-     * @param serializedObject - if true read serialized backup, if false read as 
-     * joern_query.py  standard output
+     * @param destination      - The filePath containing the .json file
+     * @param serializedObject - if true read serialized backup, if false read as
+     *                         joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
     public CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) {
@@ -37,16 +35,16 @@ public class Parser {
         CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!serializedObject) {
-             System.out.println("Reading in CPG from joern_query.");
+            System.out.println("Parser :: Reading in CPG from joern_query.");
             CodePropertyGraph tempCPG = gson.fromJson(
-                new InputStreamReader(cpgStream),
-                CodePropertyGraph.class);
+                    new InputStreamReader(cpgStream),
+                    CodePropertyGraph.class);
             if (tempCPG == null) {
-                throw new RuntimeException("Bad JSON read by parser.");
+                throw new RuntimeException("Parser :: Bad JSON read by Parser.");
             }
             // get missing info for CPGClasses and their fields and methods.
             cpg = assignProperAttributesAndMethods(tempCPG, 2);
-            System.out.println("Parser　processed joern_query.py output");
+            System.out.println("Parser :: Processed joern_query.py output");
             // assign all relations (association of diff types, composition, realization, inheritance, dependency)
             cpg = this.assignInheritanceRelationship(cpg);
             this.assignRealizationRelationships(cpg);
@@ -70,7 +68,7 @@ public class Parser {
             }
 
         } else {
-            System.out.println("Parser reading backup file");
+            System.out.println("Parser :: Reading backup file");
             try {
                 ObjectInputStream ois = new ObjectInputStream(cpgStream);
                 cpg = (CodePropertyGraph) ois.readObject();
@@ -79,8 +77,8 @@ public class Parser {
                 throw new RuntimeException(e);
             }
         }
-        System.out.printf("Project read: %d classes, %d relations\n",
-            cpg.getClasses().size(), cpg.getRelations().size());
+        System.out.printf("Parser :: Project read: %d classes, %d relations\n",
+                cpg.getClasses().size(), cpg.getRelations().size());
         return cpg;
     }
 
