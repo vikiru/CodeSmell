@@ -8,13 +8,6 @@ from pathlib import Path
 from cpgqls_client import CPGQLSClient, import_code_query
 import logging
 
-# Cleans up json output from joern so that it can be a proper JSON file.
-def clean_json(joern_result):
-    string_to_find = '"""'
-    index = joern_result.find(string_to_find)
-    joern_result = joern_result.replace('"""', "")
-    joern_result = joern_result[index: len(joern_result)]
-    return joern_result
 
 # For every attribute, create a dictionary and return it.
 def create_attribute_dict(curr_field):
@@ -256,15 +249,18 @@ def create_class_dict(curr_class):
 def source_code_json_creation():
     # Obtain the classes, attribute and modifiers, methods and their instructions
     query = (
-        "cpg.typeDecl.isExternal(false).map(node => (node.name, node.code, node.astChildren.isMember.l.map(node => (node, "
-        "node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, "
-        "node.ast.label.l, node.ast.code.l, node.ast.lineNumber.l)), node.filename)).toJsonPretty "
+        "cpg.typeDecl.isExternal(false).map(node => (node.name, node.code, node.astChildren.isMember.l.map(node => ("
+        "node, node.astChildren.isModifier.modifierType.l)), node.astChildren.isMethod.l.map(node => (node, "
+        "node.ast.label.l, node.ast.code.l, node.ast.lineNumber.l)), node.filename)).toJson"
     )
     result = client.execute(query)
-    all_data = json.loads(clean_json(result["stdout"]))
+    index = result["stdout"].index('"')
+    # Handles joern giving double-encoded JSON string
+    all_data = json.loads(json.loads(result["stdout"][index:len(result["stdout"])]))
 
-    # Create a dictionary with all the info about the source code and write it to a .json file.
-    source_code_json = {"relations": [], "classes": list(filter(None, list(map(create_class_dict, all_data))))}
+    # Create a dictionary with all the info about the source code
+    source_code_dict = {"relations": [], "classes": list(filter(None, list(map(create_class_dict, all_data))))}
+    source_code_json = json.dumps(source_code_dict)
     print(source_code_json)
 
 
@@ -279,7 +275,9 @@ if __name__ == "__main__":
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
-        
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s',
+                        datefmt="%m/%d/%Y %I:%M:%S")
+
     project_name = "analyzedProject"
     # Import the source code to Joern for analyzing.
     total_time = 0
@@ -294,28 +292,28 @@ if __name__ == "__main__":
                 format(end - start, ".2f"))
         )
         total_time += end - start
+
+        # Create the source code json representation
+        start = time.time()
+        source_code_json_creation()
+        end = time.time()
+        logging.info(
+            "A .json representation of the source code has been created. Completed in {0} seconds.".format(
+                format(end - start, ".2f")))
+        total_time += end - start
+
+        # Close and delete the project from user's bin/joern/joern-cli/workspace
+        start = time.time()
+        query = 'delete ("' + project_name + '")'
+        result = client.execute(query)
+        end = time.time()
+        if result["success"]:
+            logging.info(
+                "The source code has been successfully removed. Completed in "
+                + format(end - start, ".2f")
+                + " seconds."
+            )
+        total_time += end - start
     else:
         print("import failure", file=sys.stderr)
         exit(1)
-
-    # Create the source code json representation
-    start = time.time()
-    source_code_json_creation()
-    end = time.time()
-    logging.info(
-        "A .json representation of the source code has been created. Completed in {0} seconds.".format(
-            format(end - start, ".2f")))
-    total_time += end - start
-    
-    # Close and delete the project from user's bin/joern/joern-cli/workspace
-    start = time.time()
-    query = 'delete ("' + project_name + '")'
-    result = client.execute(query)
-    end = time.time()
-    if result["success"]:
-        logging.info(
-            "The source code has been successfully removed. Completed in "
-            + format(end - start, ".2f")
-            + " seconds."
-        )
-    total_time += end - start
