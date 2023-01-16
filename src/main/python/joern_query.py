@@ -255,6 +255,7 @@ def source_code_json_creation():
     )
     result = client.execute(query)
     index = result["stdout"].index('"')
+
     # Handles joern giving double-encoded JSON string
     all_data = json.loads(json.loads(result["stdout"][index:len(result["stdout"])]))
 
@@ -275,8 +276,9 @@ if __name__ == "__main__":
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s',
-                        datefmt="%m/%d/%Y %I:%M:%S")
+
+    # Uncomment this line if any issues arise again with joern_query, in the future.
+    # logging.basicConfig(level=logging.INFO, format='%(asctime)s :: %(levelname)s :: %(message)s', datefmt="%m/%d/%Y %I:%M:%S")
 
     project_name = "analyzedProject"
     # Import the source code to Joern for analyzing.
@@ -315,5 +317,5 @@ if __name__ == "__main__":
             )
         total_time += end - start
     else:
-        print("import failure", file=sys.stderr)
+        print("joern_query :: Source Code Import Failure", file=sys.stderr)
         exit(1)
