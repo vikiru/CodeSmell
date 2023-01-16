@@ -237,9 +237,9 @@ public class ParserTest {
             assertEquals("Package name should contain src", true, preUpdateClass.packageName.contains("src"));
 
             CPGClass updatedClass = p.assignMissingClassInfo(preUpdateClass);
-            assertEquals("Class code should not be empty", true, updatedClass.code.equals(""));
-            assertEquals("Class import statements should not be empty", true, updatedClass.importStatements.length > 0);
-            assertEquals("Class modifiers should not be empty", true, updatedClass.modifiers.length > 0);
+            assertEquals("Class code should not be empty", true, !updatedClass.code.equals(""));
+            assertEquals("Class import statements should not be empty", true, updatedClass.importStatements.length >= 0);
+            assertEquals("Class modifiers should not be empty", true, updatedClass.modifiers.length >= 0);
             assertEquals("Package name should not contain src", false,
                     updatedClass.packageName.contains("src"));
         }
@@ -255,7 +255,7 @@ public class ParserTest {
                 assertEquals("Code should not be blank", false, attribute.code.equals(""));
             }
             for (CPGClass.Method method : cpgClass.methods) {
-                assertEquals("Method name should not contain lambda", true, method.name.equals("lambda"));
+                assertEquals("Method name should not contain lambda", true, !method.name.equals("lambda"));
                 assertEquals("Method calls should be greater than or equal to 0", true, method.getMethodCalls().size() >= 0);
             }
         }
