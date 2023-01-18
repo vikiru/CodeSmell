@@ -6,6 +6,7 @@ target
 src/main/python/cpgqls_client/__pycache__/*
 workspace
 bak.cpg
+src/main/python/joern_query.log
 
 # Compiled class file
 *.class
