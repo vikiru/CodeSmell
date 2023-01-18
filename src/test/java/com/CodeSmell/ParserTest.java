@@ -227,8 +227,8 @@ public class ParserTest {
     public void testMissingClassInfo() {
         // Simulates behavior of assignMissingClassInfo()
         for (CPGClass cpgClass : ourCPGWithoutRelations.getClasses()) {
-            CPGClass preUpdateClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{},
-                    cpgClass.classFullName, cpgClass.classType, cpgClass.filePath, "src",
+            CPGClass preUpdateClass = new CPGClass(cpgClass.name, "", cpgClass.lineNumber, new String[]{}, new CPGClass.Modifier[]{},
+                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, "src",
                     cpgClass.attributes, cpgClass.methods);
 
             assertEquals("Class code should be empty", "", preUpdateClass.code);
