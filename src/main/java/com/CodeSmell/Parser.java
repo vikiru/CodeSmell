@@ -44,15 +44,16 @@ public class Parser {
                 String classJson;
                 while (((classJson = classReader.readLine()) != null)) {
                     CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
-                    tempCPG.addClass(cpgClass);
+                    if (cpgClass != null) {
+                        tempCPG.addClass(cpgClass);
+                    } else {
+                        throw new RuntimeException("Bad JSON read by Parser.");
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            if (tempCPG == null) {
-                throw new RuntimeException("Bad JSON read by Parser.");
-            }
             // get missing info for CPGClasses and their fields and methods.
             cpg = assignProperAttributesAndMethods(tempCPG, 2);
             System.out.println("Processed joern_query.py output");
