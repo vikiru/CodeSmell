@@ -24,10 +24,10 @@ def create_attribute_dict(curr_field):
         package_name = field_type_full_name[0:index].replace(
             "<unresolvedNamespace>", ""
         )
-        type = field_type_full_name[index + 1 : len(field_type_full_name)]
+        type = field_type_full_name[index + 1: len(field_type_full_name)]
     index_nested = type.rfind("$")
     if index_nested != -1:
-        type = type[index_nested + 1 : len(type)]
+        type = type[index_nested + 1: len(type)]
 
     curr_field_dict = {
         "name": field_name,
@@ -77,7 +77,7 @@ def create_method_dict(curr_method):
         if not return_type:
             # Handle all Collection types (Set, HashMap, ArrayList, etc)
             index = method_body.find(">")
-            return_type = method_body[0 : index + 1]
+            return_type = method_body[0: index + 1]
             if "(" in return_type or not return_type:
                 return_type = ""
             if return_type in method_body:
@@ -207,9 +207,9 @@ def create_class_dict(curr_class):
 
             set_field_types = set(list_field_types)
             if (
-                "class" in declaration
-                and not single_list_field_modifiers
-                and (len(set_field_types) == 1 and class_name in set_field_types)
+                    "class" in declaration
+                    and not single_list_field_modifiers
+                    and (len(set_field_types) == 1 and class_name in set_field_types)
             ):
                 return "enum"
             elif "class" in declaration and "abstract" in single_list_method_modifiers:
@@ -225,17 +225,17 @@ def create_class_dict(curr_class):
         if index_of_src < 0:
             raise Exception("joern_query could not parse folder structure. No src/test")
         full_package_name = ".".join(
-            path_without_separators[index_of_src : len(path_without_separators)]
+            path_without_separators[index_of_src: len(path_without_separators)]
         )
         file_name_index = full_package_name.rindex(".java")
         package_name = full_package_name[0:file_name_index]
-        package_name = package_name[0 : package_name.rindex(".")]
+        package_name = package_name[0: package_name.rindex(".")]
         return package_name
 
     def get_name_without_separators(name):
         if "$" in name:
             index = name.rindex("$")
-            name = name[index + 1 : len(name)]
+            name = name[index + 1: len(name)]
         return name
 
     curr_class_dict = {
@@ -266,7 +266,7 @@ def retrieve_all_class_names():
     if result["success"]:
         index = result["stdout"].index('"')
         all_names = json.loads(
-            json.loads(result["stdout"][index : len(result["stdout"])])
+            json.loads(result["stdout"][index: len(result["stdout"])])
         )
         class_names = [name.replace("$", ".") for name in all_names]
     return class_names
@@ -275,19 +275,19 @@ def retrieve_all_class_names():
 # Execute a single query to get all the data of a class
 def retrieve_class_data(name):
     class_query = (
-        'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
-        "node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
-        "node.astChildren.isModifier.modifierType.l, "
-        "node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
-        "node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
-        'node.astChildren.l.isMethod.filter(node => !node.name.contains("lambda") '
-        '&& !node.code.contains("empty")).l.map(node => (node.name, node.code, '
-        "node.lineNumber, node.lineNumberEnd, node.signature, "
-        "node.astChildren.isModifier.modifierType.l, "
-        "node.astChildren.isParameter.l.filter(node => !node.name.contains("
-        '"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
-        "node.typeFullName)), node.ast.l.map(node => (node.label, node.code, "
-        "node.lineNumber)))), node.filename)).toJson"
+            'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
+                                           "node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
+                                           "node.astChildren.isModifier.modifierType.l, "
+                                           "node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
+                                           "node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
+                                           "node.astChildren.isMethod.filter(node => node.lineNumber != None "
+                                           "&& node.lineNumberEnd != None).l.map(node => (node.name, node.code, "
+                                           "node.lineNumber, node.lineNumberEnd, node.signature, "
+                                           "node.astChildren.isModifier.modifierType.l, "
+                                           "node.astChildren.isParameter.filter(node => !node.name.contains("
+                                           '"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
+                                           'node.typeFullName)), node.ast.l.map(node => (node.label, node.code, '
+                                           'node.lineNumber)))), node.filename)).toJson'
     )
     start = time.time()
     result = client.execute(class_query)
@@ -303,7 +303,7 @@ def retrieve_class_data(name):
         index = result["stdout"].index('"')
         # Returns a list of dictionaries, extract first element of that list
         joern_class_data = json.loads(
-            json.loads(result["stdout"][index : len(result["stdout"])])
+            json.loads(result["stdout"][index: len(result["stdout"])])
         )
         class_dict = create_class_dict(joern_class_data[0])
     else:
@@ -339,7 +339,7 @@ if __name__ == "__main__":
 
     if "Windows" in platform.platform():
         index = project_dir.find(":")
-        win_drive = project_dir[0 : index + 1]
+        win_drive = project_dir[0: index + 1]
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
