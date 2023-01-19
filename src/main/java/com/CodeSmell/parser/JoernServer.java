@@ -1,4 +1,4 @@
-package com.CodeSmell;
+package com.CodeSmell.parser;
 
 import java.io.*;
 import java.nio.file.Paths;

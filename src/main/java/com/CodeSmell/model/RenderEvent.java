@@ -1,8 +1,8 @@
-package com.CodeSmell;
+package com.CodeSmell.model;
 
 import java.util.EventObject;
 
-import com.CodeSmell.RenderObject;
+import com.CodeSmell.model.RenderObject;
 
 public class RenderEvent {
 

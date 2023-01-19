@@ -1,6 +1,6 @@
-package com.CodeSmell;
+package com.CodeSmell.parser;
 
-import com.CodeSmell.ClassRelation.RelationshipType;
+import com.CodeSmell.model.ClassRelation.RelationshipType;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ public class CodePropertyGraph implements Serializable {
                 '}';
     }
 
-    protected ArrayList<CPGClass> getClasses() {
+    public ArrayList<CPGClass> getClasses() {
         return new ArrayList(this.classes);
     }
 
-    protected ArrayList<Relation> getRelations() {
+    public ArrayList<Relation> getRelations() {
         return new ArrayList(this.relations);
     }
 

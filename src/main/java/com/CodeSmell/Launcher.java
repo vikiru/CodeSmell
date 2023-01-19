@@ -1,5 +1,7 @@
 package com.CodeSmell;
 
+import com.CodeSmell.parser.JoernServer;
+import com.CodeSmell.parser.Parser;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileNotFoundException;

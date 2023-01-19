@@ -1,8 +1,15 @@
-package com.CodeSmell;
+package com.CodeSmell.view;
 
-import com.CodeSmell.CPGClass.Attribute;
-import com.CodeSmell.CPGClass.Method;
-import com.CodeSmell.CPGClass.Modifier;
+import com.CodeSmell.Pair;
+import com.CodeSmell.Position;
+import com.CodeSmell.Shape;
+import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.model.RenderEvent;
+import com.CodeSmell.model.RenderObject;
+import com.CodeSmell.model.UMLClass;
+import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Modifier;
 import javafx.scene.web.WebEngine;
 
 import java.util.ArrayList;
@@ -10,11 +17,11 @@ import java.util.ArrayList;
 // todo: support this in maven run configuration
 //import com.sun.webkit.dom.JSObject;
 
-public class WebControl implements RenderEventListener {
+public class WebBridge implements RenderEventListener {
 
     private WebEngine engine;
 
-    WebControl(WebEngine engine) {
+    public WebBridge(WebEngine engine) {
         this.engine = engine;
     }
 

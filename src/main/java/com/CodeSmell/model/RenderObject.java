@@ -1,9 +1,9 @@
-package com.CodeSmell;
+package com.CodeSmell.model;
 
 import java.util.ArrayList;
 
-import com.CodeSmell.RenderEventListener;
-import com.CodeSmell.RenderEvent;
+import com.CodeSmell.view.RenderEventListener;
+import com.CodeSmell.model.RenderEvent;
 import com.CodeSmell.Shape;
 
 public abstract class RenderObject {

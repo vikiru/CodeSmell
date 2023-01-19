@@ -1,14 +1,12 @@
-package com.CodeSmell;
+package com.CodeSmell.model;
 
 import java.util.ArrayList;
-import com.CodeSmell.WebControl;
-import com.CodeSmell.Position;
-import com.CodeSmell.RenderEvent;
-import com.CodeSmell.Pair;
-import com.CodeSmell.CPGClass.Method;
-import com.CodeSmell.CPGClass.Attribute;
 
-class UMLClass extends RenderObject {
+import com.CodeSmell.*;
+import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Attribute;
+
+public class UMLClass extends RenderObject {
 	
 	public final String name;
 	private int id;
@@ -20,7 +18,7 @@ class UMLClass extends RenderObject {
 	private double width;
 	private double height;
   
-	UMLClass(String name) {
+	public UMLClass(String name) {
 		this.name = name;
 		this.id = -1; // id is set on render
 		this.methods = new ArrayList<Method>();

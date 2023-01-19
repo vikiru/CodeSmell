@@ -1,4 +1,9 @@
-package com.CodeSmell;
+package com.CodeSmell.model;
+
+import com.CodeSmell.Position;
+import com.CodeSmell.model.RenderEvent;
+import com.CodeSmell.model.RenderObject;
+import com.CodeSmell.model.UMLClass;
 
 import java.util.ArrayList;
 

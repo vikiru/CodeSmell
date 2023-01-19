@@ -1,8 +1,8 @@
-package com.CodeSmell;
+package com.CodeSmell.smell;
 
-import com.CodeSmell.CodePropertyGraph;
-import com.CodeSmell.CPGClass;
-import com.CodeSmell.CPGClass.*;
+import com.CodeSmell.parser.CodePropertyGraph;
+import com.CodeSmell.parser.CPGClass;
+import com.CodeSmell.parser.CPGClass.*;
 import com.CodeSmell.smell.Smell;
 import com.CodeSmell.smell.Smell.CodeFragment;
 import static com.CodeSmell.smell.Common.*;
