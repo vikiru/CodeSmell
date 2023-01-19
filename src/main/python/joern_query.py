@@ -24,15 +24,15 @@ def create_attribute_dict(curr_field):
         package_name = field_type_full_name[0:index].replace(
             "<unresolvedNamespace>", ""
         )
-        type = field_type_full_name[index + 1: len(field_type_full_name)]
+        type = field_type_full_name[index + 1 : len(field_type_full_name)]
     index_nested = type.rfind("$")
     if index_nested != -1:
-        type = type[index_nested + 1: len(type)]
+        type = type[index_nested + 1 : len(type)]
 
     curr_field_dict = {
         "name": field_name,
         "code": "",
-        "lineNumber": str(field_line_number),
+        "lineNumber": int(field_line_number),
         "packageName": package_name,
         "modifiers": [modifier.lower() for modifier in field_modifiers],
         "attributeType": type,
@@ -48,7 +48,7 @@ def create_method_dict(curr_method):
     method_line_number = curr_method["_3"]
     method_line_number_end = curr_method["_4"]
     method_signature = curr_method["_5"]
-    method_modifiers = [modifier["modifierType"] for modifier in curr_method["_6"]]
+    method_modifiers = [modifier.lower() for modifier in curr_method["_6"]]
     method_parameters = curr_method["_7"]
     method_instructions = curr_method["_8"]
 
@@ -77,7 +77,7 @@ def create_method_dict(curr_method):
         if not return_type:
             # Handle all Collection types (Set, HashMap, ArrayList, etc)
             index = method_body.find(">")
-            return_type = method_body[0: index + 1]
+            return_type = method_body[0 : index + 1]
             if "(" in return_type or not return_type:
                 return_type = ""
             if return_type in method_body:
@@ -90,8 +90,8 @@ def create_method_dict(curr_method):
         def get_method_parameters(parameters):
             parameters_list = []
             for parameter in parameters:
-                evaluation_strategy = parameter["evaluationStrategy"]
-                code = parameter["code"]
+                evaluation_strategy = parameter["_1"]
+                code = parameter["_2"]
                 type = code.split(" ")[0]
                 name = code.split(" ")[1]
                 parameter_dict = {
@@ -112,8 +112,8 @@ def create_method_dict(curr_method):
         curr_method_dict = {
             "parentClassName": "",
             "code": method_code,
-            "lineNumberStart": str(method_line_number),
-            "lineNumberEnd": str(method_line_number_end),
+            "lineNumberStart": int(method_line_number),
+            "lineNumberEnd": int(method_line_number_end),
             "name": method_name.replace("<init>", constructor_name),
             "modifiers": get_method_modifiers(
                 regex_pattern_modifiers, method_modifiers
@@ -140,6 +140,8 @@ def create_instruction_dict(curr_instruction):
 
     if len(curr_instruction) == 3:
         instruction_line_number = curr_instruction["_3"]
+    else:
+        instruction_line_number = "0"
 
     if "<empty>" in instruction_code:
         return
@@ -154,7 +156,7 @@ def create_instruction_dict(curr_instruction):
         curr_instruction_dict = {
             "label": instruction_label,
             "code": instruction_code.replace("\r\n", ""),
-            "lineNumber": instruction_line_number,
+            "lineNumber": int(instruction_line_number),
             "methodCall": method_call,
         }
         return curr_instruction_dict
@@ -205,9 +207,9 @@ def create_class_dict(curr_class):
 
             set_field_types = set(list_field_types)
             if (
-                    "class" in declaration
-                    and not single_list_field_modifiers
-                    and (len(set_field_types) == 1 and class_name in set_field_types)
+                "class" in declaration
+                and not single_list_field_modifiers
+                and (len(set_field_types) == 1 and class_name in set_field_types)
             ):
                 return "enum"
             elif "class" in declaration and "abstract" in single_list_method_modifiers:
@@ -223,23 +225,23 @@ def create_class_dict(curr_class):
         if index_of_src < 0:
             raise Exception("joern_query could not parse folder structure. No src/test")
         full_package_name = ".".join(
-            path_without_separators[index_of_src: len(path_without_separators)]
+            path_without_separators[index_of_src : len(path_without_separators)]
         )
         file_name_index = full_package_name.rindex(".java")
         package_name = full_package_name[0:file_name_index]
-        package_name = package_name[0: package_name.rindex(".")]
+        package_name = package_name[0 : package_name.rindex(".")]
         return package_name
 
     def get_name_without_separators(name):
         if "$" in name:
             index = name.rindex("$")
-            name = name[index + 1: len(name)]
+            name = name[index + 1 : len(name)]
         return name
 
     curr_class_dict = {
         "name": get_name_without_separators(class_name),
         "code": "",  # keep empty for now
-        "lineNumber": line_number,
+        "lineNumber": int(line_number),
         "importStatements": [],  # keep empty for now
         "modifiers": [],  # keep these empty for now
         "classFullName": class_full_name,
@@ -258,37 +260,34 @@ def create_class_dict(curr_class):
 
 # Execute a single query to retrieve all the class names within the source code
 def retrieve_all_class_names():
-    query = "cpg.typeDecl.isExternal(false).name.toJson"
+    query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).name.toJson'
     result = client.execute(query)
-
+    class_names = []
     if result["success"]:
         index = result["stdout"].index('"')
         all_names = json.loads(
-            json.loads(result["stdout"][index: len(result["stdout"])])
+            json.loads(result["stdout"][index : len(result["stdout"])])
         )
-        class_names = [
-            name.replace("$", ".") for name in all_names if "lambda" not in name
-        ]
+        class_names = [name.replace("$", ".") for name in all_names]
     return class_names
 
 
 # Execute a single query to get all the data of a class
 def retrieve_class_data(name):
     class_query = (
-            'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
-                                           "node.inheritsFromTypeFullName.l, node.code, "
-                                           "node.lineNumber, "
-                                           "node.astChildren.isModifier.modifierType.l, "
-                                           "node.astChildren.isMember.l.map(node => (node.name, "
-                                           "node.typeFullName, node.code, node.lineNumber,"
-                                           "node.astChildren.isModifier.modifierType.l)), "
-                                           'node.astChildren.isMethod.whereNot(node => node.code'
-                                           '("<lambda>")).whereNot(node => node.code("<empty>")).l.'
-                                           "map(node => (node.name, node.code, node.lineNumber, node.lineNumberEnd, "
-                                           'node.signature, node.astChildren.label("MODIFIER").l, '
-                                           'node.astChildren.label("METHOD_PARAMETER_IN").filter(node => '
-                                           'node.code != "this").l, node.ast.l.map(node => (node.label, '
-                                           "node.code, node.lineNumber)))), node.filename)).toJson"
+        'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
+        "node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
+        "node.astChildren.isModifier.modifierType.l, "
+        "node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
+        "node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
+        'node.astChildren.l.isMethod.filter(node => !node.name.contains("lambda") '
+        '&& !node.code.contains("empty")).l.map(node => (node.name, node.code, '
+        "node.lineNumber, node.lineNumberEnd, node.signature, "
+        "node.astChildren.isModifier.modifierType.l, "
+        "node.astChildren.isParameter.l.filter(node => !node.name.contains("
+        '"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
+        "node.typeFullName)), node.ast.l.map(node => (node.label, node.code, "
+        "node.lineNumber)))), node.filename)).toJson"
     )
     start = time.time()
     result = client.execute(class_query)
@@ -304,7 +303,7 @@ def retrieve_class_data(name):
         index = result["stdout"].index('"')
         # Returns a list of dictionaries, extract first element of that list
         joern_class_data = json.loads(
-            json.loads(result["stdout"][index: len(result["stdout"])])
+            json.loads(result["stdout"][index : len(result["stdout"])])
         )
         class_dict = create_class_dict(joern_class_data[0])
     else:
@@ -340,7 +339,7 @@ if __name__ == "__main__":
 
     if "Windows" in platform.platform():
         index = project_dir.find(":")
-        win_drive = project_dir[0: index + 1]
+        win_drive = project_dir[0 : index + 1]
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
@@ -390,6 +389,7 @@ if __name__ == "__main__":
             )
             source_code_json_creation_time = end - start
             total_time += source_code_json_creation_time
+
             for class_dict in source_code_json["classes"]:
                 print(class_dict)
         else:
@@ -404,12 +404,10 @@ if __name__ == "__main__":
         if result["success"]:
             logging.info(
                 "The source code has been successfully removed. Completed in {0} seconds.".format(
-                    format(end - start, ".2f"))
+                    format(end - start, ".2f")
+                )
             )
-
-        logging.info(
-            "Total time taken: {0} seconds.".format(format(total_time, ".2f"))
-        )
+        logging.info("Total time taken: {0} seconds.".format(format(total_time, ".2f")))
         exit(0)
     else:
         print("joern_query :: Source Code Import Failure", file=sys.stderr)
