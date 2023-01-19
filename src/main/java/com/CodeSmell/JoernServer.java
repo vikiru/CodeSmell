@@ -16,7 +16,7 @@ public class JoernServer {
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
 
-        System.out.println("JoernServer :: Starting Joern in directory: " + directory);
+        System.out.println("Starting Joern in directory: " + directory);
         String directoryPath = Paths.get("").toAbsolutePath() + "/src/main/python";
 
         // Start up a command prompt terminal (no popup) and start the joern server
@@ -40,10 +40,10 @@ public class JoernServer {
 
             String line;
             while ((line = joernServerReader.readLine()) != null) {
-                System.out.println("JoernServer Input Stream Output :: " + joernServerReader.readLine());
+                System.out.println(joernServerReader.readLine());
             }
             while ((line = errorReader.readLine()) != null) {
-                System.out.println("JoernServer Error Stream Output :: " + line);
+                System.out.println(line);
             }
 
             // Execute queries against the local joern server instance.
@@ -51,20 +51,8 @@ public class JoernServer {
             this.joernStream = joernQueryProcess.getInputStream();
 
             // Reading in joernQuery Error Stream and using waitFor() on joernQuery process causes extreme delays / blocking.
+            // todo add alternative to waitFor()
 
-            // For Windows OS, find the process bound to port 8080 and kill it.
-            if (System.getProperty("os.name").contains("Windows")) {
-                Process findProcess = windowsPortFinderBuilder.start();
-                BufferedReader findProcessReader = new BufferedReader(new InputStreamReader(findProcess.getInputStream()));
-
-                // Obtain the PID of the process bound to port 8080
-                String lineFree = findProcessReader.readLine();
-                String processID = lineFree.substring(lineFree.lastIndexOf(" ")).trim();
-
-                // Kill the process bound to port 8080
-                ProcessBuilder portFreerBuilder = new ProcessBuilder("cmd.exe", "/c", "taskkill /F /PID " + processID);
-                Process freeProcess = portFreerBuilder.start();
-            }
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
