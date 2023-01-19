@@ -1,13 +1,13 @@
-package com.CodeSmell;
+package com.CodeSmell.control;
 
 import java.util.ArrayList;
 import java.lang.reflect.Array;
 
-import com.CodeSmell.UMLClass;
+import com.CodeSmell.Position;
+import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.model.UMLClass;
 
-
-
-class LayoutManager  {
+public class LayoutManager  {
 
 	private enum Direction {
 		RIGHT,

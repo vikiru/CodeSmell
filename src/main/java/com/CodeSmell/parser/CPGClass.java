@@ -1,5 +1,6 @@
-package com.CodeSmell;
+package com.CodeSmell.parser;
 
+import com.CodeSmell.parser.CodePropertyGraph;
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
