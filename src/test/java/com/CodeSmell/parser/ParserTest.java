@@ -1,5 +1,6 @@
-package com.CodeSmell;
+package com.CodeSmell.parser;
 
+import com.CodeSmell.model.ClassRelation;
 import com.google.gson.Gson;
 import org.junit.BeforeClass;
 import org.junit.Test;
