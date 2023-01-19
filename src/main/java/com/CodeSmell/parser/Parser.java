@@ -1,7 +1,9 @@
-package com.CodeSmell;
+package com.CodeSmell.parser;
 
-import com.CodeSmell.CPGClass.Attribute;
-import com.CodeSmell.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.ClassRelation;
+import com.CodeSmell.parser.CodePropertyGraph;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

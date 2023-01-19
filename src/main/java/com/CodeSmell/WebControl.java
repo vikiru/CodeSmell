@@ -1,8 +1,8 @@
 package com.CodeSmell;
 
-import com.CodeSmell.CPGClass.Attribute;
-import com.CodeSmell.CPGClass.Method;
-import com.CodeSmell.CPGClass.Modifier;
+import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Modifier;
 import javafx.scene.web.WebEngine;
 
 import java.util.ArrayList;

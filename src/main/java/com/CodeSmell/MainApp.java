@@ -1,5 +1,8 @@
 package com.CodeSmell;
 
+import com.CodeSmell.parser.CPGClass;
+import com.CodeSmell.parser.CodePropertyGraph;
+import com.CodeSmell.parser.Parser;
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;

@@ -5,8 +5,8 @@ import com.CodeSmell.WebControl;
 import com.CodeSmell.Position;
 import com.CodeSmell.RenderEvent;
 import com.CodeSmell.Pair;
-import com.CodeSmell.CPGClass.Method;
-import com.CodeSmell.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Attribute;
 
 class UMLClass extends RenderObject {
 	
