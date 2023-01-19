@@ -19,7 +19,7 @@ public class CPGClass implements Serializable {
 
     // The line number which the class was declared within the file
     @Expose(serialize = true, deserialize = true)
-    public final String lineNumber;
+    public final int lineNumber;
 
     @Expose(serialize = true, deserialize = true)
     public final String[] importStatements;
@@ -58,7 +58,7 @@ public class CPGClass implements Serializable {
     @Expose(serialize = true, deserialize = true)
     private ArrayList<CodePropertyGraph.Relation> outwardRelations;
 
-    CPGClass(String name, String code, String lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
         this.lineNumber = lineNumber;
@@ -132,7 +132,7 @@ public class CPGClass implements Serializable {
         public final String name;
 
         // line number where the field was declared within the file
-        public final String lineNumber;
+        public final int lineNumber;
 
         @Expose(serialize = true, deserialize = true)
         public final String code;
@@ -153,7 +153,7 @@ public class CPGClass implements Serializable {
         @Expose(serialize = true, deserialize = true)
         public final String typeFullName;
 
-        protected Attribute(String name, String lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
+        protected Attribute(String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
             this.name = name;
             this.lineNumber = lineNumber;
             this.code = code;
@@ -184,10 +184,10 @@ public class CPGClass implements Serializable {
 
         // line numbers where the method starts and ends
         @Expose(serialize = true, deserialize = true)
-        public final String lineNumberStart;
+        public final int lineNumberStart;
 
         @Expose(serialize = true, deserialize = true)
-        public final String lineNumberEnd;
+        public final int lineNumberEnd;
 
         // the name of the method
         @Expose(serialize = true, deserialize = true)
@@ -221,7 +221,7 @@ public class CPGClass implements Serializable {
         // a list of methods which this calls
         private ArrayList<Method> methodCalls;
 
-        protected Method(String parentClassName, String code, String lineNumberStart, String lineNumberEnd, String name, Modifier[] modifiers,
+        protected Method(String parentClassName, String code, int lineNumberStart, int lineNumberEnd, String name, Modifier[] modifiers,
                          String signature, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
@@ -259,7 +259,7 @@ public class CPGClass implements Serializable {
 
             @Expose(serialize = true, deserialize = true)
             public final String code;
-            
+
             // the name of the method parameter
             @Expose(serialize = true, deserialize = true)
             public final String name;
@@ -291,12 +291,12 @@ public class CPGClass implements Serializable {
             public final String code;
             // The line number of where the line of code occurs within the method body.
             @Expose(serialize = true, deserialize = true)
-            public final String lineNumber;
+            public final int lineNumber;
             // The name of the method that the instruction is calling, if any
             @Expose(serialize = true, deserialize = true)
             public final String methodCall;
 
-            public Instruction(String label, String code, String lineNumber, String methodCall) {
+            public Instruction(String label, String code, int lineNumber, String methodCall) {
                 this.label = label;
                 this.code = code;
                 this.lineNumber = lineNumber;
