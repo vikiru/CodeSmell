@@ -1,25 +1,30 @@
 package com.CodeSmell;
 
+import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.model.RenderObject;
+import com.CodeSmell.model.UMLClass;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
 import com.CodeSmell.parser.Parser;
+import com.CodeSmell.control.LayoutManager;
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXMLLoader;
-import javafx.stage.Screen;
-import javafx.scene.Scene;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.geometry.Rectangle2D;
+import com.CodeSmell.view.Webview;
 
-import java.io.InputStream;
+import java.awt.*;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -107,7 +112,7 @@ public class MainApp extends Application {
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
         webView.setZoom(1.0); // allow resizing for other resolutions
-        RenderObject.addRenderEventListener(new WebControl(engine));
+        RenderObject.addRenderEventListener(new Webview(engine));
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
