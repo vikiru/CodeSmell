@@ -7,6 +7,7 @@ import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
 import com.CodeSmell.parser.Parser;
 import com.CodeSmell.control.LayoutManager;
+import com.CodeSmell.view.WebBridge;
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Worker;
@@ -20,7 +21,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import com.CodeSmell.view.Webview;
+
 
 import java.awt.*;
 import java.io.File;
@@ -112,7 +113,7 @@ public class MainApp extends Application {
         URL url = getClass().getResource("boxes.html");
         WebEngine engine = webView.getEngine();
         webView.setZoom(1.0); // allow resizing for other resolutions
-        RenderObject.addRenderEventListener(new Webview(engine));
+        RenderObject.addRenderEventListener(new WebBridge(engine));
 
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {

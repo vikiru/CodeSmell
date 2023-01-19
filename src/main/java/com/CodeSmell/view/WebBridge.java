@@ -17,11 +17,11 @@ import java.util.ArrayList;
 // todo: support this in maven run configuration
 //import com.sun.webkit.dom.JSObject;
 
-public class Webview implements RenderEventListener {
+public class WebBridge implements RenderEventListener {
 
     private WebEngine engine;
 
-    public Webview(WebEngine engine) {
+    public WebBridge(WebEngine engine) {
         this.engine = engine;
     }
 
