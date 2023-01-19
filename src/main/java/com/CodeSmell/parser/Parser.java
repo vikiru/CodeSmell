@@ -1,9 +1,8 @@
 package com.CodeSmell.parser;
 
+import com.CodeSmell.model.ClassRelation;
 import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
-import com.CodeSmell.model.ClassRelation;
-import com.CodeSmell.parser.CodePropertyGraph;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -674,7 +673,7 @@ public class Parser {
         for (Method.Instruction instruction : methodToUpdate.instructions) {
             String label = instruction.label;
             String code = instruction.code;
-            String lineNumber = instruction.lineNumber;
+            int lineNumber = instruction.lineNumber;
             String methodCall = instruction.methodCall;
             if (label.equals("CALL") && (!methodCall.equals("") || !methodCall.equals("toString"))) {
                 int indexOfMethodCalled = allMethodNames.indexOf(methodCall);
@@ -824,13 +823,13 @@ public class Parser {
     }
 
     private class JavaAttribute extends Attribute {
-        JavaAttribute(String name, String code, String lineNumber, String packageName, String type, CPGClass.Modifier[] m, String typeFullName) {
+        JavaAttribute(String name, String code, int lineNumber, String packageName, String type, CPGClass.Modifier[] m, String typeFullName) {
             super(name, lineNumber, code, packageName, type, m, typeFullName);
         }
     }
 
     private class JavaMethod extends Method {
-        JavaMethod(String parentClassName, String code, String lineNumberStart, String lineNumberEnd, String name, CPGClass.Modifier[] modifiers, String signature, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
+        JavaMethod(String parentClassName, String code, int lineNumberStart, int lineNumberEnd, String name, CPGClass.Modifier[] modifiers, String signature, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
             super(parentClassName, code, lineNumberStart, lineNumberEnd, name, modifiers, signature, returnType, methodBody, parameters, instructions);
         }
     }
