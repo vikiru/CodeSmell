@@ -26,8 +26,7 @@ public class Launcher {
             MainApp.main(args);
         } else {
             try {
-                MainApp.joernStream = new FileInputStream(
-                    Parser.CPG_BACKUP_JSON);
+                MainApp.joernStream = new FileInputStream(Parser.CPG_BACKUP_JSON);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException("-Dskip=true, but CPG JSON not found on drive");
             }
@@ -37,7 +36,8 @@ public class Launcher {
     }
 
     public static File chooseDirectory()
-    {
+    {   
+        //return new File("src/main/java/com/CodeSmell");
         return new File("src/test/java/com/testproject");
     }
 }

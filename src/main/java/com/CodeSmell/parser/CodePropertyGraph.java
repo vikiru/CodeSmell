@@ -8,10 +8,7 @@ import java.io.Serializable;
 
 public class CodePropertyGraph implements Serializable {
 
-    @Expose(serialize = true, deserialize = true)
     private ArrayList<Relation> relations;
-
-    @Expose(serialize = true, deserialize = true)
     private ArrayList<CPGClass> classes;
 
     protected CodePropertyGraph() {
@@ -44,13 +41,9 @@ public class CodePropertyGraph implements Serializable {
     }
 
     public static class Relation implements Serializable  {
-        @Expose(serialize = true, deserialize = true)
         public final CPGClass source;
-        @Expose(serialize = true, deserialize = true)
         public final CPGClass destination;
-        @Expose(serialize = true, deserialize = true)
         public final RelationshipType type;
-        @Expose(serialize = true, deserialize = true)
         public final String multiplicity;
 
         Relation(CPGClass source, CPGClass destination, RelationshipType type, String multiplicity) {

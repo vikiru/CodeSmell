@@ -5,7 +5,11 @@ import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -32,6 +36,19 @@ public class Parser {
         } 
     } 
 
+    private static class ArrayListExclusion implements ExclusionStrategy {
+
+        private Type listParameterizedType = new TypeToken<List<String>>() {}.getType();
+
+        public boolean shouldSkipClass(Class<?> c) {
+            return false;
+        }
+
+        public boolean shouldSkipField(FieldAttributes f) {
+            return listParameterizedType.equals(f.getDeclaredType());
+        }
+    }
+
     /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
      * and update neccessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
@@ -43,9 +60,9 @@ public class Parser {
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
     public static CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) throws InvalidClassException {
-        GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
-        Gson gson = builder.create();
+        Gson gson = new GsonBuilder()
+            .setExclusionStrategies(new ArrayListExclusion())
+            .create();
         CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!serializedObject) {

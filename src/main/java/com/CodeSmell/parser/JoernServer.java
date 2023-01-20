@@ -31,7 +31,6 @@ public class JoernServer {
 					while ((line = this.reader.readLine()) != null) {
 					   System.out.println(line);
 					}
-				} catch (FileNotFoundException e) {
 				} catch (IOException e) {
 					e.printStackTrace();
 					System.exit(1);
