@@ -251,6 +251,7 @@ def create_class_dict(curr_class):
         "packageName": get_package_name(file_name),
         "attributes": list(map(create_attribute_dict, class_attributes)),
         "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
+        "outwardRelations": []
     }
     curr_class_dict["classType"] = get_type(class_declaration, curr_class_dict)
     for method in curr_class_dict["methods"]:
@@ -286,8 +287,8 @@ def retrieve_class_data(name):
                                            "node.astChildren.isModifier.modifierType.l, "
                                            "node.astChildren.isParameter.filter(node => !node.name.contains("
                                            '"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
-                                           'node.typeFullName)), node.ast.l.map(node => (node.label, node.code, '
-                                           'node.lineNumber)))), node.filename)).toJson'
+                                           "node.typeFullName)), node.ast.l.map(node => (node.label, node.code, "
+                                           "node.lineNumber)))), node.filename)).toJson"
     )
     start = time.time()
     result = client.execute(class_query)
@@ -391,7 +392,10 @@ if __name__ == "__main__":
             total_time += source_code_json_creation_time
 
             for class_dict in source_code_json["classes"]:
-                print(class_dict)
+                str_dict = str(class_dict)
+                bytes_length = len(bytes(str_dict, 'utf-8'))
+                bytes_length += len(str(bytes_length))
+                print(str(bytes_length) + str_dict)
         else:
             print("joern_query :: Source code json creation failure", file=sys.stderr)
             exit(1)
