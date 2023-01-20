@@ -580,7 +580,7 @@ public class Parser {
 
         // get missing info for class
         int classDeclLineNum = cpgClass.lineNumber - 1;
-        classDeclaration = allLines.get(classDeclLineNum);
+        classDeclaration = allLines.get(classDeclLineNum).replace("{", "").trim();
         int index = classDeclaration.indexOf(cpgClass.name);
         String tempStr = classDeclaration.substring(0, index - 1).trim();
         for (CPGClass.Modifier modifier : CPGClass.Modifier.values()) {
