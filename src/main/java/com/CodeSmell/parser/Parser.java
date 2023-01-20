@@ -53,10 +53,11 @@ public class Parser {
                     // expected length (without length prefix) = 10
                     int messageLength = classJson.getBytes(StandardCharsets.UTF_8).length;
                     String prefix = String.valueOf(messageLength);
+                    int prefixLength = prefix.length();
+                    int expectedLength = messageLength - prefixLength;
                     if (classJson.startsWith(prefix)) {
                         classJson = classJson.replace(prefix, "");
                         int newLength = classJson.getBytes(StandardCharsets.UTF_8).length;
-                        int expectedLength = messageLength - prefix.length();
                         if (newLength == expectedLength) {
                             CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
                             if (cpgClass != null) {
