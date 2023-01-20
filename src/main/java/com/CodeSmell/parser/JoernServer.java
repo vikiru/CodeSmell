@@ -1,6 +1,10 @@
 package com.CodeSmell.parser;
 
-import java.io.*;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 public class JoernServer {
@@ -12,7 +16,10 @@ public class JoernServer {
         return this.joernStream;
     }
 
-    public void start(String directory) {
+    public void start(File directory) {
+        if (!directory.isDirectory()) {
+            throw new RuntimeException("JoernServer got bad directory: " + directory);
+        }
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
 
@@ -27,7 +34,8 @@ public class JoernServer {
         if (System.getProperty("os.name").contains("Windows")) {
             joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
         } else joernServerBuilder = new ProcessBuilder("joern", "--server");
-        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", directory).directory(new File(directoryPath));
+        joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", 
+            directory.toString()).directory(new File(directoryPath));
 
 
         try {
@@ -48,13 +56,17 @@ public class JoernServer {
 
             // Execute queries against the local joern server instance.
             Process joernQueryProcess = joernQueryBuilder.start();
+            errorReader = new BufferedReader(
+                    new InputStreamReader(joernQueryProcess.getErrorStream()));
+            while ((line = errorReader.readLine()) != null) {
+                System.out.println(line);
+            }
             this.joernStream = joernQueryProcess.getInputStream();
 
             // Reading in joernQuery Error Stream and using waitFor() on joernQuery process causes extreme delays / blocking.
             // todo add alternative to waitFor()
 
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

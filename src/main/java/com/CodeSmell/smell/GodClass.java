@@ -19,30 +19,40 @@ public class GodClass extends Smell {
 	private ContentSorter contentSorter;
 	
 	// Smell triggers for class when class has a larger proportion of instruction
-	// characters with respect ot the hold set of classes than the given threshhold
-	private final double INSTRUCTION_PROPORTION_THRESHHOLD = 0.4;
+	// characters with respect ot the hold set of classes than the given Threshold
+	private final double contentThreshold;
 	
 	// Smell triggers for class when class has a larger proportion of relations
-	// formed between it and other classes than the given threshhold
-	private final double RELATION_PROPORTION_THRESHHOLD = 0.6;
+	// formed between it and other classes than the given Threshold
+	private final double relationThreshold;
 		
 	// classes must be at least this many lines of code for the
 	// GodClass smell to be triggered 
-	private final int MIN_LINE_COUNT = 350;
+	private final int minLineCount;
 
 	// classes exceeding this many lines will always be labeled as a godclass,
 	// regardless of overall project size
-	private final int MAX_LINE_COUNT = 1500; 
+	private final int maxLineCount; 
 
 	public LinkedList<CodeFragment> detections; 
 
-	GodClass(CodePropertyGraph cpg) {
+	/**
+	 * Create a new GodClass object with the given parameters.
+	 * For all parameters, negative number will result in using
+	 * default fallback values.
+	 */
+	public GodClass(CodePropertyGraph cpg, double contentThreshold,
+			double relationThreshold, int minLineCount, int maxLineCount) {
 		super("God Class", cpg);
 		HashMap<CPGClass, CPGClass[]>  classes = collapseNestedClasses(cpg.getClasses());
 		this.relationSorter = new RelationSorter();
 		this.relationSorter.sortNested(classes);
 		this.contentSorter = new ContentSorter();
 		this.contentSorter.sortNested(classes);
+		this.contentThreshold = (contentThreshold < 0) ? 0.4 : contentThreshold;
+		this.relationThreshold = (relationThreshold < 0) ? 0.6 : relationThreshold;
+		this.minLineCount = (minLineCount < 0) ? 350 : minLineCount;
+		this.maxLineCount =  (maxLineCount < 0) ? 1500 : maxLineCount;
 	}
 
 	public String description() {
@@ -57,50 +67,50 @@ public class GodClass extends Smell {
 	}
 
 	public LinkedList<CodeFragment> detectAll() {
-		if (this.lastDetection == null) {
-			LinkedList<CodeFragment> godClasses = new LinkedList();
-			
-			for (int i=contentSorter.itemCount()-1; i >= 0; i--) {
-				CPGClass c =  contentSorter.getKey(i);
-				int lineCount = contentSorter.getVal(i);
-
-				if (lineCount < MIN_LINE_COUNT) {
-					continue;
-				}
-
-				String description = "";
-
-				if (lineCount > MAX_LINE_COUNT) {
-					description += String.format(
-						"%s exceeds max line count (%d lines)",
-						c.name, lineCount);
-				}
-
-				double proportion = lineCount / contentSorter.getTotal();
-				if (proportion > INSTRUCTION_PROPORTION_THRESHHOLD) {
-					description += String.format(
-						"%s contains %f%% of the instructions (%d lines)",
-						c.name, proportion * 100, lineCount);
-				}
-
-				int relationIndex =  relationSorter.getIndex(c);
-				int relationSize = relationSorter.getVal(relationIndex);
-				proportion = relationSize / relationSorter.getTotal();
-				if (proportion > RELATION_PROPORTION_THRESHHOLD) {
-					description += String.format(
-						"%s contains %f%% of all relations (%d)",
-						c.name, proportion * 100, relationSize);
-				}
-
-				if (description.equals("")) {
-					continue;
-				}
-				godClasses.add(CodeFragment.makeFragment(description, c));
-			}
-			
-			return godClasses;
+		if (this.lastDetection != null) {
+			return null;
 		}
-		return null;
+		LinkedList<CodeFragment> godClasses = new LinkedList();
+		
+		for (int i=contentSorter.itemCount()-1; i >= 0; i--) {
+			CPGClass c =  contentSorter.getKey(i);
+			int lineCount = contentSorter.getVal(i);
+
+			if (lineCount < minLineCount) {
+				continue;
+			}
+
+			String description = "";
+
+			if (lineCount > maxLineCount) {
+				description += String.format(
+					"%s exceeds max line count (%d lines)",
+					c.name, lineCount);
+			}
+
+			double proportion = lineCount / contentSorter.getTotal();
+			if (proportion > contentThreshold) {
+				description += String.format(
+					"%s contains %f%% of the instructions (%d lines)",
+					c.name, proportion * 100, lineCount);
+			}
+
+			int relationIndex =  relationSorter.getIndex(c);
+			int relationSize = relationSorter.getVal(relationIndex);
+			proportion = relationSize / relationSorter.getTotal();
+			if (proportion > relationThreshold) {
+				description += String.format(
+					"%s contains %f%% of all relations (%d)",
+					c.name, proportion * 100, relationSize);
+			}
+
+			if (description.equals("")) {
+				continue;
+			}
+			godClasses.add(CodeFragment.makeFragment(description, c));
+		}
+		
+		return godClasses;
 	}
 
 }

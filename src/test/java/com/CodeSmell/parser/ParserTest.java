@@ -1,7 +1,8 @@
 package com.CodeSmell.parser;
 
 import com.CodeSmell.model.ClassRelation;
-import com.google.gson.Gson;
+import com.CodeSmell.ProjectManager;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,7 +17,6 @@ import static org.junit.Assert.assertNotNull;
 public class ParserTest {
 
     private static Parser p;
-    private static Gson gson;
     private static CodePropertyGraph ourCPGWithRelations;
     private static CodePropertyGraph ourCPGWithoutRelations;
 
@@ -24,16 +24,9 @@ public class ParserTest {
     @BeforeClass
     public static void before() {
         p = new Parser();
-        gson = new Gson();
-        String ourDirectory = Paths.get("").toAbsolutePath() + "/src/test/java/com/testproject";
-
-        JoernServer js = new JoernServer();
-        js.start(ourDirectory);
-        System.out.println("started joern");
-
         // Obtain CPG after Parser has properly initialized it, using our project's
         // source code
-        ourCPGWithRelations = p.initializeCPG(js.getStream(), false);
+        ourCPGWithRelations = ProjectManager.getCPG("testproject");
         ourCPGWithoutRelations = new CodePropertyGraph();
 
         // Create a CPG object without any relations

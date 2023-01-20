@@ -52,7 +52,8 @@ public class Parser {
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                System.exit(1);
             }
 
             // get missing info for CPGClasses and their fields and methods.
@@ -77,7 +78,7 @@ public class Parser {
                 oos.close();
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException(e);
+                System.exit(1);
             }
 
         } else {
@@ -87,7 +88,7 @@ public class Parser {
                 cpg = (CodePropertyGraph) ois.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException(e);
+                System.exit(1);
             }
         }
         System.out.printf("Project read: %d classes, %d relations\n",
