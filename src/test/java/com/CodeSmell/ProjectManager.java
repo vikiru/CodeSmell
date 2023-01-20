@@ -13,6 +13,8 @@ import com.CodeSmell.parser.Parser;
 import com.CodeSmell.parser.CodePropertyGraph;
 import com.CodeSmell.parser.JoernServer;
 
+import java.util.Date;
+
 public class ProjectManager {
 
 	private static Parser parser = new Parser();
@@ -46,7 +48,7 @@ public class ProjectManager {
 			try {
 				this.cpg = parser.initializeCPG(server.getStream(), false);
 				move(
-					new File(Parser.CPG_BACKUP_JSON).toPath(),
+					Parser.CPG_BACKUP_JSON.toPath(),
 					this.backup.toPath(), 
 					StandardCopyOption.REPLACE_EXISTING);
 			} catch (Exception e) {
@@ -68,9 +70,26 @@ public class ProjectManager {
 			}
 		}
 
+		private boolean compareDirectoryModificationTime(File directory, 
+				long modificationTime) {
+			if (!directory.isDirectory()) {
+				return directory.lastModified() > modificationTime;
+			}
+			for (File f : directory.listFiles()) {
+				if (compareDirectoryModificationTime(f, modificationTime)) {
+					System.out.println("Edit in file " + f);
+					System.out.println(f.lastModified());
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void load() {
 			try {
-				if (this.backup.lastModified() > this.directory.lastModified()) {
+				if (!compareDirectoryModificationTime(this.directory, 
+						this.backup.lastModified())) {
+					System.out.println("Loading backup");
 					loadFromBackup();
 				} else {
 					loadFromJoern();
