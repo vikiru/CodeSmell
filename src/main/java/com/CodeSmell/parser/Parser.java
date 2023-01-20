@@ -545,7 +545,7 @@ public class Parser {
             constructorBody = constructorResult.get(0).code;
         }
         // HELPER VARIABLES
-        ArrayList<String> nonEmptyLines = new ArrayList<>();
+        ArrayList<String> allLines = new ArrayList<>();
 
         // INFO TO FIND
         String classType = "";
@@ -559,9 +559,7 @@ public class Parser {
             try (Scanner scanner = new Scanner(classFile)) {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
-                    if (!line.equals("")) {
-                        nonEmptyLines.add(line);
-                    }
+                    allLines.add(line);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -569,42 +567,30 @@ public class Parser {
         }
 
         // get package
-        var packageResult = nonEmptyLines.stream().
+        var packageResult = allLines.stream().
                 filter(line -> line.startsWith("package ") && line.contains(";")).collect(Collectors.toList());
 
         // get all imports
-        var importStatements = nonEmptyLines.stream().
+        var importStatements = allLines.stream().
                 filter(line -> line.startsWith("import ") && line.contains(";")).collect(Collectors.toList());
-
-        // get class declaration
-        var classDeclResult = nonEmptyLines.stream().
-                filter(line -> line.contains(cpgClass.name) && line.endsWith("{") && !line.contains("(") && !line.contains(")")).collect(Collectors.toList());
 
         if (!packageResult.isEmpty()) {
             packageName = packageResult.get(0).replace("package ", "").replace(";", "").trim();
         }
-        // extract missing info from class decl
-        if (!classDeclResult.isEmpty()) {
-            classDeclaration = classDeclResult.get(0).replace("{", "").trim();
-            String[] types = {"class", "enum", "abstract class", "interface"};
-            String line = classDeclaration.trim();
-            line = line.replace(className, "").replace("{", "").trim();
-            for (CPGClass.Modifier m : CPGClass.Modifier.values()) {
-                if (line.contains(m.modString)) {
-                    line = line.replace(m.modString, "").trim();
-                    classModifiers.add(m);
-                }
-            }
-            if (!classModifiers.contains(CPGClass.Modifier.ABSTRACT)) {
-                for (String typeStr : types) {
-                    if (line.contains(typeStr)) {
-                        classType = typeStr;
-                    }
-                }
-            } else {
-                classType = "abstract class";
-            }
+
+        // get missing info for class
+        int classDeclLineNum = cpgClass.lineNumber - 1;
+        classDeclaration = allLines.get(classDeclLineNum);
+        int index = classDeclaration.indexOf(cpgClass.name);
+        String tempStr = classDeclaration.substring(0, index - 1).trim();
+        for (CPGClass.Modifier modifier : CPGClass.Modifier.values()) {
+            tempStr = tempStr.replace(modifier.modString, "").trim();
+            classModifiers.add(modifier);
         }
+        if (classModifiers.contains(CPGClass.Modifier.ABSTRACT)) {
+            classType = "abstract class";
+        } else classType = tempStr;
+
         // extract missing info from attributes
         for (Attribute a : cpgClass.attributes) {
             String name = a.name;
@@ -613,8 +599,10 @@ public class Parser {
                 type = getProperTypeName(type);
             }
             String toFind = type + " " + name;
-            var attributeResult = nonEmptyLines.stream().
-                    filter(line -> (line.contains(toFind) || line.contains(name))
+            String toFind2 = name + ";";
+            var attributeResult = allLines.stream().
+                    filter(line -> (line.contains(toFind) ||
+                            line.contains(toFind2) || (line.contains(name) && line.contains("=")))
                             && !line.contains("{") && !line.contains("//") && !line.contains("*")).collect(Collectors.toList());
             // add all modifiers
             if (!attributeResult.isEmpty()) {
@@ -658,6 +646,7 @@ public class Parser {
                 updatedAttributes.add(properAttribute);
             }
         }
+
 
         // return the CPGClass with updated info
         return new CPGClass(className, classDeclaration,
