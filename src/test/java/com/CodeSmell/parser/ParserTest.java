@@ -274,6 +274,7 @@ public class ParserTest {
     public void testGetProperName() {
         String singularInstance = "UMLClass";
         String hashMap = "HashMap<CPGClass, Modifier>";
+        String arrayAndList = "ArrayList<CPGClass>[]";
         String arr = "Position[]";
         String nestedClass = "CPGClass$Modifier";
         String complexType = "HashMap<HashMap<HashMap<HashMap<HashMap<String, String>, String>, String>, String>, String>";
@@ -285,6 +286,7 @@ public class ParserTest {
                 "HashMap HashMap HashMap HashMap String String String String String String",
                 p.getProperTypeName(complexType));
         assertEquals("Type should not have the $ or CPGClass", "Modifier", p.getProperTypeName(nestedClass));
+        assertEquals("Type should not have <> or []", "CPGClass", p.getProperTypeName(arrayAndList));
     }
     // ----------------------------------------------------------------------------------------------------------
 

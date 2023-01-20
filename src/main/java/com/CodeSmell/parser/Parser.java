@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,11 +45,27 @@ public class Parser {
             try {
                 String classJson;
                 while (((classJson = classReader.readLine()) != null)) {
-                    CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
-                    if (cpgClass != null) {
-                        tempCPG.addClass(cpgClass);
-                    } else {
-                        throw new RuntimeException("Bad JSON read by Parser.");
+                    // Each JSON Object representation of a single class will be printed on a new line separately by joern_query.
+                    // Prior to the dictionary, a length value will precede the JSON Object (class dictionary):
+                    // Input = 12{"test":0}
+                    // total message length = 12 (length of dictionary is 10 in bytes + len('10') = 12)
+                    // prefix length = 2
+                    // expected length (without length prefix) = 10
+                    int messageLength = classJson.getBytes(StandardCharsets.UTF_8).length;
+                    String prefix = String.valueOf(messageLength);
+                    int prefixLength = prefix.length();
+                    int expectedLength = messageLength - prefixLength;
+                    if (classJson.startsWith(prefix)) {
+                        classJson = classJson.replace(prefix, "");
+                        int newLength = classJson.getBytes(StandardCharsets.UTF_8).length;
+                        if (newLength == expectedLength) {
+                            CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
+                            if (cpgClass != null) {
+                                tempCPG.addClass(cpgClass);
+                            } else {
+                                throw new RuntimeException("Bad JSON read by Parser.");
+                            }
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -810,28 +827,25 @@ public class Parser {
         if (typeName.contains("$")) {
             int index = typeName.lastIndexOf("$");
             typeName = typeName.substring(index + 1);
-        } else if (typeName.contains("[]")) {
+        }
+        if (typeName.contains("[]")) {
             typeName = typeName.replace("[]", "");
-        } else if (typeName.contains("<")) {
+        }
+        if (typeName.contains("<")) {
             int startingIndex = typeName.indexOf("<");
-            int endingIndex = typeName.lastIndexOf(">");
-            typeName = typeName.substring(startingIndex, endingIndex + 1).
+            int checkFirstIndex = typeName.indexOf(">");
+            int checkLastIndex = typeName.lastIndexOf(">");
+            int endingIndex = typeName.length();
+            if (checkLastIndex == -1 && checkFirstIndex != -1 || (checkFirstIndex == checkLastIndex && checkFirstIndex > 0)) {
+                endingIndex = checkFirstIndex;
+            } else if (checkLastIndex != -1 && checkLastIndex != checkFirstIndex) {
+                endingIndex = checkLastIndex;
+            }
+            typeName = typeName.substring(startingIndex, endingIndex).
                     replace("<", " ").
                     replace(">", "").
                     replace(", ", " ").trim();
         }
         return typeName;
-    }
-
-    private class JavaAttribute extends Attribute {
-        JavaAttribute(String name, String code, int lineNumber, String packageName, String type, CPGClass.Modifier[] m, String typeFullName) {
-            super(name, lineNumber, code, packageName, type, m, typeFullName);
-        }
-    }
-
-    private class JavaMethod extends Method {
-        JavaMethod(String parentClassName, String code, int lineNumberStart, int lineNumberEnd, String name, CPGClass.Modifier[] modifiers, String signature, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
-            super(parentClassName, code, lineNumberStart, lineNumberEnd, name, modifiers, signature, returnType, methodBody, parameters, instructions);
-        }
     }
 }

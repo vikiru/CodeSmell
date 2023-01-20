@@ -251,12 +251,12 @@ def create_class_dict(curr_class):
 		"packageName": get_package_name(file_name),
 		"attributes": list(map(create_attribute_dict, class_attributes)),
 		"methods": list(filter(None, list(map(create_method_dict, class_methods)))),
+		"outwardRelations": []
 	}
 	curr_class_dict["classType"] = get_type(class_declaration, curr_class_dict)
 	for method in curr_class_dict["methods"]:
 		method["parentClassName"] = curr_class["_1"]
 	return curr_class_dict
-
 
 # Execute a single query to retrieve all the class names within the source code
 def retrieve_all_class_names():
@@ -276,18 +276,18 @@ def retrieve_all_class_names():
 def retrieve_class_data(name):
 	class_query = (
 			'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
-										   "node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
-										   "node.astChildren.isModifier.modifierType.l, "
-										   "node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
-										   "node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
-										   "node.astChildren.isMethod.filter(node => node.lineNumber != None "
-										   "&& node.lineNumberEnd != None).l.map(node => (node.name, node.code, "
-										   "node.lineNumber, node.lineNumberEnd, node.signature, "
-										   "node.astChildren.isModifier.modifierType.l, "
-										   "node.astChildren.isParameter.filter(node => !node.name.contains("
-										   '"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
-										   'node.typeFullName)), node.ast.l.map(node => (node.label, node.code, '
-										   'node.lineNumber)))), node.filename)).toJson'
+			"node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
+			"node.astChildren.isModifier.modifierType.l, "
+			"node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
+			"node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
+			"node.astChildren.isMethod.filter(node => node.lineNumber != None "
+			"&& node.lineNumberEnd != None).l.map(node => (node.name, node.code, "
+			"node.lineNumber, node.lineNumberEnd, node.signature, "
+			"node.astChildren.isModifier.modifierType.l, "
+			"node.astChildren.isParameter.filter(node => !node.name.contains("
+			'"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
+			"node.typeFullName)), node.ast.l.map(node => (node.label, node.code, "
+			"node.lineNumber)))), node.filename)).toJson"
 	)
 	start = time.time()
 	result = client.execute(class_query)
@@ -310,7 +310,6 @@ def retrieve_class_data(name):
 		print("joern_query :: Retrieve class data failure for " + name, file=sys.stderr)
 		exit(1)
 	return class_dict
-
 
 def source_code_json_creation(class_names):
 	source_code_json = {"relations": [], "classes": []}
@@ -389,10 +388,12 @@ if __name__ == "__main__":
 			total_time += source_code_json_creation_time
 
 			for class_dict in source_code_json["classes"]:
-				print(class_dict)
+				str_dict = str(class_dict)
+				bytes_length = len(bytes(str_dict, 'utf-8'))
+				bytes_length += len(str(bytes_length))
+				print(str(bytes_length) + str_dict)
 		else:
 			print("joern_query :: Source code json creation failure", file=sys.stderr)
-			exit(1)
 
 		# Close and delete the project from user's bin/joern/joern-cli/workspace
 		start = time.time()
