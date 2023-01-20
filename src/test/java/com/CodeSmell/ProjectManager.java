@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import static java.nio.file.Files.move;
 
 import com.CodeSmell.parser.Parser;
@@ -41,9 +42,9 @@ public class ProjectManager {
 		private void loadFromJoern() {
 			JoernServer server = new JoernServer();
 			server.start(this.directory);
-			this.cpg = parser.initializeCPG(server.getStream(), false);
 			// moves the Parser's backup file to the backup directory
 			try {
+				this.cpg = parser.initializeCPG(server.getStream(), false);
 				move(
 					new File(Parser.CPG_BACKUP_JSON).toPath(),
 					this.backup.toPath(), 
@@ -56,8 +57,11 @@ public class ProjectManager {
 
 		private void loadFromBackup() {
 			try {
-				this.cpg = parser.initializeCPG(
+				this.cpg = Parser.initializeCPG(
 					new FileInputStream(this.backup), true);
+			} catch (InvalidClassException e) {
+				System.out.println("Serialization failed. Loading joern.");
+				loadFromJoern();
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(1);
