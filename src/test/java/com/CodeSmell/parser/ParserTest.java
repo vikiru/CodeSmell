@@ -229,7 +229,6 @@ public class ParserTest {
     public void testMissingClassInfo() {
         // Simulates behavior of assignMissingClassInfo()
         for (CPGClass cpgClass : ourCPGWithoutRelations.getClasses()) {
-            Arrays.stream(cpgClass.modifiers).forEach(a -> System.out.println(a));
             CPGClass preUpdateClass = new CPGClass(cpgClass.name, "", cpgClass.lineNumber, new String[]{},
                     new CPGClass.Modifier[]{},
                     cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, "src",
@@ -257,9 +256,6 @@ public class ParserTest {
             for (CPGClass.Attribute attribute : temp.attributes) {
                 if (attribute.packageName.contains("java.util")) {
                     assertEquals("Type should contain < >", true, attribute.attributeType.contains("<"));
-                    if (!attribute.attributeType.contains("<")) {
-                        System.out.println(attribute);
-                    }
                 }
                 assertEquals("Code should not be blank", false, attribute.code.equals(""));
             }
