@@ -40,7 +40,6 @@ public class Parser {
             System.out.println("Reading in CPG from joern_query.");
 
             // Read class JSONs line by line and add them to temp CPG
-            CodePropertyGraph tempCPG = new CodePropertyGraph();
             BufferedReader classReader = new BufferedReader(new InputStreamReader(cpgStream));
             try {
                 String classJson;
@@ -53,19 +52,16 @@ public class Parser {
                     // expected length (without length prefix) = 10
                     int messageLength = classJson.getBytes(StandardCharsets.UTF_8).length;
                     String prefix = String.valueOf(messageLength);
-                    int prefixLength = prefix.length();
-                    int expectedLength = messageLength - prefixLength;
                     if (classJson.startsWith(prefix)) {
-                        classJson = classJson.replace(prefix, "");
-                        int newLength = classJson.getBytes(StandardCharsets.UTF_8).length;
-                        if (newLength == expectedLength) {
-                            CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
-                            if (cpgClass != null) {
-                                tempCPG.addClass(cpgClass);
-                            } else {
-                                throw new RuntimeException("Bad JSON read by Parser.");
-                            }
+                        classJson = classJson.replaceFirst(prefix, "");
+                        CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
+                        if (cpgClass != null) {
+                            cpg.addClass(cpgClass);
+                        } else {
+                            throw new IllegalArgumentException("Bad JSON read by Parser.");
                         }
+                    } else {
+                        throw new IllegalArgumentException("JSON missing prefix length");
                     }
                 }
             } catch (IOException e) {
@@ -73,7 +69,7 @@ public class Parser {
             }
 
             // get missing info for CPGClasses and their fields and methods.
-            cpg = assignProperAttributesAndMethods(tempCPG, 2);
+            cpg = assignProperAttributesAndMethods(cpg, 2);
             System.out.println("Processed joern_query.py output");
             // assign all relations (association of diff types, composition, realization, inheritance, dependency)
             cpg = this.assignInheritanceRelationship(cpg);
