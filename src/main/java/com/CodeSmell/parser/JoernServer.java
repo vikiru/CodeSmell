@@ -16,11 +16,11 @@ public class JoernServer {
 
 	InputStream joernStream;
 
-	private static class ThreadedReader extends Thread {
+	private static class ReaderThread extends Thread {
 
 		private BufferedReader reader; 
 
-		public ThreadedReader(BufferedReader reader) {
+		public ReaderThread(BufferedReader reader) {
 			this.reader = reader;
 		}
 
@@ -74,19 +74,19 @@ public class JoernServer {
 					new InputStreamReader(joernServerProcess.getInputStream()));
 			BufferedReader errorReader = new BufferedReader(
 					new InputStreamReader(joernServerProcess.getErrorStream()));
-			new ThreadedReader(joernServerReader).start();
-			new ThreadedReader(errorReader).start();
+			new ReaderThread(joernServerReader).start();
+			new ReaderThread(errorReader).start();
 			// Execute queries against the local joern server instance.
 			Process joernQueryProcess = joernQueryBuilder.start();
 
 			// log joern_query.py standard error output
-			new ThreadedReader(
+			new ReaderThread(
 				new BufferedReader(
 				new InputStreamReader(
 				joernQueryProcess.getErrorStream()))).start();
 
 			// log joern_query.py loggin.info() output
-			new ThreadedReader(
+			new ReaderThread(
 				new BufferedReader (
 				new FileReader(
 				Parser.JOERN_QUERY_LOGFILE))).start();

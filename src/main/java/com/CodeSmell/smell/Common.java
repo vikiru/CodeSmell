@@ -18,8 +18,7 @@ public class Common {
 
 	// returns true if c2 is a nested class (within the same file) of c
 	public static boolean isNestedClass(CPGClass c2, CPGClass c) {
-		System.out.println(c2.classFullName);
-		System.out.println(c.classFullName);
+		//com.CodeSmell.parser.CPGClass$Method$Instruction
 		return false;
 	}
 
