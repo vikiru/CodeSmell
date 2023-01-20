@@ -77,8 +77,3 @@ Run the following command to execute all of the tests:
 ```bash
 mvn test
 ```
-
-In order to skip invoking joern (which can take a sagnificant amount of time on older hardware), pass the command line argument to skip joern through maven like so
-```bash
-mvn -Dskip=true javafx:run
-```
