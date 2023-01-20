@@ -18,7 +18,7 @@ public class SmellTest {
 
     @Before
     public void before() {
-        this.cpg = ProjectManager.getCPG("testproject");
+        this.cpg = ProjectManager.getCPG("own");
     }
 
     @Test
@@ -26,7 +26,7 @@ public class SmellTest {
         System.out.println("GodClass Test:");
         GodClass gc = new GodClass(this.cpg, -1, -1, -1, -1);
         while (gc.detect()) {
-            System.out.println(gc.lastDetection);
+            //System.out.println(gc.lastDetection);
         }
     }
 }

@@ -18,7 +18,19 @@ import java.util.stream.Collectors;
  */
 public class Parser {
 
-    public static final String CPG_BACKUP_JSON = "bak.cpg";
+    public static final File CPG_BACKUP_JSON = new File("bak.cpg");
+    public static final File JOERN_QUERY_LOGFILE = new File(
+            "src/main/python/joern_query.log");
+
+    static {
+        JOERN_QUERY_LOGFILE.delete();
+        try {
+            JOERN_QUERY_LOGFILE.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } 
+    } 
 
     /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
@@ -43,6 +55,7 @@ public class Parser {
             BufferedReader classReader = new BufferedReader(new InputStreamReader(cpgStream));
             try {
                 String classJson;
+
                 while (((classJson = classReader.readLine()) != null)) {
                     // Each JSON Object representation of a single class will be printed on a new line separately by joern_query.
                     // Prior to the dictionary, a length value will precede the JSON Object (class dictionary):
@@ -84,7 +97,8 @@ public class Parser {
             // write the resulting CPG
             // to a backup file for recovery in the event of a crash
             try {
-                FileOutputStream fos = new FileOutputStream(CPG_BACKUP_JSON);
+                FileOutputStream fos = new FileOutputStream(
+                    CPG_BACKUP_JSON.getPath());
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
                 oos.writeObject(cpg);
                 oos.flush();
