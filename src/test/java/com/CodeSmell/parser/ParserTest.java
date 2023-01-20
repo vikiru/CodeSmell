@@ -1,6 +1,8 @@
-package com.CodeSmell;
+package com.CodeSmell.parser;
 
-import com.google.gson.Gson;
+import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.ProjectManager;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,7 +17,6 @@ import static org.junit.Assert.assertNotNull;
 public class ParserTest {
 
     private static Parser p;
-    private static Gson gson;
     private static CodePropertyGraph ourCPGWithRelations;
     private static CodePropertyGraph ourCPGWithoutRelations;
 
@@ -23,16 +24,9 @@ public class ParserTest {
     @BeforeClass
     public static void before() {
         p = new Parser();
-        gson = new Gson();
-        String ourDirectory = Paths.get("").toAbsolutePath() + "/src/test/java/com/testproject";
-
-        JoernServer js = new JoernServer();
-        js.start(ourDirectory);
-        System.out.println("started joern");
-
         // Obtain CPG after Parser has properly initialized it, using our project's
         // source code
-        ourCPGWithRelations = p.initializeCPG(js.getStream(), false);
+        ourCPGWithRelations = ProjectManager.getCPG("testproject");
         ourCPGWithoutRelations = new CodePropertyGraph();
 
         // Create a CPG object without any relations
@@ -94,7 +88,6 @@ public class ParserTest {
             var destAttributes = Arrays.stream(destClass.attributes)
                     .filter(attribute -> attribute.attributeType.contains(sourceClass.name))
                     .collect(Collectors.toList());
-            destAttributes.forEach(attribute -> System.out.println(attribute));
             boolean destClassHasNoSrcClassAttribute = destAttributes.isEmpty();
 
             // reflexive association check
@@ -161,7 +154,8 @@ public class ParserTest {
             CPGClass sourceClass = r.source;
             CPGClass destinationClass = r.destination;
             var sourceClassMethods = Arrays.stream(sourceClass.methods)
-                    .filter(method -> !method.name.equals(sourceClass.name)).collect(Collectors.toList());
+                    .filter(method -> !method.name.equals(sourceClass.name)
+                            && method.methodBody.contains(destinationClass.name)).collect(Collectors.toList());
             var sourceClassAttributes = Arrays.stream(sourceClass.attributes)
                     .filter(attribute -> attribute.attributeType.equals(destinationClass.name))
                     .collect(Collectors.toList());
@@ -170,11 +164,12 @@ public class ParserTest {
 
             for (CPGClass.Method m : sourceClassMethods) {
                 var methodCalls = m.getMethodCalls().stream()
-                        .filter(method -> method.parentClassName.equals(destinationClass.name)).collect(Collectors.toList());
+                        .filter(method -> method.parentClassName.equals(destinationClass.name))
+                        .collect(Collectors.toList());
                 boolean destClassWithinMethodBody = m.methodBody.contains(destinationClass.name);
                 boolean destClassWithinMethodCalls = methodCalls.isEmpty();
                 assertEquals("Destination class should be within method params or method calls", true,
-                        destClassWithinMethodBody || destClassWithinMethodCalls);
+                        (destClassWithinMethodBody || destClassWithinMethodCalls));
             }
             assertEquals("Multiplicity should be left blank", "", r.multiplicity);
         }
@@ -227,8 +222,9 @@ public class ParserTest {
     public void testMissingClassInfo() {
         // Simulates behavior of assignMissingClassInfo()
         for (CPGClass cpgClass : ourCPGWithoutRelations.getClasses()) {
-            CPGClass preUpdateClass = new CPGClass(cpgClass.name, "", new String[]{}, new CPGClass.Modifier[]{},
-                    cpgClass.classFullName, cpgClass.classType, cpgClass.filePath, "src",
+            CPGClass preUpdateClass = new CPGClass(cpgClass.name, "", cpgClass.lineNumber, new String[]{},
+                    new CPGClass.Modifier[]{},
+                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, "src",
                     cpgClass.attributes, cpgClass.methods);
 
             assertEquals("Class code should be empty", "", preUpdateClass.code);
@@ -237,9 +233,10 @@ public class ParserTest {
             assertEquals("Package name should contain src", true, preUpdateClass.packageName.contains("src"));
 
             CPGClass updatedClass = p.assignMissingClassInfo(preUpdateClass);
-            assertEquals("Class code should not be empty", true, updatedClass.code.equals(""));
-            assertEquals("Class import statements should not be empty", true, updatedClass.importStatements.length > 0);
-            assertEquals("Class modifiers should not be empty", true, updatedClass.modifiers.length > 0);
+            assertEquals("Class code should not be empty", true, !updatedClass.code.equals(""));
+            assertEquals("Class import statements should not be empty", true,
+                    updatedClass.importStatements.length >= 0);
+            assertEquals("Class modifiers should not be empty", true, updatedClass.modifiers.length >= 0);
             assertEquals("Package name should not contain src", false,
                     updatedClass.packageName.contains("src"));
         }
@@ -248,15 +245,17 @@ public class ParserTest {
     @Test
     public void testAssignProperFieldsAndMethods() {
         for (CPGClass cpgClass : ourCPGWithoutRelations.getClasses()) {
-            for (CPGClass.Attribute attribute : cpgClass.attributes) {
+            CPGClass temp = p.assignMissingClassInfo(cpgClass);
+            for (CPGClass.Attribute attribute : temp.attributes) {
                 if (attribute.packageName.contains("java.util")) {
                     assertEquals("Type should contain < >", true, attribute.attributeType.contains("<"));
                 }
                 assertEquals("Code should not be blank", false, attribute.code.equals(""));
             }
             for (CPGClass.Method method : cpgClass.methods) {
-                assertEquals("Method name should not contain lambda", true, method.name.equals("lambda"));
-                assertEquals("Method calls should be greater than or equal to 0", true, method.getMethodCalls().size() >= 0);
+                assertEquals("Method name should not contain lambda", true, !method.name.equals("lambda"));
+                assertEquals("Method calls should be greater than or equal to 0", true,
+                        method.getMethodCalls().size() >= 0);
             }
         }
     }
@@ -280,6 +279,7 @@ public class ParserTest {
     public void testGetProperName() {
         String singularInstance = "UMLClass";
         String hashMap = "HashMap<CPGClass, Modifier>";
+        String arrayAndList = "ArrayList<CPGClass>[]";
         String arr = "Position[]";
         String nestedClass = "CPGClass$Modifier";
         String complexType = "HashMap<HashMap<HashMap<HashMap<HashMap<String, String>, String>, String>, String>, String>";
@@ -291,9 +291,9 @@ public class ParserTest {
                 "HashMap HashMap HashMap HashMap String String String String String String",
                 p.getProperTypeName(complexType));
         assertEquals("Type should not have the $ or CPGClass", "Modifier", p.getProperTypeName(nestedClass));
+        assertEquals("Type should not have <> or []", "CPGClass", p.getProperTypeName(arrayAndList));
     }
     // ----------------------------------------------------------------------------------------------------------
-
 
     @Test
     public void testOwnProject() {

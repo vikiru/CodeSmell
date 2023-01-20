@@ -18,6 +18,10 @@ public class CPGClass implements Serializable {
     @Expose(serialize = true, deserialize = true)
     public final String code;
 
+    // The line number which the class was declared within the file
+    @Expose(serialize = true, deserialize = true)
+    public final int lineNumber;
+
     @Expose(serialize = true, deserialize = true)
     public final String[] importStatements;
 
@@ -27,6 +31,9 @@ public class CPGClass implements Serializable {
     // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
     @Expose(serialize = true, deserialize = true)
     public final String classFullName;
+
+    @Expose(serialize = true, deserialize = true)
+    public final String[] inheritsFrom;
 
     // the type of the object (class, enum, abstract class, interface)
     @Expose(serialize = true, deserialize = true)
@@ -52,12 +59,14 @@ public class CPGClass implements Serializable {
     @Expose(serialize = true, deserialize = true)
     private ArrayList<CodePropertyGraph.Relation> outwardRelations;
 
-    CPGClass(String name, String code, String[] importStatements, Modifier[] modifiers, String classFullName, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
+        this.lineNumber = lineNumber;
         this.importStatements = importStatements;
         this.modifiers = modifiers;
         this.classFullName = classFullName;
+        this.inheritsFrom = inheritsFrom;
         this.classType = classType;
         this.filePath = filePath;
         this.packageName = packageName;
@@ -67,7 +76,7 @@ public class CPGClass implements Serializable {
     }
 
     public void addOutwardRelation(CodePropertyGraph.Relation r) {
-        this.outwardRelations.add(r);  
+        this.outwardRelations.add(r);
     }
 
     public ArrayList<CodePropertyGraph.Relation> getOutwardRelations() {
@@ -91,6 +100,8 @@ public class CPGClass implements Serializable {
         STATIC("static"),
         @Expose(serialize = true, deserialize = true)
         SYNCHRONIZED("synchronized"),
+        @Expose(serialize = true, deserialize = true)
+        VIRTUAL("virtual"),
         @Expose(serialize = true, deserialize = true)
         VOLATILE("volatile"),
         @Expose(serialize = true, deserialize = true)
@@ -116,10 +127,13 @@ public class CPGClass implements Serializable {
     /**
      * An attribute belonging to a class
      */
-    public static class Attribute implements Serializable  {
+    public static class Attribute implements Serializable {
         // the name of the attribute
         @Expose(serialize = true, deserialize = true)
         public final String name;
+
+        // line number where the field was declared within the file
+        public final int lineNumber;
 
         @Expose(serialize = true, deserialize = true)
         public final String code;
@@ -140,8 +154,9 @@ public class CPGClass implements Serializable {
         @Expose(serialize = true, deserialize = true)
         public final String typeFullName;
 
-        protected Attribute(String name, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
+        protected Attribute(String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
             this.name = name;
+            this.lineNumber = lineNumber;
             this.code = code;
             this.packageName = packageName;
             this.attributeType = attributeType;
@@ -167,6 +182,13 @@ public class CPGClass implements Serializable {
 
         @Expose(serialize = true, deserialize = true)
         public final String code;
+
+        // line numbers where the method starts and ends
+        @Expose(serialize = true, deserialize = true)
+        public final int lineNumberStart;
+
+        @Expose(serialize = true, deserialize = true)
+        public final int lineNumberEnd;
 
         // the name of the method
         @Expose(serialize = true, deserialize = true)
@@ -196,11 +218,14 @@ public class CPGClass implements Serializable {
         // a list of methods which this calls
         private ArrayList<Method> methodCalls;
 
-        protected Method(String parentClassName, String code, String name, Modifier[] modifiers,
-                         String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
+        protected Method(String parentClassName, String code, int lineNumberStart, 
+            int lineNumberEnd, String name, Modifier[] modifiers, 
+            String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
             this.code = code;
+            this.lineNumberStart = lineNumberStart;
+            this.lineNumberEnd = lineNumberEnd;
             this.name = name;
             this.modifiers = modifiers;
             this.returnType = returnType;
@@ -213,7 +238,7 @@ public class CPGClass implements Serializable {
         public ArrayList<Method> getMethodCalls() {
             return new ArrayList<>(methodCalls);
         }
-        
+
         protected void setMethodCalls(ArrayList<Method> methodCalls) {
             this.methodCalls = methodCalls;
         }
@@ -225,7 +250,13 @@ public class CPGClass implements Serializable {
             } else return this.methodBody;
         }
 
-        public static class Parameter implements Serializable  {
+        public static class Parameter implements Serializable {
+            @Expose(serialize = true, deserialize = true)
+            public final String evaluationStrategy;
+
+            @Expose(serialize = true, deserialize = true)
+            public final String code;
+
             // the name of the method parameter
             @Expose(serialize = true, deserialize = true)
             public final String name;
@@ -234,7 +265,9 @@ public class CPGClass implements Serializable {
             @Expose(serialize = true, deserialize = true)
             public final String type;
 
-            public Parameter(String name, String type) {
+            public Parameter(String evaluationStrategy, String code, String name, String type) {
+                this.evaluationStrategy = evaluationStrategy;
+                this.code = code;
                 this.name = name;
                 this.type = type;
             }
@@ -255,12 +288,12 @@ public class CPGClass implements Serializable {
             public final String code;
             // The line number of where the line of code occurs within the method body.
             @Expose(serialize = true, deserialize = true)
-            public final String lineNumber;
+            public final int lineNumber;
             // The name of the method that the instruction is calling, if any
             @Expose(serialize = true, deserialize = true)
             public final String methodCall;
 
-            public Instruction(String label, String code, String lineNumber, String methodCall) {
+            public Instruction(String label, String code, int lineNumber, String methodCall) {
                 this.label = label;
                 this.code = code;
                 this.lineNumber = lineNumber;
