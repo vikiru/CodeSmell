@@ -23,7 +23,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 
-import java.awt.*;
+import java.io.InvalidClassException;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -83,11 +83,15 @@ public class MainApp extends Application {
 	LayoutManager lm = new LayoutManager(new ArrayList<UMLClass>(classMap.values()), relations);
     }
 
-    private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
+    private void removeWhenParserLambdaLimitationFixed(Worker.State newState)  {
         if (newState == Worker.State.SUCCEEDED) {
-            Parser p = new Parser();
-            CodePropertyGraph cpg = p.initializeCPG(joernStream, skipJoern);
-            initializeMainView(cpg);
+            try {
+                CodePropertyGraph cpg = Parser.initializeCPG(joernStream, skipJoern);
+                initializeMainView(cpg);
+            } catch (InvalidClassException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
     }
 
@@ -116,7 +120,8 @@ public class MainApp extends Application {
         RenderObject.addRenderEventListener(new WebBridge(engine));
 
         engine.load(url.toExternalForm());
-        engine.getLoadWorker().stateProperty().addListener((ov, oldState, newState) -> {
+        engine.getLoadWorker().stateProperty().addListener(
+                (ov, oldState, newState) -> {
             removeWhenParserLambdaLimitationFixed(newState);
         });
 

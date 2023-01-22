@@ -198,10 +198,6 @@ public class CPGClass implements Serializable {
         @Expose(serialize = true, deserialize = true)
         public final Modifier[] modifiers;
 
-        // method signature
-        @Expose(serialize = true, deserialize = true)
-        public final String signature;
-
         // the return type of the method
         @Expose(serialize = true, deserialize = true)
         public final String returnType;
@@ -222,8 +218,9 @@ public class CPGClass implements Serializable {
         // a list of methods which this calls
         private ArrayList<Method> methodCalls;
 
-        protected Method(String parentClassName, String code, int lineNumberStart, int lineNumberEnd, String name, Modifier[] modifiers,
-                         String signature, String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
+        protected Method(String parentClassName, String code, int lineNumberStart, 
+            int lineNumberEnd, String name, Modifier[] modifiers, 
+            String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
             this.code = code;
@@ -231,7 +228,6 @@ public class CPGClass implements Serializable {
             this.lineNumberEnd = lineNumberEnd;
             this.name = name;
             this.modifiers = modifiers;
-            this.signature = signature;
             this.returnType = returnType;
             this.methodBody = methodBody;
             this.parameters = parameters;

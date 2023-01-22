@@ -36,8 +36,8 @@ public class Launcher {
         }
     }
 
-    public static String chooseDirectory()
+    public static File chooseDirectory()
     {
-        return "src/test/java/com/testproject";
+        return new File("src/test/java/com/testproject");
     }
 }

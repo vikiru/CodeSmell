@@ -18,7 +18,8 @@ public class Common {
 
 	// returns true if c2 is a nested class (within the same file) of c
 	public static boolean isNestedClass(CPGClass c2, CPGClass c) {
-		System.out.println("=============\n" + c + "=============\n\n");
+		System.out.println(c2.classFullName);
+		System.out.println(c.classFullName);
 		return false;
 	}
 
@@ -27,13 +28,13 @@ public class Common {
 			List<CPGClass> classes) {
 		HashMap<CPGClass, CPGClass[]> collapsedClasses = new HashMap();
 		for (CPGClass c : classes) {
-				ArrayList<CPGClass> nestedClasses = new ArrayList<>();
-				for (CPGClass c2 : classes) {
-					if (c2 != c && isNestedClass(c2, c)) {
-							nestedClasses.add(c2);
-					}
+			ArrayList<CPGClass> nestedClasses = new ArrayList<>();
+			for (CPGClass c2 : classes) {
+				if (c2 != c && isNestedClass(c2, c)) {
+						nestedClasses.add(c2);
 				}
-				collapsedClasses.put(c, nestedClasses.toArray(new CPGClass[0]));
+			}
+			collapsedClasses.put(c, nestedClasses.toArray(new CPGClass[0]));
 		}
 		return  collapsedClasses;
 	} 

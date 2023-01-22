@@ -30,7 +30,7 @@ public class Parser {
      *                         joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) {
+    public static CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) throws InvalidClassException {
         GsonBuilder builder = new GsonBuilder();
         builder.excludeFieldsWithoutExposeAnnotation();
         Gson gson = builder.create();
@@ -65,17 +65,18 @@ public class Parser {
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
+                System.exit(1);
             }
 
             // get missing info for CPGClasses and their fields and methods.
             cpg = assignProperAttributesAndMethods(cpg, 2);
             System.out.println("Processed joern_query.py output");
             // assign all relations (association of diff types, composition, realization, inheritance, dependency)
-            cpg = this.assignInheritanceRelationship(cpg);
-            this.assignRealizationRelationships(cpg);
-            this.assignAssociationRelationships(cpg);
-            this.assignDependencyRelationships(cpg);
+            cpg = assignInheritanceRelationship(cpg);
+            assignRealizationRelationships(cpg);
+            assignAssociationRelationships(cpg);
+            assignDependencyRelationships(cpg);
             for (CodePropertyGraph.Relation r : cpg.getRelations()) {
                 r.source.addOutwardRelation(r);
             }
@@ -90,7 +91,7 @@ public class Parser {
                 oos.close();
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException(e);
+                System.exit(1);
             }
 
         } else {
@@ -98,9 +99,12 @@ public class Parser {
             try {
                 ObjectInputStream ois = new ObjectInputStream(cpgStream);
                 cpg = (CodePropertyGraph) ois.readObject();
+            } catch (InvalidClassException e) {
+                e.printStackTrace();
+                throw e;
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException(e);
+                System.exit(1);
             }
         }
         System.out.printf("Project read: %d classes, %d relations\n",
@@ -123,7 +127,7 @@ public class Parser {
      *
      * @param cpg The CodePropertyGraph containing classes and existing relations.
      */
-    void assignAssociationRelationships(CodePropertyGraph cpg) {
+    protected static void assignAssociationRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
@@ -234,7 +238,7 @@ public class Parser {
      * @param destination - The destination class which is being compared with to determine if source has composition relation with it.
      * @return True or False, depending on if a composition relation exists.
      */
-    boolean determineCompositionRelationship(CPGClass source, CPGClass destination) {
+    protected static boolean determineCompositionRelationship(CPGClass source, CPGClass destination) {
         boolean compositionExists = false;
         var constructorResult = Arrays.stream(source.methods).
                 filter(method -> method.name.equals(source.name)).collect(Collectors.toList());
@@ -269,7 +273,7 @@ public class Parser {
      *
      * @param cpg The CodePropertyGraph containing source code and existing relations.
      */
-    private void assignDependencyRelationships(CodePropertyGraph cpg) {
+    protected static void assignDependencyRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         for (CPGClass cpgClass : cpg.getClasses()) {
@@ -339,7 +343,7 @@ public class Parser {
      * @param cpg - The CodePropertyGraph containing existing CPGClass and Relations.
      * @return A CodePropertyGraph containing the updated CPGClasses and Relations.
      */
-    private CodePropertyGraph assignInheritanceRelationship(CodePropertyGraph cpg) {
+    protected static CodePropertyGraph assignInheritanceRelationship(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         CodePropertyGraph updatedGraph = new CodePropertyGraph();
@@ -386,7 +390,7 @@ public class Parser {
      * @param superClass The CPGClass which is inherited by the subclass
      * @return The updated CPGClass object for the subclass, with the super class's methods added.
      */
-    CPGClass appendSuperClassMethods(CPGClass subClass, CPGClass superClass) {
+    protected static CPGClass appendSuperClassMethods(CPGClass subClass, CPGClass superClass) {
         ArrayList<Method> methods = new ArrayList<>(Arrays.asList(subClass.methods));
         ArrayList<String> existingMethodNames = new ArrayList<>();
         methods.forEach(method -> existingMethodNames.add(method.name));
@@ -416,7 +420,7 @@ public class Parser {
      *
      * @param cpg -The CodePropertyGraph containing source code classes and existing relations
      */
-    void assignRealizationRelationships(CodePropertyGraph cpg) {
+    protected static void assignRealizationRelationships(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = new ArrayList<>();
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
@@ -466,7 +470,7 @@ public class Parser {
      * @param relationToAdd The relation to be added to the provided CodePropertyGraph object.
      * @return boolean - True or False, depending on if the relation exists within cpg
      */
-    private boolean checkExistingRelation(CodePropertyGraph cpg, CodePropertyGraph.Relation relationToAdd) {
+    protected static boolean checkExistingRelation(CodePropertyGraph cpg, CodePropertyGraph.Relation relationToAdd) {
         var result = cpg.getRelations().stream().
                 filter(relation -> relation.source.equals(relationToAdd.source)
                         && relation.destination.equals(relationToAdd.destination)
@@ -487,7 +491,7 @@ public class Parser {
      * @param iterations - The number of iterations that the method must be called in order to properly update fields and methods.
      * @return
      */
-    CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
+    protected static CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
         CodePropertyGraph graph = new CodePropertyGraph();
         for (CPGClass cpgClass : cpg.getClasses()) {
             ArrayList<Attribute> properAttributes = new ArrayList<>(Arrays.asList(cpgClass.attributes));
@@ -530,7 +534,7 @@ public class Parser {
      * @param cpgClass - The existing CPGClass object which will be updated.
      * @return A new CPGClass containing the updated CPGClass fields and Attribute objects.
      */
-    CPGClass assignMissingClassInfo(CPGClass cpgClass) {
+    protected static CPGClass assignMissingClassInfo(CPGClass cpgClass) {
         // KNOWN INFO
         File classFile = new File(cpgClass.filePath);
         String className = cpgClass.name;
@@ -661,7 +665,7 @@ public class Parser {
      * @param methodToUpdate - The method that is having its methodCalls field updated
      * @return The updated method with its methodCalls
      */
-    Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
+    protected static Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
         ArrayList<String> allClassNames = new ArrayList<>();
@@ -761,7 +765,7 @@ public class Parser {
         if (iterationNumber == 1) {
             Method properMethod = new Method(methodToUpdate.parentClassName,
                     methodToUpdate.code, methodToUpdate.lineNumberStart, methodToUpdate.lineNumberEnd,
-                    methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.signature, methodToUpdate.returnType,
+                    methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
                     methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions);
             properMethod.setMethodCalls(methodCalls);
             return properMethod;
@@ -786,7 +790,7 @@ public class Parser {
      * @param count     - A Long representing the count of how many instances of this attribute exist within source class
      * @return A string representing the multiplicity
      */
-    String obtainMultiplicity(String attribute, Long count) {
+    protected static String obtainMultiplicity(String attribute, Long count) {
         String multiplicityToReturn = "";
         if (attribute.contains("[]") || attribute.contains("<")) {
             multiplicityToReturn = "1..*";
@@ -807,7 +811,7 @@ public class Parser {
      * @param typeName The name of the attribute's type.
      * @return The name of the attribute's type without special characters and extra info.
      */
-    String getProperTypeName(String typeName) {
+    protected static String getProperTypeName(String typeName) {
         if (typeName.contains("$")) {
             int index = typeName.lastIndexOf("$");
             typeName = typeName.substring(index + 1);
