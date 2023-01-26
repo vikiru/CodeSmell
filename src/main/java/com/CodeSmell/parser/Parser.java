@@ -11,6 +11,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
@@ -49,6 +51,29 @@ public class Parser {
         }
     }
 
+    private static short nextInputSize(InputStream cpgStream) throws IOException {
+        byte[] contentBytes = new byte[2];
+        int bytesRead = cpgStream.read(contentBytes, 0, 2);
+        if (bytesRead != 2) {
+            throw new RuntimeException("invalid byte size input");
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(contentBytes);
+        buffer.order(ByteOrder.nativeOrder());
+        return buffer.getShort();
+    }
+
+    private static String nextJson(InputStream cpgStream, 
+            short size) throws IOException  {
+        byte[] contentBytes = new byte[size];
+        ByteBuffer buffer = ByteBuffer.wrap(contentBytes);
+        int bytesRead = cpgStream.read(contentBytes, 0, size);
+        if (bytesRead != size) {
+            throw new RuntimeException("Bad class size");
+        }
+
+        return StandardCharsets.UTF_8.decode(buffer).toString();
+    }
+
     /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
      * and update neccessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
@@ -59,7 +84,9 @@ public class Parser {
      *                         joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public static CodePropertyGraph initializeCPG(InputStream cpgStream, boolean serializedObject) throws InvalidClassException {
+    public static CodePropertyGraph initializeCPG(InputStream cpgStream, 
+            boolean serializedObject) throws InvalidClassException {
+
         Gson gson = new GsonBuilder()
             .setExclusionStrategies(new ArrayListExclusion())
             .create();
@@ -69,31 +96,34 @@ public class Parser {
             System.out.println("Reading in CPG from joern_query.");
 
             // Read class JSONs line by line and add them to temp CPG
-            BufferedReader classReader = new BufferedReader(new InputStreamReader(cpgStream));
             try {
-                String classJson;
+                //String s = new BufferedReader(new InputStreamReader(cpgStream)).readLine();
+                //System.out.println(s);
+                // gets the size of the first class
+                BufferedInputStream bis = new BufferedInputStream(cpgStream);
+                short classSize = nextInputSize(bis);
 
-                while (((classJson = classReader.readLine()) != null)) {
-                    // Each JSON Object representation of a single class will be printed on a new line separately by joern_query.
-                    // Prior to the dictionary, a length value will precede the JSON Object (class dictionary):
-                    // Input = 12{"test":0}
-                    // total message length = 12 (length of dictionary is 10 in bytes + len('10') = 12)
-                    // prefix length = 2
-                    // expected length (without length prefix) = 10
-                    int messageLength = classJson.getBytes(StandardCharsets.UTF_8).length;
-                    String prefix = String.valueOf(messageLength);
-                    if (classJson.startsWith(prefix)) {
-                        classJson = classJson.replaceFirst(prefix, "");
-                        CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
-                        if (cpgClass != null) {
-                            cpg.addClass(cpgClass);
-                        } else {
-                            throw new IllegalArgumentException("Bad JSON read by Parser.");
-                        }
+                do {
+                    System.out.println("Reading in new class of size: " + classSize);
+                    String classJson =  nextJson(bis, classSize);
+                    System.out.println(classJson);
+                    CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
+                    if (cpgClass != null) {
+                        cpg.addClass(cpgClass);
+                        System.out.println(cpgClass.name);
                     } else {
-                        throw new IllegalArgumentException("JSON missing prefix length");
+                        throw new IllegalArgumentException("Bad JSON read by Parser.");
                     }
+                    classSize = nextInputSize(bis);
+                } while (classSize > 0);
+
+                if (classSize != -1) {
+                    // after joern_query prints the last class, it must
+                    // print 0 (16 byte signed default edian)
+                    throw new IllegalArgumentException(
+                        "Parser given illegal class size " + classSize);
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);

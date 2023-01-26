@@ -1,8 +1,8 @@
 package com.CodeSmell.view;
 
-import com.CodeSmell.Pair;
-import com.CodeSmell.Position;
-import com.CodeSmell.Shape;
+import com.CodeSmell.model.Pair;
+import com.CodeSmell.model.Position;
+import com.CodeSmell.model.Shape;
 import com.CodeSmell.model.ClassRelation;
 import com.CodeSmell.model.RenderEvent;
 import com.CodeSmell.model.RenderObject;

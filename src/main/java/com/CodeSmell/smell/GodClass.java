@@ -7,7 +7,7 @@ import com.CodeSmell.smell.Smell;
 import com.CodeSmell.smell.Smell.CodeFragment;
 import static com.CodeSmell.smell.Common.*;
 import com.CodeSmell.smell.Common.*;
-import com.CodeSmell.Pair;
+import com.CodeSmell.model.Pair;
 
 import java.util.HashMap;
 import java.util.LinkedList;

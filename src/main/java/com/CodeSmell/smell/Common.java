@@ -3,7 +3,7 @@ package com.CodeSmell.smell;
 import com.CodeSmell.parser.CodePropertyGraph;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.*;
-import com.CodeSmell.Pair;
+import com.CodeSmell.model.Pair;
 
 import java.util.HashMap;
 import java.util.Map;

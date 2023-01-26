@@ -1,5 +1,5 @@
 package com.testproject;
 
-public interface ClassC {
+public interface InterfaceC {
 	public void doThing();
 }

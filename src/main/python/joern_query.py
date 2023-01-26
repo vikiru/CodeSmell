@@ -5,6 +5,7 @@ import re
 import sys
 import time
 from pathlib import Path
+from time import sleep
 from cpgqls_client import CPGQLSClient, import_code_query
 import logging
 
@@ -388,10 +389,16 @@ if __name__ == "__main__":
 			total_time += source_code_json_creation_time
 
 			for class_dict in source_code_json["classes"]:
-				str_dict = str(class_dict)
-				bytes_length = len(bytes(str_dict, 'utf-8'))
-				bytes_length += len(str(bytes_length))
-				print(str(bytes_length) + str_dict)
+				class_contents = bytes(str(class_dict), "utf-8")
+				size_bytes = len(class_contents).to_bytes(
+					2, byteorder=sys.byteorder, signed=True)
+				print("class content size: ", len(class_contents), file=sys.stderr)
+				print("size bytes size: ", file=sys.stderr)
+				sys.stdout.buffer.write(size_bytes)
+				sys.stdout.buffer.write(class_contents)
+
+			sys.stdout.buffer.write((-1).to_bytes(
+					2, byteorder=sys.byteorder, signed=True))
 		else:
 			print("joern_query :: Source code json creation failure", file=sys.stderr)
 

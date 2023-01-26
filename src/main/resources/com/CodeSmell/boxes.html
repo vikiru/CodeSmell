@@ -17,6 +17,28 @@ function renderClassBox(name) {
     let h = document.createElement('h2');
     h.innerHTML = name;
     classBox.appendChild(h);
+  
+    if (name == "GodClass") {
+        let p = document.createElement('p');
+        p.style.color = "red";
+        p.innerHTML = "God Class";
+        classBox.appendChild(p);
+    }
+
+    if (name == "ClassA") {
+        let p = document.createElement('p');
+        p.style.color = "orange";
+        p.innerHTML = "Feature Envy";
+        classBox.appendChild(p);
+    }
+
+    if (name == "ClassE") {
+        let p = document.createElement('p');
+        p.style.color = "yellow";
+        p.innerHTML = "Dead Code";
+        classBox.appendChild(p);
+    }
+
 
     // add attributes divider to classBox
     let attributeContainer = document.createElement('div');
@@ -161,28 +183,6 @@ function renderPath(classId, pathNumber, type) {
         }  
 
         let line = document.createElement('div');
-        line.className = 'line';
-        if (i == nodes.length - 2) {
-            if (check == 0) {
-                check += 1;
-                line.className = 'endLine';
-                let arrow = document.createElement('img');
-                arrow.src = "smell.svg";
-                arrow.style.backgroundColor = "orange";
-                arrow.style.height = "40px";
-                arrow.style.transform = 'translateY(' + -12 + 'px)';
-                if (magnitude > 10) {
-                    arrow.style.transform = 'translateX(' + magnitude - 10 + 'px)';
-                }
-                line.appendChild(arrow)
-            }
-        }
-        line.style.left = startX + 'px';
-        line.style.top = startY + 'px';
-        line.style.width = magnitude - 7 + 'px';
-        line.id = nodes[i].id;
-        rotateLine(line, angle);
-
 
         if (type == "DEPENDENCY" || type == "REALIZATION") {
             line.style.borderStyle = 'dashed';
@@ -190,6 +190,32 @@ function renderPath(classId, pathNumber, type) {
             line.style.borderStyle = 'solid';
         }
 
+        if (i == nodes.length - 2) {
+            line.className = 'endLine';
+            let arrow = document.createElement('img');
+            arrow.style.height = "20px";
+            arrow.style.float = "right";
+            arrow.style.transform = 'translateY(' + -10 + 'px)';
+            if (type == "DEPENDENCY") {
+                arrow.src = "inheritence.svg";
+            } else if (type == "REALIZATION") {
+                arrow.src = "realization.svg";
+            } else if (type == "ASSOCIATION") {
+                arrow.src = "association.svg";
+            } else if (type == "COMPOSITION") {
+                arrow.src = "composition.svg";
+            } else if (type == "AGGREGATION") {
+                arrow.src = "aggregation.svg";
+            }
+            line.appendChild(arrow)
+        }
+
+        line.className = 'line';
+        line.style.left = startX + 'px';
+        line.style.top = startY + 'px';
+        line.style.width = magnitude - 7 + 'px';
+        line.id = nodes[i].id;
+        rotateLine(line, angle);
         lineContainer.appendChild(line);
     }
 }
@@ -218,7 +244,8 @@ body {
     height: 0px;
     border: 1px dashed blue;
     position: absolute;
-    display: block
+    display: block;
+    float: right;
 }
 
 
@@ -230,7 +257,7 @@ body {
     color: white;
     max-width: 20em;
     min-height: 10em;
-    overflow:  hidden;
+    overflow:  visible;
     white-space:nowrap;
     padding: 0em 1em 0em 1em;
     background: #303841;

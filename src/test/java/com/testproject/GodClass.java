@@ -2,17 +2,23 @@ package com.testproject;
 
 import com.testproject.ClassA;
 import com.testproject.ClassB;
-import com.testproject.ClassC;
+import com.testproject.InterfaceC;
 import com.testproject.ClassD;
 import com.testproject.ClassE;
 
 public class GodClass {
-	ClassA a;
-	ClassA[] moreA;
-	ClassB b;
-	ClassC c;
-	ClassD[] ds;
-	ClassE[] es;
+	ClassA field1;
+	ClassA[] field2;
+	ClassB field3;
+	InterfaceC field4;
+	ClassD[] field5;
+	ClassE[] field6;
+	ClassD field7;
+	ClassD field8;
+	ClassD field9;
+	ClassD field10;
+	ClassD field11;
+	ClassD field12;
 
 	public boolean compareAs() {
 		for (ClassA a : moreA) {

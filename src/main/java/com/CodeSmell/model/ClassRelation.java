@@ -1,6 +1,6 @@
 package com.CodeSmell.model;
 
-import com.CodeSmell.Position;
+import com.CodeSmell.model.Position;
 import com.CodeSmell.model.RenderEvent;
 import com.CodeSmell.model.RenderObject;
 import com.CodeSmell.model.UMLClass;
@@ -28,6 +28,9 @@ public class ClassRelation extends RenderObject {
     }
 
     public void setPath(ArrayList<Position> path) {
+        if (this.target.name.equals("ClassB")) {
+            System.out.println("===========");
+        }
         this.path = path;
         RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
         dispatchToRenderEventListeners(re);

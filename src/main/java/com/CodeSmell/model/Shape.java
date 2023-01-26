@@ -1,5 +1,6 @@
-package com.CodeSmell;
-import com.CodeSmell.Position;
+package com.CodeSmell.model;
+
+import com.CodeSmell.model.Position;
 import com.CodeSmell.model.RenderObject;
 
 public class Shape extends RenderObject {

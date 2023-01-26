@@ -2,7 +2,7 @@ package com.testproject;
 
 import com.testproject.ClassB;
 
-public class ClassD implements ClassC {
+public class ClassD implements InterfaceC {
 	private ClassB b;
 
 	ClassD(ClassB b) {

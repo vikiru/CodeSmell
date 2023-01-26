@@ -1,4 +1,4 @@
-package com.CodeSmell;
+package com.CodeSmell.model;
 
 public class Pair<F, S> {
 	

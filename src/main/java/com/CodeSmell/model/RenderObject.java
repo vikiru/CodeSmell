@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.CodeSmell.view.RenderEventListener;
 import com.CodeSmell.model.RenderEvent;
-import com.CodeSmell.Shape;
+import com.CodeSmell.model.Shape;
 
 public abstract class RenderObject {
 
