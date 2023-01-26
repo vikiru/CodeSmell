@@ -130,6 +130,8 @@ function appendPathNode(classId, pathNumber, x, y) {
     pathContainer.appendChild(node);
 }
 
+let check = 0;
+
 function renderPath(classId, pathNumber, type) {   
     let lineContainer = document.getElementById("lines");
     let relationsContainer = document.getElementById('relationContainer' + classId);
@@ -160,11 +162,27 @@ function renderPath(classId, pathNumber, type) {
 
         let line = document.createElement('div');
         line.className = 'line';
+        if (i == nodes.length - 2) {
+            if (check == 0) {
+                check += 1;
+                line.className = 'endLine';
+                let arrow = document.createElement('img');
+                arrow.src = "smell.svg";
+                arrow.style.backgroundColor = "orange";
+                arrow.style.height = "40px";
+                arrow.style.transform = 'translateY(' + -12 + 'px)';
+                if (magnitude > 10) {
+                    arrow.style.transform = 'translateX(' + magnitude - 10 + 'px)';
+                }
+                line.appendChild(arrow)
+            }
+        }
         line.style.left = startX + 'px';
         line.style.top = startY + 'px';
         line.style.width = magnitude - 7 + 'px';
         line.id = nodes[i].id;
         rotateLine(line, angle);
+
 
         if (type == "DEPENDENCY" || type == "REALIZATION") {
             line.style.borderStyle = 'dashed';
@@ -196,10 +214,13 @@ body {
     padding: 2px;
 }
 
-.classBox:hover {
-    border: 2px dashed grey;
-    #5662F6
+.endLine {
+    height: 0px;
+    border: 1px dashed blue;
+    position: absolute;
+    display: block
 }
+
 
 .classBox {
     border: 2px solid grey;
