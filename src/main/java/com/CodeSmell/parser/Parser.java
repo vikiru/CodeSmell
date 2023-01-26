@@ -51,19 +51,19 @@ public class Parser {
         }
     }
 
-    private static short nextInputSize(InputStream cpgStream) throws IOException {
-        byte[] contentBytes = new byte[2];
-        int bytesRead = cpgStream.read(contentBytes, 0, 2);
-        if (bytesRead != 2) {
+    private static int nextInputSize(InputStream cpgStream) throws IOException {
+        byte[] contentBytes = new byte[4];
+        int bytesRead = cpgStream.read(contentBytes, 0, 4);
+        if (bytesRead != 4) {
             throw new RuntimeException("invalid byte size input");
         }
         ByteBuffer buffer = ByteBuffer.wrap(contentBytes);
         buffer.order(ByteOrder.nativeOrder());
-        return buffer.getShort();
+        return buffer.getInt();
     }
 
     private static String nextJson(InputStream cpgStream, 
-            short size) throws IOException  {
+            int size) throws IOException  {
         byte[] contentBytes = new byte[size];
         ByteBuffer buffer = ByteBuffer.wrap(contentBytes);
         int bytesRead = cpgStream.read(contentBytes, 0, size);
@@ -101,7 +101,7 @@ public class Parser {
                 //System.out.println(s);
                 // gets the size of the first class
                 BufferedInputStream bis = new BufferedInputStream(cpgStream);
-                short classSize = nextInputSize(bis);
+                int classSize = nextInputSize(bis);
 
                 do {
                     System.out.println("Reading in new class of size: " + classSize);
