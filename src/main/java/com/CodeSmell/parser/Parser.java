@@ -35,19 +35,6 @@ public class Parser {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
-        } 
-    } 
-
-    private static class ArrayListExclusion implements ExclusionStrategy {
-
-        private Type listParameterizedType = new TypeToken<List<String>>() {}.getType();
-
-        public boolean shouldSkipClass(Class<?> c) {
-            return false;
-        }
-
-        public boolean shouldSkipField(FieldAttributes f) {
-            return listParameterizedType.equals(f.getDeclaredType());
         }
     }
 
@@ -62,8 +49,8 @@ public class Parser {
         return buffer.getShort();
     }
 
-    private static String nextJson(InputStream cpgStream, 
-            short size) throws IOException  {
+    private static String nextJson(InputStream cpgStream,
+                                   short size) throws IOException {
         byte[] contentBytes = new byte[size];
         ByteBuffer buffer = ByteBuffer.wrap(contentBytes);
         int bytesRead = cpgStream.read(contentBytes, 0, size);
@@ -84,12 +71,12 @@ public class Parser {
      *                         joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public static CodePropertyGraph initializeCPG(InputStream cpgStream, 
-            boolean serializedObject) throws InvalidClassException {
+    public static CodePropertyGraph initializeCPG(InputStream cpgStream,
+                                                  boolean serializedObject) throws InvalidClassException {
 
         Gson gson = new GsonBuilder()
-            .setExclusionStrategies(new ArrayListExclusion())
-            .create();
+                .setExclusionStrategies(new ArrayListExclusion())
+                .create();
         CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!serializedObject) {
@@ -105,7 +92,7 @@ public class Parser {
 
                 do {
                     System.out.println("Reading in new class of size: " + classSize);
-                    String classJson =  nextJson(bis, classSize);
+                    String classJson = nextJson(bis, classSize);
                     System.out.println(classJson);
                     CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
                     if (cpgClass != null) {
@@ -121,7 +108,7 @@ public class Parser {
                     // after joern_query prints the last class, it must
                     // print 0 (16 byte signed default edian)
                     throw new IllegalArgumentException(
-                        "Parser given illegal class size " + classSize);
+                            "Parser given illegal class size " + classSize);
                 }
 
             } catch (IOException e) {
@@ -145,7 +132,7 @@ public class Parser {
             // to a backup file for recovery in the event of a crash
             try {
                 FileOutputStream fos = new FileOutputStream(
-                    CPG_BACKUP_JSON.getPath());
+                        CPG_BACKUP_JSON.getPath());
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
                 oos.writeObject(cpg);
                 oos.flush();
@@ -468,7 +455,6 @@ public class Parser {
                 methods.toArray(new Method[methods.size()]));
     }
 
-
     /**
      * Iterates through the provided CodePropertyGraph to determine whether a realization relationship exists.
      * This is determined by first checking for the presence of interfaces within the cpg and collecting them within a list.
@@ -486,8 +472,8 @@ public class Parser {
         ArrayList<Method> allMethodsInCPG = new ArrayList<>();
         ArrayList<String> allMethodNames = new ArrayList<>();
         cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodsInCPG.add(method)));
-        cpg.getClasses().stream().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
-        cpg.getClasses().stream().forEach(cpgClass -> allClassNames.add(cpgClass.name));
+        cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+        cpg.getClasses().forEach(cpgClass -> allClassNames.add(cpgClass.name));
 
         var interfacesResult = cpg.getClasses().stream().
                 filter(cpgClass -> cpgClass.classType.equals("interface")).collect(Collectors.toList());
@@ -645,8 +631,10 @@ public class Parser {
         int index = classDeclaration.indexOf(cpgClass.name);
         String tempStr = classDeclaration.substring(0, index - 1).trim();
         for (CPGClass.Modifier modifier : CPGClass.Modifier.values()) {
-            tempStr = tempStr.replace(modifier.modString, "").trim();
-            classModifiers.add(modifier);
+            if (tempStr.contains(modifier.modString)) {
+                classModifiers.add(modifier);
+                tempStr = tempStr.replaceFirst(modifier.modString, "").trim();
+            }
         }
         if (classModifiers.contains(CPGClass.Modifier.ABSTRACT)) {
             classType = "abstract class";
@@ -896,5 +884,19 @@ public class Parser {
                     replace(", ", " ").trim();
         }
         return typeName;
+    }
+
+    private static class ArrayListExclusion implements ExclusionStrategy {
+
+        private Type listParameterizedType = new TypeToken<List<String>>() {
+        }.getType();
+
+        public boolean shouldSkipClass(Class<?> c) {
+            return false;
+        }
+
+        public boolean shouldSkipField(FieldAttributes f) {
+            return listParameterizedType.equals(f.getDeclaredType());
+        }
     }
 }
