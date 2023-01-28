@@ -26,8 +26,12 @@ import com.CodeSmell.parser.JoernServer.ReaderThread;
 
 public class LayoutManager  {
 
+	// amount to scale coordinates returned by graphViz
 	private static final double SCALING_FACTOR = 1;
-	
+
+	// node (class) seperation parameter propegated to graphViz
+	private static final String NODE_SEP = "100";
+
 	public static void setLayout(
 			ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) 
@@ -130,7 +134,7 @@ public class LayoutManager  {
 		System.out.println("Calling graphViz with command\n" + graphVizIn);
 
 		Process graphVizProcess = new ProcessBuilder(
-			"dot", "-y", "-Tplain").start();
+			"dot", "-Tplain").start();
 		
 		// std in buffer
 		OutputStream graphVizOut = graphVizProcess.getOutputStream();
@@ -162,7 +166,8 @@ public class LayoutManager  {
 	private static String compileGraphVizInvokeCommand(ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) {
 		StringBuilder graphVizIn = new StringBuilder(
-			"digraph G {\nrankdir=\"LR\"\noverlap=false\nsplines=polyline\n");
+			"digraph G {\nrankdir=\"LR\"\noverlap=false\nsplines=polyline\n" +
+			"nodesep=" + NODE_SEP + "\n");
 		appendClassParameters(graphVizIn, classes);
 		appendPathParameters(graphVizIn, relations);
 		graphVizIn.append("}");
@@ -173,7 +178,8 @@ public class LayoutManager  {
 			ArrayList<UMLClass> classes) {
 		for (UMLClass c : classes) {
 			graphVizIn.append(String.format(
-				"\"%s\" [width=%f, height=%f, shape=\"rectangle\"]\n", 
+				"\"%s\" [width=%f, height=%f, " +
+				"shape=\"rectangle\", fixedsize=true]\n", 
 				c.name, c.getWidth() * SCALING_FACTOR, 
 				c.getHeight() * SCALING_FACTOR));
 		}
