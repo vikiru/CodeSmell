@@ -134,7 +134,7 @@ public class LayoutManager  {
 		System.out.println("Calling graphViz with command\n" + graphVizIn);
 
 		Process graphVizProcess = new ProcessBuilder(
-			"dot", "-Tplain").start();
+			"dot", "-y", "-Tplain").start();
 		
 		// std in buffer
 		OutputStream graphVizOut = graphVizProcess.getOutputStream();
@@ -166,7 +166,7 @@ public class LayoutManager  {
 	private static String compileGraphVizInvokeCommand(ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) {
 		StringBuilder graphVizIn = new StringBuilder(
-			"digraph G {\nrankdir=\"LR\"\noverlap=false\nsplines=polyline\n" +
+			"digraph G {\nsplines=polyline\n" +
 			"nodesep=" + NODE_SEP + "\n");
 		appendClassParameters(graphVizIn, classes);
 		appendPathParameters(graphVizIn, relations);
