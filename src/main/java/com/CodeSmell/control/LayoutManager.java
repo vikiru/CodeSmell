@@ -27,7 +27,7 @@ import com.CodeSmell.parser.JoernServer.ReaderThread;
 public class LayoutManager  {
 
 	private static final double SCALING_FACTOR = 1;
-
+	
 	public static void setLayout(
 			ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) 
@@ -37,7 +37,7 @@ public class LayoutManager  {
 
 		String line;
 		while ((line = graphVizReader.readLine()) != null) {
-			parseDotLine(classes, line);
+			parseDotLine(classes, relations, line);
 		}
 	}
 
@@ -47,8 +47,11 @@ public class LayoutManager  {
 	private static final Pattern CLASS_DOT_RE = Pattern.compile(
 			"node ([a-zA-Z]+) ((((\\d+[.]\\d+)|(\\d+)) ){2})");
 
-	private static void parseDotLine(ArrayList<UMLClass> classes, String line) 
-			throws IOException {
+	private static void parseDotLine(
+			ArrayList<UMLClass> classes, 
+			ArrayList<ClassRelation> relations,
+			String line) throws IOException {
+
 		String numbers = "((((\\d+[.]\\d+)|(\\d+)) ){2,})";
 
 		if (line.startsWith("graph") || line.startsWith("stop")) return;
@@ -56,7 +59,19 @@ public class LayoutManager  {
 		Matcher classMatch = CLASS_DOT_RE.matcher(line);
 
 		if (edgeMatch.find()) {
-			double[][] path = parsePaths(edgeMatch);
+			String sourceClassName = edgeMatch.group(1);
+			ArrayList<Position> path = parsePaths(edgeMatch);
+			for (ClassRelation cr : relations) {
+				if (cr.source.name.equals(sourceClassName)) {
+					System.out.printf("edge name: %s\n%s\n", 
+						sourceClassName, line);
+					for (Position p : path) {
+						System.out.println(p);
+					}
+					cr.setPath(path);
+					return;
+				}
+			}
 			//System.out.println("EDGE MATCH " + path);
 		} else if (classMatch.find()) {
 			//System.out.println("CLASS MATCH " + line);
@@ -69,8 +84,10 @@ public class LayoutManager  {
 			System.out.println(line);
 			for (UMLClass c : classes) {
 				if (c.name.equals(className)) {
-					c.setPosition(x * SCALING_FACTOR, 
-						y * SCALING_FACTOR);
+					// coordinates graphViz uses
+					// are relative to the center, convert
+					c.setPosition(x * SCALING_FACTOR - c.getWidth() / 2, 
+						y * SCALING_FACTOR - c.getHeight() / 2);
 					return;
 				}
 			}
@@ -80,10 +97,10 @@ public class LayoutManager  {
 		}
 	}
 
-	private static double[][] parsePaths(
+	private static ArrayList<Position> parsePaths(
 			Matcher edgeMatch) throws IOException {
 		int numPaths = Integer.parseInt(edgeMatch.group(3));
-		double[][] paths = new double[2][numPaths];
+		ArrayList<Position> pathNodes = new ArrayList<Position>();
 
 		String pathString = edgeMatch.group(4);
 		Iterator<String> pathIter = Arrays.asList(
@@ -99,12 +116,11 @@ public class LayoutManager  {
 					"dot (graphViz) gave a path " +
 					"with an incorrect size:\n" + pathString);
 			}
-			paths[0][numPaths] = Double.parseDouble(xCord);
 			yCord = pathIter.next();
-			//System.out.println(yCord);
-			paths[1][numPaths] = Double.parseDouble(yCord);
+			pathNodes.add(new Position(Double.parseDouble(xCord),
+				Double.parseDouble(yCord)));
 		}
-		return paths;
+		return pathNodes;
 	}
 
 	private static BufferedReader callGraphViz(ArrayList<UMLClass> classes,
@@ -145,7 +161,8 @@ public class LayoutManager  {
 
 	private static String compileGraphVizInvokeCommand(ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) {
-		StringBuilder graphVizIn = new StringBuilder("digraph G {\n");
+		StringBuilder graphVizIn = new StringBuilder(
+			"digraph G {\nrankdir=\"LR\"\noverlap=false\nsplines=polyline\n");
 		appendClassParameters(graphVizIn, classes);
 		appendPathParameters(graphVizIn, relations);
 		graphVizIn.append("}");
@@ -157,8 +174,8 @@ public class LayoutManager  {
 		for (UMLClass c : classes) {
 			graphVizIn.append(String.format(
 				"\"%s\" [width=%f, height=%f, shape=\"rectangle\"]\n", 
-				c.name, c.getWidth() / SCALING_FACTOR, 
-				c.getHeight() / SCALING_FACTOR));
+				c.name, c.getWidth() * SCALING_FACTOR, 
+				c.getHeight() * SCALING_FACTOR));
 		}
 	}
 
