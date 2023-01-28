@@ -4,7 +4,6 @@ package com.CodeSmell.control;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Collections;
-import java.util.Arrays;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,6 +11,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import com.CodeSmell.model.UMLClass;
 import com.CodeSmell.model.Position;
@@ -23,16 +26,95 @@ import com.CodeSmell.parser.JoernServer.ReaderThread;
 
 public class LayoutManager  {
 
+	private static final double SCALING_FACTOR = 1;
 
-	public static void determineLayout(ArrayList<UMLClass> classes,
-			ArrayList<ClassRelation> relations) throws IOException {
+	public static void setLayout(
+			ArrayList<UMLClass> classes,
+			ArrayList<ClassRelation> relations) 
+		throws IOException {
 		
+		BufferedReader graphVizReader = callGraphViz(classes, relations);
+
+		String line;
+		while ((line = graphVizReader.readLine()) != null) {
+			parseDotLine(classes, line);
+		}
+	}
+
+	private static final String NUMBERS_RE = "((((\\d+[.]\\d+)|(\\d+)) ){2,})";
+	private static final Pattern RELATION_DOT_RE = Pattern.compile(
+			"edge ([a-zA-Z]+) ([a-zA-Z]+) (\\d+) " + NUMBERS_RE);
+	private static final Pattern CLASS_DOT_RE = Pattern.compile(
+			"node ([a-zA-Z]+) ((((\\d+[.]\\d+)|(\\d+)) ){2})");
+
+	private static void parseDotLine(ArrayList<UMLClass> classes, String line) 
+			throws IOException {
+		String numbers = "((((\\d+[.]\\d+)|(\\d+)) ){2,})";
+
+		if (line.startsWith("graph") || line.startsWith("stop")) return;
+		Matcher edgeMatch = RELATION_DOT_RE.matcher(line);
+		Matcher classMatch = CLASS_DOT_RE.matcher(line);
+
+		if (edgeMatch.find()) {
+			double[][] path = parsePaths(edgeMatch);
+			//System.out.println("EDGE MATCH " + path);
+		} else if (classMatch.find()) {
+			//System.out.println("CLASS MATCH " + line);
+			String className = classMatch.group(1);
+			String[] rest = classMatch.group(2).split(" ");
+			double x = Double.parseDouble(rest[0]);
+			double y = Double.parseDouble(rest[1]);
+			System.out.printf("name: %s, x: %f, y: %f\n",
+				className, x, y);
+			System.out.println(line);
+			for (UMLClass c : classes) {
+				if (c.name.equals(className)) {
+					c.setPosition(x * SCALING_FACTOR, 
+						y * SCALING_FACTOR);
+					return;
+				}
+			}
+		} else {
+			throw new IOException(
+				"unexpected line in graphViz output:\n" + line);
+		}
+	}
+
+	private static double[][] parsePaths(
+			Matcher edgeMatch) throws IOException {
+		int numPaths = Integer.parseInt(edgeMatch.group(3));
+		double[][] paths = new double[2][numPaths];
+
+		String pathString = edgeMatch.group(4);
+		Iterator<String> pathIter = Arrays.asList(
+			pathString.split(" ")).iterator();
+		String xCord, yCord;
+		while (pathIter.hasNext()) {
+			numPaths--;
+			xCord = pathIter.next();
+			//System.out.println(numPaths);
+			//System.out.println(xCord);
+			if (numPaths < 0) {
+				throw new IOException(
+					"dot (graphViz) gave a path " +
+					"with an incorrect size:\n" + pathString);
+			}
+			paths[0][numPaths] = Double.parseDouble(xCord);
+			yCord = pathIter.next();
+			//System.out.println(yCord);
+			paths[1][numPaths] = Double.parseDouble(yCord);
+		}
+		return paths;
+	}
+
+	private static BufferedReader callGraphViz(ArrayList<UMLClass> classes,
+			ArrayList<ClassRelation> relations) throws IOException {
 		String graphVizIn = compileGraphVizInvokeCommand(classes, relations);
 		//File inFile = createTempFile("graphViz-gen-codesmell", "-tmp");
-
+		System.out.println("Calling graphViz with command\n" + graphVizIn);
 
 		Process graphVizProcess = new ProcessBuilder(
-			"dot").start();
+			"dot", "-y", "-Tplain").start();
 		
 		// std in buffer
 		OutputStream graphVizOut = graphVizProcess.getOutputStream();
@@ -57,14 +139,8 @@ public class LayoutManager  {
 		graphVizOut.close();
 		try {
 			graphVizProcess.waitFor();
-		} catch (InterruptedException e) {
-		}
-		String line;
-		while ((line = graphVizReader.readLine()) != null) {
-			System.out.println(line);
-		}
-		System.out.println("===========");
-		
+		} catch (InterruptedException e) {}
+		return graphVizReader;
 	}
 
 	private static String compileGraphVizInvokeCommand(ArrayList<UMLClass> classes,
@@ -81,7 +157,8 @@ public class LayoutManager  {
 		for (UMLClass c : classes) {
 			graphVizIn.append(String.format(
 				"\"%s\" [width=%f, height=%f, shape=\"rectangle\"]\n", 
-				c.name, c.getWidth() / 50, c.getHeight() / 50));
+				c.name, c.getWidth() / SCALING_FACTOR, 
+				c.getHeight() / SCALING_FACTOR));
 		}
 	}
 
@@ -92,60 +169,5 @@ public class LayoutManager  {
 				String.format("\"%s\" -> \"%s\"\n", 
 				cr.source.name, cr.target.name));
 		}
-	}
-
-	private class Line extends Shape {
-		/* Represents a line (i.e, one connecting
-		two classes) */
-
-		public final double x1, x2, y1, y2;
-		
-		Line(Position p1, Position p2) {
-			super(new Position[]{p1, p2}, "#4C94A2");
-			this.x1 = p1.x;
-			this.x2 = p2.x;
-			this.y1 = p1.y;
-			this.y2 = p2.y;	
-		}
-
-		Line(double x1, double y1, double x2, double y2) {
-			super(new Position[] {
-					new Position(x1, y1), new Position(x2, y2)
-				}, "orange");
-			this.x1 = x1;
-			this.x2 = x2;;
-			this.y1 = y1;
-			this.y2 = y2;	
-		}
-
-		public String toString() {
-			return String.format("(%f, %f) -> (%f, %f)", 
-					x1, y1, x2, y2);
-		}
-
-		public double magnitude() {
-			return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-		}
-	}
-
-	private class Dot extends Shape {
-		/* A dot to be rendered for debugging purposes */
-
-		Dot(Position p, String colour) {
-			super(new Position[] { p }, colour);
-		}
-	}
-
-	private Line[] classBoxLines(UMLClass c) {
-		Line[] lines = new Line[4];
-		Position p1 = c.getPosition();
-		Position corner2 = new Position(p1.x + c.getWidth(), p1.y);
-		Position corner3 = new Position(p1.x + c.getWidth(), p1.y + c.getHeight());
-		Position corner4 = new Position(p1.x, p1.y + c.getHeight());
-		lines[0] = new Line(p1, corner2);
-		lines[1] = new Line(corner2, corner3);
-		lines[2] = new Line(corner3, corner4);
-		lines[3] = new Line(corner4, p1);
-		return lines;
 	}
 }

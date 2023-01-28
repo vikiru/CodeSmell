@@ -28,9 +28,6 @@ public class ClassRelation extends RenderObject {
     }
 
     public void setPath(ArrayList<Position> path) {
-        if (this.target.name.equals("ClassB")) {
-            System.out.println("===========");
-        }
         this.path = path;
         RenderEvent re = new RenderEvent(RenderEvent.Type.RENDER, this);
         dispatchToRenderEventListeners(re);

@@ -87,7 +87,7 @@ public class MainApp extends Application {
         ArrayList<UMLClass> umlClasses = new ArrayList<UMLClass>(classMap.values());
 
         try {
-            LayoutManager.determineLayout(umlClasses, relations);
+            LayoutManager.setLayout(umlClasses, relations);
         } catch (IOException e) {
             throw new RuntimeException(
                 "Error invoking graphviz binary (dot)\n" + e);

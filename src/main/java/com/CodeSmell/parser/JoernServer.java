@@ -16,7 +16,7 @@ public class JoernServer {
 
 	InputStream joernStream;
 
-	private static class ReaderThread extends Thread {
+	public static class ReaderThread extends Thread {
 
 		private BufferedReader reader; 
 
