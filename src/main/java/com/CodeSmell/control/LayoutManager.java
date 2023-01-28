@@ -6,46 +6,91 @@ import java.util.Comparator;
 import java.util.Collections;
 import java.util.Arrays;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.ByteArrayOutputStream;
+
+
 import com.CodeSmell.model.UMLClass;
 import com.CodeSmell.model.Position;
 import com.CodeSmell.model.RenderEvent;
 import com.CodeSmell.model.Shape;
 import com.CodeSmell.model.Pair;
 import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.parser.JoernServer.ReaderThread;
 
 public class LayoutManager  {
 
-	public LayoutManager() {}
 
-	private ArrayList<UMLClass> classes;
+	public static void determineLayout(ArrayList<UMLClass> classes,
+			ArrayList<ClassRelation> relations) throws IOException {
+		
+		String graphVizIn = compileGraphVizInvokeCommand(classes, relations);
+		//File inFile = createTempFile("graphViz-gen-codesmell", "-tmp");
 
-	public void positionClasses(ArrayList<UMLClass> classes) {
-		/**
-		 * given a list of classes with a defined size attribute,
-		 * set their position with the classes setPosition() method
-		 */
 
-		this.classes = classes;
-		sortClasses();
+		Process graphVizProcess = new ProcessBuilder(
+			"dot").start();
+		
+		// std in buffer
+		OutputStream graphVizOut = graphVizProcess.getOutputStream();
 
-		double x = 0;
-		double y = 0;
+		// std error buffer 
+		BufferedReader graphVizErrorReader = new BufferedReader(
+				new InputStreamReader(graphVizProcess.getErrorStream()));
+		
+		// std out buffer 
+		BufferedReader graphVizReader = new BufferedReader(
+				new InputStreamReader(graphVizProcess.getInputStream()));
 
-		for (int i=0; i < classes.size(); i++) {
-			// set the classes's ith class' 
-			// x position to be after i-1th's with
-			// some padding. 
-			if (i >= 1) {
-				UMLClass lastClass = classes.get(i - 1);
-				Double lastX = lastClass.getPosition().x;
-				Double lastWidth = classes.get(i - 1).getWidth();
-				Double padding = lastWidth / 2;
-				x = lastX + lastWidth + padding;
-				Double lastY = lastClass.getPosition().y;
-				y = lastY + classes.get(i - 1).getHeight();
+		// start the error reader
+		new ReaderThread(graphVizErrorReader).start();
 
-			}
-			classes.get(i).setPosition(x, y);
+		//System.out.println(graphVizIn);
+		byte[] inFileBuffer = graphVizIn.getBytes("utf-8");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(inFileBuffer, 0, inFileBuffer.length);
+		baos.writeTo(graphVizOut);
+		graphVizOut.flush();
+		graphVizOut.close();
+		try {
+			graphVizProcess.waitFor();
+		} catch (InterruptedException e) {
+		}
+		String line;
+		while ((line = graphVizReader.readLine()) != null) {
+			System.out.println(line);
+		}
+		System.out.println("===========");
+		
+	}
+
+	private static String compileGraphVizInvokeCommand(ArrayList<UMLClass> classes,
+			ArrayList<ClassRelation> relations) {
+		StringBuilder graphVizIn = new StringBuilder("digraph G {\n");
+		appendClassParameters(graphVizIn, classes);
+		appendPathParameters(graphVizIn, relations);
+		graphVizIn.append("}");
+		return graphVizIn.toString();
+	}
+
+	private static void appendClassParameters(StringBuilder graphVizIn,
+			ArrayList<UMLClass> classes) {
+		for (UMLClass c : classes) {
+			graphVizIn.append(String.format(
+				"\"%s\" [width=%f, height=%f, shape=\"rectangle\"]\n", 
+				c.name, c.getWidth() / 50, c.getHeight() / 50));
+		}
+	}
+
+	private static void appendPathParameters(StringBuilder graphVizIn,
+			ArrayList<ClassRelation> relations) {
+		for (ClassRelation cr : relations) {
+			graphVizIn.append(
+				String.format("\"%s\" -> \"%s\"\n", 
+				cr.source.name, cr.target.name));
 		}
 	}
 
@@ -102,186 +147,5 @@ public class LayoutManager  {
 		lines[2] = new Line(corner3, corner4);
 		lines[3] = new Line(corner4, p1);
 		return lines;
-	}
-
-	private boolean testCollision(Line line, UMLClass[] exclude) {
-		/* returns true if the given line does not
-		 hit the bounding box of any class not in exclude */
-
-		for (UMLClass c : classes) {
-			if (Arrays.asList(exclude).contains(c)) {
-				continue;
-			}
-			if (intersection(line, classBoxLines(c)) != null) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private Position intersection(Line l1, Line[] with) {
-		/* gets the Position of where l1 interesects with a line in with */
-
-		for (Line l2 : with) {
-			double x1 = l1.x1;
-			double x2 = l1.x2;
-			double x3 = l2.x1;
-			double x4 = l2.x2;
-			double y1 = l1.y1;
-			double y2 = l1.y2;
-			double y3 = l2.y1;
-			double y4 = l2.y2;
-			double a = ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / 
-					((y4-y3)*(x2-x1)  - (x4-x3)*(y2-y1));
-			double b = ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / 
-					((y4-y3)*(x2-x1)  - (x4-x3)*(y2-y1));
-			if (a >= 0 && a <= 1 &&  b >= 0 && b <= 1) {
-				return new Position(x1 + a*(x2-x1), y1 + a*(y2-y1));
-			}
-		}
-		return null;
-	}
-
-	private enum Direction {
-		TOP,
-		BOTTOM,
-		LEFT, 
-		RIGHT
-	}
-
-	private Position classMiddle(UMLClass c) {
-		/* Gets the position of the middle of a class bounding box */
-
-		Position p = c.getPosition(); // topleft corner of c
-		return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight() / 2);
-	}
-
-	private Position classMiddle(UMLClass c, Direction d) {
-		/* Gets the position of the middle of the given edge (direction)
-		 of a class bounding box */
-
-		Position p = c.getPosition(); // topleft corner of c
-		if (d == Direction.TOP) {
-			return new Position(p.x + c.getWidth() / 2, p.y);
-		} else if (d == Direction.BOTTOM) {
-			return new Position(p.x + c.getWidth() / 2, p.y + c.getHeight());
-		} else if (d == Direction.LEFT) {
-			return new Position(p.x, p.y + c.getHeight() / 2);
-		} else if (d == Direction.RIGHT) {
-			return new Position(p.x + c.getWidth(), p.y + c.getHeight() / 2);
-		} else {
-			throw new RuntimeException("Bad direction");
-		}
-	}
-
-	private Pair<Position, Position> closetNodes(UMLClass c1, UMLClass c2) {
-		/* 
-		returns the two closest points relations that sit on 
-		each classes box boundry to connect the two clases 
-		*/
-
-		// get mid point of each class
-		Position mid1 = classMiddle(c1);
-		Position mid2 = classMiddle(c2);
-
-		// return the position of where a line connecting the midpoints
-		// intersects with the class box boundaries
-		Line line = new Line(mid1, mid2);
-		Position p1, p2;
-		p1 = intersection(line, classBoxLines(c1));
-		p2 = intersection(line, classBoxLines(c2));
-		if (p1 == null || p2 == null) {
-			throw new RuntimeException("No intersection");
-		}
-		return new Pair<Position, Position>(p1, p2);
-	} 
-
-	private Position indirectConnection(UMLClass c1, UMLClass c2) {
-		/* gets the  position of a bend where the perpendicular lines
-		coming from the midpoints of c1 and c2 intersect */
-
-		// get top left corners of each class 
-		Position mid1 = classMiddle(c1);
-		Position mid2 = classMiddle(c2);
-
-		// new Dot(mid1, "blue").render();
-		// new Dot(mid2, "red").render();
-		Line l1 = new Line(mid1.x, mid1.y, mid2.x, mid1.y);
-		Line l2 = new Line(mid2.x, mid2.y, mid2.x, mid1.y);
-		Position p = intersection(l1, new Line[] { l2 });
-		//l2.render();
-		if (p == null) {
-			throw new RuntimeException("No intersection");
-		}
-		return p;
-	}
-
-	private void sortClasses() {
-		// sorts the classes such that the ones which are furthest left are first
-
-		Comparator<UMLClass> classHorzComp = new Comparator<UMLClass>() {
-	        public int compare(UMLClass c1, UMLClass c2) {
-	        	Double d = (c1.getPosition().x - c2.getPosition().x);
-	            return d.intValue();
-	        }
-	    };
-	    
-	    Collections.sort(classes, classHorzComp);
-	}
-
-	public void setRelationPaths(ArrayList<ClassRelation> relations) {
-		/**
-		 * given a list of classes which have been rendered and 
-		 * positioned, set the path for their index of their connections
-		 * attribute.
-		 *  
-		 */
-
-		for (ClassRelation r : relations) {
-			ArrayList<Position> path = new ArrayList<Position>();
-		
-			Pair<Position, Position> p = closetNodes(r.source, r.target);
-			Position terminal = p.second;
-			Position test = p.first; 
-			boolean collision = !testCollision(
-					new Line(test, terminal), new UMLClass[]{ r.source, r.target });
-
-			if (collision) {
-				System.out.printf("Indirect path from %s to %s\n", 
-						r.source.name, r.target.name);
-		
-				Position bend, mid1, mid2;
-				bend = indirectConnection(r.source, r.target);
-				mid1 = classMiddle(r.source);
-				mid2 = classMiddle(r.target);
-
-				if (bend.y > mid1.y && bend.x < mid2.x) {
-					mid1 = classMiddle(r.source, Direction.BOTTOM);
-					mid2 = classMiddle(r.target, Direction.LEFT);
-				} else if (bend.x < mid1.x && bend.y > mid2.y) {
-					mid1 = classMiddle(r.source, Direction.LEFT);
-					mid2 = classMiddle(r.target, Direction.BOTTOM);
-				} else if (bend.x > mid2.x && bend.y < mid1.y) {
-					mid1 = classMiddle(r.source, Direction.TOP);
-					mid2 = classMiddle(r.target, Direction.RIGHT);
-				} else if (bend.x > mid1.x && bend.y < mid2.y) {
-					mid1 = classMiddle(r.source, Direction.RIGHT);
-					mid2 = classMiddle(r.target, Direction.TOP);
-				}
-
-				path.add(mid1);
-				path.add(bend);
-				path.add(mid2);
-				System.out.println(path);
-				r.setPath(path);
-			} else {
-				path.add(test);
-				System.out.printf("Direct path from %s to %s\n", 
-						r.source.name, r.target.name);
-				path.add(terminal);
-				System.out.println(path);
-				r.setPath(path);
-			}
-		}
 	}
 }

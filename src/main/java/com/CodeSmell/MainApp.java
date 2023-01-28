@@ -26,6 +26,8 @@ import javafx.stage.Stage;
 import java.io.InvalidClassException;
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,10 +81,18 @@ public class MainApp extends Application {
             source.addRelationship(cr);
             target.addRelationship(cr);
             relations.add(cr);
+            System.out.println(cr);
         }
-        LayoutManager lm = new LayoutManager();
-        lm.positionClasses(new ArrayList<UMLClass>(classMap.values()));
-        lm.setRelationPaths(relations);
+ 
+        ArrayList<UMLClass> umlClasses = new ArrayList<UMLClass>(classMap.values());
+
+        try {
+            LayoutManager.determineLayout(umlClasses, relations);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                "Error invoking graphviz binary (dot)\n" + e);
+        }
+
     }
 
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState)  {
