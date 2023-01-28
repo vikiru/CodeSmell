@@ -25,10 +25,10 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.8284271"
-     inkscape:cx="-241.30019"
-     inkscape:cy="82.731493"
-     inkscape:window-width="3440"
-     inkscape:window-height="1371"
+     inkscape:cx="14.318912"
+     inkscape:cy="80.963727"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="32"
      inkscape:window-maximized="1"
@@ -41,45 +41,8 @@
      id="layer1"
      transform="translate(-49.03339,-3.0887442)">
     <path
-       sodipodi:type="star"
+       id="path511"
        style="fill:#000000;stroke-width:0.264583"
-       id="path329"
-       inkscape:flatsided="false"
-       sodipodi:sides="3"
-       sodipodi:cx="30.752525"
-       sodipodi:cy="29.710463"
-       sodipodi:r1="32.39679"
-       sodipodi:r2="16.198395"
-       sodipodi:arg1="2.0943951"
-       sodipodi:arg2="3.1415927"
-       inkscape:rounded="0"
-       inkscape:randomized="0"
-       d="m 14.554131,57.766905 0,-28.056443 -10e-7,-28.0564421 24.297593,14.0282221 24.297592,14.02822 -24.297593,14.028222 z"
-       inkscape:transform-center-x="-8.0991967"
-       transform="translate(34.538739,1.4347243)" />
-    <path
-       sodipodi:type="star"
-       style="fill:#ffffff;stroke-width:0.264583"
-       id="path329-3-5-3"
-       inkscape:flatsided="false"
-       sodipodi:sides="3"
-       sodipodi:cx="30.752525"
-       sodipodi:cy="29.710463"
-       sodipodi:r1="32.39679"
-       sodipodi:r2="16.198395"
-       sodipodi:arg1="2.0943951"
-       sodipodi:arg2="3.1415927"
-       inkscape:rounded="0"
-       inkscape:randomized="0"
-       d="m 14.554131,57.766905 0,-28.056443 -10e-7,-28.0564421 24.297593,14.0282221 24.297592,14.02822 -24.297593,14.028222 z"
-       transform="matrix(0.85454366,0,0,0.85454366,36.687033,6.0445116)"
-       inkscape:transform-center-x="-6.9211121" />
-    <rect
-       style="fill:#000000;stroke-width:0.264583"
-       id="rect746"
-       width="4.0277901"
-       height="50.081066"
-       x="49.03339"
-       y="6.0797539" />
+       d="M 49.093851 3.0939118 L 49.093851 4.0096182 L 49.093851 59.195397 C 65.290464 49.8463 81.485566 40.494526 97.681583 31.144396 C 81.485566 21.794266 65.290464 12.443009 49.093851 3.0939118 z M 51.211035 6.7577709 C 65.289797 14.886669 79.368455 23.015498 93.447216 31.144396 C 79.368455 39.273295 65.289797 47.402123 51.211035 55.531021 L 51.211035 6.7577709 z " />
   </g>
 </svg>

@@ -1,7 +1,9 @@
 <head>
 
 <script>
+
 let classCount = 0;
+let check = 0; // remove later
 
 function renderClassBox(name) {
     let mainPanel = document.getElementById("main");
@@ -152,71 +154,85 @@ function appendPathNode(classId, pathNumber, x, y) {
     pathContainer.appendChild(node);
 }
 
-let check = 0;
+function init_main_panel() {
+    let lineContainer = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    lineContainer.id = "lines";
+    // TODO: Increase they dynamically if needed
+    lineContainer.setAttribute("height", 5000 + 'px'); 
+    lineContainer.setAttribute("width",  5000 + 'px');
+    document.getElementById("main").appendChild(lineContainer);
+}
 
 function renderPath(classId, pathNumber, type) {   
     let lineContainer = document.getElementById("lines");
+    let arrowContainer = document.getElementById("arrows");
     let relationsContainer = document.getElementById('relationContainer' + classId);
     let nodes = relationsContainer.children.item(pathNumber).children;
 
-    function rotateLine(line, angle) {
-      //line.setAttribute("style", "transform: rotate(" + angle + ")");
-        line.style.transform = 'rotate(' + angle + 'rad)';
-        line.style.transformOrigin = "0 0"; 
-    }
+    function rotate(element, angle) {
+        element.style.transformOrigin = "0 0";
+        element.style.transform = 'rotate(' + angle + 'rad)'; 
+    }  
+
+    let arrow = document.createElement('img');
+    arrow.className = "arrow";
+    if (type == "COMPOSITION") {
+        arrow.src = "composition.svg";
+    } else if (type == "AGGREGATION") {
+        arrow.src = "aggregation.svg";
+    } else if (type == "DEPENDENCY") {
+        arrow.src = "association.svg";
+    } else if (type == "INHERITANCE") {
+        arrow.src = "inheritance.svg"
+    } else if (type == "REALIZATION") {
+        arrow.src = "inheritance.svg";
+    } else if (type == "ASSOCIATION") {
+        arrow.src = "association.svg";
+    } 
     
     for (let i = 0; i < nodes.length - 1; i++) { 
         let startX = nodes[i].x;
         let endX = nodes[i+1].x;
         let startY = nodes[i].y;
         let endY = nodes[i+1].y;
-        let magnitude = ((startX - endX)**2 + (startY - endY)**2)**0.5;
+        let intLine = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'line');
 
-        // find angle to rotate a line by taking the dot product
-        // with the unit vector for horizontal direction 
-        // i = (1, 0)
-        // v =  (endX - startX, endY - startY))
-        // i・v = |i||v|cos0
-        let angle = Math.acos((endX - startX) / magnitude);
-        if (endX <= startX && endY <= startY) {
-            angle *= -1;
-        }  
-
-        let line = document.createElement('div');
+        intLine.setAttribute("x1", startX + 'px');
+        intLine.setAttribute("y1", startY + 'px');
+        intLine.setAttribute("x2", endX + 'px');
+        intLine.setAttribute("y2", endY + 'px');
+        intLine.setAttribute("stroke", "white");
 
         if (type == "DEPENDENCY" || type == "REALIZATION") {
-            line.style.borderStyle = 'dashed';
-        } else{
-            line.style.borderStyle = 'solid';
+            intLine.setAttribute("stroke-dasharray", "5,5,5,5");
         }
+        intLine.id = nodes[i].id + "-line";
+        lineContainer.appendChild(intLine);
+    }
 
-        if (i == nodes.length - 2) {
-            line.className = 'endLine';
-            let arrow = document.createElement('img');
-            arrow.style.height = "20px";
-            arrow.style.float = "right";
-            arrow.style.transform = 'translateY(' + -10 + 'px)';
-            if (type == "DEPENDENCY") {
-                arrow.src = "inheritence.svg";
-            } else if (type == "REALIZATION") {
-                arrow.src = "realization.svg";
-            } else if (type == "ASSOCIATION") {
-                arrow.src = "association.svg";
-            } else if (type == "COMPOSITION") {
-                arrow.src = "composition.svg";
-            } else if (type == "AGGREGATION") {
-                arrow.src = "aggregation.svg";
-            }
-            line.appendChild(arrow)
+    for (let i = nodes.length - 2; i > 0; i--) { 
+        let startX = nodes[i].x;
+        let endX = nodes[i+1].x;
+        let startY = nodes[i].y;
+        let endY = nodes[i+1].y;
+        let magnitude = ((startX - endX)**2 + 
+            (startY - endY)**2)**0.5;
+
+        if (magnitude >= 15) {
+            let angle = Math.acos((endX - startX) / magnitude);
+            if (endX <= startX && endY <= startY) {
+                angle *= -1;
+            } 
+            // try and move the arrows away from the box
+            arrow.style.left = endX - 10 - 10 * Math.cos(angle) + "px";
+            arrow.style.top = endY - 10 - 10 * Math.sin(angle) + "px";
+            rotate(arrow, angle);
+            arrow.id = nodes[i].id + "-arrow";
+            arrowContainer.appendChild(arrow);
+            return;
         }
-
-        line.className = 'line';
-        line.style.left = startX + 'px';
-        line.style.top = startY + 'px';
-        line.style.width = magnitude - 7 + 'px';
-        line.id = nodes[i].id;
-        rotateLine(line, angle);
-        lineContainer.appendChild(line);
     }
 }
 
@@ -235,17 +251,19 @@ body {
     background: #22262A;
 }
 
+.arrow {
+    /* https://stackoverflow.com/questions/22252472/how-can-i-change-the-color-of-an-svg-element */
+    filter: invert(100%) sepia(100%) 
+    saturate(0%) hue-rotate(125deg) 
+    brightness(103%) contrast(103%);
+    position: absolute;
+    height: 20px;
+    z-index: 200;
+}
+
 .attributeContainer {
     background: #22262A;
     padding: 2px;
-}
-
-.endLine {
-    height: 0px;
-    border: 1px dashed blue;
-    position: absolute;
-    display: block;
-    float: right;
 }
 
 
@@ -279,21 +297,18 @@ h2:hover {
 
 
 .line {
-    height: 0px;
-    border: 1px dashed #C4BEB7;
     position: absolute;
+    z-index: 100;
+    shape-rendering: crispEdges;
 }
 
-.line:hover {
-    border: 1px dashed #5662F6;
-}
 </style>
 </head>
 
 
-<body>
-    <div id="main">
-        <div id="lines">
+<body onload="init_main_panel()">
+    <div id="main" style="position: absolute;">
+        <div id="arrows" style="position: absolute;">
         </div>
     </div>
 </body>

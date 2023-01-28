@@ -134,7 +134,12 @@ public class LayoutManager  {
 		System.out.println("Calling graphViz with command\n" + graphVizIn);
 
 		Process graphVizProcess = new ProcessBuilder(
-			"dot", "-y", "-Tplain").start();
+			// can also do 
+			//"dot", "-y" instead of "fdp"
+			//fdp, dot, sfdp, neato are all provided by
+			// graphViz. Some use flipped y coordinates, 
+			// some don't. -y controls flipped y.
+			"fdp", "-Tplain").start();
 		
 		// std in buffer
 		OutputStream graphVizOut = graphVizProcess.getOutputStream();
