@@ -67,6 +67,7 @@ public class LayoutManager  {
 			ArrayList<Position> path = parsePaths(edgeMatch);
 			for (ClassRelation cr : relations) {
 				if (cr.source.name.equals(sourceClassName)) {
+					System.out.println(cr.type);
 					System.out.printf("edge name: %s\n%s\n", 
 						sourceClassName, line);
 					for (Position p : path) {

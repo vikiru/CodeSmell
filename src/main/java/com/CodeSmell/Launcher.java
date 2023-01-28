@@ -38,6 +38,6 @@ public class Launcher {
     public static File chooseDirectory()
     {   
         //return new File("src/main/java/com/CodeSmell");
-        return new File("src/test/java/com/testproject");
+        return new File("/home/sabin/Documents/CodeSmell/src/test/java/com/testproject/");
     }
 }

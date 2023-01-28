@@ -170,7 +170,7 @@ function renderPath(classId, pathNumber, type) {
     let nodes = relationsContainer.children.item(pathNumber).children;
 
     function rotate(element, angle) {
-        element.style.transformOrigin = "0 0";
+        element.style.transformOrigin = "10px 10px";
         element.style.transform = 'rotate(' + angle + 'rad)'; 
     }  
 
@@ -186,7 +186,7 @@ function renderPath(classId, pathNumber, type) {
         arrow.src = "inheritance.svg"
     } else if (type == "REALIZATION") {
         arrow.src = "inheritance.svg";
-    } else if (type == "ASSOCIATION") {
+    } else if (type.includes("ASSOCIATION")) {
         arrow.src = "association.svg";
     } 
     
@@ -212,28 +212,29 @@ function renderPath(classId, pathNumber, type) {
         lineContainer.appendChild(intLine);
     }
 
-    for (let i = nodes.length - 2; i > 0; i--) { 
-        let startX = nodes[i].x;
-        let endX = nodes[i+1].x;
-        let startY = nodes[i].y;
-        let endY = nodes[i+1].y;
-        let magnitude = ((startX - endX)**2 + 
-            (startY - endY)**2)**0.5;
+    let i = nodes.length - 2 
+    let startX = nodes[i].x;
+    let endX = nodes[i+1].x;
+    let startY = nodes[i].y;
+    let endY = nodes[i+1].y;
+    let magnitude = ((startX - endX)**2 + 
+        (startY - endY)**2)**0.5;
 
-        if (magnitude >= 15) {
-            let angle = Math.acos((endX - startX) / magnitude);
-            if (endX <= startX && endY <= startY) {
-                angle *= -1;
-            } 
-            // try and move the arrows away from the box
-            arrow.style.left = endX - 10 - 10 * Math.cos(angle) + "px";
-            arrow.style.top = endY - 10 - 10 * Math.sin(angle) + "px";
-            rotate(arrow, angle);
-            arrow.id = nodes[i].id + "-arrow";
-            arrowContainer.appendChild(arrow);
-            return;
-        }
+
+    let angle = Math.acos((endX - startX) / magnitude);
+    if (endY >= startY) {
+        // angle = Math.asin((startY - endY) / magnitude);
+    } else {
+        angle = angle * -1;
     }
+    // try and move the arrow so that they just point to the box
+    let x =  endX - 10
+    let y = endY - 10
+    rotate(arrow, angle);
+    arrow.style.left = x - 10 * Math.cos(angle);
+    arrow.style.top = y - 10 * Math.sin(angle);
+    arrow.id = nodes[i].id + "-arrow";
+    arrowContainer.appendChild(arrow);
 }
 
 </script>
@@ -258,6 +259,7 @@ body {
     brightness(103%) contrast(103%);
     position: absolute;
     height: 20px;
+    width: 20px;
     z-index: 200;
 }
 

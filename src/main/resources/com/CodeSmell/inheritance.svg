@@ -7,7 +7,7 @@
    viewBox="0 0 48.654663 56.112885"
    version="1.1"
    id="svg5"
-   sodipodi:docname="inheritence.svg"
+   sodipodi:docname="inheritance.svg"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -25,7 +25,7 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="2.8284271"
-     inkscape:cx="14.318912"
+     inkscape:cx="-40.12831"
      inkscape:cy="80.963727"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
@@ -37,12 +37,11 @@
      id="defs2" />
   <g
      inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-49.03339,-3.0887442)">
     <path
        id="path511"
        style="fill:#000000;stroke-width:0.264583"
-       d="M 49.093851 3.0939118 L 49.093851 4.0096182 L 49.093851 59.195397 C 65.290464 49.8463 81.485566 40.494526 97.681583 31.144396 C 81.485566 21.794266 65.290464 12.443009 49.093851 3.0939118 z M 51.211035 6.7577709 C 65.289797 14.886669 79.368455 23.015498 93.447216 31.144396 C 79.368455 39.273295 65.289797 47.402123 51.211035 55.531021 L 51.211035 6.7577709 z " />
+       d="M 49.093851,3.0939118 V 4.0096182 59.195397 C 65.290464,49.8463 81.485566,40.494526 97.681583,31.144396 81.485566,21.794266 65.290464,12.443009 49.093851,3.0939118 Z m 2.117184,3.6638591 C 65.289797,14.886669 79.368455,23.015498 93.447216,31.144396 79.368455,39.273295 65.289797,47.402123 51.211035,55.531021 Z" />
   </g>
 </svg>
