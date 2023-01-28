@@ -28,6 +28,7 @@ Make sure that the following prerequisites are successfully installed on your ma
 - Maven - [Download & Install Maven.](https://maven.apache.org/download.cgi) Choosing the latest version will suffice.
 - Python - [Download & Install Python.](https://www.python.org/downloads/) Python 3.7+ is required.
 - Joern - Please see the [joern](https://github.com/joernio/joern) repository for more details on installing joern.
+- GraphViz - Used to generate layout. Specifically need the `dot` [graphviz.org](https://graphviz.org/download/source/)
 
 ## Build and Run Instructions
 

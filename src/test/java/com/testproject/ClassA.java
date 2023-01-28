@@ -6,6 +6,11 @@ public class ClassA {
 
 	private ClassB[] compositionField;
 
+	public ClassA() {
+		this.compositionField = new ClassB[4];
+
+	}
+
 	public ClassB getB() {
 		return compositionField[0];
 	}
