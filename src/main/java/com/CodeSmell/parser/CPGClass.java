@@ -1,8 +1,5 @@
 package com.CodeSmell.parser;
 
-import com.CodeSmell.parser.CodePropertyGraph;
-import com.google.gson.annotations.Expose;
-
 import java.util.ArrayList;
 import java.io.Serializable;
 
@@ -104,6 +101,8 @@ public class CPGClass implements Serializable {
      * An attribute belonging to a class
      */
     public static class Attribute implements Serializable {
+        public final String parentClassName;
+
         // the name of the attribute
         public final String name;
 
@@ -124,7 +123,8 @@ public class CPGClass implements Serializable {
         // the full type decl obtained from Joern (Without modification)
         public final String typeFullName;
 
-        protected Attribute(String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
+        protected Attribute(String parentClassName, String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
+            this.parentClassName = parentClassName;
             this.name = name;
             this.lineNumber = lineNumber;
             this.code = code;
@@ -179,9 +179,9 @@ public class CPGClass implements Serializable {
         // gson IGNORE THIS
         private ArrayList<Method> methodCalls;
 
-        protected Method(String parentClassName, String code, int lineNumberStart, 
-            int lineNumberEnd, String name, Modifier[] modifiers, 
-            String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
+        protected Method(String parentClassName, String code, int lineNumberStart,
+                         int lineNumberEnd, String name, Modifier[] modifiers,
+                         String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
             this.code = code;
@@ -212,7 +212,7 @@ public class CPGClass implements Serializable {
         }
 
         public static class Parameter implements Serializable {
-            
+
             public final String evaluationStrategy;
 
             public final String code;
