@@ -41,9 +41,11 @@ def assign_missing_class_info(class_dict, file_lines):
             attribute_modifiers = ["package private"]
         attribute_type = re.sub(modifiers_pattern, "", attribute_code).strip()
         attribute_type = attribute_type.split()[0]
+        attribute["parentClassName"] = class_name
         attribute["code"] = attribute_code
         attribute["attributeType"] = attribute_type
         attribute["modifiers"] = attribute_modifiers
+        attribute["packageName"] = attribute["typeFullName"].replace("[]", "")
 
     class_dict["code"] = class_declaration
     class_dict["importStatements"] = import_statements
@@ -55,35 +57,34 @@ def assign_missing_class_info(class_dict, file_lines):
 
 
 # For every attribute, create a dictionary and return it.
-def create_attribute_dict(curr_field):
-    field_name = curr_field["_1"]
-    field_type_full_name = curr_field["_2"]
-    field_code = curr_field["_3"]
-    field_line_number = curr_field["_4"]
-    field_modifiers = curr_field["_5"]
+def create_attribute_dict(curr_attribute):
+    attribute_name = curr_attribute["_1"]
+    attribute_type_full_name = curr_attribute["_2"]
+    attribute_code = curr_attribute["_3"]
+    attribute_line_number = curr_attribute["_4"]
+    attribute_modifiers = curr_attribute["_5"]
 
-    index = field_type_full_name.rfind(".")
-    type = field_type_full_name
+    index = attribute_type_full_name.rfind(".")
+    type = attribute_type_full_name
     package_name = ""
     if index != -1:
-        package_name = field_type_full_name[0:index].replace(
-            "<unresolvedNamespace>", ""
-        )
-        type = field_type_full_name[index + 1: len(field_type_full_name)]
+        package_name = attribute_type_full_name
+        type = attribute_type_full_name[index + 1: len(attribute_type_full_name)]
     index_nested = type.rfind("$")
     if index_nested != -1:
         type = type[index_nested + 1: len(type)]
 
-    curr_field_dict = {
-        "name": field_name,
+    curr_attribute_dict = {
+        "parentClassName": "",
+        "name": attribute_name,
         "code": "",
-        "lineNumber": int(field_line_number),
+        "lineNumber": int(attribute_line_number),
         "packageName": package_name,
-        "modifiers": [modifier.lower() for modifier in field_modifiers],
+        "modifiers": [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": type,
-        "typeFullName": field_type_full_name,
+        "typeFullName": attribute_type_full_name,
     }
-    return curr_field_dict
+    return curr_attribute_dict
 
 
 # For every method, create a dictionary and return it.
@@ -233,28 +234,28 @@ def create_class_dict(curr_class):
                 single_list_method_modifiers.extend(list)
 
             # Get all the modifiers and types of each attribute and combine each into a single list.
-            list_field_modifiers = [
+            list_attribute_modifiers = [
                 attribute["modifiers"]
                 for attribute in class_dictionary["attributes"]
                 if not attribute["modifiers"]
             ]
-            list_field_types = [
+            list_attribute_types = [
                 attribute["attributeType"]
                 for attribute in class_dictionary["attributes"]
                 if attribute["attributeType"] == class_name
             ]
-            single_list_field_modifiers = []
-            single_list_field_types = []
-            for list in list_field_modifiers:
-                single_list_field_modifiers.extend(list)
-            for list in list_field_types:
-                single_list_field_types.extend(list)
+            single_list_attribute_modifiers = []
+            single_list_attribute_types = []
+            for list in list_attribute_modifiers:
+                single_list_attribute_modifiers.extend(list)
+            for list in list_attribute_types:
+                single_list_attribute_types.extend(list)
 
-            set_field_types = set(list_field_types)
+            set_attribute_types = set(list_attribute_types)
             if (
                     "class" in declaration
-                    and not single_list_field_modifiers
-                    and (len(set_field_types) == 1 and class_name in set_field_types)
+                    and not single_list_attribute_modifiers
+                    and (len(set_attribute_types) == 1 and class_name in set_attribute_types)
             ):
                 return "enum"
             elif "class" in declaration and "abstract" in single_list_method_modifiers:
