@@ -18,6 +18,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * The Parser class that reads in the JSON source code of the project that is being analysed and then
  * converts the JSON code to a code property object that can be
@@ -70,9 +72,34 @@ public class Parser {
         if (bytesRead != size) {
             throw new RuntimeException("Bad class size");
         }
-
         return StandardCharsets.UTF_8.decode(buffer).toString();
     }
+
+    private static void readFromJoernQuery(CodePropertyGraph cpg,
+            BufferedInputStream bis, Gson gson) throws IOException {
+
+        int classSize = nextInputSize(bis);
+        do {
+            System.out.println("Reading in new class of size: " + classSize);
+            String classJson =  nextJson(bis, classSize);
+            System.out.println(classJson);
+            CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
+            if (cpgClass != null) {
+                cpg.addClass(cpgClass);
+                System.out.println(cpgClass.name);
+            } else {
+                throw new IllegalArgumentException("Bad JSON read by Parser.");
+            }
+            classSize = nextInputSize(bis);
+        } while (classSize > 0);
+
+        if (classSize != -1) {
+            // after joern_query prints the last class, it must
+            // print 0 (16 byte signed default edian)
+            throw new IllegalArgumentException(
+                "Parser given illegal class size " + classSize);
+        }
+}
 
     /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
@@ -87,73 +114,21 @@ public class Parser {
     public static CodePropertyGraph initializeCPG(InputStream cpgStream, 
             boolean serializedObject) throws InvalidClassException {
 
-        Gson gson = new GsonBuilder()
-            .setExclusionStrategies(new ArrayListExclusion())
-            .create();
         CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!serializedObject) {
             System.out.println("Reading in CPG from joern_query.");
-
-            // Read class JSONs line by line and add them to temp CPG
             try {
-                //String s = new BufferedReader(new InputStreamReader(cpgStream)).readLine();
-                //System.out.println(s);
-                // gets the size of the first class
-                BufferedInputStream bis = new BufferedInputStream(cpgStream);
-                int classSize = nextInputSize(bis);
-
-                do {
-                    System.out.println("Reading in new class of size: " + classSize);
-                    String classJson =  nextJson(bis, classSize);
-                    System.out.println(classJson);
-                    CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
-                    if (cpgClass != null) {
-                        cpg.addClass(cpgClass);
-                        System.out.println(cpgClass.name);
-                    } else {
-                        throw new IllegalArgumentException("Bad JSON read by Parser.");
-                    }
-                    classSize = nextInputSize(bis);
-                } while (classSize > 0);
-
-                if (classSize != -1) {
-                    // after joern_query prints the last class, it must
-                    // print 0 (16 byte signed default edian)
-                    throw new IllegalArgumentException(
-                        "Parser given illegal class size " + classSize);
-                }
-
+                Gson gson = new GsonBuilder()
+                    .setExclusionStrategies(new ArrayListExclusion())
+                    .create();
+                readFromJoernQuery(cpg, new BufferedInputStream(cpgStream), gson);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
-
-            // get missing info for CPGClasses and their fields and methods.
-            cpg = assignProperAttributesAndMethods(cpg, 2);
-            System.out.println("Processed joern_query.py output");
-            // assign all relations (association of diff types, composition, realization, inheritance, dependency)
-            cpg = assignInheritanceRelationship(cpg);
-            assignRealizationRelationships(cpg);
-            assignAssociationRelationships(cpg);
-            assignDependencyRelationships(cpg);
-            for (CodePropertyGraph.Relation r : cpg.getRelations()) {
-                r.source.addOutwardRelation(r);
-            }
-
-            // write the resulting CPG
-            // to a backup file for recovery in the event of a crash
-            try {
-                FileOutputStream fos = new FileOutputStream(
-                    CPG_BACKUP_JSON.getPath());
-                ObjectOutputStream oos = new ObjectOutputStream(fos);
-                oos.writeObject(cpg);
-                oos.flush();
-                oos.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+            cpg = assignRelationships(cpg);
+            writeBackup(cpg);
 
         } else {
             System.out.println("Reading backup file");
@@ -170,6 +145,37 @@ public class Parser {
         }
         System.out.printf("Project read: %d classes, %d relations\n",
                 cpg.getClasses().size(), cpg.getRelations().size());
+        return cpg;
+    }
+
+    protected static void writeBackup(CodePropertyGraph cpg) {
+        // write the resulting CPG
+        // to a backup file for recovery in the event of a crash
+        try {
+            FileOutputStream fos = new FileOutputStream(
+                CPG_BACKUP_JSON.getPath());
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(cpg);
+            oos.flush();
+            oos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    protected static CodePropertyGraph assignRelationships(CodePropertyGraph cpg) {
+        // get missing info for CPGClasses and their fields and methods.
+        cpg = assignProperAttributesAndMethods(cpg, 2);
+        System.out.println("Processed joern_query.py output");
+        // assign all relations (association of diff types, composition, realization, inheritance, dependency)
+        cpg = assignInheritanceRelationship(cpg);
+        assignRealizationRelationships(cpg);
+        assignAssociationRelationships(cpg);
+        assignDependencyRelationships(cpg);
+        for (CodePropertyGraph.Relation r : cpg.getRelations()) {
+            r.source.addOutwardRelation(r);
+        }
         return cpg;
     }
 
