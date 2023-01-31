@@ -1,10 +1,9 @@
 package com.CodeSmell.parser;
 
 import com.CodeSmell.model.ClassRelation.RelationshipType;
-import com.google.gson.annotations.Expose;
 
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class CodePropertyGraph implements Serializable {
 
@@ -12,8 +11,8 @@ public class CodePropertyGraph implements Serializable {
     private ArrayList<CPGClass> classes;
 
     protected CodePropertyGraph() {
-        this.classes = new ArrayList<CPGClass>();
-        this.relations = new ArrayList<Relation>();
+        this.classes = new ArrayList<>();
+        this.relations = new ArrayList<>();
     }
 
     @Override
@@ -25,22 +24,22 @@ public class CodePropertyGraph implements Serializable {
     }
 
     public ArrayList<CPGClass> getClasses() {
-        return new ArrayList(this.classes);
+        return new ArrayList<>(this.classes);
     }
 
     public ArrayList<Relation> getRelations() {
-        return new ArrayList(this.relations);
+        return new ArrayList<>(this.relations);
     }
 
-    public void addClass(CPGClass c) {
+    protected void addClass(CPGClass c) {
         this.classes.add(c);
     }
 
-    public void addRelation(Relation r) {
+    protected void addRelation(Relation r) {
         this.relations.add(r);
     }
 
-    public static class Relation implements Serializable  {
+    public static class Relation implements Serializable {
         public final CPGClass source;
         public final CPGClass destination;
         public final RelationshipType type;
@@ -55,7 +54,7 @@ public class CodePropertyGraph implements Serializable {
 
         @Override
         public String toString() {
-            return this.source.name + " -> " + destination.name + " : " + this.multiplicity + " " + this.type;
+            return source.name + " -> " + destination.name + " : " + multiplicity + " " + type;
         }
     }
 }
