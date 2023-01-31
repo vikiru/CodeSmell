@@ -63,6 +63,7 @@ public class LayoutManager  {
 		Matcher classMatch = CLASS_DOT_RE.matcher(line);
 
 		if (edgeMatch.find()) {
+			System.out.println("EDGE MATCH\n" + line);
 			String sourceClassName = edgeMatch.group(1);
 			ArrayList<Position> path = parsePaths(edgeMatch);
 			for (ClassRelation cr : relations) {
@@ -77,16 +78,14 @@ public class LayoutManager  {
 					return;
 				}
 			}
-			//System.out.println("EDGE MATCH " + path);
 		} else if (classMatch.find()) {
-			//System.out.println("CLASS MATCH " + line);
+			System.out.println("CLASS MATCH\n" + line);
 			String className = classMatch.group(1);
 			String[] rest = classMatch.group(2).split(" ");
 			double x = Double.parseDouble(rest[0]);
 			double y = Double.parseDouble(rest[1]);
 			System.out.printf("name: %s, x: %f, y: %f\n",
 				className, x, y);
-			System.out.println(line);
 			for (UMLClass c : classes) {
 				if (c.name.equals(className)) {
 					// coordinates graphViz uses

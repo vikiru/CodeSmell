@@ -154,13 +154,32 @@ function appendPathNode(classId, pathNumber, x, y) {
     pathContainer.appendChild(node);
 }
 
+let scale = 1.0;
+
 function init_main_panel() {
+    let mainPanel = document.getElementById("main");
     let lineContainer = document.createElementNS('http://www.w3.org/2000/svg','svg');
     lineContainer.id = "lines";
     // TODO: Increase they dynamically if needed
     lineContainer.setAttribute("height", 5000 + 'px'); 
     lineContainer.setAttribute("width",  5000 + 'px');
-    document.getElementById("main").appendChild(lineContainer);
+    mainPanel.appendChild(lineContainer);
+    mainPanel.addEventListener('click', (event) => {
+        let t = {};
+        scale = scale * 1.1;
+        t.scale = scale;
+        t.y = -50;
+        t.x = -50;
+        applyTransform(mainPanel, t);
+    });
+}
+
+function applyTransform(elem, transform) {
+    elem.style.transformOrigin = '0 0 0';
+    elem.style.transform = 'matrix(' +
+    transform.scale + ', 0, 0, ' +
+    transform.scale + ', ' +
+    transform.x + ', ' + transform.y + ')';
 }
 
 function renderPath(classId, pathNumber, type) {   
@@ -332,10 +351,12 @@ h2:hover {
 .line {
     position: absolute;
     z-index: 100;
-    shape-rendering: crispEdges;
+    shape-rendering: geometricPrecision; 
+    filter: url(#blurFilter);
 }
 
 </style>
+
 </head>
 
 

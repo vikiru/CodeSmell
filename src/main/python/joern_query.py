@@ -1,8 +1,8 @@
+import sys
 import json
 import os
 import platform
 import re
-import sys
 import time
 from pathlib import Path
 from time import sleep
@@ -329,11 +329,22 @@ if __name__ == "__main__":
 	)
 	total_time = 0
 
-	server_endpoint = "localhost:8080"
-	client = CPGQLSClient(server_endpoint)
+	server_endpoint = "localhost:" + sys.argv[-1]
+	client = None
+	sleep(4)
+	while (True):
+		try:
+			client = CPGQLSClient(server_endpoint)
+			break
+		except OSError:
+			print("joern_query :: failed to connect to port "  + 
+				str(sys.argv[-1]) + "retrying", file=sys.stderr)
+			sleep(1)
+
 	if client:
 		logging.info("joern_query is starting and connected to CPGQLSClient.")
-	project_dir = sys.argv[-1]
+	project_dir = sys.argv[-2]
+	print("joern_query :: project_dir "  + project_dir, file=sys.stderr)
 
 	if "Windows" in platform.platform():
 		index = project_dir.find(":")

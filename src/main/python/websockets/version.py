@@ -66,13 +66,3 @@ if not released:  # pragma: no cover
         return f"{tag}.dev0+gunknown"
 
     version = get_version(tag)
-
-    def get_commit(tag: str, version: str) -> str:
-        # Extract commit from version, falling back to tag if not available.
-        version_re = r"[0-9.]+\.dev[0-9]+\+g([0-9a-f]{7,}|unknown)(?:\.dirty)?"
-        match = re.fullmatch(version_re, version)
-        assert match is not None
-        (commit,) = match.groups()
-        return tag if commit == "unknown" else commit
-
-    commit = get_commit(tag, version)
