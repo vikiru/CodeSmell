@@ -35,19 +35,6 @@ public class Parser {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
-        } 
-    } 
-
-    private static class ArrayListExclusion implements ExclusionStrategy {
-
-        private Type listParameterizedType = new TypeToken<List<String>>() {}.getType();
-
-        public boolean shouldSkipClass(Class<?> c) {
-            return false;
-        }
-
-        public boolean shouldSkipField(FieldAttributes f) {
-            return listParameterizedType.equals(f.getDeclaredType());
         }
     }
 
@@ -62,8 +49,8 @@ public class Parser {
         return buffer.getInt();
     }
 
-    private static String nextJson(InputStream cpgStream, 
-            int size) throws IOException  {
+    private static String nextJson(InputStream cpgStream,
+                                   int size) throws IOException {
         byte[] contentBytes = new byte[size];
         ByteBuffer buffer = ByteBuffer.wrap(contentBytes);
         int bytesRead = cpgStream.read(contentBytes, 0, size);
@@ -84,12 +71,12 @@ public class Parser {
      *                         joern_query.py  standard output
      * @return A CodePropertyGraph object containing the source code classes and all relations
      */
-    public static CodePropertyGraph initializeCPG(InputStream cpgStream, 
-            boolean serializedObject) throws InvalidClassException {
+    public static CodePropertyGraph initializeCPG(InputStream cpgStream,
+                                                  boolean serializedObject) throws InvalidClassException {
 
         Gson gson = new GsonBuilder()
-            .setExclusionStrategies(new ArrayListExclusion())
-            .create();
+                .setExclusionStrategies(new ArrayListExclusion())
+                .create();
         CodePropertyGraph cpg = new CodePropertyGraph();
 
         if (!serializedObject) {
@@ -105,7 +92,7 @@ public class Parser {
 
                 do {
                     System.out.println("Reading in new class of size: " + classSize);
-                    String classJson =  nextJson(bis, classSize);
+                    String classJson = nextJson(bis, classSize);
                     System.out.println(classJson);
                     CPGClass cpgClass = gson.fromJson(classJson, CPGClass.class);
                     if (cpgClass != null) {
@@ -121,7 +108,7 @@ public class Parser {
                     // after joern_query prints the last class, it must
                     // print 0 (16 byte signed default edian)
                     throw new IllegalArgumentException(
-                        "Parser given illegal class size " + classSize);
+                            "Parser given illegal class size " + classSize);
                 }
 
             } catch (IOException e) {
@@ -145,7 +132,7 @@ public class Parser {
             // to a backup file for recovery in the event of a crash
             try {
                 FileOutputStream fos = new FileOutputStream(
-                    CPG_BACKUP_JSON.getPath());
+                        CPG_BACKUP_JSON.getPath());
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
                 oos.writeObject(cpg);
                 oos.flush();
@@ -468,7 +455,6 @@ public class Parser {
                 methods.toArray(new Method[methods.size()]));
     }
 
-
     /**
      * Iterates through the provided CodePropertyGraph to determine whether a realization relationship exists.
      * This is determined by first checking for the presence of interfaces within the cpg and collecting them within a list.
@@ -570,154 +556,13 @@ public class Parser {
                     cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
-            properClass = assignMissingClassInfo(properClass);
             graph.addClass(properClass);
         }
         if (iterations - 1 == 0) {
             return graph;
         } else return assignProperAttributesAndMethods(graph, iterations - 1);
     }
-
-    /**
-     * <p>
-     * Given a CPGClass object, this method will read in the .java file by reading the file
-     * based on the filePath field of the class. This method is necessary to address certain
-     * limitations of Joern.
-     * </p>
-     *
-     * <p>
-     * This method will update the CPGClass's code, packageName, classType, classModifiers, importStatements fields.
-     * Additionally, updating each the type, code, and modifiers fields of each Attribute within the class as needed.
-     * <p>
-     * Finally, a new CPGClass object is returned.
-     * </p>
-     *
-     * @param cpgClass - The existing CPGClass object which will be updated.
-     * @return A new CPGClass containing the updated CPGClass fields and Attribute objects.
-     */
-    protected static CPGClass assignMissingClassInfo(CPGClass cpgClass) {
-        // KNOWN INFO
-        File classFile = new File(cpgClass.filePath);
-        String className = cpgClass.name;
-        String constructorBody = "";
-        var constructorResult = Arrays.stream(cpgClass.methods).
-                filter(method -> method.name.equals(className)).collect(Collectors.toList());
-        if (!constructorResult.isEmpty()) {
-            constructorBody = constructorResult.get(0).code;
-        }
-        // HELPER VARIABLES
-        ArrayList<String> allLines = new ArrayList<>();
-
-        // INFO TO FIND
-        String classType = "";
-        String classDeclaration = "";
-        String packageName = "";
-        ArrayList<CPGClass.Modifier> classModifiers = new ArrayList<>();
-        HashSet<Attribute> updatedAttributes = new HashSet<>();
-
-        // Read in Java file and append non-empty lines to an ArrayList
-        try {
-            try (Scanner scanner = new Scanner(classFile)) {
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    allLines.add(line);
-                }
-            }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        // get package
-        var packageResult = allLines.stream().
-                filter(line -> line.startsWith("package ") && line.contains(";")).collect(Collectors.toList());
-
-        // get all imports
-        var importStatements = allLines.stream().
-                filter(line -> line.startsWith("import ") && line.contains(";")).collect(Collectors.toList());
-
-        if (!packageResult.isEmpty()) {
-            packageName = packageResult.get(0).replace("package ", "").replace(";", "").trim();
-        }
-
-        // get missing info for class
-        int classDeclLineNum = cpgClass.lineNumber - 1;
-        classDeclaration = allLines.get(classDeclLineNum).replace("{", "").trim();
-        int index = classDeclaration.indexOf(cpgClass.name);
-        String tempStr = classDeclaration.substring(0, index - 1).trim();
-        for (CPGClass.Modifier modifier : CPGClass.Modifier.values()) {
-            tempStr = tempStr.replace(modifier.modString, "").trim();
-            classModifiers.add(modifier);
-        }
-        if (classModifiers.contains(CPGClass.Modifier.ABSTRACT)) {
-            classType = "abstract class";
-        } else classType = tempStr;
-
-        // extract missing info from attributes
-        for (Attribute a : cpgClass.attributes) {
-            String name = a.name;
-            String type = a.attributeType;
-            if (type.contains("$")) {
-                type = getProperTypeName(type);
-            }
-            String toFind = type + " " + name;
-            String toFind2 = name + ";";
-            var attributeResult = allLines.stream().
-                    filter(line -> (line.contains(toFind) ||
-                            line.contains(toFind2) || (line.contains(name) && line.contains("=")))
-                            && !line.contains("{") && !line.contains("//") && !line.contains("*")).collect(Collectors.toList());
-            // add all modifiers
-            if (!attributeResult.isEmpty()) {
-                ArrayList<CPGClass.Modifier> fieldModifiers = new ArrayList<>();
-                String code = attributeResult.get(0).trim();
-                String line = code.replace(a.name, "").trim();
-                if (!type.equals(cpgClass.name) && !classType.equals("enum")) {
-                    for (CPGClass.Modifier modStr : CPGClass.Modifier.values()) {
-                        if (line.contains(modStr.modString)) {
-                            line = line.replace(modStr.modString, "").trim();
-                            fieldModifiers.add(modStr);
-                        }
-                    }
-                }
-                // enum constants are implicitly declared as public static final.
-                else {
-                    fieldModifiers.add(CPGClass.Modifier.PUBLIC);
-                    fieldModifiers.add(CPGClass.Modifier.STATIC);
-                    fieldModifiers.add(CPGClass.Modifier.FINAL);
-                }
-                // get proper type of attribute
-                if (a.packageName.equals("java.util") && !type.contains("<")) {
-                    int startIndex = line.indexOf("<");
-                    int endIndex = line.lastIndexOf(">");
-                    if (startIndex != -1 && endIndex != -1) {
-                        type += line.substring(startIndex, endIndex + 1).trim();
-                    }
-                }
-                String attrPackage = a.packageName;
-                if (a.typeFullName.contains(packageName) && attrPackage.equals("")) {
-                    String properType = getProperTypeName(type).trim();
-                    if (!type.contains(",")) {
-                        attrPackage = packageName + "." + properType;
-                    }
-                } else if (a.typeFullName.contains("<unresolvedNameSpace>") && attrPackage.equals("")) {
-                    attrPackage = packageName;
-                }
-                // create new attribute with proper info and add to updatedAttributes list
-                Attribute properAttribute = new Attribute(name, a.lineNumber, code, attrPackage,
-                        type, fieldModifiers.toArray(new CPGClass.Modifier[fieldModifiers.size()]), a.typeFullName);
-                updatedAttributes.add(properAttribute);
-            }
-        }
-
-
-        // return the CPGClass with updated info
-        return new CPGClass(className, classDeclaration,
-                cpgClass.lineNumber, importStatements.toArray(new String[importStatements.size()]),
-                classModifiers.toArray(new CPGClass.Modifier[classModifiers.size()]),
-                cpgClass.classFullName, cpgClass.inheritsFrom, classType, cpgClass.filePath, packageName,
-                updatedAttributes.toArray(new Attribute[updatedAttributes.size()]),
-                cpgClass.methods);
-    }
-
+        
     /**
      * Updates a given method with its proper methodCalls, requires two iterations to get all the proper method
      * calls of each method called within this list.
@@ -896,5 +741,19 @@ public class Parser {
                     replace(", ", " ").trim();
         }
         return typeName;
+    }
+
+    private static class ArrayListExclusion implements ExclusionStrategy {
+
+        private Type listParameterizedType = new TypeToken<List<String>>() {
+        }.getType();
+
+        public boolean shouldSkipClass(Class<?> c) {
+            return false;
+        }
+
+        public boolean shouldSkipField(FieldAttributes f) {
+            return listParameterizedType.equals(f.getDeclaredType());
+        }
     }
 }
