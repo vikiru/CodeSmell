@@ -7,14 +7,42 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+
+import java.util.Random;
+
 import java.nio.file.Paths;
+
+import java.net.ServerSocket;
 
 import com.CodeSmell.parser.Parser;
 
 public class JoernServer {
 
 
+	private static Random rand = new Random();
 	InputStream joernStream;
+
+	public static int nextFreePort(int from, int to) {
+	// https://stackoverflow.com/questions/2675362/how-to-find-an-available-port
+    int port = rand.nextInt(to - from) + from;
+    while (true) {
+        if (isLocalPortFree(port)) {
+            return port;
+        } else {
+            port = rand.nextInt(to - from) + from;
+        }
+    }
+}
+
+	private static boolean isLocalPortFree(int port) {
+		// https://stackoverflow.com/questions/2675362/how-to-find-an-available-port
+	    try {
+	        new ServerSocket(port).close();
+	        return true;
+	    } catch (IOException e) {
+	        return false;
+	    }
+	}
 
 	public static class ReaderThread extends Thread {
 
@@ -57,13 +85,18 @@ public class JoernServer {
 		// Start up a command prompt terminal (no popup) and start the joern server
 		ProcessBuilder joernServerBuilder, joernQueryBuilder, windowsPortFinderBuilder;
 
+		int serverPort = nextFreePort(8000, 9999);
+
 		// Open terminal and start the joern server once process for joernServerBuilder starts
 		windowsPortFinderBuilder = new ProcessBuilder("cmd.exe", "/c", "netstat -ano | findstr 8080");
 		if (System.getProperty("os.name").contains("Windows")) {
 			joernServerBuilder = new ProcessBuilder("cmd.exe", "/c", "joern", "--server");
-		} else joernServerBuilder = new ProcessBuilder("joern", "--server");
+		} else {
+			joernServerBuilder = new ProcessBuilder("joern", "--server-host",  "localhost",
+				"--server-port", String.valueOf(serverPort), "--server");
+		}
 		joernQueryBuilder = new ProcessBuilder("python", "joern_query.py", 
-			directory.toString()).directory(new File(directoryPath));
+			directory.toString(), String.valueOf(serverPort)).directory(new File(directoryPath));
 
 
 		try {

@@ -27,6 +27,8 @@ import java.io.InvalidClassException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,7 +37,20 @@ import java.util.Set;
 
 public class MainApp extends Application {
 
-    public static InputStream joernStream;
+    public static InputStream cpgStream; 
+    
+    static {
+        cpgStream = getBackupStream();
+    }
+
+    private static FileInputStream getBackupStream() {
+        try {
+            return new FileInputStream(Parser.CPG_BACKUP_JSON);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
     public static boolean skipJoern;
     
     public static void main(String[] args) {
@@ -98,9 +113,12 @@ public class MainApp extends Application {
     private void removeWhenParserLambdaLimitationFixed(Worker.State newState)  {
         if (newState == Worker.State.SUCCEEDED) {
             try {
-                CodePropertyGraph cpg = Parser.initializeCPG(joernStream, skipJoern);
+                if (cpgStream.available() == 0 && skipJoern) {
+                    cpgStream = getBackupStream();
+                }
+                CodePropertyGraph cpg = Parser.initializeCPG(cpgStream, skipJoern);
                 initializeMainView(cpg);
-            } catch (InvalidClassException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
