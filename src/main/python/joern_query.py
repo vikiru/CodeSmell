@@ -56,7 +56,6 @@ def assign_missing_class_info(class_dict, file_lines):
         attribute["code"] = attribute_code
         attribute["attributeType"] = attribute_type
         attribute["modifiers"] = attribute_modifiers
-        attribute["packageName"] = attribute["typeFullName"].replace("[]", "")
 
     class_dict["classType"] = class_type
     class_dict["code"] = class_declaration
@@ -80,7 +79,7 @@ def create_attribute_dict(curr_attribute):
     type = attribute_type_full_name
     package_name = ""
     if index != -1:
-        package_name = attribute_type_full_name
+        package_name = attribute_type_full_name.replace("[]", "")
         type = attribute_type_full_name[index + 1: len(attribute_type_full_name)]
     index_nested = type.rfind("$")
     if index_nested != -1:
