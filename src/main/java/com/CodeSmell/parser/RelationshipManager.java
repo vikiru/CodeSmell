@@ -297,35 +297,6 @@ public class RelationshipManager {
                 filter(method -> method.name.equals(subClass.name)).collect(Collectors.toList());
         List<CPGClass.Method> superClassConstructor = Arrays.stream(superClass.methods).
                 filter(method -> method.name.equals(superClass.name)).collect(Collectors.toList());
-        // Append superclass constructor to subclass constructor's method call,
-        // if 'super' exists in constructor instructions
-        if (!subClassConstructor.isEmpty()) {
-            CPGClass.Method existingConstructor = subClassConstructor.get(0);
-            int index = allSubClassMethods.indexOf(existingConstructor);
-            ArrayList<CPGClass.Method> newMethodCalls = new ArrayList<>(existingConstructor.getMethodCalls());
-            var superCallResult = Arrays.stream(existingConstructor.instructions).
-                    filter(instruction -> instruction.label.equals("CALL") && instruction.methodCall.equals("super")).
-                    collect(Collectors.toList());
-            if (!superCallResult.isEmpty() && !superClassConstructor.isEmpty()) {
-                allSubClassMethods.remove(index);
-                CPGClass.Method superMethod = superClassConstructor.get(0);
-                newMethodCalls.add(superMethod);
-                CPGClass.Method properSubClassConstructor =
-                        new CPGClass.Method(
-                                existingConstructor.parentClassName,
-                                existingConstructor.code,
-                                existingConstructor.lineNumberStart,
-                                existingConstructor.lineNumberEnd,
-                                existingConstructor.name,
-                                existingConstructor.modifiers,
-                                existingConstructor.returnType,
-                                existingConstructor.methodBody,
-                                existingConstructor.parameters,
-                                existingConstructor.instructions);
-                properSubClassConstructor.setMethodCalls(newMethodCalls);
-                allSubClassMethods.add(index, properSubClassConstructor);
-            }
-        }
         // Add all super class properties
         ArrayList<CPGClass.Attribute> allSuperClassAttr = new ArrayList<>(List.of(superClass.attributes));
         ArrayList<CPGClass.Method> allSuperClassMethods = new ArrayList<>(List.of(superClass.methods));
