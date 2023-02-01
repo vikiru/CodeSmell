@@ -183,9 +183,11 @@ public class StatTracker {
             HashMap<CPGClass, Integer> distinctClassCalls = new HashMap<>();
             for (CPGClass.Method methodCall : methodCalls) {
                 String methodParentName = methodCall.parentClassName;
-                int index = allClassNames.indexOf(methodParentName);
-                CPGClass methodParentClass = cpg.getClasses().get(index);
-                distinctClassCalls.put(methodParentClass, distinctClassCalls.getOrDefault(methodParentClass, 0) + 1);
+                if (allClassNames.contains(methodParentName)) {
+                    int index = allClassNames.indexOf(methodParentName);
+                    CPGClass methodParentClass = cpg.getClasses().get(index);
+                    distinctClassCalls.put(methodParentClass, distinctClassCalls.getOrDefault(methodParentClass, 0) + 1);
+                }
             }
             distinctMethodCalls.put(method, distinctClassCalls);
         }
