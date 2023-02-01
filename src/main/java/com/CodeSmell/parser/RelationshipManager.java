@@ -87,20 +87,22 @@ public class RelationshipManager {
                         collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 String multiplicity = returnHighestMultiplicity(filteredResult);
                 ClassRelation.RelationshipType type;
+                boolean sameClass = sourceClass == destinationClass;
                 // Handle Reflexive Association
-                if (sourceClass == destinationClass) {
+                if (sameClass) {
                     type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
-                }
-                // Handle Bi-Directional Association
-                if (determineBidirectionalAssociation(sourceClass, destinationClass)) {
-                    type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
-                }
-                // Handle Unidirectional Association
-                else {
-                    type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
-                }
-                if (determineCompositionRelationship(sourceClass, destinationClass)) {
-                    type = ClassRelation.RelationshipType.COMPOSITION;
+                } else {
+                    // Handle Bi-Directional Association
+                    if (determineBidirectionalAssociation(sourceClass, destinationClass)) {
+                        type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
+                    }
+                    // Handle Unidirectional Association
+                    else {
+                        type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
+                    }
+                    if (determineCompositionRelationship(sourceClass, destinationClass)) {
+                        type = ClassRelation.RelationshipType.COMPOSITION;
+                    }
                 }
                 CodePropertyGraph.Relation relationToAdd = new
                         CodePropertyGraph.Relation(sourceClass, destinationClass, type, multiplicity);
@@ -121,7 +123,8 @@ public class RelationshipManager {
      */
     protected static boolean determineBidirectionalAssociation(CPGClass sourceClass, CPGClass destinationClass) {
         var destResult = Arrays.stream(destinationClass.attributes).
-                filter(attribute -> attribute.attributeType.contains(sourceClass.name)).collect(Collectors.toList());
+                filter(attribute -> attribute.attributeType.contains(sourceClass.name)
+                        && attribute.parentClassName.equals(destinationClass.name)).collect(Collectors.toList());
         return !destResult.isEmpty();
     }
 
@@ -137,7 +140,8 @@ public class RelationshipManager {
         var constructorResult = Arrays.stream(sourceClass.methods).
                 filter(method -> method.name.equals(sourceClass.name)).collect(Collectors.toList());
         var matchingAttribute = Arrays.stream(sourceClass.attributes).
-                filter(attribute -> attribute.attributeType.contains(destinationClass.name)).collect(Collectors.toList());
+                filter(attribute -> attribute.attributeType.contains(destinationClass.name)
+                        && attribute.parentClassName.equals(sourceClass.name)).collect(Collectors.toList());
         // Check for presence of a constructor
         if (!constructorResult.isEmpty()) {
             CPGClass.Method constructor = constructorResult.get(0);
