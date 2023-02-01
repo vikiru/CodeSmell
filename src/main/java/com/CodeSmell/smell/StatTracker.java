@@ -12,34 +12,38 @@ import java.util.stream.Collectors;
  * for general use case purposes including determining potential bugs within the CodeSmell tool itself.
  */
 public final class StatTracker {
-    public static final HashMap<CPGClass.Attribute, Integer> attributeUsage = new HashMap<>();
-    public static final HashMap<CPGClass, Integer> classUsage = new HashMap<>();
-    public static final HashMap<CPGClass.Method, Integer> methodUsage = new HashMap<>();
-    public static final TreeMap<String, ArrayList<CPGClass>> distinctClassTypes = new TreeMap<>();
-    public static final HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls = new HashMap<>();
-    public static final ArrayList<Package> distinctPackages = new ArrayList<>();
-    public static final HashMap<ClassRelation.RelationshipType, ArrayList<CodePropertyGraph.Relation>> distinctRelations = new HashMap<>();
+    public final Helper helper;
+    public final HashMap<CPGClass.Attribute, Integer> attributeUsage = new HashMap<>();
+    public final HashMap<CPGClass, Integer> classUsage = new HashMap<>();
+    public final HashMap<CPGClass.Method, Integer> methodUsage = new HashMap<>();
+    public final TreeMap<String, ArrayList<CPGClass>> distinctClassTypes = new TreeMap<>();
+    public final HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls = new HashMap<>();
+    public final ArrayList<Package> distinctPackages = new ArrayList<>();
+    public final HashMap<ClassRelation.RelationshipType, ArrayList<CodePropertyGraph.Relation>> distinctRelations = new HashMap<>();
 
     public StatTracker(CodePropertyGraph cpg) {
-        determineAttributeUsage(cpg);
-        determineClassUsage(cpg);
-        determineMethodUsage();
-        determineDistinctClassTypes(cpg);
-        determineDistinctMethodCalls(cpg);
-        determineDistinctPackages(cpg);
-        determineDistinctRelations(cpg);
+        helper = new Helper(cpg);
+        determineAttributeUsage(cpg, attributeUsage, helper);
+        determineClassUsage(cpg, classUsage, helper);
+        determineMethodUsage(methodUsage, helper);
+        determineDistinctClassTypes(cpg, distinctClassTypes);
+        determineDistinctMethodCalls(cpg, distinctMethodCalls, helper);
+        determineDistinctPackages(cpg, distinctPackages);
+        determineDistinctRelations(cpg, distinctRelations);
     }
 
     /**
      * Iterates through the cpg to determine how many times an Attribute has been used within methods.
      *
-     * @param cpg - The CodePropertyGraph containing all existing classes and relations
+     * @param cpg            - The CodePropertyGraph containing all existing classes and relations
+     * @param attributeUsage
+     * @param helper
      */
-    private static void determineAttributeUsage(CodePropertyGraph cpg) {
+    protected static void determineAttributeUsage(CodePropertyGraph cpg, HashMap<CPGClass.Attribute, Integer> attributeUsage, Helper helper) {
         // Create helper lists to determine all attribute usages
-        ArrayList<String> allClassNames = Helper.allClassNames;
-        ArrayList<CPGClass.Attribute> allAttributeWithinCPG = Helper.allAttributes;
-        ArrayList<CPGClass.Method> allMethodsWithinCPG = Helper.allMethods;
+        ArrayList<String> allClassNames = helper.allClassNames;
+        ArrayList<CPGClass.Attribute> allAttributeWithinCPG = helper.allAttributes;
+        ArrayList<CPGClass.Method> allMethodsWithinCPG = helper.allMethods;
         var filteredMethodsWithinCPG = allMethodsWithinCPG.stream().
                 filter(method -> allClassNames.contains(method.parentClassName)).collect(Collectors.toList());
         // Iterate through each method within CPG and determine attribute usage through method instructions
@@ -85,10 +89,12 @@ public final class StatTracker {
      * Iterates through the CPG to return a HashMap containing the number of times each
      * CPGClass has been used within the cpg, either through some form of association or through local instantiation.
      *
-     * @param cpg - The CodePropertyGraph containing all existing classes and relations
+     * @param cpg        - The CodePropertyGraph containing all existing classes and relations
+     * @param classUsage
+     * @param helper
      */
-    private static void determineClassUsage(CodePropertyGraph cpg) {
-        ArrayList<CPGClass.Method> allMethodCallsWithinCPG = Helper.allMethodCalls;
+    protected static void determineClassUsage(CodePropertyGraph cpg, HashMap<CPGClass, Integer> classUsage, Helper helper) {
+        ArrayList<CPGClass.Method> allMethodCallsWithinCPG = helper.allMethodCalls;
         for (CPGClass cpgClass : cpg.getClasses()) {
             int count = 0;
             // Check how many association relations point towards a given cpgClass
@@ -116,9 +122,9 @@ public final class StatTracker {
      * Iterates through the cpg to determine how many times a given Method has been used and returns a
      * hashmap mapping every Method object to an int value representing the number of times it was called.
      */
-    private static void determineMethodUsage() {
-        ArrayList<CPGClass.Method> allMethodsWithinCPG = Helper.allMethods;
-        ArrayList<CPGClass.Method> allMethodCallsWithinCPG = Helper.allMethodCalls;
+    protected static void determineMethodUsage(HashMap<CPGClass.Method, Integer> methodUsage, Helper helper) {
+        ArrayList<CPGClass.Method> allMethodsWithinCPG = helper.allMethods;
+        ArrayList<CPGClass.Method> allMethodCallsWithinCPG = helper.allMethodCalls;
         // Add all the methods that exist within allMethodCalls of cpg and update the key, if it exists.
         for (CPGClass.Method method : allMethodCallsWithinCPG) {
             methodUsage.put(method, methodUsage.getOrDefault(method, 0) + 1);
@@ -134,9 +140,10 @@ public final class StatTracker {
      * Iterates through the cpg to determine all the distinct class types that are present such as
      * abstract class, class, enum, interface.
      *
-     * @param cpg - The CodePropertyGraph containing all existing classes and relations
+     * @param cpg                - The CodePropertyGraph containing all existing classes and relations
+     * @param distinctClassTypes
      */
-    private static void determineDistinctClassTypes(CodePropertyGraph cpg) {
+    protected static void determineDistinctClassTypes(CodePropertyGraph cpg, TreeMap<String, ArrayList<CPGClass>> distinctClassTypes) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             String classType = cpgClass.classType;
             distinctClassTypes.putIfAbsent(classType, new ArrayList<>());
@@ -145,11 +152,15 @@ public final class StatTracker {
     }
 
     /**
-     * @param cpg - The CodePropertyGraph containing all existing classes and relations
+     * @param cpg                 - The CodePropertyGraph containing all existing classes and relations
+     * @param distinctMethodCalls
+     * @param helper
      */
-    private static void determineDistinctMethodCalls(CodePropertyGraph cpg) {
-        ArrayList<CPGClass.Method> allMethodsWithinCPG = Helper.allMethods;
-        ArrayList<String> allClassNames = Helper.allClassNames;
+    protected static void determineDistinctMethodCalls(CodePropertyGraph cpg,
+                                                       HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls,
+                                                       Helper helper) {
+        ArrayList<CPGClass.Method> allMethodsWithinCPG = helper.allMethods;
+        ArrayList<String> allClassNames = helper.allClassNames;
         for (CPGClass.Method method : allMethodsWithinCPG) {
             ArrayList<CPGClass.Method> methodCalls = method.getMethodCalls();
             HashMap<CPGClass, Integer> distinctClassCalls = new HashMap<>();
@@ -169,9 +180,10 @@ public final class StatTracker {
      * Iterates through the cpg, creating Package objects corresponding to the distinct packages that exist
      * and additionally appends the corresponding sub-packages and CPGClasses that exist within each package.
      *
-     * @param cpg - The CodePropertyGraph containing all existing classes and relations
+     * @param cpg              - The CodePropertyGraph containing all existing classes and relations
+     * @param distinctPackages
      */
-    private static void determineDistinctPackages(CodePropertyGraph cpg) {
+    protected static void determineDistinctPackages(CodePropertyGraph cpg, ArrayList<Package> distinctPackages) {
         // Get all package names, mapped to an array list of classes
         TreeMap<String, ArrayList<CPGClass>> packageNames = new TreeMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
@@ -187,7 +199,6 @@ public final class StatTracker {
             classes.forEach(Package::addClass);
             distinctPackages.add(newPackage);
         }
-
         // Add all subpackages, by checking length of packageName (greater packageName implies subPackage to current pkg)
         for (Package pkg : distinctPackages) {
             String packageName = pkg.packageName;
@@ -203,9 +214,10 @@ public final class StatTracker {
     /**
      * Iterates through the cpg and groups all relations by RelationshipType.
      *
-     * @param cpg - The CodePropertyGraph containing all existing classes and relations
+     * @param cpg               - The CodePropertyGraph containing all existing classes and relations
+     * @param distinctRelations
      */
-    private static void determineDistinctRelations(CodePropertyGraph cpg) {
+    protected static void determineDistinctRelations(CodePropertyGraph cpg, HashMap<ClassRelation.RelationshipType, ArrayList<CodePropertyGraph.Relation>> distinctRelations) {
         for (ClassRelation.RelationshipType relationshipType : ClassRelation.RelationshipType.values()) {
             var allMatchingRelations = cpg.getRelations().stream().
                     filter(relation -> relation.type.equals(relationshipType)).collect(Collectors.toList());
@@ -249,59 +261,62 @@ public final class StatTracker {
      * all method calls, all method parameters, all class names within cpg.
      */
     public static final class Helper {
-        public static final ArrayList<CPGClass.Attribute> allAttributes = new ArrayList<>();
-        public static final ArrayList<CPGClass.Method> allMethods = new ArrayList<>();
-        public static final ArrayList<CPGClass.Method> allMethodCalls = new ArrayList<>();
-        public static final ArrayList<CPGClass.Method.Parameter> allParameters = new ArrayList<>();
-        public static final ArrayList<String> allClassNames = new ArrayList<>();
+        public final ArrayList<CPGClass.Attribute> allAttributes = new ArrayList<>();
+        public final ArrayList<CPGClass.Method> allMethods = new ArrayList<>();
+        public final ArrayList<CPGClass.Method> allMethodCalls = new ArrayList<>();
+        public final ArrayList<CPGClass.Method.Parameter> allParameters = new ArrayList<>();
+        public final ArrayList<String> allClassNames = new ArrayList<>();
 
         private Helper(CodePropertyGraph cpg) {
-            collectAllAttributes(cpg);
-            collectAllMethods(cpg);
-            collectAllMethodCalls();
-            collectAllParameters();
-            collectAllClassNames(cpg);
+            collectAllAttributes(cpg, allAttributes);
+            collectAllMethods(cpg, allMethods);
+            collectAllMethodCalls(allMethods, allMethodCalls);
+            collectAllParameters(allMethods, allParameters);
+            collectAllClassNames(cpg, allClassNames);
         }
 
         /**
          * Collect all the attributes that exist within cpg
          *
-         * @param cpg - The CodePropertyGraph containing all existing classes and relations
+         * @param cpg           - The CodePropertyGraph containing all existing classes and relations
+         * @param allAttributes
          */
-        private static void collectAllAttributes(CodePropertyGraph cpg) {
-            cpg.getClasses().forEach(cpgClass -> Helper.allAttributes.addAll(Arrays.asList(cpgClass.attributes)));
+        private static void collectAllAttributes(CodePropertyGraph cpg, ArrayList<CPGClass.Attribute> allAttributes) {
+            cpg.getClasses().forEach(cpgClass -> allAttributes.addAll(Arrays.asList(cpgClass.attributes)));
         }
 
         /**
          * Collect all the methods that exist within cpg
          *
-         * @param cpg - The CodePropertyGraph containing all existing classes and relations
+         * @param cpg        - The CodePropertyGraph containing all existing classes and relations
+         * @param allMethods
          */
-        private static void collectAllMethods(CodePropertyGraph cpg) {
-            cpg.getClasses().forEach(cpgClass -> Helper.allMethods.addAll(Arrays.asList(cpgClass.methods)));
+        private static void collectAllMethods(CodePropertyGraph cpg, ArrayList<CPGClass.Method> allMethods) {
+            cpg.getClasses().forEach(cpgClass -> allMethods.addAll(Arrays.asList(cpgClass.methods)));
         }
 
         /**
          * Collect all the method calls that exist within cpg
          */
-        private static void collectAllMethodCalls() {
-            Helper.allMethods.forEach(method -> Helper.allMethodCalls.addAll(method.getMethodCalls()));
+        private static void collectAllMethodCalls(ArrayList<CPGClass.Method> allMethods, ArrayList<CPGClass.Method> allMethodCalls) {
+            allMethods.forEach(method -> allMethodCalls.addAll(method.getMethodCalls()));
         }
 
         /**
          * Collect all the method parameters that exist within cpg
          */
-        private static void collectAllParameters() {
-            Helper.allMethods.forEach(method -> Helper.allParameters.addAll(Arrays.asList(method.parameters)));
+        private static void collectAllParameters(ArrayList<CPGClass.Method> allMethods, ArrayList<CPGClass.Method.Parameter> allParameters) {
+            allMethods.forEach(method -> allParameters.addAll(Arrays.asList(method.parameters)));
         }
 
         /**
          * Collect all the class names that exist within the cpg
          *
-         * @param cpg - The CodePropertyGraph containing all existing classes and relations
+         * @param cpg           - The CodePropertyGraph containing all existing classes and relations
+         * @param allClassNames
          */
-        private static void collectAllClassNames(CodePropertyGraph cpg) {
-            cpg.getClasses().forEach(cpgClass -> Helper.allClassNames.add(cpgClass.name));
+        private static void collectAllClassNames(CodePropertyGraph cpg, ArrayList<String> allClassNames) {
+            cpg.getClasses().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         }
     }
 
