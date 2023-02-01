@@ -205,11 +205,11 @@ public class StatTracker {
         // Get all package names, mapped to an array list of classes
         TreeMap<String, ArrayList<CPGClass>> packageNames = new TreeMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            String packageName = cpgClass.packageName.replace("package ", "").trim();
+            String packageName = cpgClass.packageName;
             packageNames.putIfAbsent(packageName, new ArrayList<>());
             packageNames.get(packageName).add(cpgClass);
         }
-        // Create distinct package objects and additionally append subpackages, if present
+        // Create distinct package objects
         ArrayList<Package> distinctPackages = new ArrayList<>();
         for (Map.Entry<String, ArrayList<CPGClass>> entry : packageNames.entrySet()) {
             String packageName = entry.getKey();
@@ -218,9 +218,10 @@ public class StatTracker {
         }
         // Add all subpackages, by checking length of packageName (greater packageName implies subPackage to current pkg)
         for (Package pkg : distinctPackages) {
-            int packageNameLength = pkg.packageName.length();
-            var result = distinctPackages.stream().filter(p -> p.packageName.length() > packageNameLength).
-                    collect(Collectors.toList());
+            String packageName = pkg.packageName;
+            int lastOccurrence = packageName.lastIndexOf(".");
+            var result = distinctPackages.stream().
+                    filter(p -> p.packageName.lastIndexOf(".") > lastOccurrence).collect(Collectors.toList());
             if (!result.isEmpty()) {
                 result.forEach(pkg::addPackage);
             }
