@@ -30,17 +30,28 @@ def assign_missing_class_info(class_dict, file_lines):
     class_declaration = class_declaration.replace("{", "").strip()
     class_modifiers = [modifier.strip() for modifier in modifiers_pattern.findall(class_declaration)]
     class_type = class_declaration.replace(class_name, "").replace("{", "").strip()
-    class_type = re.sub(modifiers_pattern, "", class_type).strip()
+    class_type = re.sub(modifiers_pattern, "", class_type).strip().split()[0]
 
     for attribute in class_dict["attributes"]:
         attribute_name = attribute["name"]
+        existing_package_name = attribute["packageName"];
+        existing_type = attribute["attributeType"]
         line_number = attribute["lineNumber"]
         attribute_code = file_lines[line_number - 1].strip()
         attribute_modifiers = [modifier.strip() for modifier in modifiers_pattern.findall(attribute_code)]
-        if not attribute_modifiers and "enum" not in class_type:
-            attribute_modifiers = ["package private"]
         attribute_type = re.sub(modifiers_pattern, "", attribute_code).strip()
         attribute_type = attribute_type.split()[0]
+        if not attribute_modifiers and "enum" not in class_type:
+            attribute_modifiers = ["package private"]
+        elif "enum" in class_type and existing_type == class_name:
+            if "public" in class_modifiers:
+                attribute_modifiers.append("public")
+            elif "private" in class_modifiers:
+                attribute_modifiers.append("private")
+            attribute_modifiers.append("final")
+            attribute_modifiers.append("static")
+            attribute_type = existing_type
+
         attribute["parentClassName"] = class_name
         attribute["code"] = attribute_code
         attribute["attributeType"] = attribute_type
