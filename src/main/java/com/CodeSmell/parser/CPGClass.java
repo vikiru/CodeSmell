@@ -7,10 +7,10 @@ import java.io.Serializable;
  * A class within the source code.
  */
 public class CPGClass implements Serializable {
-
     // The name of the class
     public final String name;
 
+    // The class declaration
     public final String code;
 
     // The line number which the class was declared within the file
@@ -31,6 +31,9 @@ public class CPGClass implements Serializable {
     // the filePath of the class (full path)
     public final String filePath;
 
+    // the length of the file where the class resides
+    public final int fileLength;
+
     // the package name of the class
     public final String packageName;
 
@@ -43,7 +46,7 @@ public class CPGClass implements Serializable {
     // a list of outward relations of the class
     private ArrayList<CodePropertyGraph.Relation> outwardRelations;
 
-    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, int fileLength, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
         this.lineNumber = lineNumber;
@@ -53,6 +56,7 @@ public class CPGClass implements Serializable {
         this.inheritsFrom = inheritsFrom;
         this.classType = classType;
         this.filePath = filePath;
+        this.fileLength = fileLength;
         this.packageName = packageName;
         this.attributes = attributes;
         this.methods = methods;
@@ -67,13 +71,13 @@ public class CPGClass implements Serializable {
         return new ArrayList<>(this.outwardRelations);
     }
 
-
     @Override
     public String toString() {
         return this.code;
     }
 
     public enum Modifier {
+        PACKAGE_PRIVATE("package private"),
         PUBLIC("public"),
         PRIVATE("private"),
         PROTECTED("protected"),
@@ -101,6 +105,7 @@ public class CPGClass implements Serializable {
      * An attribute belonging to a class
      */
     public static class Attribute implements Serializable {
+        // the name of the CPGClass which this field belongs to
         public final String parentClassName;
 
         // the name of the attribute
@@ -109,6 +114,7 @@ public class CPGClass implements Serializable {
         // line number where the field was declared within the file
         public final int lineNumber;
 
+        // the full line of code where the field is declared
         public final String code;
 
         // the package name of the field
@@ -120,10 +126,7 @@ public class CPGClass implements Serializable {
         // the type of the attribute
         public final String attributeType;
 
-        // the full type decl obtained from Joern (Without modification)
-        public final String typeFullName;
-
-        protected Attribute(String parentClassName, String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
+        protected Attribute(String parentClassName, String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers) {
             this.parentClassName = parentClassName;
             this.name = name;
             this.lineNumber = lineNumber;
@@ -131,7 +134,6 @@ public class CPGClass implements Serializable {
             this.packageName = packageName;
             this.attributeType = attributeType;
             this.modifiers = modifiers;
-            this.typeFullName = typeFullName;
         }
 
         @Override
@@ -149,11 +151,8 @@ public class CPGClass implements Serializable {
         // methodCalls)
         public final String parentClassName;
 
-        public final String code;
-
         // line numbers where the method starts and ends
         public final int lineNumberStart;
-
         public final int lineNumberEnd;
 
         // the name of the method
@@ -176,15 +175,13 @@ public class CPGClass implements Serializable {
         public final Instruction[] instructions;
 
         // a list of methods which this calls
-        // gson IGNORE THIS
         private ArrayList<Method> methodCalls;
 
-        protected Method(String parentClassName, String code, int lineNumberStart,
+        protected Method(String parentClassName, int lineNumberStart,
                          int lineNumberEnd, String name, Modifier[] modifiers,
                          String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
-            this.code = code;
             this.lineNumberStart = lineNumberStart;
             this.lineNumberEnd = lineNumberEnd;
             this.name = name;
@@ -212,9 +209,6 @@ public class CPGClass implements Serializable {
         }
 
         public static class Parameter implements Serializable {
-
-            public final String evaluationStrategy;
-
             public final String code;
 
             // the name of the method parameter
@@ -223,8 +217,7 @@ public class CPGClass implements Serializable {
             // the type of the method parameter
             public final String type;
 
-            public Parameter(String evaluationStrategy, String code, String name, String type) {
-                this.evaluationStrategy = evaluationStrategy;
+            public Parameter(String code, String name, String type) {
                 this.code = code;
                 this.name = name;
                 this.type = type;
