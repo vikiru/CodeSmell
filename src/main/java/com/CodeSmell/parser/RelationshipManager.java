@@ -305,7 +305,7 @@ public class RelationshipManager {
         // Return updated subclass
         return new CPGClass(subClass.name, subClass.code,
                 subClass.lineNumber, subClass.importStatements, subClass.modifiers,
-                subClass.classFullName, subClass.inheritsFrom, subClass.classType, subClass.filePath, subClass.packageName,
+                subClass.classFullName, subClass.inheritsFrom, subClass.classType, subClass.filePath, subClass.fileLength, subClass.packageName,
                 allSubClassAttr.toArray(new CPGClass.Attribute[allSuperClassAttr.size()]),
                 allSubClassMethods.toArray(new CPGClass.Method[allSuperClassMethods.size()]));
     }
