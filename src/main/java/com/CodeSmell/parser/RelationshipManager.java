@@ -172,43 +172,41 @@ public class RelationshipManager {
      */
     protected static void assignDependency(CodePropertyGraph cpg) {
         ArrayList<String> allClassNames = getAllClassNames(cpg);
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            for (CPGClass.Method method : cpgClass.methods) {
-                // Add dependency relations for parameters that do not have an existing relation of any kind with source class
-                if (!method.name.equals(cpgClass.name)) {
-                    for (CPGClass.Method.Parameter parameter : method.parameters) {
-                        if (allClassNames.contains(parameter.type)) {
-                            int index = allClassNames.indexOf(parameter.type);
-                            CPGClass destinationClass = cpg.getClasses().get(index);
-                            var additionalCheck = cpg.getRelations().stream().
-                                    filter(relation -> relation.source.equals(cpgClass) &&
-                                            relation.destination.equals(destinationClass))
-                                    .collect(Collectors.toList());
-                            CodePropertyGraph.Relation relationToAdd = new
-                                    CodePropertyGraph.Relation(cpgClass, destinationClass,
-                                    ClassRelation.RelationshipType.DEPENDENCY, "");
-                            if (additionalCheck.isEmpty() && !checkRelationExists(cpg, relationToAdd)) {
-                                cpg.addRelation(relationToAdd);
-                            }
-                        }
-                    }
-                    // Add dependency relations based on a method's method calls
-                    for (CPGClass.Method methodCall : method.getMethodCalls()) {
-                        if (allClassNames.contains(methodCall.parentClassName)) {
-                            int index = allClassNames.indexOf(methodCall.parentClassName);
-                            CPGClass methodParent = cpg.getClasses().get(index);
-                            var additionalCheck = cpg.getRelations().stream().
-                                    filter(relation -> relation.source.equals(cpgClass) &&
-                                            relation.destination.equals(methodParent))
-                                    .collect(Collectors.toList());
-                            CodePropertyGraph.Relation relationToAdd = new
-                                    CodePropertyGraph.Relation(cpgClass, methodParent,
-                                    ClassRelation.RelationshipType.DEPENDENCY, "");
-                            if (additionalCheck.isEmpty() && !checkRelationExists(cpg, relationToAdd)) {
-                                cpg.addRelation(relationToAdd);
-                            }
-                        }
-                    }
+        ArrayList<CPGClass.Method> filteredCPGMethods = new ArrayList<>();
+        cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).
+                filter(method -> !method.name.equals(cpgClass.name)).forEach(filteredCPGMethods::add));
+        for (CPGClass.Method method : filteredCPGMethods) {
+            int index = allClassNames.indexOf(method.parentClassName);
+            CPGClass cpgClass = cpg.getClasses().get(index);
+            var filteredParameters = Arrays.stream(method.parameters).
+                    filter(parameter -> allClassNames.contains(parameter.type)).collect(Collectors.toList());
+            for (CPGClass.Method.Parameter parameter : filteredParameters) {
+                CPGClass destinationClass = cpg.getClasses().get(allClassNames.indexOf(parameter.type));
+                var additionalCheck = cpg.getRelations().stream().
+                        filter(relation -> relation.source.equals(cpgClass) &&
+                                relation.destination.equals(destinationClass))
+                        .collect(Collectors.toList());
+                CodePropertyGraph.Relation relationToAdd = new
+                        CodePropertyGraph.Relation(cpgClass, destinationClass,
+                        ClassRelation.RelationshipType.DEPENDENCY, "");
+                if (additionalCheck.isEmpty() && !checkRelationExists(cpg, relationToAdd)) {
+                    cpg.addRelation(relationToAdd);
+                }
+            }
+            var filteredMethodCalls = method.getMethodCalls().stream().
+                    filter(methodCall -> allClassNames.contains(methodCall.parentClassName)).collect(Collectors.toList());
+            // Add dependency relations based on a method's method calls
+            for (CPGClass.Method methodCall : filteredMethodCalls) {
+                CPGClass methodParent = cpg.getClasses().get(allClassNames.indexOf(methodCall.parentClassName));
+                var additionalCheck = cpg.getRelations().stream().
+                        filter(relation -> relation.source.equals(cpgClass) &&
+                                relation.destination.equals(methodParent))
+                        .collect(Collectors.toList());
+                CodePropertyGraph.Relation relationToAdd = new
+                        CodePropertyGraph.Relation(cpgClass, methodParent,
+                        ClassRelation.RelationshipType.DEPENDENCY, "");
+                if (additionalCheck.isEmpty() && !checkRelationExists(cpg, relationToAdd)) {
+                    cpg.addRelation(relationToAdd);
                 }
             }
         }
@@ -223,38 +221,46 @@ public class RelationshipManager {
      */
     protected static CodePropertyGraph assignInheritance(CodePropertyGraph codePropertyGraph) {
         CodePropertyGraph updatedGraph = new CodePropertyGraph();
-        List<CPGClass> allClasses = codePropertyGraph.getClasses().stream().
-                filter(cpgClass -> !cpgClass.code.contains("extends")).collect(Collectors.toList());
-        List<CPGClass> allInheritances = codePropertyGraph.getClasses().stream().
+        var subClassResult = codePropertyGraph.getClasses().stream().
                 filter(cpgClass -> cpgClass.code.contains("extends")).collect(Collectors.toList());
+        ArrayList<CPGClass> allClasses = codePropertyGraph.getClasses().stream().
+                filter(cpgClass -> !cpgClass.code.contains("extends")).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> allClassNames = getAllClassNames(codePropertyGraph);
         // Iterate through the filtered allInheritances list and assign inheritance relationships
-        for (CPGClass subClass : allInheritances) {
-            for (String className : subClass.inheritsFrom) {
-                ArrayList<String> allClassNames = getAllClassNames(codePropertyGraph);
-                // Account for cases where Joern may return classes such as Object, which would not be present within CPG
-                if (allClassNames.contains(className)) {
+        for (CPGClass cpgClass : subClassResult) {
+            // Account for cases where Joern may return classes such as Object, which would not be present within CPG
+            var filteredInheritFrom = Arrays.stream(cpgClass.inheritsFrom).filter(allClassNames::contains).collect(Collectors.toList());
+            if (!filteredInheritFrom.isEmpty()) {
+                for (String className : filteredInheritFrom) {
                     int index = allClassNames.indexOf(className);
                     CPGClass destinationClass = codePropertyGraph.getClasses().get(index);
                     // Joern provides both interfaces and superclasses within inheritsFrom, account for this case
-                    if (!destinationClass.classType.equals("interface") && !subClassAlreadyUpdated(subClass, destinationClass)) {
-                        CPGClass properSubClass = appendSuperClassProperties(subClass, destinationClass);
-                        allClasses.add(properSubClass);
-                        CodePropertyGraph.Relation relationToAdd = new
-                                CodePropertyGraph.Relation(properSubClass, destinationClass,
-                                ClassRelation.RelationshipType.INHERITANCE, "");
-                        if (!checkRelationExists(updatedGraph, relationToAdd)) {
-                            updatedGraph.addRelation(relationToAdd);
+                    if (!destinationClass.classType.equals("interface")) {
+                        boolean subClassAlreadyUpdated = subClassAlreadyUpdated(cpgClass, destinationClass);
+                        // Subclass not updated
+                        if (!subClassAlreadyUpdated) {
+                            CPGClass properSubClass = appendSuperClassProperties(cpgClass, destinationClass);
+                            allClasses.add(properSubClass);
+                            CodePropertyGraph.Relation relationToAdd = new
+                                    CodePropertyGraph.Relation(properSubClass, destinationClass,
+                                    ClassRelation.RelationshipType.INHERITANCE, "");
+                            if (!checkRelationExists(updatedGraph, relationToAdd)) {
+                                updatedGraph.addRelation(relationToAdd);
+                            }
                         }
-                    }
-                    // Subclass has already been updated
-                    else {
-                        allClasses.add(subClass);
+                        // Subclass already updated
+                        else {
+                            allClasses.add(cpgClass);
+                        }
                     }
                 }
             }
+            // Subclass extends a class not present within cpg (i.e. Application)
+            else {
+                allClasses.add(cpgClass);
+            }
         }
         allClasses.forEach(updatedGraph::addClass);
-        codePropertyGraph.getRelations().forEach(updatedGraph::addRelation);
         return updatedGraph;
     }
 
@@ -295,10 +301,6 @@ public class RelationshipManager {
         // Get all existing subclass properties
         ArrayList<CPGClass.Attribute> allSubClassAttr = new ArrayList<>(List.of(subClass.attributes));
         ArrayList<CPGClass.Method> allSubClassMethods = new ArrayList<>(List.of(subClass.methods));
-        List<CPGClass.Method> subClassConstructor = Arrays.stream(subClass.methods).
-                filter(method -> method.name.equals(subClass.name)).collect(Collectors.toList());
-        List<CPGClass.Method> superClassConstructor = Arrays.stream(superClass.methods).
-                filter(method -> method.name.equals(superClass.name)).collect(Collectors.toList());
         // Add all super class properties
         ArrayList<CPGClass.Attribute> allSuperClassAttr = new ArrayList<>(List.of(superClass.attributes));
         ArrayList<CPGClass.Method> allSuperClassMethods = new ArrayList<>(List.of(superClass.methods));
