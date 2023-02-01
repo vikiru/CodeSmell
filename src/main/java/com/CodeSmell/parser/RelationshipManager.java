@@ -194,17 +194,19 @@ public class RelationshipManager {
                     }
                     // Add dependency relations based on a method's method calls
                     for (CPGClass.Method methodCall : method.getMethodCalls()) {
-                        int index = allClassNames.indexOf(methodCall.parentClassName);
-                        CPGClass methodParent = cpg.getClasses().get(index);
-                        var additionalCheck = cpg.getRelations().stream().
-                                filter(relation -> relation.source.equals(cpgClass) &&
-                                        relation.destination.equals(methodParent))
-                                .collect(Collectors.toList());
-                        CodePropertyGraph.Relation relationToAdd = new
-                                CodePropertyGraph.Relation(cpgClass, methodParent,
-                                ClassRelation.RelationshipType.DEPENDENCY, "");
-                        if (additionalCheck.isEmpty() && !checkRelationExists(cpg, relationToAdd)) {
-                            cpg.addRelation(relationToAdd);
+                        if (allClassNames.contains(methodCall.parentClassName)) {
+                            int index = allClassNames.indexOf(methodCall.parentClassName);
+                            CPGClass methodParent = cpg.getClasses().get(index);
+                            var additionalCheck = cpg.getRelations().stream().
+                                    filter(relation -> relation.source.equals(cpgClass) &&
+                                            relation.destination.equals(methodParent))
+                                    .collect(Collectors.toList());
+                            CodePropertyGraph.Relation relationToAdd = new
+                                    CodePropertyGraph.Relation(cpgClass, methodParent,
+                                    ClassRelation.RelationshipType.DEPENDENCY, "");
+                            if (additionalCheck.isEmpty() && !checkRelationExists(cpg, relationToAdd)) {
+                                cpg.addRelation(relationToAdd);
+                            }
                         }
                     }
                 }
