@@ -58,10 +58,11 @@ def assign_missing_class_info(class_dict, file_lines):
         attribute["modifiers"] = attribute_modifiers
         attribute["packageName"] = attribute["typeFullName"].replace("[]", "")
 
+    class_dict["classType"] = class_type
     class_dict["code"] = class_declaration
+    class_dict["fileLength"] = len(file_lines)
     class_dict["importStatements"] = import_statements
     class_dict["modifiers"] = class_modifiers
-    class_dict["classType"] = class_type
     class_dict["packageName"] = package_name
 
     return class_dict
@@ -93,7 +94,6 @@ def create_attribute_dict(curr_attribute):
         "packageName": package_name,
         "modifiers": [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": type,
-        "typeFullName": attribute_type_full_name,
     }
     return curr_attribute_dict
 
@@ -153,7 +153,6 @@ def create_method_dict(curr_method):
                 name = code.split(" ")[1]
                 parameter_dict = {
                     "code": code,
-                    "evaluationStrategy": evaluation_strategy,
                     "name": name,
                     "type": type,
                 }
@@ -175,7 +174,6 @@ def create_method_dict(curr_method):
             "modifiers": get_method_modifiers(
                 regex_pattern_modifiers, method_modifiers
             ),
-            "signature": method_signature,
             "returnType": return_type,
             "methodBody": method_body,
             "parameters": get_method_parameters(method_parameters),
@@ -305,6 +303,7 @@ def create_class_dict(curr_class):
         "inheritsFrom": [className.split('.')[-1] for className in inherits_from_list],
         "classType": "",
         "filePath": file_name,
+        "fileLength": 0,
         "packageName": get_package_name(file_name),
         "attributes": list(map(create_attribute_dict, class_attributes)),
         "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
