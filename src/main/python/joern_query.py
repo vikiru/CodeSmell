@@ -10,8 +10,16 @@ from cpgqls_client import CPGQLSClient, import_code_query
 import logging
 
 
+# Return all of the unique collection types present within the code base
+def return_collection_types(all_attributes):
+    collection_types = {attribute_dict["packageName"].replace("java.util.", "").strip() for attribute_dict in
+                        all_attributes if
+                        "java.util" in attribute_dict["packageName"]}
+    return collection_types
+
+
 # Return all distinct package names as a set
-def return_all_package_names(all_classes):
+def return_all_distinct_package_names(all_classes):
     package_names = {class_dict["packageName"] for class_dict in all_classes}
     return sorted(package_names)
 
@@ -120,6 +128,7 @@ def create_attribute_dict(curr_attribute):
         "packageName": package_name,
         "modifiers": [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": type,
+        "typeList": [],
     }
     return curr_attribute_dict
 
@@ -366,14 +375,8 @@ def retrieve_class_data(name):
     return class_dict
 
 
-def source_code_json_creation(class_names):
-    source_code_json = {"relations": [], "classes": []}
-    for class_name in class_names:
-        source_code_json["classes"].append(retrieve_class_data(class_name))
-    package_names = return_all_package_names(source_code_json["classes"])
-    root_pkg = package_names[0]
-    # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
-    # code base)
+def clean_up_external_classes(source_code_json):
+    root_pkg = return_all_distinct_package_names(source_code_json["classes"])[0]
     for class_dict in source_code_json["classes"]:
         filteredInherits = [class_name for class_name in class_dict["inheritsFrom"] if
                             class_name.replace(root_pkg, "") == class_name and "java" not in class_name]
@@ -383,6 +386,35 @@ def source_code_json_creation(class_names):
         # Else, clean up the inheritsFrom so that instead of "com.CodeSmell.smell.Smell", "Smell" is returned.
         else:
             class_dict["inheritsFrom"] = [className.split(".")[-1] for className in class_dict["inheritsFrom"]]
+    return source_code_json
+
+
+# Obtain all of the type lists for each attribute within cpg
+def obtain_attribute_type_lists(source_code_json):
+    all_attributes = [attribute for class_dict in source_code_json["classes"] for attribute in class_dict["attributes"]]
+    collection_types = return_collection_types(all_attributes)
+    regex_str = "|".join(collection_types) + "|\[]|<|>|,"
+    regex_pattern = re.compile(regex_str)
+    for attribute in all_attributes:
+        attribute_type = attribute["attributeType"]
+        new_type = re.sub(regex_pattern, "", attribute_type)
+        if len(new_type) == len(attribute_type):
+            attribute["typeList"] = [attribute_type]
+        else:
+            attribute["typeList"] = new_type.split()
+    return source_code_json
+
+
+def source_code_json_creation(class_names):
+    source_code_json = {"relations": [], "classes": []}
+    for class_name in class_names:
+        source_code_json["classes"].append(retrieve_class_data(class_name))
+    # Get all the type lists of attributes within cpg (i.e. HashMap<CPGClass, Integer> should return ["CPGClass",
+    # "Integer"]
+    source_code_json = obtain_attribute_type_lists(source_code_json)
+    # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
+    # code base)
+    source_code_json = clean_up_external_classes(source_code_json)
     return source_code_json
 
 
