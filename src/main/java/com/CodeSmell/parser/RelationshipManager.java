@@ -76,7 +76,7 @@ public class RelationshipManager {
                     if (!matcher.group().equals("") && attribute.parentClassName.equals(sourceClass.name)) {
                         allAttributeTypes.add(attributeType);
                         String className = matcher.group();
-                        properDestClass.add(helper.getClassFromName(className));
+                        properDestClass.add(helper.getClassFromName(cpg, className));
                     }
                 }
             }
@@ -179,7 +179,7 @@ public class RelationshipManager {
                 filter(method -> !method.name.equals(cpgClass.name)).forEach(filteredCPGMethods::add));
 
         for (CPGClass.Method method : filteredCPGMethods) {
-            CPGClass methodParent = helper.getClassFromName(method.parentClassName);
+            CPGClass methodParent = helper.getClassFromName(cpg, method.parentClassName);
             var filteredRelations = cpg.getRelations().stream().
                     filter(relation -> relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
                             relation.type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION) ||
@@ -196,10 +196,10 @@ public class RelationshipManager {
             var parameterResult = Arrays.stream(method.parameters).
                     filter(methodParameter -> helper.allClassNames.contains(methodParameter.type)).collect(Collectors.toSet());
             methodCallResult.
-                    forEach(methodCall -> classesToAddDependencies.add(helper.cpg.getClasses().
+                    forEach(methodCall -> classesToAddDependencies.add(cpg.getClasses().
                             get(helper.allClassNames.indexOf(methodCall.parentClassName))));
             parameterResult.
-                    forEach(methodParameter -> classesToAddDependencies.add(helper.cpg.getClasses()
+                    forEach(methodParameter -> classesToAddDependencies.add(cpg.getClasses()
                             .get(helper.allClassNames.indexOf(methodParameter.type))));
             // Remove all occurrences of elements within classesToIgnore and add dependencies accordingly
             classesToAddDependencies.removeAll(classesToIgnore);
@@ -230,26 +230,22 @@ public class RelationshipManager {
                 filter(cpgClass -> cpgClass.classType.equals("interface")).collect(Collectors.toList());
         ArrayList<String> allInterfaceNames = new ArrayList<>();
         allInterfaces.forEach(interfaceClass -> allInterfaceNames.add(interfaceClass.name));
+        var allExtenders = cpg.getClasses().stream().
+                filter(cpgClass -> cpgClass.code.contains("extends")).collect(Collectors.toList());
         // Iterate through all of cpg
-        for (CPGClass cpgClass : cpg.getClasses()) {
+        for (CPGClass cpgClass : allExtenders) {
             // Account for cases where Joern may return classes such as Object, which would not be present within CPG
             // Joern provides both interfaces and superclasses within inheritsFrom, account for this case
             var filteredInheritFrom = Arrays.stream(cpgClass.inheritsFrom).
                     filter(name -> allClassNames.contains(name) && !allInterfaceNames.contains(name)).collect(Collectors.toList());
             if (!filteredInheritFrom.isEmpty()) {
                 String className = filteredInheritFrom.get(0);
-                CPGClass destinationClass = helper.getClassFromName(className);
+                CPGClass destinationClass = helper.getClassFromName(cpg, className);
                 boolean subClassAlreadyUpdated = subClassAlreadyUpdated(cpgClass, destinationClass);
                 // Subclass not updated
                 if (!subClassAlreadyUpdated) {
                     CPGClass properSubClass = appendSuperClassProperties(cpgClass, destinationClass);
                     allClasses.add(properSubClass);
-                    CodePropertyGraph.Relation relationToAdd = new
-                            CodePropertyGraph.Relation(properSubClass, destinationClass,
-                            ClassRelation.RelationshipType.INHERITANCE, "");
-                    if (!checkRelationExists(updatedGraph, relationToAdd)) {
-                        updatedGraph.addRelation(relationToAdd);
-                    }
                 }
                 // Subclass already updated
                 else {
@@ -261,30 +257,29 @@ public class RelationshipManager {
                 allClasses.add(cpgClass);
             }
         }
+        Set<CPGClass> updatedExtendersOnly = new HashSet<>(allClasses);
+        // Add all the classes that do not extend and then add the classes to cpg and return the updated graph
+        var allNonExtenders = cpg.getClasses().stream().
+                filter(cpgClass -> !cpgClass.code.contains("extends")).collect(Collectors.toList());
+        allClasses.addAll(allNonExtenders);
         allClasses.forEach(updatedGraph::addClass);
-        return updatedGraph;
-    }
-
-    /**
-     * Create sets of sub and superclasses methods and attributes and check to see if
-     * all superclass properties are present, if yes then subClass has already been updated.
-     *
-     * @param existingSubclass
-     * @param superClass
-     * @return
-     */
-    protected static boolean subClassAlreadyUpdated(CPGClass existingSubclass, CPGClass superClass) {
-        boolean updated = false;
-        Set<CPGClass.Attribute> subAttrSet = new HashSet<>(List.of(existingSubclass.attributes));
-        Set<CPGClass.Method> subMethodSet = new HashSet<>(List.of(existingSubclass.methods));
-        Set<CPGClass.Attribute> superClassAttrSet = new HashSet<>(List.of(superClass.attributes));
-        Set<CPGClass.Method> superClassMethodSet = new HashSet<>(List.of(superClass.methods));
-        superClassMethodSet.removeAll(subMethodSet);
-        superClassAttrSet.removeAll(subAttrSet);
-        if (superClassMethodSet.isEmpty() && superClassAttrSet.isEmpty()) {
-            updated = true;
+        // Add relations to the updatedGraph
+        for (CPGClass cpgClass : updatedExtendersOnly) {
+            var filteredInheritFrom = Arrays.stream(cpgClass.inheritsFrom).
+                    filter(name -> allClassNames.contains(name) && !allInterfaceNames.contains(name)).collect(Collectors.toList());
+            if (!filteredInheritFrom.isEmpty()) {
+                String className = filteredInheritFrom.get(0);
+                CPGClass destinationClass = helper.getClassFromName(updatedGraph, className);
+                CodePropertyGraph.Relation relationToAdd = new
+                        CodePropertyGraph.Relation(cpgClass, destinationClass,
+                        ClassRelation.RelationshipType.INHERITANCE, "");
+                if (!checkRelationExists(updatedGraph, relationToAdd)) {
+                    updatedGraph.addRelation(relationToAdd);
+                }
+            }
         }
-        return updated;
+
+        return updatedGraph;
     }
 
     /**
@@ -314,6 +309,28 @@ public class RelationshipManager {
                 subClass.classFullName, subClass.inheritsFrom, subClass.classType, subClass.filePath, subClass.fileLength, subClass.packageName,
                 allSubClassAttr.toArray(new CPGClass.Attribute[allSuperClassAttr.size()]),
                 allSubClassMethods.toArray(new CPGClass.Method[allSuperClassMethods.size()]));
+    }
+
+    /**
+     * Create sets of sub and superclasses methods and attributes and check to see if
+     * all superclass properties are present, if yes then subClass has already been updated.
+     *
+     * @param existingSubclass
+     * @param superClass
+     * @return
+     */
+    protected static boolean subClassAlreadyUpdated(CPGClass existingSubclass, CPGClass superClass) {
+        boolean updated = false;
+        Set<CPGClass.Attribute> subAttrSet = new HashSet<>(List.of(existingSubclass.attributes));
+        Set<CPGClass.Method> subMethodSet = new HashSet<>(List.of(existingSubclass.methods));
+        Set<CPGClass.Attribute> superClassAttrSet = new HashSet<>(List.of(superClass.attributes));
+        Set<CPGClass.Method> superClassMethodSet = new HashSet<>(List.of(superClass.methods));
+        superClassMethodSet.removeAll(subMethodSet);
+        superClassAttrSet.removeAll(subAttrSet);
+        if (superClassMethodSet.isEmpty() && superClassAttrSet.isEmpty()) {
+            updated = true;
+        }
+        return updated;
     }
 
     /**
