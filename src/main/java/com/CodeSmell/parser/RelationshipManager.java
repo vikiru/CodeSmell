@@ -142,7 +142,7 @@ public class RelationshipManager {
         var constructorResult = Arrays.stream(sourceClass.methods).
                 filter(method -> method.name.equals(sourceClass.name)).collect(Collectors.toList());
         var matchingAttribute = Arrays.stream(sourceClass.attributes).
-                filter(attribute -> attribute.attributeType.contains(destinationClass.name)
+                filter(attribute -> (attribute.attributeType.contains(sourceClass.name) || attribute.attributeType.contains(destinationClass.classFullName))
                         && attribute.parentClassName.equals(sourceClass.name)).collect(Collectors.toList());
         // Check for presence of a constructor
         if (!constructorResult.isEmpty()) {
@@ -158,14 +158,6 @@ public class RelationshipManager {
                 }
             }
         }
-        // Case where constructor is not present
-        else {
-            // Check if the attribute is declared and initialized in the same line
-            // Additionally ensure the attribute is not static.
-            if (matchingAttribute.get(0).code.contains("= new") && !matchingAttribute.get(0).code.contains("static")) {
-                compositionExists = true;
-            }
-        }
         return compositionExists;
     }
 
@@ -174,11 +166,7 @@ public class RelationshipManager {
      */
     protected static void assignDependency(CodePropertyGraph cpg) {
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
-        ArrayList<CPGClass.Method> filteredCPGMethods = new ArrayList<>();
-        cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).
-                filter(method -> !method.name.equals(cpgClass.name)).forEach(filteredCPGMethods::add));
-
-        for (CPGClass.Method method : filteredCPGMethods) {
+        for (CPGClass.Method method : helper.allMethods) {
             CPGClass methodParent = helper.getClassFromName(cpg, method.parentClassName);
             var filteredRelations = cpg.getRelations().stream().
                     filter(relation -> relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
@@ -306,7 +294,7 @@ public class RelationshipManager {
         // Return updated subclass
         return new CPGClass(subClass.name, subClass.code,
                 subClass.lineNumber, subClass.importStatements, subClass.modifiers,
-                subClass.classFullName, subClass.inheritsFrom, subClass.classType, subClass.filePath, subClass.fileLength, subClass.packageName,
+                subClass.classFullName, subClass.inheritsFrom, subClass.classType, subClass.filePath, subClass.fileLength, subClass.emptyLines, subClass.nonEmptyLines, subClass.packageName,
                 allSubClassAttr.toArray(new CPGClass.Attribute[allSuperClassAttr.size()]),
                 allSubClassMethods.toArray(new CPGClass.Method[allSuperClassMethods.size()]));
     }

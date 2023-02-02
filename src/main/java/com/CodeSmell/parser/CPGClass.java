@@ -33,6 +33,8 @@ public class CPGClass implements Serializable {
 
     // the length of the file where the class resides
     public final int fileLength;
+    public final int emptyLines;
+    public final int nonEmptyLines;
 
     // the package name of the class
     public final String packageName;
@@ -46,7 +48,7 @@ public class CPGClass implements Serializable {
     // a list of outward relations of the class
     private ArrayList<CodePropertyGraph.Relation> outwardRelations;
 
-    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, int fileLength, String packageName, Attribute[] attributes, Method[] methods) {
+    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, int fileLength, int emptyLines, int nonEmptyLines, String packageName, Attribute[] attributes, Method[] methods) {
         this.name = name;
         this.code = code;
         this.lineNumber = lineNumber;
@@ -57,6 +59,8 @@ public class CPGClass implements Serializable {
         this.classType = classType;
         this.filePath = filePath;
         this.fileLength = fileLength;
+        this.emptyLines = emptyLines;
+        this.nonEmptyLines = nonEmptyLines;
         this.packageName = packageName;
         this.attributes = attributes;
         this.methods = methods;
@@ -154,6 +158,7 @@ public class CPGClass implements Serializable {
         // line numbers where the method starts and ends
         public final int lineNumberStart;
         public final int lineNumberEnd;
+        public final int totalMethodLength;
 
         // the name of the method
         public final String name;
@@ -178,12 +183,13 @@ public class CPGClass implements Serializable {
         private ArrayList<Method> methodCalls;
 
         protected Method(String parentClassName, int lineNumberStart,
-                         int lineNumberEnd, String name, Modifier[] modifiers,
+                         int lineNumberEnd, int totalMethodLength, String name, Modifier[] modifiers,
                          String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
 
             this.parentClassName = parentClassName;
             this.lineNumberStart = lineNumberStart;
             this.lineNumberEnd = lineNumberEnd;
+            this.totalMethodLength = totalMethodLength;
             this.name = name;
             this.modifiers = modifiers;
             this.returnType = returnType;

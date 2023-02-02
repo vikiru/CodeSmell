@@ -2,6 +2,7 @@ package com.CodeSmell.parser;
 
 import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.smell.StatTracker;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -100,7 +101,7 @@ public class Parser {
 
     /**
      * Reads in a .json file to create an initial CodePropertyGraph and then calls methods to obtain missing information
-     * and update neccessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
+     * and update necessary fields of every element within cpg. Finally, adds relationships to the cpg object and then
      * serializes it into a .json file.
      *
      * @param cpgStream        - The input stream from JoernServer
@@ -193,7 +194,8 @@ public class Parser {
             }
 
             CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.code, cpgClass.lineNumber, cpgClass.importStatements, cpgClass.modifiers,
-                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, cpgClass.fileLength, cpgClass.packageName,
+                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, cpgClass.fileLength, cpgClass.emptyLines,
+                    cpgClass.nonEmptyLines, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
             graph.addClass(properClass);
@@ -212,13 +214,12 @@ public class Parser {
      * @return The updated method with its methodCalls
      */
     protected static Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
-        ArrayList<Method> allMethodsInCPG = new ArrayList<>();
+        StatTracker.Helper helper = new StatTracker.Helper(cpg);
+        ArrayList<Method> allMethodsInCPG = helper.allMethods;
         ArrayList<String> allMethodNames = new ArrayList<>();
-        ArrayList<String> allClassNames = new ArrayList<>();
+        ArrayList<String> allClassNames = helper.allClassNames;
         ArrayList<Method.Instruction> allMethodInstructions = new ArrayList<>(Arrays.asList(methodToUpdate.instructions));
-        cpg.getClasses().forEach(cpgClass -> allMethodsInCPG.addAll(Arrays.asList(cpgClass.methods)));
         cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
-        cpg.getClasses().forEach(cpgClass -> allClassNames.add(cpgClass.name));
 
         // Get the indexes of the names of each Method called by methodToUpdate
         ArrayList<Integer> indexes = new ArrayList<>();
@@ -259,7 +260,6 @@ public class Parser {
                 filter(ins -> ins.label.equals("CALL") && !ins.methodCall.equals("")).collect(Collectors.toList());
         var localResult = allMethodInstructions.stream().
                 filter(ins -> ins.label.equals("LOCAL")).collect(Collectors.toList());
-
         // Check for identifier and calls
         for (Method.Instruction identifier : identifierResult) {
             String parentName = identifier.code;
@@ -311,7 +311,7 @@ public class Parser {
         if (iterationNumber == 1) {
             Method properMethod = new Method(methodToUpdate.parentClassName,
                     methodToUpdate.lineNumberStart, methodToUpdate.lineNumberEnd,
-                    methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
+                    methodToUpdate.totalMethodLength, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
                     methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions);
             properMethod.setMethodCalls(methodCalls);
             return properMethod;
