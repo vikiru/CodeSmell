@@ -193,6 +193,7 @@ def create_method_dict(curr_method):
                     "code": code,
                     "name": name,
                     "type": type,
+                    "typeList": [],
                 }
                 parameters_list.append(parameter_dict)
             return parameters_list
@@ -389,12 +390,15 @@ def clean_up_external_classes(source_code_json):
     return source_code_json
 
 
-# Obtain all of the type lists for each attribute within cpg
-def obtain_attribute_type_lists(source_code_json):
+# Obtain all the type lists for each attribute and method parameter within cpg
+def obtain_type_lists(source_code_json):
     all_attributes = [attribute for class_dict in source_code_json["classes"] for attribute in class_dict["attributes"]]
+    all_parameters = [parameter for class_dict in source_code_json["classes"] for method in class_dict["methods"] for
+                      parameter in method["parameters"]]
     collection_types = return_collection_types(all_attributes)
     regex_str = "|".join(collection_types) + "|\[]|<|>|,"
     regex_pattern = re.compile(regex_str)
+    # Obtain type lists for all attributes
     for attribute in all_attributes:
         attribute_type = attribute["attributeType"]
         new_type = re.sub(regex_pattern, "", attribute_type)
@@ -402,6 +406,14 @@ def obtain_attribute_type_lists(source_code_json):
             attribute["typeList"] = [attribute_type]
         else:
             attribute["typeList"] = new_type.split()
+    # Obtain type lists for all method parameters
+    for method_parameter in all_parameters:
+        parameter_type = method_parameter["type"]
+        new_type = re.sub(regex_pattern, "", parameter_type)
+        if len(new_type) == len(parameter_type):
+            method_parameter["typeList"] = [parameter_type]
+        else:
+            method_parameter["typeList"] = new_type.split()
     return source_code_json
 
 
@@ -409,9 +421,9 @@ def source_code_json_creation(class_names):
     source_code_json = {"relations": [], "classes": []}
     for class_name in class_names:
         source_code_json["classes"].append(retrieve_class_data(class_name))
-    # Get all the type lists of attributes within cpg (i.e. HashMap<CPGClass, Integer> should return ["CPGClass",
-    # "Integer"]
-    source_code_json = obtain_attribute_type_lists(source_code_json)
+    # Get all the type lists of method params & attributes within cpg (i.e. HashMap<CPGClass, Integer> should return
+    # ["CPGClass", "Integer"]
+    source_code_json = obtain_type_lists(source_code_json)
     # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
     # code base)
     source_code_json = clean_up_external_classes(source_code_json)

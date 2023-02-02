@@ -31,7 +31,7 @@ public class CPGClass implements Serializable {
     // the filePath of the class (full path)
     public final String filePath;
 
-    // the length of the file where the class resides (and additionally the empty and non empty lines)
+    // the length of the file where the class resides (and additionally the empty and non-empty lines)
     public final int fileLength;
     public final int emptyLines;
     public final int nonEmptyLines;
@@ -144,7 +144,8 @@ public class CPGClass implements Serializable {
         // the type of the attribute
         public final String attributeType;
 
-        // contains all the types within an attribute type (i.e. HashMap<CPGClass, ArrayList<CPGClass.Method> -> ['CPGClass', 'CPGClass.Method']
+        // contains all the types within an attribute type
+        // (i.e. HashMap<CPGClass, ArrayList<CPGClass.Method> -> ['CPGClass', 'CPGClass.Method']
         public final ArrayList<String> typeList;
 
         protected Attribute(String parentClassName,
@@ -253,11 +254,15 @@ public class CPGClass implements Serializable {
 
             // the type of the method parameter
             public final String type;
+            // contains all the types within an attribute type
+            // (i.e. HashMap<CPGClass, ArrayList<CPGClass.Method> -> ['CPGClass', 'CPGClass.Method']
+            public final ArrayList<String> typeList;
 
-            public Parameter(String code, String name, String type) {
+            public Parameter(String code, String name, String type, ArrayList<String> typeList) {
                 this.code = code;
                 this.name = name;
                 this.type = type;
+                this.typeList = typeList;
             }
 
             @Override
