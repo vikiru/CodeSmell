@@ -16,7 +16,7 @@ def return_all_package_names(all_classes):
     return package_names
 
 
-# Read a file from the file path that Joern gives and return a list of all of the lines
+# Read a file from the file path that Joern gives and return a list of all the lines
 def read_file(file_path):
     file = open(file_path, "r")
     lines = file.read().splitlines()
@@ -27,7 +27,7 @@ def read_file(file_path):
 # Assign missing class info to each class dictionary
 def assign_missing_class_info(class_dict, file_lines):
     class_name = class_dict["name"]
-    class_decl_line_number = class_dict["lineNumber"]
+    class_decl_line_number = int(class_dict["lineNumber"])
     # Space is needed to pickup, "abstract class" and not "class abstractClass" for example.
     modifiers_pattern = re.compile(
         "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
@@ -98,7 +98,7 @@ def create_attribute_dict(curr_attribute):
     attribute_name = curr_attribute["_1"]
     attribute_type_full_name = curr_attribute["_2"]
     attribute_code = curr_attribute["_3"]
-    attribute_line_number = curr_attribute["_4"]
+    attribute_line_number = int(curr_attribute["_4"])
     attribute_modifiers = curr_attribute["_5"]
     if not attribute_modifiers:
         attribute_modifiers = ["package private"]
@@ -117,7 +117,7 @@ def create_attribute_dict(curr_attribute):
         "parentClassName": "",
         "name": attribute_name,
         "code": "",
-        "lineNumber": int(attribute_line_number),
+        "lineNumber": attribute_line_number,
         "packageName": package_name,
         "modifiers": [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": type,
@@ -129,8 +129,9 @@ def create_attribute_dict(curr_attribute):
 def create_method_dict(curr_method):
     method_name = curr_method["_1"]
     method_code = curr_method["_2"]
-    method_line_number = curr_method["_3"]
-    method_line_number_end = curr_method["_4"]
+    method_line_number = int(curr_method["_3"])
+    method_line_number_end = int(curr_method["_4"])
+    total_lines = method_line_number_end - method_line_number
     method_signature = curr_method["_5"]
     method_modifiers = [modifier.lower() for modifier in curr_method["_6"]]
     if not method_modifiers:
@@ -194,13 +195,11 @@ def create_method_dict(curr_method):
             difference = set_regex - set_joern
             return regex_pattern_modifiers + list(difference)
 
-        total_lines = abs(method_line_number_end - method_line_number_end)
-
         curr_method_dict = {
             "parentClassName": "",
             "code": method_code,
-            "lineNumberStart": int(method_line_number),
-            "lineNumberEnd": int(method_line_number_end),
+            "lineNumberStart": method_line_number,
+            "lineNumberEnd": method_line_number_end,
             "totalMethodLength": total_lines,
             "name": method_name.replace("<init>", constructor_name),
             "modifiers": get_method_modifiers(
@@ -308,7 +307,6 @@ def retrieve_all_class_names():
     result = client.execute(query)
     class_names = []
     if result["success"] and result["stdout"] is not "":
-        print(result["stdout"])
         index = result["stdout"].index('"')
         all_names = json.loads(
             json.loads(result["stdout"][index: len(result["stdout"])])
@@ -406,7 +404,6 @@ if __name__ == "__main__":
     if client:
         logging.info("joern_query is starting and connected to CPGQLSClient.")
     project_dir = sys.argv[-2]
-    print(project_dir)
     print("joern_query :: project_dir " + project_dir, file=sys.stderr)
 
     if "Windows" in platform.platform():
