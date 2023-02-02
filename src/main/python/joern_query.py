@@ -10,6 +10,12 @@ from cpgqls_client import CPGQLSClient, import_code_query
 import logging
 
 
+# Return all distinct package names as a set
+def return_all_package_names(all_classes):
+    package_names = {class_dict["packageName"] for class_dict in all_classes}
+    return package_names
+
+
 # Read a file from the file path that Joern gives and return a list of all of the lines
 def read_file(file_path):
     file = open(file_path, "r")
@@ -21,28 +27,37 @@ def read_file(file_path):
 # Assign missing class info to each class dictionary
 def assign_missing_class_info(class_dict, file_lines):
     class_name = class_dict["name"]
+    class_decl_line_number = class_dict["lineNumber"]
     # Space is needed to pickup, "abstract class" and not "class abstractClass" for example.
     modifiers_pattern = re.compile(
         "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
     )
-    package_name = "".join(filter(lambda line: ("package" in line), file_lines))
-    package_name = package_name.replace(";", "")
+    package_name = ""
+    if file_lines[0].startswith("package"):
+        package_name = file_lines[0]
+    package_name = package_name.replace(";", "").replace("package ", "").strip()
     import_statements = [line for line in file_lines if "import" in line]
-    class_declaration = "".join(filter(lambda line: ("class" and "{" in line and "(" not in line), file_lines))
+    class_declaration = file_lines[class_decl_line_number - 1]
     class_declaration = class_declaration.replace("{", "").strip()
-    class_modifiers = [modifier.strip() for modifier in modifiers_pattern.findall(class_declaration)]
-    class_type = class_declaration.replace(class_name, "").replace("{", "").strip()
-    class_type = re.sub(modifiers_pattern, "", class_type).strip().split()[0]
+    class_modifiers = [
+        modifier.strip() for modifier in modifiers_pattern.findall(class_declaration)
+    ]
+    class_type = class_dict["classType"]
+    if "abstract" in class_modifiers:
+        class_type = "abstract class"
 
     for attribute in class_dict["attributes"]:
-        attribute_name = attribute["name"]
-        existing_package_name = attribute["packageName"];
         existing_type = attribute["attributeType"]
         line_number = attribute["lineNumber"]
         attribute_code = file_lines[line_number - 1].strip()
-        attribute_modifiers = [modifier.strip() for modifier in modifiers_pattern.findall(attribute_code)]
+        attribute_modifiers = [
+            modifier.strip() for modifier in modifiers_pattern.findall(attribute_code)
+        ]
         attribute_type = re.sub(modifiers_pattern, "", attribute_code).strip()
-        attribute_type = attribute_type.split()[0]
+        # Handle hashmap types
+        attribute_type = attribute_type.replace(", ", "|")
+        attribute_type = attribute_type.split()[0].replace("|", ", ")
+
         if not attribute_modifiers and "enum" not in class_type:
             attribute_modifiers = ["package private"]
         elif "enum" in class_type and existing_type == class_name:
@@ -59,9 +74,18 @@ def assign_missing_class_info(class_dict, file_lines):
         attribute["attributeType"] = attribute_type
         attribute["modifiers"] = attribute_modifiers
 
+    for method in class_dict["methods"]:
+        method["parentClassName"] = class_name
+
+    existing_full_name = class_dict["classFullName"].replace(package_name, "")
+    new_full_name = existing_full_name.replace(".", "").replace("$", ".").strip()
+    class_dict["classFullName"] = new_full_name
     class_dict["classType"] = class_type
     class_dict["code"] = class_declaration
     class_dict["fileLength"] = len(file_lines)
+    class_dict["emptyLines"] = len([line for line in file_lines if line is ""])
+    class_dict["nonEmptyLines"] = len([line for line in file_lines if line is not ""])
+    class_dict["inheritsFrom"] = [className.split(".")[-1] for className in class_dict["inheritsFrom"]]
     class_dict["importStatements"] = import_statements
     class_dict["modifiers"] = class_modifiers
     class_dict["packageName"] = package_name
@@ -76,12 +100,14 @@ def create_attribute_dict(curr_attribute):
     attribute_code = curr_attribute["_3"]
     attribute_line_number = curr_attribute["_4"]
     attribute_modifiers = curr_attribute["_5"]
+    if not attribute_modifiers:
+        attribute_modifiers = ["package private"]
 
     index = attribute_type_full_name.rfind(".")
     type = attribute_type_full_name
     package_name = ""
     if index != -1:
-        package_name = attribute_type_full_name.replace("[]", "")
+        package_name = attribute_type_full_name.replace("[]", "").replace("$", ".")
         type = attribute_type_full_name[index + 1: len(attribute_type_full_name)]
     index_nested = type.rfind("$")
     if index_nested != -1:
@@ -107,6 +133,8 @@ def create_method_dict(curr_method):
     method_line_number_end = curr_method["_4"]
     method_signature = curr_method["_5"]
     method_modifiers = [modifier.lower() for modifier in curr_method["_6"]]
+    if not method_modifiers:
+        method_modifiers = ["package private"]
     method_parameters = curr_method["_7"]
     method_instructions = curr_method["_8"]
 
@@ -166,11 +194,14 @@ def create_method_dict(curr_method):
             difference = set_regex - set_joern
             return regex_pattern_modifiers + list(difference)
 
+        total_lines = abs(method_line_number_end - method_line_number_end)
+
         curr_method_dict = {
             "parentClassName": "",
             "code": method_code,
             "lineNumberStart": int(method_line_number),
             "lineNumberEnd": int(method_line_number_end),
+            "totalMethodLength": total_lines,
             "name": method_name.replace("<init>", constructor_name),
             "modifiers": get_method_modifiers(
                 regex_pattern_modifiers, method_modifiers
@@ -231,62 +262,15 @@ def create_class_dict(curr_class):
     file_name = curr_class["_9"]
 
     # Get the type of the object, either a interface, class, enum or abstract class.
-    def get_type(declaration, class_dictionary):
-        if "interface" in declaration:
+    def get_type(declaration):
+        if "abstract class" in declaration:
+            return "abstract class"
+        elif "class" in declaration:
+            return "class"
+        elif "enum" in declaration:
+            return "enum"
+        elif "interface" in declaration:
             return "interface"
-        else:
-            # Get all the modifiers of a class's methods and combine them into a single list.
-            list_method_modifiers = [
-                methods["modifiers"] for methods in class_dictionary["methods"]
-            ]
-            single_list_method_modifiers = []
-            for list in list_method_modifiers:
-                single_list_method_modifiers.extend(list)
-
-            # Get all the modifiers and types of each attribute and combine each into a single list.
-            list_attribute_modifiers = [
-                attribute["modifiers"]
-                for attribute in class_dictionary["attributes"]
-                if not attribute["modifiers"]
-            ]
-            list_attribute_types = [
-                attribute["attributeType"]
-                for attribute in class_dictionary["attributes"]
-                if attribute["attributeType"] == class_name
-            ]
-            single_list_attribute_modifiers = []
-            single_list_attribute_types = []
-            for list in list_attribute_modifiers:
-                single_list_attribute_modifiers.extend(list)
-            for list in list_attribute_types:
-                single_list_attribute_types.extend(list)
-
-            set_attribute_types = set(list_attribute_types)
-            if (
-                    "class" in declaration
-                    and not single_list_attribute_modifiers
-                    and (len(set_attribute_types) == 1 and class_name in set_attribute_types)
-            ):
-                return "enum"
-            elif "class" in declaration and "abstract" in single_list_method_modifiers:
-                return "abstract class"
-            else:
-                return "class"
-
-    def get_package_name(file_path):
-        path_without_separators = file_path.replace(os.sep, " ").split(" ")
-        index_of_src = path_without_separators.index("src")
-        if index_of_src < 0:
-            index_of_src = path_without_separators.index("test")
-        if index_of_src < 0:
-            raise Exception("joern_query could not parse folder structure. No src/test")
-        full_package_name = ".".join(
-            path_without_separators[index_of_src: len(path_without_separators)]
-        )
-        file_name_index = full_package_name.rindex(".java")
-        package_name = full_package_name[0:file_name_index]
-        package_name = package_name[0: package_name.rindex(".")]
-        return package_name
 
     def get_name_without_separators(name):
         if "$" in name:
@@ -301,20 +285,20 @@ def create_class_dict(curr_class):
         "importStatements": [],  # keep empty for now
         "modifiers": [],  # keep these empty for now
         "classFullName": class_full_name,
-        "inheritsFrom": [className.split('.')[-1] for className in inherits_from_list],
-        "classType": "",
+        "inheritsFrom": inherits_from_list,
+        "classType": get_type(class_declaration),
         "filePath": file_name,
         "fileLength": 0,
-        "packageName": get_package_name(file_name),
+        "emptyLines": 0,
+        "nonEmptyLines": 0,
+        "packageName": "",
         "attributes": list(map(create_attribute_dict, class_attributes)),
         "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
-        "outwardRelations": []
+        "outwardRelations": [],
     }
-    curr_class_dict["classType"] = get_type(class_declaration, curr_class_dict)
-    for method in curr_class_dict["methods"]:
-        method["parentClassName"] = curr_class["_1"]
-
-    curr_class_dict = assign_missing_class_info(curr_class_dict, read_file(curr_class_dict["filePath"]))
+    curr_class_dict = assign_missing_class_info(
+        curr_class_dict, read_file(curr_class_dict["filePath"])
+    )
     return curr_class_dict
 
 
@@ -323,36 +307,49 @@ def retrieve_all_class_names():
     query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).name.toJson'
     result = client.execute(query)
     class_names = []
-    if result["success"]:
+    if result["success"] and result["stdout"] is not "":
+        print(result["stdout"])
         index = result["stdout"].index('"')
         all_names = json.loads(
             json.loads(result["stdout"][index: len(result["stdout"])])
         )
+        # add packages (node.fullName to make sure any classes that inherit from external libraries are removed)
         class_names = [name.replace("$", ".") for name in all_names]
+    else:
+        print("joern_query :: Retrieve class names failure", file=sys.stderr)
+        exit(1)
     return class_names
 
 
 # Execute a single query to get all the data of a class
 def retrieve_class_data(name):
     class_query = (
-            'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
-                                           "node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
-                                           "node.astChildren.isModifier.modifierType.l, "
-                                           "node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
-                                           "node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
-                                           "node.astChildren.isMethod.filter(node => node.lineNumber != None "
-                                           "&& node.lineNumberEnd != None).l.map(node => (node.name, node.code, "
-                                           "node.lineNumber, node.lineNumberEnd, node.signature, "
-                                           "node.astChildren.isModifier.modifierType.l, "
-                                           "node.astChildren.isParameter.filter(node => !node.name.contains("
-                                           '"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
-                                           "node.typeFullName)), node.ast.l.map(node => (node.label, node.code, "
-                                           "node.lineNumber)))), node.filename)).toJson"
+            'cpg.typeDecl.isExternal(false).name("' + name + '").map(node => (node.name, node.fullName, '
+                                                             "node.inheritsFromTypeFullName.l, node.code, "
+                                                             "node.lineNumber,"
+                                                             "node.astChildren.isModifier.modifierType.l, "
+                                                             "node.astChildren.isMember.l.map(node => (node.name, "
+                                                             "node.typeFullName,"
+                                                             "node.code, node.lineNumber, "
+                                                             "node.astChildren.isModifier.modifierType.l)),"
+                                                             "node.astChildren.isMethod.filter(node => "
+                                                             "node.lineNumber != None"
+                                                             "&& node.lineNumberEnd != None).l.map(node => ("
+                                                             "node.name, node.code,"
+                                                             "node.lineNumber, node.lineNumberEnd, node.signature, "
+                                                             "node.astChildren.isModifier.modifierType.l, "
+                                                             "node.astChildren.isParameter.filter(node => "
+                                                             "!node.name.contains("
+                                                             '"this")).l.map(node => (node.evaluationStrategy, '
+                                                             'node.code, node.name, '
+                                                             "node.typeFullName)), node.ast.l.map(node => ("
+                                                             "node.label, node.code,"
+                                                             "node.lineNumber)))), node.filename)).toJson"
     )
     start = time.time()
     result = client.execute(class_query)
     end = time.time()
-    if result["success"]:
+    if result["success"] and result["stdout"] is not "":
         logging.info(
             "The class data for "
             + name.replace(".", "$")
@@ -391,19 +388,25 @@ if __name__ == "__main__":
 
     server_endpoint = "localhost:" + sys.argv[-1]
     client = None
+    index = 1
     sleep(4)
-    while (True):
+    while True:
         try:
             client = CPGQLSClient(server_endpoint)
             break
         except OSError:
-            print("joern_query :: failed to connect to port " +
-                  str(sys.argv[-1]) + "retrying", file=sys.stderr)
+            print(
+                "joern_query :: failed to connect to port "
+                + str(sys.argv[-1])
+                + "retrying",
+                file=sys.stderr,
+            )
             sleep(1)
 
     if client:
         logging.info("joern_query is starting and connected to CPGQLSClient.")
     project_dir = sys.argv[-2]
+    print(project_dir)
     print("joern_query :: project_dir " + project_dir, file=sys.stderr)
 
     if "Windows" in platform.platform():
@@ -462,14 +465,16 @@ if __name__ == "__main__":
             for class_dict in source_code_json["classes"]:
                 class_contents = bytes(str(class_dict), "utf-8")
                 size_bytes = len(class_contents).to_bytes(
-                    4, byteorder=sys.byteorder, signed=True)
+                    4, byteorder=sys.byteorder, signed=True
+                )
                 print("class content size: ", len(class_contents), file=sys.stderr)
                 print("size bytes size: ", file=sys.stderr)
                 sys.stdout.buffer.write(size_bytes)
                 sys.stdout.buffer.write(class_contents)
 
-            sys.stdout.buffer.write((-1).to_bytes(
-                4, byteorder=sys.byteorder, signed=True))
+            sys.stdout.buffer.write(
+                (-1).to_bytes(4, byteorder=sys.byteorder, signed=True)
+            )
         else:
             print("joern_query :: Source code json creation failure", file=sys.stderr)
 
