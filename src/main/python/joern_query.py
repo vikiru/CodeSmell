@@ -13,7 +13,7 @@ import logging
 # Return all distinct package names as a set
 def return_all_package_names(all_classes):
     package_names = {class_dict["packageName"] for class_dict in all_classes}
-    return package_names
+    return sorted(package_names)
 
 
 # Read a file from the file path that Joern gives and return a list of all the lines
@@ -85,7 +85,6 @@ def assign_missing_class_info(class_dict, file_lines):
     class_dict["fileLength"] = len(file_lines)
     class_dict["emptyLines"] = len([line for line in file_lines if line is ""])
     class_dict["nonEmptyLines"] = len([line for line in file_lines if line is not ""])
-    class_dict["inheritsFrom"] = [className.split(".")[-1] for className in class_dict["inheritsFrom"]]
     class_dict["importStatements"] = import_statements
     class_dict["modifiers"] = class_modifiers
     class_dict["packageName"] = package_name
@@ -371,6 +370,19 @@ def source_code_json_creation(class_names):
     source_code_json = {"relations": [], "classes": []}
     for class_name in class_names:
         source_code_json["classes"].append(retrieve_class_data(class_name))
+    package_names = return_all_package_names(source_code_json["classes"])
+    root_pkg = package_names[0]
+    # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
+    # code base)
+    for class_dict in source_code_json["classes"]:
+        filteredInherits = [class_name for class_name in class_dict["inheritsFrom"] if
+                            class_name.replace(root_pkg, "") == class_name and "java" not in class_name]
+        # If filteredInherits is not an empty list, delete the class_dictionary
+        if filteredInherits:
+            del class_dict
+        # Else, clean up the inheritsFrom so that instead of "com.CodeSmell.smell.Smell", "Smell" is returned.
+        else:
+            class_dict["inheritsFrom"] = [className.split(".")[-1] for className in class_dict["inheritsFrom"]]
     return source_code_json
 
 
