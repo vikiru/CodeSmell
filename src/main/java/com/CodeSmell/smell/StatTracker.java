@@ -8,6 +8,8 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
+
 /**
  * A class that is meant to contain potentially useful statistics that can aid in the detection of code smells and
  * for general use case purposes including determining potential bugs within the CodeSmell tool itself.
@@ -196,20 +198,22 @@ public final class StatTracker {
             String fileName = cpgClass.name + ".java";
             packageNames.putIfAbsent(packageName, new ArrayList<>());
             if (filePath.contains(fileName)) {
-                // Handle adding of new files
+                // Handle adding of new files and classes within those files, starting with root class.
                 File newFile = new File(fileName, filePath);
-                var fileClasses = cpg.getClasses().stream().filter(nestedClasses -> nestedClasses.filePath.equals(filePath)).collect(Collectors.toList());
+                var fileClasses = cpg.getClasses().stream().
+                        filter(nestedClasses -> nestedClasses.filePath.equals(filePath)).collect(Collectors.toList());
+                fileClasses.sort(comparing(classes -> classes.classFullName));
                 if (!fileClasses.isEmpty()) {
                     fileClasses.forEach(fileClass -> File.addClass(newFile.classes, fileClass));
                 }
                 packageNames.get(packageName).add(newFile);
             }
         }
-
         // Create distinct package objects
         for (Map.Entry<String, ArrayList<File>> entry : packageNames.entrySet()) {
             String packageName = entry.getKey();
             ArrayList<File> files = entry.getValue();
+            files.sort(comparing(file -> file.fileName.toLowerCase()));
             Package newPackage = new Package(packageName);
             files.forEach(file -> Package.addFile(newPackage.files, file));
             distinctPackages.add(newPackage);
