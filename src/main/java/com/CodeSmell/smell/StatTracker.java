@@ -20,6 +20,7 @@ public final class StatTracker {
     public final HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls = new HashMap<>();
     public final ArrayList<Package> distinctPackages = new ArrayList<>();
     public final HashMap<ClassRelation.RelationshipType, ArrayList<CodePropertyGraph.Relation>> distinctRelations = new HashMap<>();
+    public final HashMap<CPGClass, Integer> totalClassLines = new HashMap<>();
 
     public StatTracker(CodePropertyGraph cpg) {
         helper = new Helper(cpg);
@@ -30,6 +31,22 @@ public final class StatTracker {
         determineDistinctMethodCalls(cpg, distinctMethodCalls, helper);
         determineDistinctPackages(cpg, distinctPackages);
         determineDistinctRelations(cpg, distinctRelations);
+        determineTotalClassLines(cpg, totalClassLines);
+    }
+
+    private static void determineTotalClassLines(CodePropertyGraph cpg, HashMap<CPGClass, Integer> totalClassLines) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            int selfAttributeLength = cpgClass.attributes.length;
+            final int[] selfMethodLines = {0};
+            Arrays.stream(cpgClass.methods).forEach(method -> {
+                selfMethodLines[0] += method.totalMethodLength;
+            });
+            int declarationLines = 2;
+            // This is the total amount of lines without package and import statements taken into account,
+            // purely just shows how many lines of non-empty code are occupied by each class
+            int totalLines = selfAttributeLength + selfMethodLines[0] + declarationLines;
+            totalClassLines.put(cpgClass, totalLines);
+        }
     }
 
     /**
@@ -261,12 +278,13 @@ public final class StatTracker {
      * all method calls, all method parameters, all class names within cpg.
      */
     public static final class Helper {
-        public final CodePropertyGraph cpg;
+        private final CodePropertyGraph cpg;
         public final ArrayList<CPGClass.Attribute> allAttributes = new ArrayList<>();
         public final ArrayList<CPGClass.Method> allMethods = new ArrayList<>();
         public final ArrayList<CPGClass.Method> allMethodCalls = new ArrayList<>();
         public final ArrayList<CPGClass.Method.Parameter> allParameters = new ArrayList<>();
         public final ArrayList<String> allClassNames = new ArrayList<>();
+        public final ArrayList<String> allMethodNames = new ArrayList<>();
 
         public Helper(CodePropertyGraph cpg) {
             this.cpg = cpg;
@@ -275,24 +293,40 @@ public final class StatTracker {
             collectAllMethodCalls(allMethods, allMethodCalls);
             collectAllParameters(allMethods, allParameters);
             collectAllClassNames(cpg, allClassNames);
+            collectAllMethodNames(cpg, allMethodNames);
         }
 
-        public CPGClass.Attribute getAttributeFromName(String name, String parentClassName) {
+        public CPGClass getClassFromName(String name) {
+            CPGClass classToReturn = null;
+            var classResult = cpg.getClasses().stream().
+                    filter(cpgClass -> cpgClass.name.equals(name) || cpgClass.classFullName.equals(name)).collect(Collectors.toList());
+            if (!classResult.isEmpty()) {
+                classToReturn = classResult.get(0);
+            }
+            return classToReturn;
+        }
+
+        public CPGClass.Attribute getAttributeFromName(String name, String attributeType, String parentClassName) {
             CPGClass.Attribute attributeToReturn = null;
-            var attributeResult = allAttributes.stream().filter(attribute -> attribute.name.equals(name) && attribute.parentClassName.equals(parentClassName)).collect(Collectors.toList());
+            var attributeResult = allAttributes.stream().
+                    filter(attribute -> attribute.name.equals(name) &&
+                            attribute.attributeType.equals(attributeType) &&
+                            attribute.parentClassName.equals(parentClassName)).collect(Collectors.toList());
             if (!attributeResult.isEmpty()) {
                 attributeToReturn = attributeResult.get(0);
             }
             return attributeToReturn;
         }
 
-        public CPGClass getClassFromName(String name) {
-            CPGClass classToReturn = null;
-            var classResult = cpg.getClasses().stream().filter(cpgClass -> cpgClass.name.equals(name)).collect(Collectors.toList());
-            if (!classResult.isEmpty()) {
-                classToReturn = classResult.get(0);
+        public CPGClass.Method getMethodFromName(String name, String parentClassName) {
+            CPGClass.Method methodToReturn = null;
+            var methodResult = allMethods.stream().
+                    filter(method -> method.name.equals(name) &&
+                            method.parentClassName.equals(parentClassName)).collect(Collectors.toList());
+            if (!methodResult.isEmpty()) {
+                methodToReturn = methodResult.get(0);
             }
-            return classToReturn;
+            return methodToReturn;
         }
 
 
@@ -339,7 +373,11 @@ public final class StatTracker {
         private static void collectAllClassNames(CodePropertyGraph cpg, ArrayList<String> allClassNames) {
             cpg.getClasses().forEach(cpgClass -> allClassNames.add(cpgClass.name));
         }
+
+        private static void collectAllMethodNames(CodePropertyGraph cpg, ArrayList<String> allMethodNames) {
+            cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+        }
+
     }
 
 }
-
