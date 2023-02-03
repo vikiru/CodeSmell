@@ -62,59 +62,52 @@ public class RelationshipManager {
      * </p>
      **/
     protected static void assignAssociation(CodePropertyGraph cpg) {
-        final String[] allClassNamePattern = {""};
-        cpg.getClasses().forEach(cpgClass -> allClassNamePattern[0] += cpgClass.name + "|");
-        String allNameRegex = allClassNamePattern[0];
-        Pattern regexPattern = Pattern.compile(allNameRegex, Pattern.COMMENTS);
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
-        // Iterate through cpg and match all attributes that are a valid class within cpg
-        for (CPGClass sourceClass : cpg.getClasses()) {
-            ArrayList<String> allAttributeTypes = new ArrayList<>();
-            Set<CPGClass> properDestClass = new HashSet<>();
-            for (CPGClass.Attribute attribute : sourceClass.attributes) {
-                String attributeType = attribute.attributeType;
-                Matcher matcher = regexPattern.matcher(attributeType);
-                while (matcher.find()) {
-                    if (!matcher.group().equals("") && attribute.parentClassName.equals(sourceClass.name)) {
-                        allAttributeTypes.add(attributeType);
-                        String className = matcher.group();
-                        properDestClass.add(helper.getClassFromName(className));
+        ArrayList<String> allClassNames = helper.allClassNames;
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            HashMap<String, Long> typeCountMap = new HashMap<>();
+            Set<CPGClass> uniqueDestinationClasses = new HashSet<>();
+            Set<CPGClass.Attribute> filteredAttribute = new HashSet<>();
+            Arrays.stream(cpgClass.attributes).filter(attr -> (attr.parentClassName.equals(cpgClass.name)
+                            || attr.parentClassName.equals(cpgClass.classFullName))).
+                    forEach(attribute -> attribute.typeList.stream().
+                            filter(allClassNames::contains).
+                            forEach(type -> uniqueDestinationClasses.add(helper.getClassFromName(type))));
+            Arrays.stream(cpgClass.attributes).filter(attr -> (attr.parentClassName.equals(cpgClass.name)
+                            || attr.parentClassName.equals(cpgClass.classFullName))).
+                    forEach(filteredAttribute::add);
+            for (CPGClass.Attribute attr : filteredAttribute) {
+                typeCountMap.put(attr.attributeType, typeCountMap.getOrDefault(attr.attributeType, 0L) + 1L);
+            }
+            for (CPGClass destClass : uniqueDestinationClasses) {
+                Map<String, Long> filtered = typeCountMap.entrySet().stream()
+                        .filter(entry -> entry.getKey().contains(destClass.name) || entry.getKey().contains(destClass.classFullName))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                String highestMultiplicity = returnHighestMultiplicity(filtered);
+                ClassRelation.RelationshipType type = null;
+                boolean isReflexive = cpgClass.name.equals(destClass.name);
+                boolean isBidirectional = determineBidirectionalAssociation(cpgClass, destClass);
+                boolean isComposition = determineCompositionRelationship(cpgClass, destClass);
+                if (isReflexive) {
+                    type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
+                } else {
+                    if (isBidirectional) {
+                        type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
+                    }
+                    if (isComposition && !isBidirectional) {
+                        type = ClassRelation.RelationshipType.COMPOSITION;
+                    }
+                    if (!isBidirectional && !isComposition) {
+                        type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
                     }
                 }
-            }
-            Map<String, Long> result = allAttributeTypes.stream().
-                    collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-            // Add associations for unique destination classes
-            for (CPGClass destinationClass : properDestClass) {
-                Map<String, Long> filteredResult = result.entrySet().stream().
-                        filter(entry -> entry.getKey().contains(destinationClass.name)).
-                        collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                String multiplicity = returnHighestMultiplicity(filteredResult);
-                ClassRelation.RelationshipType type = null;
-                boolean sameClass = sourceClass == destinationClass;
-                boolean bidirectional = determineBidirectionalAssociation(sourceClass, destinationClass);
-                boolean composition = determineCompositionRelationship(sourceClass, destinationClass);
-                // Handle Reflexive
-                if (sameClass) {
-                    type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
-                }
-                // Handle Bidirectional
-                else if (bidirectional) {
-                    type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
-                } else if (!composition) {
-                    type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
-                }
-                // Handle Composition
-                else {
-                    type = ClassRelation.RelationshipType.COMPOSITION;
-                }
                 CodePropertyGraph.Relation relationToAdd = new
-                        CodePropertyGraph.Relation(sourceClass, destinationClass, type, multiplicity);
-                // Add relation if it does not exist and there is no conflict with inheritance
+                        CodePropertyGraph.Relation(cpgClass, destClass, type, highestMultiplicity);
                 if (!checkRelationExists(cpg, relationToAdd)) {
                     cpg.addRelation(relationToAdd);
                 }
             }
+
         }
     }
 
@@ -186,6 +179,7 @@ public class RelationshipManager {
      */
     protected static void assignDependency(CodePropertyGraph cpg) {
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
+        ArrayList<String> allClassNames = helper.allClassNames;
         for (CPGClass.Method method : helper.allMethods) {
             CPGClass methodParent = helper.getClassFromName(method.parentClassName);
             var filteredRelations = cpg.getRelations().stream().
@@ -197,20 +191,22 @@ public class RelationshipManager {
             // Create a set which contains all the classes which srcClass has some kind of association relation to
             Set<CPGClass> classesToIgnore = new HashSet<>();
             filteredRelations.forEach(relation -> classesToIgnore.add(relation.destination));
+            // Ignore the class itself and classes it inherits from (interfaces and superclass)
+            Arrays.stream(methodParent.inheritsFrom).filter(allClassNames::contains).
+                    forEach(classToIgnore -> classesToIgnore.add(helper.getClassFromName(classToIgnore)));
             classesToIgnore.add(methodParent);
             // Create a single set containing all classes that exist within method params and method calls
             Set<CPGClass> classesToAddDependencies = new HashSet<>();
             var methodCallResult = method.getMethodCalls().stream().
                     filter(methodCall -> helper.allClassNames.contains(methodCall.parentClassName)
                             && !methodCall.parentClassName.equals(methodParent.name)).collect(Collectors.toSet());
-            var parameterResult = Arrays.stream(method.parameters).
-                    filter(methodParameter -> helper.allClassNames.contains(methodParameter.type)).collect(Collectors.toSet());
-            methodCallResult.
-                    forEach(methodCall -> classesToAddDependencies.add(cpg.getClasses().
-                            get(helper.allClassNames.indexOf(methodCall.parentClassName))));
-            parameterResult.
-                    forEach(methodParameter -> classesToAddDependencies.add(cpg.getClasses()
-                            .get(helper.allClassNames.indexOf(methodParameter.type))));
+            // Add all classes that exist within cpg and exist as parameters to the classesToAddDependencies set.
+            Arrays.stream(method.parameters).
+                    forEach(methodParameter -> methodParameter.typeList.stream().
+                            filter(allClassNames::contains).
+                            forEach(typeToAdd -> classesToAddDependencies.add(helper.getClassFromName(typeToAdd))));
+            // Add all classes that exist within a method's methodCalls list.
+            methodCallResult.forEach(methodToAdd -> classesToAddDependencies.add(helper.getClassFromName(methodToAdd.parentClassName)));
             // Remove all occurrences of elements within classesToIgnore and add dependencies accordingly
             classesToAddDependencies.removeAll(classesToIgnore);
             for (CPGClass destinationClass : classesToAddDependencies) {
