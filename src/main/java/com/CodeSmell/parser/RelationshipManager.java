@@ -126,10 +126,17 @@ public class RelationshipManager {
      * @return True or False, depending on if bidirectional association exists or not
      */
     protected static boolean determineBidirectionalAssociation(CPGClass sourceClass, CPGClass destinationClass) {
-        var destResult = Arrays.stream(destinationClass.attributes).
-                filter(attribute -> (attribute.attributeType.contains(sourceClass.name) || attribute.attributeType.contains(destinationClass.classFullName))
-                        && attribute.parentClassName.equals(destinationClass.name)).collect(Collectors.toList());
-        return !destResult.isEmpty();
+        boolean bidirectionalAssociationExists = false;
+        Set<CPGClass.Attribute> allSourceTypes = Arrays.stream(sourceClass.attributes).
+                filter(attr -> attr.typeList.contains(destinationClass.name) || attr.typeList.contains(destinationClass.classFullName)).
+                collect(Collectors.toSet());
+        Set<CPGClass.Attribute> allDestinationTypes = Arrays.stream(destinationClass.attributes).
+                filter(attr -> attr.typeList.contains(sourceClass.name) || attr.typeList.contains(sourceClass.classFullName)).
+                collect(Collectors.toSet());
+        if (!allSourceTypes.isEmpty() && !allDestinationTypes.isEmpty()) {
+            bidirectionalAssociationExists = true;
+        }
+        return bidirectionalAssociationExists;
     }
 
     /**
@@ -142,22 +149,33 @@ public class RelationshipManager {
     protected static boolean determineCompositionRelationship(CPGClass sourceClass, CPGClass destinationClass) {
         boolean compositionExists = false;
         var constructorResult = Arrays.stream(sourceClass.methods).
-                filter(method -> method.name.equals(sourceClass.name)).collect(Collectors.toList());
-        var matchingAttribute = Arrays.stream(sourceClass.attributes).
-                filter(attribute -> (attribute.attributeType.contains(sourceClass.name) || attribute.attributeType.contains(destinationClass.classFullName))
-                        && attribute.parentClassName.equals(sourceClass.name)).collect(Collectors.toList());
-        // Check for presence of a constructor
-        if (!constructorResult.isEmpty()) {
-            CPGClass.Method constructor = constructorResult.get(0);
-            // Ensure destination class is not within parameters of constructor
-            if (!constructor.methodBody.contains(destinationClass.name)) {
-                var constructorInstructions = Arrays.stream(constructor.instructions).
-                        filter(instruction -> instruction.label.equals("CALL")
-                                && instruction.code.contains(destinationClass.name)
-                                && instruction.code.contains("new")).collect(Collectors.toList());
-                if (!constructorInstructions.isEmpty()) {
-                    compositionExists = true;
-                }
+                filter(method -> method.name.equals(sourceClass.name) &&
+                        method.parentClassName.equals(sourceClass.name) &&
+                        !method.methodBody.contains(destinationClass.name)).collect(Collectors.toList());
+        var filteredAttributes = Arrays.stream(sourceClass.attributes).
+                filter(attribute -> (attribute.typeList.contains(destinationClass.classFullName)
+                        || attribute.typeList.contains(destinationClass.name)
+                        && attribute.parentClassName.equals(sourceClass.name))
+                        && !attribute.code.contains("static")).collect(Collectors.toList());
+        String codeToFind = "= new " + destinationClass.name;
+        // A constructor does not exist, but attributes matching destination class exist,
+        // filter these attributes such that they contain "new" and are not static, or the attribute contains final
+        if (constructorResult.isEmpty() && !filteredAttributes.isEmpty()) {
+            var compositionAttribute = filteredAttributes.stream().filter(attribute ->
+                    attribute.code.contains(codeToFind)
+                            || attribute.code.contains("final")).collect(Collectors.toList());
+            if (!compositionAttribute.isEmpty()) {
+                compositionExists = true;
+            }
+        }
+        // A constructor exists and destination class does not appear within parameters
+        // The constructor's instruction contains "= new (destination class name)"
+        else if (!constructorResult.isEmpty() && !filteredAttributes.isEmpty()) {
+            CPGClass.Method sourceConstructor = constructorResult.get(0);
+            var constructorIns = Arrays.stream(sourceConstructor.instructions).
+                    filter(instruction -> instruction.code.contains(codeToFind)).collect(Collectors.toList());
+            if (!constructorIns.isEmpty()) {
+                compositionExists = true;
             }
         }
         return compositionExists;
@@ -179,10 +197,12 @@ public class RelationshipManager {
             // Create a set which contains all the classes which srcClass has some kind of association relation to
             Set<CPGClass> classesToIgnore = new HashSet<>();
             filteredRelations.forEach(relation -> classesToIgnore.add(relation.destination));
+            classesToIgnore.add(methodParent);
             // Create a single set containing all classes that exist within method params and method calls
             Set<CPGClass> classesToAddDependencies = new HashSet<>();
             var methodCallResult = method.getMethodCalls().stream().
-                    filter(methodCall -> helper.allClassNames.contains(methodCall.parentClassName) && !methodCall.parentClassName.equals(methodParent.name)).collect(Collectors.toSet());
+                    filter(methodCall -> helper.allClassNames.contains(methodCall.parentClassName)
+                            && !methodCall.parentClassName.equals(methodParent.name)).collect(Collectors.toSet());
             var parameterResult = Arrays.stream(method.parameters).
                     filter(methodParameter -> helper.allClassNames.contains(methodParameter.type)).collect(Collectors.toSet());
             methodCallResult.
