@@ -4,6 +4,7 @@ import com.CodeSmell.model.ClassRelation;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,20 +35,6 @@ public final class StatTracker {
         determineTotalClassLines(cpg, totalClassLines);
     }
 
-    private static void determineTotalClassLines(CodePropertyGraph cpg, HashMap<CPGClass, Integer> totalClassLines) {
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            int selfAttributeLength = cpgClass.attributes.length;
-            final int[] selfMethodLines = {0};
-            Arrays.stream(cpgClass.methods).forEach(method -> {
-                selfMethodLines[0] += method.totalMethodLength;
-            });
-            int declarationLines = 2;
-            // This is the total amount of lines without package and import statements taken into account,
-            // purely just shows how many lines of non-empty code are occupied by each class
-            int totalLines = selfAttributeLength + selfMethodLines[0] + declarationLines;
-            totalClassLines.put(cpgClass, totalLines);
-        }
-    }
 
     /**
      * Iterates through the cpg to determine how many times an Attribute has been used within methods.
@@ -201,19 +188,30 @@ public final class StatTracker {
      * @param distinctPackages
      */
     private static void determineDistinctPackages(CodePropertyGraph cpg, ArrayList<Package> distinctPackages) {
-        // Get all package names, mapped to an array list of classes
-        TreeMap<String, ArrayList<CPGClass>> packageNames = new TreeMap<>();
+        // Get all package names, mapped to an array list of files
+        TreeMap<String, ArrayList<File>> packageNames = new TreeMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
             String packageName = cpgClass.packageName;
+            String filePath = cpgClass.filePath;
+            String fileName = cpgClass.name + ".java";
             packageNames.putIfAbsent(packageName, new ArrayList<>());
-            packageNames.get(packageName).add(cpgClass);
+            if (filePath.contains(fileName)) {
+                // Handle adding of new files
+                File newFile = new File(fileName, filePath);
+                var fileClasses = cpg.getClasses().stream().filter(nestedClasses -> nestedClasses.filePath.equals(filePath)).collect(Collectors.toList());
+                if (!fileClasses.isEmpty()) {
+                    fileClasses.forEach(fileClass -> File.addClass(newFile.classes, fileClass));
+                }
+                packageNames.get(packageName).add(newFile);
+            }
         }
+
         // Create distinct package objects
-        for (Map.Entry<String, ArrayList<CPGClass>> entry : packageNames.entrySet()) {
+        for (Map.Entry<String, ArrayList<File>> entry : packageNames.entrySet()) {
             String packageName = entry.getKey();
-            ArrayList<CPGClass> classes = entry.getValue();
+            ArrayList<File> files = entry.getValue();
             Package newPackage = new Package(packageName);
-            classes.forEach(cpgClass -> Package.addClass(newPackage.classes, cpgClass));
+            files.forEach(file -> Package.addFile(newPackage.files, file));
             distinctPackages.add(newPackage);
         }
         // Add all subpackages, by checking length of packageName (greater packageName implies subPackage to current pkg)
@@ -243,12 +241,31 @@ public final class StatTracker {
     }
 
     /**
+     * @param cpg
+     * @param totalClassLines
+     */
+    private static void determineTotalClassLines(CodePropertyGraph cpg, HashMap<CPGClass, Integer> totalClassLines) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            int selfAttributeLength = cpgClass.attributes.length;
+            final int[] selfMethodLines = {0};
+            Arrays.stream(cpgClass.methods).forEach(method -> {
+                selfMethodLines[0] += method.totalMethodLength;
+            });
+            int declarationLines = 2;
+            // This is the total amount of lines without package and import statements taken into account,
+            // purely just shows how many lines of non-empty code are occupied by each class
+            int totalLines = selfAttributeLength + selfMethodLines[0] + declarationLines;
+            totalClassLines.put(cpgClass, totalLines);
+        }
+    }
+
+    /**
      * A class that is meant to represent that packages that exist within a given codebase.
      */
     public static final class Package {
         public final String packageName;
+        public final ArrayList<File> files = new ArrayList<>();
         public final ArrayList<Package> subPackages = new ArrayList<>();
-        public final ArrayList<CPGClass> classes = new ArrayList<>();
 
         public Package(String packageName) {
             this.packageName = packageName;
@@ -264,7 +281,29 @@ public final class StatTracker {
         }
 
         /**
-         * Add classes to the current Package
+         * Add files to the current Package
+         */
+        private static void addFile(ArrayList<File> classes, File fileToAdd) {
+            classes.add(fileToAdd);
+        }
+
+    }
+
+    /**
+     *
+     */
+    public static final class File {
+        public final String fileName;
+        public final String filePath;
+        public final ArrayList<CPGClass> classes = new ArrayList<>();
+
+        public File(String fileName, String filePath) {
+            this.fileName = fileName;
+            this.filePath = filePath;
+        }
+
+        /**
+         * Add classes to the current File
          *
          * @param cpgClassToAdd - The class to be added to the current Package
          */
