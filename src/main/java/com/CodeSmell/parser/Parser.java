@@ -186,11 +186,9 @@ public class Parser {
             ArrayList<Method> properMethods = new ArrayList<>();
             for (Method m : cpgClass.methods) {
                 int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
-                // ignore lambdas for now
                 Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
                 properMethods.add(properMethod);
             }
-
             CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.code, cpgClass.lineNumber, cpgClass.importStatements, cpgClass.modifiers,
                     cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, cpgClass.fileLength, cpgClass.emptyLines,
                     cpgClass.nonEmptyLines, cpgClass.packageName,
@@ -223,27 +221,29 @@ public class Parser {
         Set<String> allInheritedTypes = new HashSet<>();
         Set<String> allLocalTypes = new HashSet<>();
         Set<String> allParameterTypes = new HashSet<>();
-
         Set<String> allTypes = new HashSet<>();
         Set<Integer> uniqueIndexes = new LinkedHashSet<>();
-        Set<String> allCalls = new HashSet<>();
-
         // Get all possible calls where the instruction's methodCall is not empty and
         // the method is present within cpg
-        var possibleCalls = Arrays.stream(methodToUpdate.instructions).
+        var allCalls = Arrays.stream(methodToUpdate.instructions).
                 filter(instruction -> instruction.label.equals("CALL")
-                        && !instruction.methodCall.equals("") && allMethodNames.contains(instruction.methodCall)).
-                collect(Collectors.toList());
-        possibleCalls.forEach(instruction -> allCalls.add(instruction.methodCall));
+                        && !instruction.methodCall.equals("") &&
+                        (allMethodNames.contains(instruction.methodCall) ||
+                                instruction.methodCall.equals("super"))).collect(Collectors.toList());
         Arrays.stream(methodParent.attributes).
                 forEach(attribute -> attribute.typeList.stream().
-                        filter(allClassNames::contains).forEach(allFieldTypes::add));
+                        filter(allClassNames::contains).
+                        forEach(allFieldTypes::add));
         Arrays.stream(methodToUpdate.parameters).
                 forEach(parameter -> parameter.typeList.stream().
-                        filter(allClassNames::contains).forEach(allParameterTypes::add));
-        Arrays.stream(methodParent.inheritsFrom).filter(allClassNames::contains).
+                        filter(allClassNames::contains).
+                        forEach(allParameterTypes::add));
+        Arrays.stream(methodParent.inheritsFrom).
+                filter(allClassNames::contains).
                 forEach(allInheritedTypes::add);
-        allCalls.stream().filter(allClassNames::contains).forEach(allLocalTypes::add);
+        allCalls.stream().
+                filter(ins -> allClassNames.contains(ins.methodCall)).
+                forEach(localType -> allLocalTypes.add(localType.methodCall));
         // Now allTypes contains all possible types that could have owned the method (itself, fields,
         // parameters, local, and inherited superclass)
         allTypes.addAll(allFieldTypes);
@@ -252,9 +252,16 @@ public class Parser {
         allTypes.addAll(allLocalTypes);
         allTypes.add(methodParent.name);
         if (!allCalls.isEmpty()) {
-            for (String call : allCalls) {
+            for (Method.Instruction call : allCalls) {
+                String methodCall = call.methodCall;
+                if (methodCall.equals("super")) {
+                    int index = methodParent.code.indexOf("extends ");
+                    String extenderCode = methodParent.code.substring(index).replace("extends ", "");
+                    methodCall = extenderCode.split(" ")[0];
+                }
+                String finalMethodCall = methodCall;
                 var methodCallParent = allMethodsInCPG.stream().
-                        filter(method -> method.name.equals(call) &&
+                        filter(method -> method.name.equals(finalMethodCall) &&
                                 allTypes.contains(method.parentClassName)).collect(Collectors.toList());
                 if (!methodCallParent.isEmpty()) {
                     uniqueIndexes.add(allMethodsInCPG.indexOf(methodCallParent.get(0)));
