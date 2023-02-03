@@ -9,6 +9,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
+
 /**
  * The RelationshipManager is responsible for adding relations to the CodePropertyGraph object
  * and adding relationships to each CPGClass's outwardRelations attribute.
@@ -76,7 +78,7 @@ public class RelationshipManager {
                     if (!matcher.group().equals("") && attribute.parentClassName.equals(sourceClass.name)) {
                         allAttributeTypes.add(attributeType);
                         String className = matcher.group();
-                        properDestClass.add(helper.getClassFromName(cpg, className));
+                        properDestClass.add(helper.getClassFromName(className));
                     }
                 }
             }
@@ -167,13 +169,13 @@ public class RelationshipManager {
     protected static void assignDependency(CodePropertyGraph cpg) {
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
         for (CPGClass.Method method : helper.allMethods) {
-            CPGClass methodParent = helper.getClassFromName(cpg, method.parentClassName);
+            CPGClass methodParent = helper.getClassFromName(method.parentClassName);
             var filteredRelations = cpg.getRelations().stream().
-                    filter(relation -> relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
+                    filter(relation -> (relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
                             relation.type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION) ||
                             relation.type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION) ||
-                            relation.type.equals(ClassRelation.RelationshipType.COMPOSITION) &&
-                                    relation.source.equals(methodParent)).collect(Collectors.toList());
+                            relation.type.equals(ClassRelation.RelationshipType.COMPOSITION)) &&
+                            relation.source.equals(methodParent)).collect(Collectors.toList());
             // Create a set which contains all the classes which srcClass has some kind of association relation to
             Set<CPGClass> classesToIgnore = new HashSet<>();
             filteredRelations.forEach(relation -> classesToIgnore.add(relation.destination));
@@ -228,7 +230,7 @@ public class RelationshipManager {
                     filter(name -> allClassNames.contains(name) && !allInterfaceNames.contains(name)).collect(Collectors.toList());
             if (!filteredInheritFrom.isEmpty()) {
                 String className = filteredInheritFrom.get(0);
-                CPGClass destinationClass = helper.getClassFromName(cpg, className);
+                CPGClass destinationClass = helper.getClassFromName(className);
                 boolean subClassAlreadyUpdated = subClassAlreadyUpdated(cpgClass, destinationClass);
                 // Subclass not updated
                 if (!subClassAlreadyUpdated) {
@@ -257,7 +259,7 @@ public class RelationshipManager {
                     filter(name -> allClassNames.contains(name) && !allInterfaceNames.contains(name)).collect(Collectors.toList());
             if (!filteredInheritFrom.isEmpty()) {
                 String className = filteredInheritFrom.get(0);
-                CPGClass destinationClass = helper.getClassFromName(updatedGraph, className);
+                CPGClass destinationClass = helper.getClassFromName(className);
                 CodePropertyGraph.Relation relationToAdd = new
                         CodePropertyGraph.Relation(cpgClass, destinationClass,
                         ClassRelation.RelationshipType.INHERITANCE, "");
