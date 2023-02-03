@@ -189,8 +189,10 @@ public class Parser {
                 Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
                 properMethods.add(properMethod);
             }
-            CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.code, cpgClass.lineNumber, cpgClass.importStatements, cpgClass.modifiers,
-                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath, cpgClass.fileLength, cpgClass.emptyLines,
+            CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.code, cpgClass.lineNumber,
+                    cpgClass.importStatements, cpgClass.modifiers,
+                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath,
+                    cpgClass.fileLength, cpgClass.emptyLines,
                     cpgClass.nonEmptyLines, cpgClass.packageName,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
@@ -254,7 +256,7 @@ public class Parser {
         if (!allCalls.isEmpty()) {
             for (Method.Instruction call : allCalls) {
                 String methodCall = call.methodCall;
-                if (methodCall.equals("super")) {
+                if (methodCall.equals("super") && methodParent.code.contains("extends")) {
                     int index = methodParent.code.indexOf("extends ");
                     String extenderCode = methodParent.code.substring(index).replace("extends ", "");
                     methodCall = extenderCode.split(" ")[0];
