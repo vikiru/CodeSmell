@@ -223,6 +223,7 @@ def create_method_dict(curr_method):
                     list(map(create_instruction_dict, method_instructions)),
                 )
             ),
+            "methodCalls": [],
         }
         return curr_method_dict
 
@@ -390,30 +391,28 @@ def clean_up_external_classes(source_code_json):
     return source_code_json
 
 
-# Obtain all the type lists for each attribute and method parameter within cpg
-def obtain_type_lists(source_code_json):
+# Update all the type lists for each attribute and method parameter within cpg
+def update_type_lists(source_code_json):
     all_attributes = [attribute for class_dict in source_code_json["classes"] for attribute in class_dict["attributes"]]
     all_parameters = [parameter for class_dict in source_code_json["classes"] for method in class_dict["methods"] for
                       parameter in method["parameters"]]
     collection_types = return_collection_types(all_attributes)
     regex_str = "|".join(collection_types) + "|\[]|<|>|,"
     regex_pattern = re.compile(regex_str)
+
+    def return_type_lists(type_to_analyze):
+        type_list = [type_to_analyze]
+        new_type = re.sub(regex_pattern, "", type_to_analyze)
+        if len(new_type) != len(type_to_analyze):
+            type_list = new_type.split()
+        return type_list
+
     # Obtain type lists for all attributes
     for attribute in all_attributes:
-        attribute_type = attribute["attributeType"]
-        new_type = re.sub(regex_pattern, "", attribute_type)
-        if len(new_type) == len(attribute_type):
-            attribute["typeList"] = [attribute_type]
-        else:
-            attribute["typeList"] = new_type.split()
+        attribute["typeList"] = return_type_lists(attribute["attributeType"])
     # Obtain type lists for all method parameters
     for method_parameter in all_parameters:
-        parameter_type = method_parameter["type"]
-        new_type = re.sub(regex_pattern, "", parameter_type)
-        if len(new_type) == len(parameter_type):
-            method_parameter["typeList"] = [parameter_type]
-        else:
-            method_parameter["typeList"] = new_type.split()
+        method_parameter["typeList"] = return_type_lists(method_parameter["type"])
     return source_code_json
 
 
@@ -423,7 +422,7 @@ def source_code_json_creation(class_names):
         source_code_json["classes"].append(retrieve_class_data(class_name))
     # Get all the type lists of method params & attributes within cpg (i.e. HashMap<CPGClass, Integer> should return
     # ["CPGClass", "Integer"]
-    source_code_json = obtain_type_lists(source_code_json)
+    source_code_json = update_type_lists(source_code_json)
     # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
     # code base)
     source_code_json = clean_up_external_classes(source_code_json)
@@ -441,6 +440,9 @@ if __name__ == "__main__":
     total_time = 0
 
     server_endpoint = "localhost:" + sys.argv[-1]
+    if len(sys.argv) == 3:
+        server_endpoint = "localhost:8080"
+
     client = None
     index = 1
     sleep(4)
