@@ -125,7 +125,7 @@ public class Parser {
                 e.printStackTrace();
                 System.exit(1);
             }
-            cpg = assignRelationships(cpg);
+            //cpg = assignRelationships(cpg);
             writeBackup(cpg);
 
         } else {
@@ -187,10 +187,8 @@ public class Parser {
             for (Method m : cpgClass.methods) {
                 int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
                 // ignore lambdas for now
-                if (!m.name.contains("lambda")) {
-                    Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
-                    properMethods.add(properMethod);
-                }
+                Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
+                properMethods.add(properMethod);
             }
 
             CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.code, cpgClass.lineNumber, cpgClass.importStatements, cpgClass.modifiers,
@@ -214,100 +212,56 @@ public class Parser {
      * @return The updated method with its methodCalls
      */
     protected static Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
+        // Helper variables
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
         ArrayList<Method> allMethodsInCPG = helper.allMethods;
-        ArrayList<String> allMethodNames = new ArrayList<>();
+        ArrayList<String> allMethodNames = helper.allMethodNames;
         ArrayList<String> allClassNames = helper.allClassNames;
-        ArrayList<Method.Instruction> allMethodInstructions = new ArrayList<>(Arrays.asList(methodToUpdate.instructions));
-        cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
-
-        // Get the indexes of the names of each Method called by methodToUpdate
-        ArrayList<Integer> indexes = new ArrayList<>();
-        for (Method.Instruction instruction : methodToUpdate.instructions) {
-            String label = instruction.label;
-            String code = instruction.code;
-            int lineNumber = instruction.lineNumber;
-            String methodCall = instruction.methodCall;
-            if (label.equals("CALL") && (!methodCall.equals("") || !methodCall.equals("toString"))) {
-                int indexOfMethodCalled = allMethodNames.indexOf(methodCall);
-                int lastIndexOfMethodCalled = allMethodNames.lastIndexOf(methodCall);
-                if (indexOfMethodCalled != lastIndexOfMethodCalled) {
-                    Method firstMethod = allMethodsInCPG.get(indexOfMethodCalled);
-                    Method secondMethod = allMethodsInCPG.get(lastIndexOfMethodCalled);
-                    List<CPGClass> filteredClasses = cpg.getClasses().stream().
-                            filter(cpgClass -> cpgClass.name.equals(firstMethod.parentClassName) ||
-                                    cpgClass.name.equals(secondMethod.parentClassName)).collect(Collectors.toList());
-                    var result = filteredClasses.stream().
-                            filter(cpgClass -> cpgClass.classType.equals("interface")).collect(Collectors.toList());
-                    if (!result.isEmpty()) {
-                        if (firstMethod.parentClassName.equals(result.get(0).name)) {
-                            indexes.add(lastIndexOfMethodCalled);
-                        } else if (secondMethod.parentClassName.equals(result.get(0).name)) {
-                            indexes.add(indexOfMethodCalled);
-                        }
-                    }
-                } else {
-                    if (indexOfMethodCalled != -1) {
-                        indexes.add(indexOfMethodCalled);
-                    }
-                }
-            }
-        }
-        var identifierResult = allMethodInstructions.stream().
-                filter(ins -> ins.label.equals("IDENTIFIER")
-                        && allClassNames.contains(ins.code)).collect(Collectors.toList());
-        var methodCallResult = allMethodInstructions.stream().
-                filter(ins -> ins.label.equals("CALL") && !ins.methodCall.equals("")).collect(Collectors.toList());
-        var localResult = allMethodInstructions.stream().
-                filter(ins -> ins.label.equals("LOCAL")).collect(Collectors.toList());
-        // Check for identifier and calls
-        for (Method.Instruction identifier : identifierResult) {
-            String parentName = identifier.code;
-            for (Method.Instruction mc : methodCallResult) {
-                String methodCalled = mc.methodCall;
-                // Determine the number of method parameters provided by the instruction code
-                String code = mc.code;
-                int startIndex = code.indexOf("(");
-                code = code.substring(startIndex).replace("(", "").replace(")", "").trim();
-                int paramCount = 0;
-                if (code.contains(",")) {
-                    String[] params = code.split(",");
-                    paramCount = params.length;
-                } else paramCount = 1;
-                int finalParamCount = paramCount;
-                // Find the method matching parentClassName, methodName, and parameter count
-                var methodResult = allMethodsInCPG.stream().
-                        filter(method -> method.name.equals(methodCalled)
-                                && method.parentClassName.equals(parentName)
-                                && method.parameters.length == finalParamCount).collect(Collectors.toList());
-                if (!methodResult.isEmpty()) {
-                    indexes.add(allMethodsInCPG.indexOf(methodResult.get(0)));
-                }
-            }
-        }
-        // Check for local variable creation
-        for (Method.Instruction localIns : localResult) {
-            String[] localInstanceVar = localIns.code.split(" ");
-            if (localInstanceVar.length == 2) {
-                String type = localInstanceVar[0];
-                String name = localInstanceVar[1];
-                if (allClassNames.contains(type)) {
-                    var checkCreation = methodCallResult.stream().
-                            filter(i -> i.methodCall.contains(type) && i.code.contains("=")).collect(Collectors.toList());
-                    for (Method.Instruction creation : checkCreation) {
-                        String methodCalled = creation.methodCall;
-                        int index = allMethodNames.indexOf(methodCalled);
-                        if (index != -1) {
-                            indexes.add(index);
-                        }
-                    }
-                }
-            }
-        }
         ArrayList<Method> methodCalls = new ArrayList<>();
-        Set<Integer> uniqueIndexes = new LinkedHashSet<>(indexes);
-        uniqueIndexes.forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
+        CPGClass methodParent = helper.getClassFromName(methodToUpdate.parentClassName);
+        Set<String> allFieldTypes = new HashSet<>();
+        Set<String> allInheritedTypes = new HashSet<>();
+        Set<String> allLocalTypes = new HashSet<>();
+        Set<String> allParameterTypes = new HashSet<>();
 
+        Set<String> allTypes = new HashSet<>();
+        Set<Integer> uniqueIndexes = new LinkedHashSet<>();
+        Set<String> allCalls = new HashSet<>();
+
+        // Get all possible calls where the instruction's methodCall is not empty and
+        // the method is present within cpg
+        var possibleCalls = Arrays.stream(methodToUpdate.instructions).
+                filter(instruction -> instruction.label.equals("CALL")
+                        && !instruction.methodCall.equals("") && allMethodNames.contains(instruction.methodCall)).
+                collect(Collectors.toList());
+        possibleCalls.forEach(instruction -> allCalls.add(instruction.methodCall));
+        Arrays.stream(methodParent.attributes).
+                forEach(attribute -> attribute.typeList.stream().
+                        filter(allClassNames::contains).forEach(allFieldTypes::add));
+        Arrays.stream(methodToUpdate.parameters).
+                forEach(parameter -> parameter.typeList.stream().
+                        filter(allClassNames::contains).forEach(allParameterTypes::add));
+        Arrays.stream(methodParent.inheritsFrom).filter(allClassNames::contains).
+                forEach(allInheritedTypes::add);
+        allCalls.stream().filter(allClassNames::contains).forEach(allLocalTypes::add);
+        // Now allTypes contains all possible types that could have owned the method (itself, fields,
+        // parameters, local, and inherited superclass)
+        allTypes.addAll(allFieldTypes);
+        allTypes.addAll(allInheritedTypes);
+        allTypes.addAll(allParameterTypes);
+        allTypes.addAll(allLocalTypes);
+        allTypes.add(methodParent.name);
+        if (!allCalls.isEmpty()) {
+            for (String call : allCalls) {
+                var methodCallParent = allMethodsInCPG.stream().
+                        filter(method -> method.name.equals(call) &&
+                                allTypes.contains(method.parentClassName)).collect(Collectors.toList());
+                if (!methodCallParent.isEmpty()) {
+                    uniqueIndexes.add(allMethodsInCPG.indexOf(methodCallParent.get(0)));
+                }
+            }
+        }
+        uniqueIndexes.forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
         if (iterationNumber == 1) {
             Method properMethod = new Method(methodToUpdate.parentClassName,
                     methodToUpdate.lineNumberStart, methodToUpdate.lineNumberEnd,
