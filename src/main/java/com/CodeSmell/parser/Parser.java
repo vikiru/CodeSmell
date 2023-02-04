@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -125,7 +126,7 @@ public class Parser {
                 e.printStackTrace();
                 System.exit(1);
             }
-            //cpg = assignRelationships(cpg);
+            cpg = assignRelationships(cpg);
             writeBackup(cpg);
 
         } else {
@@ -164,8 +165,8 @@ public class Parser {
 
     protected static CodePropertyGraph assignRelationships(CodePropertyGraph cpg) {
         cpg = assignProperAttributesAndMethods(cpg, 2);
-        RelationshipManager relationshipManager = new RelationshipManager(cpg);
-        cpg = relationshipManager.cpg;
+        //RelationshipManager relationshipManager = new RelationshipManager(cpg);
+        //cpg = relationshipManager.cpg;
         return cpg;
     }
 
@@ -189,11 +190,10 @@ public class Parser {
                 Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
                 properMethods.add(properMethod);
             }
-            CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.code, cpgClass.lineNumber,
-                    cpgClass.importStatements, cpgClass.modifiers,
-                    cpgClass.classFullName, cpgClass.inheritsFrom, cpgClass.classType, cpgClass.filePath,
-                    cpgClass.fileLength, cpgClass.emptyLines,
-                    cpgClass.nonEmptyLines, cpgClass.packageName,
+            CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.classFullName, cpgClass.packageName,
+                    cpgClass.importStatements, cpgClass.code, cpgClass.lineNumber, cpgClass.modifiers,
+                    cpgClass.classType, cpgClass.filePath, cpgClass.fileLength, cpgClass.nonEmptyLines,
+                    cpgClass.emptyLines, cpgClass.inheritsFrom,
                     properAttributes.toArray(new Attribute[properAttributes.size()]),
                     properMethods.toArray(new Method[properMethods.size()]));
             graph.addClass(properClass);
@@ -211,7 +211,9 @@ public class Parser {
      * @param methodToUpdate - The method that is having its methodCalls field updated
      * @return The updated method with its methodCalls
      */
-    protected static Method updateMethodWithMethodCalls(CodePropertyGraph cpg, Method methodToUpdate, int iterationNumber) {
+    protected static Method updateMethodWithMethodCalls(CodePropertyGraph cpg,
+                                                        Method methodToUpdate,
+                                                        int iterationNumber) {
         // Helper variables
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
         ArrayList<Method> allMethodsInCPG = helper.allMethods;
@@ -311,26 +313,39 @@ public class Parser {
             String fieldName = entry.getKey();
             int lineNumber = entry.getValue();
             String toFind = "." + fieldName;
-            var matchingCallIns = Arrays.stream(methodToUpdate.instructions).filter(instruction ->
-                    instruction.label.equals("CALL") && instruction.lineNumber == lineNumber &&
-                            instruction.code.contains(toFind) && !instruction.code.contains("=")).collect(Collectors.toList());
+            var matchingCallIns = Arrays.stream(methodToUpdate.instructions).
+                    filter(instruction -> instruction.label.equals("CALL") &&
+                            instruction.lineNumber == lineNumber &&
+                            instruction.code.contains(toFind) &&
+                            !instruction.code.contains("=")).collect(Collectors.toList());
             if (!matchingCallIns.isEmpty()) {
                 Method.Instruction instruction = matchingCallIns.get(0);
                 if (instruction.code.startsWith("this")) {
                     boolean inheritsFromAnotherClass = methodParent.code.contains("extends");
+                    // method parent inherits and joern will output "this.(attribute name)" for fields that are inherited
+                    // combine attributes and find the one that is used within the method
                     if (inheritsFromAnotherClass) {
-                        CPGClass superClass = helper.getSuperClass(methodParent);
-                        Set<Attribute> combinedAttributes = new HashSet<Attribute>(List.of(superClass.attributes));
-                        combinedAttributes.addAll(List.of(methodParent.attributes));
-                        var combinedResult = combinedAttributes.stream().filter(attribute -> attribute.name.equals(fieldName)).collect(Collectors.toSet());
-                        attributeUsage.addAll(combinedResult);
-                    } else {
-                        String newCode = instruction.code.replace("this.", "");
-                        var attributeResult = Arrays.stream(methodParent.attributes).
-                                filter(attribute -> attribute.name.equals(newCode)).collect(Collectors.toList());
-                        if (!attributeResult.isEmpty()) {
-                            attributeUsage.add(attributeResult.get(0));
+                        List<String> inheritedNames = Arrays.stream(methodParent.inheritsFrom).
+                                filter(allClassNames::contains).
+                                collect(Collectors.toList());
+                        var checkAllClasses = allClasses.stream().
+                                filter(aClass -> inheritedNames.contains(aClass.name)
+                                        && !aClass.classType.equals("interface")).
+                                limit(2).collect(Collectors.toList());
+                        if (!checkAllClasses.isEmpty()) {
+                            CPGClass superClass = checkAllClasses.get(0);
+                            Set<Attribute> combinedAttributes = new HashSet<Attribute>(List.of(superClass.attributes));
+                            combinedAttributes.addAll(List.of(methodParent.attributes));
+                            var combinedResult = combinedAttributes.stream().
+                                    filter(attribute -> attribute.name.equals(fieldName)).collect(Collectors.toSet());
+                            attributeUsage.addAll(combinedResult);
                         }
+                    }
+                    // method parent does not inherit so check method parent's attributes for attribute that is used
+                    else {
+                        var attributeResult = Arrays.stream(methodParent.attributes).
+                                filter(attribute -> attribute.name.equals(fieldName)).collect(Collectors.toSet());
+                        attributeUsage.addAll(attributeResult);
                     }
                 } else {
                     Set<Attribute> otherClassAttributes = new HashSet<>();
