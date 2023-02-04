@@ -12,9 +12,11 @@ import logging
 
 # Return all of the unique collection types present within the code base
 def return_collection_types(all_attributes):
-    collection_types = {attribute_dict["packageName"].replace("java.util.", "").strip() for attribute_dict in
-                        all_attributes if
-                        "java.util" in attribute_dict["packageName"]}
+    collection_types = {
+        attribute_dict["packageName"].replace("java.util.", "").strip()
+        for attribute_dict in all_attributes
+        if "java.util" in attribute_dict["packageName"]
+    }
     return collection_types
 
 
@@ -234,14 +236,11 @@ def create_method_dict(curr_method):
 
 # For every method's instruction, create a dictionary and return it.
 def create_instruction_dict(curr_instruction):
-    instruction_line_number = ""
     instruction_label = curr_instruction["_1"]
     instruction_code = curr_instruction["_2"]
-
-    if len(curr_instruction) == 3:
-        instruction_line_number = curr_instruction["_3"]
-    else:
-        instruction_line_number = "0"
+    instruction_line_number = curr_instruction["_3"]
+    instruction_call_full_names = curr_instruction["_4"]
+    instruction_call_type_full_name = curr_instruction["_5"]
 
     if "<empty>" in instruction_code:
         return
@@ -252,7 +251,22 @@ def create_instruction_dict(curr_instruction):
         method_call = ""
         if calls and instruction_label == "CALL":
             method_call = calls[0].replace("(", "")
-
+            call_list = [
+                item.split(":")[0].replace("<init>", method_call)
+                for item in instruction_call_full_names
+                if method_call in item and "java" not in item
+            ]
+            # Only modify method_call if it is not empty and does not contain "super"
+            # This is to account for cases where two classes could have the same method names (additionally exclude names matching java)
+            # (ClassA.getA() and ClassB.getA()) so the returned method_call would be able tell: "ClassA.getA" was called.
+            # instead of just "getA"
+            if call_list and method_call != "super" and method_call:
+                method_call = call_list[0]
+                index = method_call.rfind(".")
+                method_call = method_call[:index] + method_call[index:].replace(
+                    ".", "$"
+                )
+                method_call = method_call.split(".")[-1].replace("$", ".")
         curr_instruction_dict = {
             "label": instruction_label,
             "code": instruction_code.replace("\r\n", ""),
@@ -293,10 +307,10 @@ def create_class_dict(curr_class):
 
     curr_class_dict = {
         "name": get_name_without_separators(class_name),
-        "code": "",  # keep empty for now
+        "code": "",
         "lineNumber": int(line_number),
-        "importStatements": [],  # keep empty for now
-        "modifiers": [],  # keep these empty for now
+        "importStatements": [],
+        "modifiers": [],
         "classFullName": class_full_name,
         "inheritsFrom": inherits_from_list,
         "classType": get_type(class_declaration),
@@ -320,7 +334,8 @@ def retrieve_all_class_names():
     query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).name.toJson'
     result = client.execute(query)
     class_names = []
-    if result["success"] and result["stdout"] is not "":
+    if result["success"]:
+        print(result)
         index = result["stdout"].index('"')
         all_names = json.loads(
             json.loads(result["stdout"][index: len(result["stdout"])])
@@ -336,27 +351,29 @@ def retrieve_all_class_names():
 # Execute a single query to get all the data of a class
 def retrieve_class_data(name):
     class_query = (
-            'cpg.typeDecl.isExternal(false).name("' + name + '").map(node => (node.name, node.fullName, '
-                                                             "node.inheritsFromTypeFullName.l, node.code, "
-                                                             "node.lineNumber,"
-                                                             "node.astChildren.isModifier.modifierType.l, "
-                                                             "node.astChildren.isMember.l.map(node => (node.name, "
-                                                             "node.typeFullName,"
-                                                             "node.code, node.lineNumber, "
-                                                             "node.astChildren.isModifier.modifierType.l)),"
-                                                             "node.astChildren.isMethod.filter(node => "
-                                                             "node.lineNumber != None"
-                                                             "&& node.lineNumberEnd != None).l.map(node => ("
-                                                             "node.name, node.code,"
-                                                             "node.lineNumber, node.lineNumberEnd, node.signature, "
-                                                             "node.astChildren.isModifier.modifierType.l, "
-                                                             "node.astChildren.isParameter.filter(node => "
-                                                             "!node.name.contains("
-                                                             '"this")).l.map(node => (node.evaluationStrategy, '
-                                                             'node.code, node.name, '
-                                                             "node.typeFullName)), node.ast.l.map(node => ("
-                                                             "node.label, node.code,"
-                                                             "node.lineNumber)))), node.filename)).toJson"
+            'cpg.typeDecl.isExternal(false).name("'
+            + name
+            + '").map(node => (node.name, node.fullName, '
+              "node.inheritsFromTypeFullName.l, node.code, "
+              "node.lineNumber,"
+              "node.astChildren.isModifier.modifierType.l, "
+              "node.astChildren.isMember.l.map(node => (node.name, "
+              "node.typeFullName,"
+              "node.code, node.lineNumber, "
+              "node.astChildren.isModifier.modifierType.l)),"
+              "node.astChildren.isMethod.filter(node => "
+              "node.lineNumber != None"
+              "&& node.lineNumberEnd != None).l.map(node => ("
+              "node.name, node.code,"
+              "node.lineNumber, node.lineNumberEnd, node.signature, "
+              "node.astChildren.isModifier.modifierType.l, "
+              "node.astChildren.isParameter.filter(node => "
+              "!node.name.contains("
+              '"this")).l.map(node => (node.evaluationStrategy, '
+              "node.code, node.name, "
+              "node.typeFullName)), node.ast.filter(node => node.lineNumber != None).l.map(node => ("
+              "node.label, node.code,"
+              "node.lineNumber, node.ast.isCall.methodFullName.l, node.ast.isCall.typeFullName.l)))), node.filename)).toJson"
     )
     start = time.time()
     result = client.execute(class_query)
@@ -385,20 +402,33 @@ def clean_up_external_classes(source_code_json):
     root_pkg = return_all_distinct_package_names(source_code_json["classes"])[0]
     new_dict = {"relations": [], "classes": []}
     for class_dict in source_code_json["classes"]:
-        filteredInherits = [class_name for class_name in class_dict["inheritsFrom"] if
-                            class_name.replace(root_pkg, "") == class_name and "java" not in class_name]
-        if not filteredInherits:
-            class_dict["inheritsFrom"] = [className.split(".")[-1] for className in
-                                          class_dict["inheritsFrom"]]
-        new_dict["classes"].append(class_dict)
+        filtered_inherits = [
+            class_name
+            for class_name in class_dict["inheritsFrom"]
+            if class_name.replace(root_pkg, "") == class_name
+               and "java" not in class_name
+        ]
+        if not filtered_inherits:
+            class_dict["inheritsFrom"] = [
+                className.split(".")[-1] for className in class_dict["inheritsFrom"]
+            ]
+            new_dict["classes"].append(class_dict)
     return new_dict
 
 
 # Update all the type lists for each attribute and method parameter within cpg
 def update_type_lists(source_code_json):
-    all_attributes = [attribute for class_dict in source_code_json["classes"] for attribute in class_dict["attributes"]]
-    all_parameters = [parameter for class_dict in source_code_json["classes"] for method in class_dict["methods"] for
-                      parameter in method["parameters"]]
+    all_attributes = [
+        attribute
+        for class_dict in source_code_json["classes"]
+        for attribute in class_dict["attributes"]
+    ]
+    all_parameters = [
+        parameter
+        for class_dict in source_code_json["classes"]
+        for method in class_dict["methods"]
+        for parameter in method["parameters"]
+    ]
     collection_types = return_collection_types(all_attributes)
     regex_str = "|".join(collection_types) + "|\[]|<|>|,"
     regex_pattern = re.compile(regex_str)
@@ -443,8 +473,7 @@ if __name__ == "__main__":
     total_time = 0
 
     server_endpoint = "localhost:" + sys.argv[-1]
-    if len(sys.argv) == 3:
-        server_endpoint = "localhost:8080"
+    project_dir = sys.argv[-2]
 
     client = None
     index = 1
@@ -464,7 +493,6 @@ if __name__ == "__main__":
 
     if client:
         logging.info("joern_query is starting and connected to CPGQLSClient.")
-    project_dir = sys.argv[-2]
     print("joern_query :: project_dir " + project_dir, file=sys.stderr)
 
     if "Windows" in platform.platform():
