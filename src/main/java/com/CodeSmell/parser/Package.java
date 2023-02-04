@@ -15,7 +15,7 @@ public final class Package {
     /**
      * All the files contained within the package
      */
-    public final ArrayList<java.io.File> files = new ArrayList<>();
+    public final ArrayList<File> files = new ArrayList<>();
 
     /**
      * All the subpackages that exist within the package, if any
@@ -31,14 +31,14 @@ public final class Package {
      *
      * @param packageToAdd The package to be added to the current Package
      */
-    private static void addPackage(ArrayList<Package> subPackages, Package packageToAdd) {
+    public static void addPackage(ArrayList<Package> subPackages, Package packageToAdd) {
         subPackages.add(packageToAdd);
     }
 
     /**
      * Add files to the current Package
      */
-    private static void addFile(ArrayList<File> classes, File fileToAdd) {
+    public static void addFile(ArrayList<File> classes, File fileToAdd) {
         classes.add(fileToAdd);
     }
 
@@ -72,7 +72,7 @@ public final class Package {
          *
          * @param cpgClassToAdd - The class to be added to the current Package
          */
-        private static void addClass(ArrayList<CPGClass> classes, CPGClass cpgClassToAdd) {
+        public static void addClass(ArrayList<CPGClass> classes, CPGClass cpgClassToAdd) {
             classes.add(cpgClassToAdd);
         }
     }
