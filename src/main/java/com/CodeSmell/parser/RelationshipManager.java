@@ -121,10 +121,12 @@ public class RelationshipManager {
     protected static boolean determineBidirectionalAssociation(CPGClass sourceClass, CPGClass destinationClass) {
         boolean bidirectionalAssociationExists = false;
         Set<CPGClass.Attribute> allSourceTypes = Arrays.stream(sourceClass.attributes).
-                filter(attr -> attr.typeList.contains(destinationClass.name) || attr.typeList.contains(destinationClass.classFullName)).
+                filter(attr -> (attr.typeList.contains(destinationClass.name) || attr.typeList.contains(destinationClass.classFullName)) &&
+                        attr.parentClassName.equals(sourceClass.name)).
                 collect(Collectors.toSet());
         Set<CPGClass.Attribute> allDestinationTypes = Arrays.stream(destinationClass.attributes).
-                filter(attr -> attr.typeList.contains(sourceClass.name) || attr.typeList.contains(sourceClass.classFullName)).
+                filter(attr -> (attr.typeList.contains(sourceClass.name) || attr.typeList.contains(sourceClass.classFullName)) &&
+                        attr.parentClassName.equals(destinationClass.name)).
                 collect(Collectors.toSet());
         if (!allSourceTypes.isEmpty() && !allDestinationTypes.isEmpty()) {
             bidirectionalAssociationExists = true;
