@@ -275,10 +275,9 @@ public class Parser {
         ArrayList<Attribute> attributeUsage = updateMethodWithAttributeUsage(helper, allTypes, methodToUpdate);
         uniqueIndexes.forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
         if (iterationNumber == 1) {
-            Method properMethod = new Method(methodToUpdate.parentClassName,
-                    methodToUpdate.lineNumberStart, methodToUpdate.lineNumberEnd,
-                    methodToUpdate.totalMethodLength, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
-                    methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions);
+            Method properMethod = new Method(methodToUpdate.name, methodToUpdate.parentClassName, methodToUpdate.methodBody,
+                    methodToUpdate.modifiers, methodToUpdate.parameters, methodToUpdate.returnType, methodToUpdate.lineNumberStart,
+                    methodToUpdate.lineNumberEnd, methodToUpdate.totalMethodLength, methodToUpdate.instructions);
             properMethod.setMethodCalls(methodCalls);
             properMethod.setAttributeCalls(attributeUsage);
             return properMethod;
