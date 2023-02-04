@@ -270,6 +270,7 @@ public class Parser {
                 }
             }
         }
+        ArrayList<Attribute> attributeUsage = updateMethodWithAttributeUsage(helper, allTypes, methodToUpdate);
         uniqueIndexes.forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
         if (iterationNumber == 1) {
             Method properMethod = new Method(methodToUpdate.parentClassName,
@@ -277,6 +278,7 @@ public class Parser {
                     methodToUpdate.totalMethodLength, methodToUpdate.name, methodToUpdate.modifiers, methodToUpdate.returnType,
                     methodToUpdate.methodBody, methodToUpdate.parameters, methodToUpdate.instructions);
             properMethod.setMethodCalls(methodCalls);
+            properMethod.setAttributeCalls(attributeUsage);
             return properMethod;
         } else {
             ArrayList<Method> fixMethodReferences = new ArrayList<>();
@@ -287,7 +289,60 @@ public class Parser {
                 fixMethodReferences.add(result.get(0));
             }
             methodToUpdate.setMethodCalls(fixMethodReferences);
+            methodToUpdate.setAttributeCalls(attributeUsage);
             return methodToUpdate;
         }
+    }
+
+    protected static ArrayList<Attribute> updateMethodWithAttributeUsage(StatTracker.Helper helper,
+                                                                         Set<String> allClassTypes,
+                                                                         Method methodToUpdate) {
+        Set<Attribute> attributeUsage = new HashSet<>();
+        ArrayList<String> allClassNames = helper.allClassNames;
+        CPGClass methodParent = helper.getClassFromName(methodToUpdate.parentClassName);
+        Set<CPGClass> allClasses = new HashSet<>();
+        allClassTypes.forEach(type -> allClasses.add(helper.getClassFromName(type)));
+        HashMap<String, Integer> fieldWithLineNumber = new HashMap<>();
+        // Get all calls to fields of classes within a method
+        var fieldIdentifiers = Arrays.stream(methodToUpdate.instructions).
+                filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).collect(Collectors.toList());
+        fieldIdentifiers.forEach(ins -> fieldWithLineNumber.put(ins.code, ins.lineNumber));
+        for (Map.Entry<String, Integer> entry : fieldWithLineNumber.entrySet()) {
+            String fieldName = entry.getKey();
+            int lineNumber = entry.getValue();
+            String toFind = "." + fieldName;
+            var matchingCallIns = Arrays.stream(methodToUpdate.instructions).filter(instruction ->
+                    instruction.label.equals("CALL") && instruction.lineNumber == lineNumber &&
+                            instruction.code.contains(toFind) && !instruction.code.contains("=")).collect(Collectors.toList());
+            if (!matchingCallIns.isEmpty()) {
+                Method.Instruction instruction = matchingCallIns.get(0);
+                if (instruction.code.startsWith("this")) {
+                    boolean inheritsFromAnotherClass = methodParent.code.contains("extends");
+                    if (inheritsFromAnotherClass) {
+                        CPGClass superClass = helper.getSuperClass(methodParent);
+                        Set<Attribute> combinedAttributes = new HashSet<Attribute>(List.of(superClass.attributes));
+                        combinedAttributes.addAll(List.of(methodParent.attributes));
+                        var combinedResult = combinedAttributes.stream().filter(attribute -> attribute.name.equals(fieldName)).collect(Collectors.toSet());
+                        attributeUsage.addAll(combinedResult);
+                    } else {
+                        String newCode = instruction.code.replace("this.", "");
+                        var attributeResult = Arrays.stream(methodParent.attributes).
+                                filter(attribute -> attribute.name.equals(newCode)).collect(Collectors.toList());
+                        if (!attributeResult.isEmpty()) {
+                            attributeUsage.add(attributeResult.get(0));
+                        }
+                    }
+                } else {
+                    Set<Attribute> otherClassAttributes = new HashSet<>();
+                    Set<CPGClass> ignoreParent = new HashSet<>(allClasses);
+                    ignoreParent.remove(methodParent);
+                    ignoreParent.forEach(cpgClass -> Arrays.stream(cpgClass.attributes).
+                            filter(attribute -> attribute.name.equals(fieldName))
+                            .forEach(otherClassAttributes::add));
+                    attributeUsage.addAll(otherClassAttributes);
+                }
+            }
+        }
+        return new ArrayList<>(attributeUsage);
     }
 }

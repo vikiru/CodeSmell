@@ -205,8 +205,10 @@ public class CPGClass implements Serializable {
         // a print out of the method instructions
         public final Instruction[] instructions;
 
-        // a list of methods which this calls
+        // a list of methods which this method calls
         private ArrayList<Method> methodCalls;
+        // a list of attributes which this method uses
+        private ArrayList<Attribute> attributeCalls;
 
         protected Method(String parentClassName,
                          int lineNumberStart,
@@ -229,6 +231,7 @@ public class CPGClass implements Serializable {
             this.parameters = parameters;
             this.instructions = instructions;
             this.methodCalls = new ArrayList<>();
+            this.attributeCalls = new ArrayList<>();
         }
 
         public ArrayList<Method> getMethodCalls() {
@@ -237,6 +240,14 @@ public class CPGClass implements Serializable {
 
         protected void setMethodCalls(ArrayList<Method> methodCalls) {
             this.methodCalls = methodCalls;
+        }
+
+        public ArrayList<Attribute> getAttributeCalls() {
+            return new ArrayList<>(attributeCalls);
+        }
+
+        protected void setAttributeCalls(ArrayList<Attribute> attributeCalls) {
+            this.attributeCalls = attributeCalls;
         }
 
         @Override
