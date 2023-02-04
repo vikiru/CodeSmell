@@ -254,19 +254,22 @@ def create_instruction_dict(curr_instruction):
             call_list = [
                 item.split(":")[0].replace("<init>", method_call)
                 for item in instruction_call_full_names
-                if method_call in item and "java" not in item
+                if method_call in item
             ]
-            # Only modify method_call if it is not empty and does not contain "super"
-            # This is to account for cases where two classes could have the same method names (additionally exclude names matching java)
-            # (ClassA.getA() and ClassB.getA()) so the returned method_call would be able tell: "ClassA.getA" was called.
-            # instead of just "getA"
+            # Only modify method_call if it is not empty and does not contain "super". This is to account for cases
+            # where two classes could have the same method names (additionally exclude names matching java)
+            # ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell: "ClassA.getA" was
+            # called. instead of just "getA"
             if call_list and method_call != "super" and method_call:
                 method_call = call_list[0]
-                index = method_call.rfind(".")
-                method_call = method_call[:index] + method_call[index:].replace(
-                    ".", "$"
-                )
-                method_call = method_call.split(".")[-1].replace("$", ".")
+                if "java" not in method_call:
+                    index = method_call.rfind(".")
+                    method_call = method_call[:index] + method_call[index:].replace(
+                        ".", "$"
+                    )
+                    method_call = method_call.split(".")[-1].replace("$", ".")
+                else:
+                    method_call = ""
         curr_instruction_dict = {
             "label": instruction_label,
             "code": instruction_code.replace("\r\n", ""),
@@ -474,6 +477,7 @@ if __name__ == "__main__":
 
     server_endpoint = "localhost:" + sys.argv[-1]
     project_dir = sys.argv[-2]
+    project_name = "analyzedProject"
 
     client = None
     index = 1
@@ -501,7 +505,6 @@ if __name__ == "__main__":
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
-    project_name = "analyzedProject"
 
     # Import the source code to Joern for analyzing.
     start = time.time()
