@@ -310,9 +310,9 @@ public class RelationshipManager {
         allSubClassAttr.addAll(allSuperClassAttr);
         allSubClassMethods.addAll(allSuperClassMethods);
         // Return updated subclass
-        return new CPGClass(subClass.name, subClass.code,
-                subClass.lineNumber, subClass.importStatements, subClass.modifiers,
-                subClass.classFullName, subClass.inheritsFrom, subClass.classType, subClass.filePath, subClass.fileLength, subClass.emptyLines, subClass.nonEmptyLines, subClass.packageName,
+        return new CPGClass(subClass.name, subClass.classFullName, subClass.packageName, subClass.importStatements,
+                subClass.code, subClass.lineNumber, subClass.modifiers, subClass.classType, subClass.filePath, subClass.fileLength,
+                subClass.nonEmptyLines, subClass.emptyLines, subClass.inheritsFrom,
                 allSubClassAttr.toArray(new CPGClass.Attribute[allSuperClassAttr.size()]),
                 allSubClassMethods.toArray(new CPGClass.Method[allSuperClassMethods.size()]));
     }
