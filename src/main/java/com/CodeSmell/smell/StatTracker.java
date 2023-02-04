@@ -20,22 +20,28 @@ public final class StatTracker {
     public final Helper helper;
 
     /**
+     * For every {@link CPGClass} within cpg, maintain a count of many times it was used (how many instances of it are
+     * present as an attributeType, parameter type, how many of its methods appear within methodCalls, and any inheritance/realization
+     * relations that exist with the class as the destination).
+     */
+    public final HashMap<CPGClass, Integer> classUsage = new HashMap<>();
+
+    /**
      * For every {@link com.CodeSmell.parser.CPGClass.Attribute} within cpg, maintain a count of how many times it was used
      * within the body of a method.
      */
     public final HashMap<CPGClass.Attribute, Integer> attributeUsage = new HashMap<>();
 
     /**
-     * For every {@link CPGClass} within cpg, maintain a count of many times it was used (how many instances of it are
-     * present as an attributeType, parameter type, how many of its methods appear within methodCalls, and any inheritance/realization
-     * relations that exist with the class as the superclass).
-     */
-    public final HashMap<CPGClass, Integer> classUsage = new HashMap<>();
-
-    /**
      * For every {@link com.CodeSmell.parser.CPGClass.Method}, maintain a count of how many times within cpg it is used.
      */
     public final HashMap<CPGClass.Method, Integer> methodUsage = new HashMap<>();
+
+    /**
+     * For every {@link com.CodeSmell.parser.CPGClass.Method.Parameter}, maintain a count of how many times within a method
+     * it was used
+     */
+    public final HashMap<CPGClass.Method, HashMap<CPGClass.Method.Parameter, Integer>> parameterUsage = new HashMap<>();
 
     /**
      * Group all {@link CPGClass} by their classType.
@@ -84,6 +90,7 @@ public final class StatTracker {
         determineAttributeUsage(attributeUsage, helper);
         determineClassUsage(cpg, classUsage, helper);
         determineMethodUsage(methodUsage, helper);
+        determineParameterUsage(parameterUsage, helper);
         determineDistinctClassTypes(cpg, distinctClassTypes);
         determineDistinctAttributeCalls(distinctAttributeCalls, helper);
         determineDistinctMethodCalls(distinctMethodCalls, helper);
@@ -111,25 +118,32 @@ public final class StatTracker {
     }
 
     /**
-     * @param cpg        - The CodePropertyGraph containing all existing classes and relations
+     * For every class within the cpg, return a count of how many times it was used as an attribute type,
+     * inheritance/realization relation, parameter or its methods were used
+     *
+     * @param cpg        The CodePropertyGraph containing all existing classes and relations
      * @param classUsage
      * @param helper
      */
     private static void determineClassUsage(CodePropertyGraph cpg, HashMap<CPGClass, Integer> classUsage, Helper helper) {
         ArrayList<CPGClass.Method> allMethodCallsWithinCPG = helper.allMethodCalls;
         ArrayList<CPGClass.Attribute> allAttributesWithinCPG = helper.allAttributes;
+        ArrayList<CPGClass.Method.Parameter> allParametersWithinCPG = helper.allParameters;
         for (CPGClass cpgClass : cpg.getClasses()) {
-            var inheritedCount = cpg.getRelations().stream().
+            var attributeUsageCount = allAttributesWithinCPG.stream().filter(attribute ->
+                    attribute.attributeType.contains(cpgClass.name) ||
+                            attribute.attributeType.contains(cpgClass.classFullName)).collect(Collectors.toList());
+            var relationCount = cpg.getRelations().stream().
                     filter(relation -> (relation.type.equals(ClassRelation.RelationshipType.INHERITANCE) ||
                             relation.type.equals(ClassRelation.RelationshipType.REALIZATION))
                             && relation.destination.equals(cpgClass)).collect(Collectors.toList());
             var methodCallsCount = allMethodCallsWithinCPG.stream().
                     filter(method -> method.parentClassName.equals(cpgClass.name)).collect(Collectors.toList());
-            var attributeUsageCount = allAttributesWithinCPG.stream().filter(attribute ->
-                    attribute.attributeType.contains(cpgClass.name) ||
-                            attribute.attributeType.contains(cpgClass.classFullName)).collect(Collectors.toList());
-            int totalClassUage = inheritedCount.size() + attributeUsageCount.size() + methodCallsCount.size();
-            classUsage.put(cpgClass, totalClassUage);
+            var parameterUsageCount = allParametersWithinCPG.stream().
+                    filter(parameter -> (parameter.typeList.contains(cpgClass.name)
+                            || parameter.typeList.contains(cpgClass.classFullName))).collect(Collectors.toList());
+            int totalClassUsage = attributeUsageCount.size() + relationCount.size() + methodCallsCount.size() + parameterUsageCount.size();
+            classUsage.put(cpgClass, totalClassUsage);
         }
     }
 
@@ -147,6 +161,26 @@ public final class StatTracker {
         // Account for unused methods by giving them a value of 0
         for (CPGClass.Method unusedMethod : allMethodsWithinCPG) {
             methodUsage.putIfAbsent(unusedMethod, 0);
+        }
+    }
+
+    /**
+     * For every method within cpg, determine how many times each method parameter was used within the method's instructions
+     *
+     * @param parameterUsage
+     * @param helper
+     */
+    private static void determineParameterUsage(HashMap<CPGClass.Method, HashMap<CPGClass.Method.Parameter, Integer>> parameterUsage,
+                                                Helper helper) {
+        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
+        for (CPGClass.Method method : allMethods) {
+            HashMap<CPGClass.Method.Parameter, Integer> parameterUsageMap = new HashMap<>();
+            for (CPGClass.Method.Parameter parameter : method.parameters) {
+                var filteredInstructions = Arrays.stream(method.instructions).filter(ins -> ins.label.equals("IDENTIFIER")
+                        && ins.code.contains(parameter.name)).collect(Collectors.toList());
+                parameterUsageMap.put(parameter, filteredInstructions.size());
+            }
+            parameterUsage.put(method, parameterUsageMap);
         }
     }
 
@@ -392,9 +426,9 @@ public final class StatTracker {
             this.cpg = cpg;
             collectAllAttributes(cpg, allAttributes);
             collectAllMethods(cpg, allMethods);
+            collectAllParameters(allMethods, allParameters);
             collectAllMethodCalls(allMethods, allMethodCalls);
             collectAllAttributeCalls(allMethods, allAttributeCalls);
-            collectAllParameters(allMethods, allParameters);
             collectAllClassNames(cpg, allClassNames);
             collectAllMethodNames(cpg, allMethodNames);
         }
