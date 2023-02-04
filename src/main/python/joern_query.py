@@ -21,7 +21,7 @@ def return_collection_types(all_attributes):
 # Return all distinct package names as a set
 def return_all_distinct_package_names(all_classes):
     package_names = {class_dict["packageName"] for class_dict in all_classes}
-    return sorted(package_names)
+    return sorted(package_names, key=str)
 
 
 # Read a file from the file path that Joern gives and return a list of all the lines
@@ -87,12 +87,15 @@ def assign_missing_class_info(class_dict, file_lines):
 
     existing_full_name = class_dict["classFullName"].replace(package_name, "")
     new_full_name = existing_full_name.replace(".", "").replace("$", ".").strip()
+    total_file_length = len(file_lines)
+    empty_lines = len([line for line in file_lines if line is ""])
+    non_empty_lines = total_file_length - empty_lines
     class_dict["classFullName"] = new_full_name
     class_dict["classType"] = class_type
     class_dict["code"] = class_declaration
-    class_dict["fileLength"] = len(file_lines)
-    class_dict["emptyLines"] = len([line for line in file_lines if line is ""])
-    class_dict["nonEmptyLines"] = len([line for line in file_lines if line is not ""])
+    class_dict["fileLength"] = total_file_length
+    class_dict["emptyLines"] = empty_lines
+    class_dict["nonEmptyLines"] = non_empty_lines
     class_dict["importStatements"] = import_statements
     class_dict["modifiers"] = class_modifiers
     class_dict["packageName"] = package_name
@@ -224,6 +227,7 @@ def create_method_dict(curr_method):
                 )
             ),
             "methodCalls": [],
+            "attributeCalls": [],
         }
         return curr_method_dict
 
@@ -379,16 +383,15 @@ def retrieve_class_data(name):
 
 def clean_up_external_classes(source_code_json):
     root_pkg = return_all_distinct_package_names(source_code_json["classes"])[0]
+    new_dict = {"relations": [], "classes": []}
     for class_dict in source_code_json["classes"]:
         filteredInherits = [class_name for class_name in class_dict["inheritsFrom"] if
                             class_name.replace(root_pkg, "") == class_name and "java" not in class_name]
-        # If filteredInherits is not an empty list, delete the class_dictionary
-        if filteredInherits:
-            del class_dict
-        # Else, clean up the inheritsFrom so that instead of "com.CodeSmell.smell.Smell", "Smell" is returned.
-        else:
-            class_dict["inheritsFrom"] = [className.split(".")[-1] for className in class_dict["inheritsFrom"]]
-    return source_code_json
+        if not filteredInherits:
+            class_dict["inheritsFrom"] = [className.split(".")[-1] for className in
+                                          class_dict["inheritsFrom"]]
+        new_dict["classes"].append(class_dict)
+    return new_dict
 
 
 # Update all the type lists for each attribute and method parameter within cpg
