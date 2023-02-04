@@ -165,8 +165,8 @@ public class Parser {
 
     protected static CodePropertyGraph assignRelationships(CodePropertyGraph cpg) {
         cpg = assignProperAttributesAndMethods(cpg, 2);
-        //RelationshipManager relationshipManager = new RelationshipManager(cpg);
-        //cpg = relationshipManager.cpg;
+        RelationshipManager relationshipManager = new RelationshipManager(cpg);
+        cpg = relationshipManager.cpg;
         return cpg;
     }
 
