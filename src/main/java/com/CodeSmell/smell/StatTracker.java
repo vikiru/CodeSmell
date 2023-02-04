@@ -49,6 +49,12 @@ public final class StatTracker {
     public final HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls = new HashMap<>();
 
     /**
+     * For every {@link com.CodeSmell.parser.CPGClass.Method}, determine the distinct attribute calls
+     * that are made to each {@link CPGClass}.
+     */
+    public final HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctAttributeCalls = new HashMap<>();
+
+    /**
      * Determine all the distinct packages, sub-packages and files which contain classes, within cpg.
      */
     public final ArrayList<Package> distinctPackages = new ArrayList<>();
@@ -79,12 +85,14 @@ public final class StatTracker {
         determineClassUsage(cpg, classUsage, helper);
         determineMethodUsage(methodUsage, helper);
         determineDistinctClassTypes(cpg, distinctClassTypes);
+        determineDistinctAttributeCalls(distinctAttributeCalls, helper);
         determineDistinctMethodCalls(distinctMethodCalls, helper);
         determineDistinctPackages(cpg, distinctPackages);
         determineDistinctRelations(cpg, distinctRelations);
         determineTotalClassLines(cpg, totalClassLines);
+        determineTotalClassAttributeCalls(cpg, distinctAttributeCalls, totalClassAttributeCalls);
+        determineTotalClassMethodCalls(cpg, distinctMethodCalls, totalClassMethodCalls);
     }
-
 
     /**
      * Iterates through the cpg to determine how many times an Attribute has been used within methods.
@@ -155,6 +163,21 @@ public final class StatTracker {
             String classType = cpgClass.classType;
             distinctClassTypes.putIfAbsent(classType, new ArrayList<>());
             distinctClassTypes.get(classType).add(cpgClass);
+        }
+    }
+
+    /**
+     * @param distinctAttributeCalls
+     * @param helper
+     */
+    private static void determineDistinctAttributeCalls(HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctAttributeCalls, Helper helper) {
+        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
+        for (CPGClass.Method method : allMethods) {
+            HashMap<CPGClass, Integer> attributeCallClassMap = new HashMap<>();
+            method.getAttributeCalls().
+                    forEach(attrCall -> attributeCallClassMap.put(helper.getClassFromName(attrCall.parentClassName),
+                            attributeCallClassMap.getOrDefault(helper.getClassFromName(attrCall.parentClassName), 0) + 1));
+            distinctAttributeCalls.put(method, attributeCallClassMap);
         }
     }
 
@@ -281,6 +304,43 @@ public final class StatTracker {
             }
         }
     }
+
+    /**
+     * @param cpg
+     * @param distinctAttributeCalls
+     * @param totalClassAttributeCalls
+     */
+    private static void determineTotalClassAttributeCalls(CodePropertyGraph cpg,
+                                                          HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctAttributeCalls,
+                                                          HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassAttributeCalls) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            HashMap<CPGClass, Integer> classIntegerHashMap = new HashMap<>();
+            for (CPGClass.Method method : cpgClass.methods) {
+                distinctAttributeCalls.get(method).forEach((key, value) -> classIntegerHashMap.
+                        put(key, classIntegerHashMap.getOrDefault(key, 0) + value));
+            }
+            totalClassAttributeCalls.put(cpgClass, classIntegerHashMap);
+        }
+    }
+
+    /**
+     * @param cpg
+     * @param distinctMethodCalls
+     * @param totalClassMethodCalls
+     */
+    private static void determineTotalClassMethodCalls(CodePropertyGraph cpg,
+                                                       HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls,
+                                                       HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassMethodCalls) {
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            HashMap<CPGClass, Integer> classIntegerHashMap = new HashMap<>();
+            for (CPGClass.Method method : cpgClass.methods) {
+                distinctMethodCalls.get(method).forEach((key, value) -> classIntegerHashMap.
+                        put(key, classIntegerHashMap.getOrDefault(key, 0) + value));
+            }
+            totalClassMethodCalls.put(cpgClass, classIntegerHashMap);
+        }
+    }
+
 
     /**
      * A class that contains potentially helpful lists containing info such as all attributes, all methods,
