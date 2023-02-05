@@ -9,18 +9,23 @@ import java.util.ArrayList;
  * The CodePropertyGraph which contains all the classes and relations
  */
 public class CodePropertyGraph implements Serializable {
-
     /**
-     * All the relationships between classes within the CodePropertyGraph
+     * All the packages within the CodePropertyGraph. Each package contains files which contain 1 or more classes each.
      */
-    private ArrayList<Relation> relations;
+    private ArrayList<Package> packages;
 
     /**
      * All the classes within the CodePropertyGraph
      */
     private ArrayList<CPGClass> classes;
 
+    /**
+     * All the relationships between classes within the CodePropertyGraph
+     */
+    private ArrayList<Relation> relations;
+
     protected CodePropertyGraph() {
+        this.packages = new ArrayList<>();
         this.classes = new ArrayList<>();
         this.relations = new ArrayList<>();
     }
@@ -28,9 +33,14 @@ public class CodePropertyGraph implements Serializable {
     @Override
     public String toString() {
         return "CodePropertyGraph{" +
-                "relations=" + relations +
+                "packages=" + packages +
                 ", classes=" + classes +
+                ", relations=" + relations +
                 '}';
+    }
+
+    public ArrayList<Package> getPackages() {
+        return new ArrayList<>(this.packages);
     }
 
     public ArrayList<CPGClass> getClasses() {
@@ -39,6 +49,10 @@ public class CodePropertyGraph implements Serializable {
 
     public ArrayList<Relation> getRelations() {
         return new ArrayList<>(this.relations);
+    }
+
+    protected void addPackage(Package pkg) {
+        this.packages.add(pkg);
     }
 
     /**
