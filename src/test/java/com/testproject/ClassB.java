@@ -1,4 +1,4 @@
-package com.testproject;
+package com.CodeSmell.testproject;
 
 public class ClassB {
 	public int i;

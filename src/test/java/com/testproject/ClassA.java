@@ -1,6 +1,6 @@
-package com.testproject;
+package com.CodeSmell.testproject;
 
-import com.testproject.ClassB;
+import com.CodeSmell.testproject.ClassB;
 
 public class ClassA {
 
@@ -15,7 +15,7 @@ public class ClassA {
 		return compositionField[0];
 	}
 
-	public ClassB addB(B b) {
+	public ClassB addB(ClassB b) {
 		return compositionField[0];
 	}
 
