@@ -16,10 +16,15 @@ import java.util.Collections;
 
 public class Common { 
 
+	public static StatTracker stats;
+
+	public static void initStatTracker(CodePropertyGraph cpg) {
+		stats = new StatTracker(cpg);
+	}
+
 	// returns true if c2 is a nested class (within the same file) of c
 	public static boolean isNestedClass(CPGClass c2, CPGClass c) {
-		//com.CodeSmell.parser.CPGClass$Method$Instruction
-		return false;
+		return c.classFullName.startsWith(c + ".");
 	}
 
 	// return classes where nested classes are values in hashmap 
@@ -126,7 +131,7 @@ public class Common {
 		}
 
 		private int contentSize(CPGClass c) {
-			return 0;
+			return stats.totalClassLines.get(c);
 		}
 	}
 }

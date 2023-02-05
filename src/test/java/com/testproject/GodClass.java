@@ -1,10 +1,10 @@
-package com.testproject;
+package com.CodeSmell.testproject;
 
-import com.testproject.ClassA;
-import com.testproject.ClassB;
-import com.testproject.InterfaceC;
-import com.testproject.ClassD;
-import com.testproject.ClassE;
+import com.CodeSmell.testproject.ClassA;
+import com.CodeSmell.testproject.ClassB;
+import com.CodeSmell.testproject.InterfaceC;
+import com.CodeSmell.testproject.ClassD;
+import com.CodeSmell.testproject.ClassE;
 
 public class GodClass {
 	ClassA field1;
@@ -26,8 +26,8 @@ public class GodClass {
 	}
 
 	public boolean compareAs() {
-		for (ClassA a : moreA) {
-			if (a == this.a) {
+		for (ClassA a : field2) {
+			if (a == this.field1) {
 				return true;
 			}
 		}
@@ -35,12 +35,12 @@ public class GodClass {
 	}
 
 	public boolean compareB() {
-		for (ClassA a : moreA) {
-			if (a.getB() == this.b && this.a != a) {
+		for (ClassA a : field2) {
+			if (a.getB() == this.field3 && this.field1 != a) {
 				return true;
 			}
 		}
-		this.c.doThing();
+		this.field4.doThing();
 		return false;
 	}
 }

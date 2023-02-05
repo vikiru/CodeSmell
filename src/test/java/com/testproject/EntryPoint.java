@@ -1,8 +1,8 @@
-package com.testproject;
+package com.CodeSmell.testproject;
 
-import com.testproject.ClassA;
-import com.testproject.ClassB;
-import com.testproject.GodClass;
+import com.CodeSmell.testproject.ClassA;
+import com.CodeSmell.testproject.ClassB;
+import com.CodeSmell.testproject.GodClass;
 
 class EntryPoint {
 	public static void main(String[] args) {

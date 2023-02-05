@@ -22,6 +22,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import static com.CodeSmell.smell.Common.initStatTracker;
+
 
 import java.io.InvalidClassException;
 import java.io.File;
@@ -66,7 +68,8 @@ public class MainApp extends Application {
         // Build the UMLClass objects from the CPGClass objects
         // Get a hashmap to associate the latter with the former.
         HashMap<CPGClass, UMLClass> classMap = new HashMap<CPGClass, UMLClass>();
-
+        initStatTracker(cpg); // todo: run this on another thread and join before
+                              // smells are started
         for (CPGClass graphClass : cpg.getClasses()) {
             UMLClass c = new UMLClass(graphClass.name);
             classMap.put(graphClass, c);
@@ -101,7 +104,7 @@ public class MainApp extends Application {
  
         ArrayList<UMLClass> umlClasses = new ArrayList<UMLClass>(classMap.values());
 
-        try {
+        try {   
             LayoutManager.setLayout(umlClasses, relations);
         } catch (IOException e) {
             throw new RuntimeException(
