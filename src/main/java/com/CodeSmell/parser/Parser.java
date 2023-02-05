@@ -166,6 +166,7 @@ public class Parser {
         cpg = assignProperAttributesAndMethods(cpg, 2);
         RelationshipManager relationshipManager = new RelationshipManager(cpg);
         cpg = relationshipManager.cpg;
+        PackageManager packageManager = new PackageManager(cpg);
         return cpg;
     }
 
