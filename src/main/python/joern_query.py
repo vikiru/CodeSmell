@@ -268,7 +268,7 @@ def create_instruction_dict(curr_instruction):
                     ".", "$"
                 )
                 method_call = method_call.split(".")[-1].replace("$", ".")
-                class_name, method_name = method_call.split(".")
+                class_name, method_name = method_call.split(".")[0], method_call.split(".")[1]
                 method_call = method_call.replace("<init>", class_name)
             else:
                 method_call = ""
