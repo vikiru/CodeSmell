@@ -85,296 +85,86 @@ public final class StatTracker {
      */
     public final HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassAttributeCalls = new HashMap<>();
 
+    public final HashMap<CPGClass, ClassStat> classStats = new HashMap<>();
+    public final HashMap<Package, PackageStat> packageStats = new HashMap<>();
+
+    // determine total calls (Attribute and methodCalls) that a class makes to various packages including its own package
+    // hashmap<cpgclass, hashmap<package, int>
+
     public StatTracker(CodePropertyGraph cpg) {
         helper = new Helper(cpg);
-        determineAttributeUsage(attributeUsage, helper);
-        determineClassUsage(cpg, classUsage, helper);
-        determineMethodUsage(methodUsage, helper);
-        determineParameterUsage(parameterUsage, helper);
-        determineDistinctClassTypes(cpg, distinctClassTypes);
-        determineDistinctAttributeCalls(distinctAttributeCalls, helper);
-        determineDistinctMethodCalls(distinctMethodCalls, helper);
-        determineDistinctPackages(cpg, distinctPackages);
-        determineDistinctRelations(cpg, distinctRelations);
-        determineTotalClassLines(cpg, totalClassLines);
-        determineTotalClassAttributeCalls(cpg, distinctAttributeCalls, totalClassAttributeCalls);
-        determineTotalClassMethodCalls(cpg, distinctMethodCalls, totalClassMethodCalls);
+    }
+
+    public static final class PackageStat {
+    }
+
+    public static final class ClassStat {
+        public final int classUsage;
+        public final int totalClassLines;
+        public final HashMap<CPGClass.Attribute, Integer> attributesUsage = new HashMap<>();
+        public final HashMap<CPGClass.Method, Integer> methodsUsage = new HashMap<>();
+        public final HashMap<CPGClass, ArrayList<CPGClass.Attribute>> totalClassAttributeCalls = new HashMap<>();
+        public final HashMap<CPGClass, ArrayList<CPGClass.Method>> totalClassMethodCalls = new HashMap<>();
+
+        public ClassStat(CPGClass cpgClass, int classUsage, int totalClassLines) {
+            this.classUsage = classUsage;
+            this.totalClassLines = totalClassLines;
+        }
     }
 
     /**
-     * Iterates through the cpg to determine how many times an Attribute has been used within methods.
-     *
-     * @param attributeUsage
+     * @param cpgClass
+     * @param cpg
      * @param helper
+     * @return
      */
-    private static void determineAttributeUsage(HashMap<CPGClass.Attribute, Integer> attributeUsage,
-                                                Helper helper) {
-        ArrayList<CPGClass.Attribute> allAttributes = helper.allAttributes;
-        ArrayList<CPGClass.Attribute> allAttributeCalls = helper.allAttributeCalls;
-        for (CPGClass.Attribute attribute : allAttributeCalls) {
-            attributeUsage.put(attribute, attributeUsage.getOrDefault(attribute, 0) + 1);
-        }
-        allAttributes.forEach(attr -> attributeUsage.putIfAbsent(attr, 0));
+    private static int determineClassUsage(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
+        var filteredRelations = cpg.getRelations().stream().
+                filter(relation -> (relation.type.equals(ClassRelation.RelationshipType.INHERITANCE) ||
+                        relation.type.equals(ClassRelation.RelationshipType.REALIZATION))).collect(Collectors.toList());
+        var attributeTypes = helper.allAttributes.stream().
+                filter(attribute -> (attribute.typeList.contains(cpgClass.name) || attribute.typeList.contains(cpgClass.classFullName))).
+                collect(Collectors.toList());
+        var allAttributeCalls = helper.allAttributeCalls.stream().
+                filter(attributeCall -> attributeCall.parentClassName.equals(cpgClass.name)).collect(Collectors.toList());
+        var allMethodCalls = helper.allMethodCalls.stream().
+                filter(method -> method.parentClassName.equals(cpgClass.name)).collect(Collectors.toList());
+        var allParameters = helper.allParameters.stream().filter(param -> param.typeList.contains(cpgClass.name)).
+                collect(Collectors.toList());
+        return filteredRelations.size() + attributeTypes.size() +
+                allAttributeCalls.size() + allMethodCalls.size() + allParameters.size();
     }
 
     /**
-     * For every class within the cpg, return a count of how many times it was used as an attribute type,
-     * inheritance/realization relation, parameter or its methods were used
-     *
-     * @param cpg        The CodePropertyGraph containing all existing classes and relations
-     * @param classUsage
-     * @param helper
+     * @param cpgClass
+     * @param cpg
+     * @return
      */
-    private static void determineClassUsage(CodePropertyGraph cpg, HashMap<CPGClass, Integer> classUsage, Helper helper) {
-        ArrayList<CPGClass.Method> allMethodCallsWithinCPG = helper.allMethodCalls;
-        ArrayList<CPGClass.Attribute> allAttributesWithinCPG = helper.allAttributes;
-        ArrayList<CPGClass.Method.Parameter> allParametersWithinCPG = helper.allParameters;
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            var attributeUsageCount = allAttributesWithinCPG.stream().filter(attribute ->
-                    attribute.attributeType.contains(cpgClass.name) ||
-                            attribute.attributeType.contains(cpgClass.classFullName)).collect(Collectors.toList());
-            var relationCount = cpg.getRelations().stream().
-                    filter(relation -> (relation.type.equals(ClassRelation.RelationshipType.INHERITANCE) ||
-                            relation.type.equals(ClassRelation.RelationshipType.REALIZATION))
-                            && relation.destination.equals(cpgClass)).collect(Collectors.toList());
-            var methodCallsCount = allMethodCallsWithinCPG.stream().
-                    filter(method -> method.parentClassName.equals(cpgClass.name)).collect(Collectors.toList());
-            var parameterUsageCount = allParametersWithinCPG.stream().
-                    filter(parameter -> (parameter.typeList.contains(cpgClass.name)
-                            || parameter.typeList.contains(cpgClass.classFullName))).collect(Collectors.toList());
-            int totalClassUsage = attributeUsageCount.size() + relationCount.size() + methodCallsCount.size() + parameterUsageCount.size();
-            classUsage.put(cpgClass, totalClassUsage);
-        }
-    }
-
-    /**
-     * Iterates through the cpg to determine how many times a given Method has been used and returns a
-     * hashmap mapping every Method object to an int value representing the number of times it was called.
-     */
-    private static void determineMethodUsage(HashMap<CPGClass.Method, Integer> methodUsage, Helper helper) {
-        ArrayList<CPGClass.Method> allMethodsWithinCPG = helper.allMethods;
-        ArrayList<CPGClass.Method> allMethodCallsWithinCPG = helper.allMethodCalls;
-        // Add all the methods that exist within allMethodCalls of cpg and update the key, if it exists.
-        for (CPGClass.Method method : allMethodCallsWithinCPG) {
-            methodUsage.put(method, methodUsage.getOrDefault(method, 0) + 1);
-        }
-        // Account for unused methods by giving them a value of 0
-        for (CPGClass.Method unusedMethod : allMethodsWithinCPG) {
-            methodUsage.putIfAbsent(unusedMethod, 0);
-        }
-    }
-
-    /**
-     * For every method within cpg, determine how many times each method parameter was used within the method's instructions
-     *
-     * @param parameterUsage
-     * @param helper
-     */
-    private static void determineParameterUsage(HashMap<CPGClass.Method, HashMap<CPGClass.Method.Parameter, Integer>> parameterUsage,
-                                                Helper helper) {
-        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
-        for (CPGClass.Method method : allMethods) {
-            HashMap<CPGClass.Method.Parameter, Integer> parameterUsageMap = new HashMap<>();
-            for (CPGClass.Method.Parameter parameter : method.parameters) {
-                var filteredInstructions = Arrays.stream(method.instructions).filter(ins -> ins.label.equals("IDENTIFIER")
-                        && ins.code.contains(parameter.name)).collect(Collectors.toList());
-                parameterUsageMap.put(parameter, filteredInstructions.size());
-            }
-            parameterUsage.put(method, parameterUsageMap);
-        }
-    }
-
-    /**
-     * Iterates through the cpg to determine all the distinct class types that are present such as
-     * abstract class, class, enum, interface.
-     *
-     * @param cpg                The CodePropertyGraph containing all existing classes and relations
-     * @param distinctClassTypes
-     */
-    private static void determineDistinctClassTypes(CodePropertyGraph cpg,
-                                                    TreeMap<String, ArrayList<CPGClass>> distinctClassTypes) {
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            String classType = cpgClass.classType;
-            distinctClassTypes.putIfAbsent(classType, new ArrayList<>());
-            distinctClassTypes.get(classType).add(cpgClass);
-        }
-    }
-
-    /**
-     * @param distinctAttributeCalls
-     * @param helper
-     */
-    private static void determineDistinctAttributeCalls(HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctAttributeCalls, Helper helper) {
-        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
-        for (CPGClass.Method method : allMethods) {
-            HashMap<CPGClass, Integer> attributeCallClassMap = new HashMap<>();
-            method.getAttributeCalls().
-                    forEach(attrCall -> attributeCallClassMap.put(helper.getClassFromName(attrCall.parentClassName),
-                            attributeCallClassMap.getOrDefault(helper.getClassFromName(attrCall.parentClassName), 0) + 1));
-            distinctAttributeCalls.put(method, attributeCallClassMap);
-        }
-    }
-
-    /**
-     * @param distinctMethodCalls
-     * @param helper
-     */
-    private static void determineDistinctMethodCalls(HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls, Helper helper) {
-        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
-        for (CPGClass.Method method : allMethods) {
-            HashMap<CPGClass, Integer> methodCallClassMap = new HashMap<>();
-            method.getMethodCalls().
-                    forEach(methodCall -> methodCallClassMap.put(helper.getClassFromName(methodCall.parentClassName),
-                            methodCallClassMap.getOrDefault(helper.getClassFromName(methodCall.parentClassName), 0) + 1));
-            distinctMethodCalls.put(method, methodCallClassMap);
-        }
-    }
-
-    /**
-     * Iterate through the cpg to determine all the distinct packages and sub-packages, additionally creating
-     * files which possess 1 or more classes each (accounts for nested classes).
-     *
-     * @param cpg              The CodePropertyGraph containing all existing classes and relations
-     * @param distinctPackages
-     */
-    private static void determineDistinctPackages(CodePropertyGraph cpg,
-                                                  ArrayList<Package> distinctPackages) {
-        // Get all package names, mapped to an array list of files
-        TreeMap<String, ArrayList<File>> packageNames = new TreeMap<>();
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            String packageName = cpgClass.packageName;
-            String filePath = cpgClass.filePath;
-            String fileName = cpgClass.name + ".java";
-            packageNames.putIfAbsent(packageName, new ArrayList<>());
-            if (filePath.contains(fileName)) {
-                // Handle adding of new files and classes within those files
-                File newFile = new File(fileName, filePath);
-                var fileClasses = cpg.getClasses().stream().
-                        filter(nestedClasses -> nestedClasses.filePath.equals(filePath)).collect(Collectors.toList());
-                fileClasses.sort(comparing(classes -> classes.classFullName));
-                if (!fileClasses.isEmpty()) {
-                    fileClasses.forEach(fileClass -> File.addClass(newFile.classes, fileClass));
-                }
-                packageNames.get(packageName).add(newFile);
-            }
-        }
-        // Create distinct package objects
-        for (Map.Entry<String, ArrayList<File>> entry : packageNames.entrySet()) {
-            String packageName = entry.getKey();
-            ArrayList<File> files = entry.getValue();
-            files.sort(comparing(file -> file.fileName.toLowerCase()));
-            Package newPackage = new Package(packageName);
-            files.forEach(file -> Package.addFile(newPackage.files, file));
-            distinctPackages.add(newPackage);
-        }
-        // Add all subpackages, by checking length of packageName (greater packageName implies subPackage to current pkg)
-        for (Package pkg : distinctPackages) {
-            String packageName = pkg.packageName;
-            int lastOccurrence = packageName.lastIndexOf(".");
-            var result = distinctPackages.stream().
-                    filter(p -> p.packageName.lastIndexOf(".") > lastOccurrence).collect(Collectors.toList());
-            if (!result.isEmpty()) {
-                result.forEach(pkgToAdd -> Package.addPackage(pkg.subPackages, pkgToAdd));
-            }
-        }
-    }
-
-    /**
-     * Iterates through the cpg and groups all relations by RelationshipType.
-     *
-     * @param cpg               The CodePropertyGraph containing all existing classes and relations
-     * @param distinctRelations
-     */
-    private static void determineDistinctRelations(CodePropertyGraph cpg,
-                                                   HashMap<ClassRelation.RelationshipType, ArrayList<CodePropertyGraph.Relation>> distinctRelations) {
-        for (ClassRelation.RelationshipType relationshipType : ClassRelation.RelationshipType.values()) {
-            var allMatchingRelations = cpg.getRelations().stream().
-                    filter(relation -> relation.type.equals(relationshipType)).collect(Collectors.toList());
-            distinctRelations.put(relationshipType, (ArrayList<CodePropertyGraph.Relation>) allMatchingRelations);
-        }
-    }
-
-    /**
-     * For each class within the cpg, determine how many non-empty lines are occupied by that class. Additionally, accounting
-     * for any nested classes within the same file.
-     *
-     * @param cpg             The CodePropertyGraph containing all existing classes and relations
-     * @param totalClassLines The map containing all the classes within cpg and all of their total class line length
-     */
-    private static void determineTotalClassLines(CodePropertyGraph cpg,
-                                                 HashMap<CPGClass, Integer> totalClassLines) {
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            String filePath = cpgClass.filePath;
-            boolean isRootClass = filePath.contains(cpgClass.name);
-            int selfAttributeLength = cpgClass.attributes.length;
-            final int[] selfMethodLines = {0};
-            Arrays.stream(cpgClass.methods).forEach(method -> {
-                selfMethodLines[0] += method.totalMethodLength;
-            });
-            int selfDeclarationLines = 2;
-            int selfTotal = selfDeclarationLines + selfAttributeLength + selfMethodLines[0];
-            var nestedCheck = cpg.getClasses().stream().
-                    filter(cpgToFind -> cpgToFind.filePath.equals(filePath) &&
-                            !cpgToFind.name.equals(cpgClass.name)).collect(Collectors.toList());
-            if (nestedCheck.isEmpty()) {
-                totalClassLines.put(cpgClass, selfTotal);
+    private static int determineTotalClassLines(CPGClass cpgClass, CodePropertyGraph cpg) {
+        var filePathResult = cpg.getClasses().stream().filter(cpgToFind -> cpgToFind.filePath.equals(cpgClass.filePath)).
+                collect(Collectors.toList());
+        int totalSelfLines = 0;
+        int totalNestedLines = 0;
+        System.out.println(cpgClass.name);
+        for (CPGClass classWithinFile : filePathResult) {
+            int declarationLength = 2;
+            final int[] attributeLength = {0};
+            Arrays.stream(classWithinFile.attributes).
+                    filter(attribute -> attribute.parentClassName.equals(classWithinFile.name)).
+                    forEach(attribute -> attributeLength[0] += 1);
+            final int[] methodLength = {0};
+            Arrays.stream(classWithinFile.methods).
+                    filter(method -> method.parentClassName.equals(classWithinFile.name)).
+                    forEach(method -> methodLength[0] += method.totalMethodLength);
+            if (classWithinFile.name.equals(cpgClass.name)) {
+                totalSelfLines += attributeLength[0] + declarationLength + methodLength[0];
             } else {
-                int nestedTotal = 0;
-                for (CPGClass nestedClass : nestedCheck) {
-                    int attrLength = nestedClass.attributes.length;
-                    final int[] methodLength = {0};
-                    Arrays.stream(nestedClass.methods).forEach(method -> {
-                        methodLength[0] += method.totalMethodLength;
-                    });
-                    int declLines = 2;
-                    nestedTotal += declLines + attrLength + methodLength[0];
-                }
-                if (isRootClass) {
-                    int total = nestedTotal + selfTotal;
-                    totalClassLines.put(cpgClass, total);
-                } else {
-                    totalClassLines.put(cpgClass, selfTotal);
-                }
+                totalNestedLines += attributeLength[0] + declarationLength + methodLength[0];
             }
         }
+        int totalLines = totalSelfLines + totalNestedLines;
+        return totalLines;
     }
-
-    /**
-     * @param cpg
-     * @param distinctAttributeCalls
-     * @param totalClassAttributeCalls
-     */
-    private static void determineTotalClassAttributeCalls(CodePropertyGraph cpg,
-                                                          HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctAttributeCalls,
-                                                          HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassAttributeCalls) {
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            HashMap<CPGClass, Integer> classIntegerHashMap = new HashMap<>();
-            for (CPGClass.Method method : cpgClass.methods) {
-                distinctAttributeCalls.get(method).forEach((key, value) -> classIntegerHashMap.
-                        put(key, classIntegerHashMap.getOrDefault(key, 0) + value));
-            }
-            totalClassAttributeCalls.put(cpgClass, classIntegerHashMap);
-        }
-    }
-
-    /**
-     * @param cpg
-     * @param distinctMethodCalls
-     * @param totalClassMethodCalls
-     */
-    private static void determineTotalClassMethodCalls(CodePropertyGraph cpg,
-                                                       HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls,
-                                                       HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassMethodCalls) {
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            HashMap<CPGClass, Integer> classIntegerHashMap = new HashMap<>();
-            for (CPGClass.Method method : cpgClass.methods) {
-                distinctMethodCalls.get(method).forEach((key, value) -> classIntegerHashMap.
-                        put(key, classIntegerHashMap.getOrDefault(key, 0) + value));
-            }
-            totalClassMethodCalls.put(cpgClass, classIntegerHashMap);
-        }
-    }
-
 
     /**
      * A class that contains potentially helpful lists containing info such as all attributes, all methods,
