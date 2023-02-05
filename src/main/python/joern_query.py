@@ -255,8 +255,7 @@ def create_instruction_dict(curr_instruction):
             call_list = [
                 item.split(":")[0]
                 for item in instruction_call_full_names
-                if method_call in item
-                   and "java" not in item
+                if method_call in item and "java" not in item
             ]
             # Account for cases where two classes could have the same method names (additionally exclude names
             # matching java): ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell:
@@ -268,6 +267,8 @@ def create_instruction_dict(curr_instruction):
                     ".", "$"
                 )
                 method_call = method_call.split(".")[-1].replace("$", ".")
+                class_name, method_name = method_call.split(".")[0], method_call.split(".")[1]
+                method_call = method_call.replace("<init>", class_name)
             else:
                 method_call = ""
         curr_instruction_dict = {
