@@ -10,7 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -217,63 +216,30 @@ public class Parser {
         // Helper variables
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
         ArrayList<Method> allMethodsInCPG = helper.allMethods;
-        ArrayList<String> allMethodNames = helper.allMethodNames;
-        ArrayList<String> allClassNames = helper.allClassNames;
         ArrayList<Method> methodCalls = new ArrayList<>();
-        CPGClass methodParent = helper.getClassFromName(methodToUpdate.parentClassName);
-        Set<String> allFieldTypes = new HashSet<>();
-        Set<String> allInheritedTypes = new HashSet<>();
-        Set<String> allLocalTypes = new HashSet<>();
-        Set<String> allParameterTypes = new HashSet<>();
-        Set<String> allTypes = new HashSet<>();
-        Set<Integer> uniqueIndexes = new LinkedHashSet<>();
-        // Get all possible calls where the instruction's methodCall is not empty and
-        // the method is present within cpg
-        var allCalls = Arrays.stream(methodToUpdate.instructions).
+        // Get all possible calls where the instruction's methodCall is not empty
+        Set<String> allDistinctCalls = new HashSet<>();
+        Arrays.stream(methodToUpdate.instructions).
                 filter(instruction -> instruction.label.equals("CALL")
-                        && !instruction.methodCall.equals("") &&
-                        (allMethodNames.contains(instruction.methodCall) ||
-                                instruction.methodCall.equals("super"))).collect(Collectors.toList());
-        Arrays.stream(methodParent.attributes).
-                forEach(attribute -> attribute.typeList.stream().
-                        filter(allClassNames::contains).
-                        forEach(allFieldTypes::add));
-        Arrays.stream(methodToUpdate.parameters).
-                forEach(parameter -> parameter.typeList.stream().
-                        filter(allClassNames::contains).
-                        forEach(allParameterTypes::add));
-        Arrays.stream(methodParent.inheritsFrom).
-                filter(allClassNames::contains).
-                forEach(allInheritedTypes::add);
-        allCalls.stream().
-                filter(ins -> allClassNames.contains(ins.methodCall)).
-                forEach(localType -> allLocalTypes.add(localType.methodCall));
-        // Now allTypes contains all possible types that could have owned the method (itself, fields,
-        // parameters, local, and inherited superclass)
-        allTypes.addAll(allFieldTypes);
-        allTypes.addAll(allInheritedTypes);
-        allTypes.addAll(allParameterTypes);
-        allTypes.addAll(allLocalTypes);
-        allTypes.add(methodParent.name);
-        if (!allCalls.isEmpty()) {
-            for (Method.Instruction call : allCalls) {
-                String methodCall = call.methodCall;
-                if (methodCall.equals("super") && methodParent.code.contains("extends")) {
-                    int index = methodParent.code.indexOf("extends ");
-                    String extenderCode = methodParent.code.substring(index).replace("extends ", "");
-                    methodCall = extenderCode.split(" ")[0];
-                }
-                String finalMethodCall = methodCall;
-                var methodCallParent = allMethodsInCPG.stream().
-                        filter(method -> method.name.equals(finalMethodCall) &&
-                                allTypes.contains(method.parentClassName)).collect(Collectors.toList());
-                if (!methodCallParent.isEmpty()) {
-                    uniqueIndexes.add(allMethodsInCPG.indexOf(methodCallParent.get(0)));
+                        && (!instruction.methodCall.equals(""))).
+                forEach(ins -> allDistinctCalls.add(ins.methodCall));
+        Set<String> allLocalTypes = new HashSet<>();
+        // Add all the method calls.
+        for (String call : allDistinctCalls) {
+            String className = call.split("\\.")[0].trim();
+            String methodName = call.split("\\.")[1].trim();
+            var methodToAdd = allMethodsInCPG.stream().
+                    filter(method -> (method.parentClassName.equals(className) && method.name.equals(methodName))).
+                    collect(Collectors.toList());
+            if (!methodToAdd.isEmpty()) {
+                methodCalls.add(methodToAdd.get(0));
+                // Add local variables to a temp set to be used to find attribute usage.
+                if (className.equals(methodName)) {
+                    allLocalTypes.add(className);
                 }
             }
         }
-        ArrayList<Attribute> attributeUsage = updateMethodWithAttributeUsage(helper, allTypes, methodToUpdate);
-        uniqueIndexes.forEach(index -> methodCalls.add(allMethodsInCPG.get(index)));
+        ArrayList<Attribute> attributeUsage = updateMethodWithAttributeUsage(helper, methodToUpdate, allLocalTypes);
         if (iterationNumber == 1) {
             Method properMethod = new Method(methodToUpdate.name, methodToUpdate.parentClassName, methodToUpdate.methodBody,
                     methodToUpdate.modifiers, methodToUpdate.parameters, methodToUpdate.returnType, methodToUpdate.lineNumberStart,
@@ -282,81 +248,53 @@ public class Parser {
             properMethod.setAttributeCalls(attributeUsage);
             return properMethod;
         } else {
-            ArrayList<Method> fixMethodReferences = new ArrayList<>();
             for (Method m : methodToUpdate.getMethodCalls()) {
                 var result = allMethodsInCPG.stream().
                         filter(method -> method.name.equals(m.name) && method.parentClassName.equals(m.parentClassName))
                         .collect(Collectors.toList());
-                fixMethodReferences.add(result.get(0));
+                methodCalls.add(result.get(0));
             }
-            methodToUpdate.setMethodCalls(fixMethodReferences);
+            methodToUpdate.setMethodCalls(methodCalls);
             methodToUpdate.setAttributeCalls(attributeUsage);
             return methodToUpdate;
         }
     }
 
     protected static ArrayList<Attribute> updateMethodWithAttributeUsage(StatTracker.Helper helper,
-                                                                         Set<String> allClassTypes,
-                                                                         Method methodToUpdate) {
-        Set<Attribute> attributeUsage = new HashSet<>();
+                                                                         Method methodToUpdate,
+                                                                         Set<String> allLocalTypes) {
+        Set<CPGClass> allPossibleClasses = new HashSet<>();
+        Set<Attribute> possibleAttributes = new HashSet<>();
         ArrayList<String> allClassNames = helper.allClassNames;
+        HashMap<String, Attribute> attributes = new HashMap<>();
+        HashMap<String, Integer> fieldLine = new HashMap<>();
+        Arrays.stream(methodToUpdate.instructions).filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
+                forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
         CPGClass methodParent = helper.getClassFromName(methodToUpdate.parentClassName);
-        Set<CPGClass> allClasses = new HashSet<>();
-        allClassTypes.forEach(type -> allClasses.add(helper.getClassFromName(type)));
-        HashMap<String, Integer> fieldWithLineNumber = new HashMap<>();
-        // Get all calls to fields of classes within a method
-        var fieldIdentifiers = Arrays.stream(methodToUpdate.instructions).
-                filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).collect(Collectors.toList());
-        fieldIdentifiers.forEach(ins -> fieldWithLineNumber.put(ins.code, ins.lineNumber));
-        for (Map.Entry<String, Integer> entry : fieldWithLineNumber.entrySet()) {
-            String fieldName = entry.getKey();
-            int lineNumber = entry.getValue();
-            String toFind = "." + fieldName;
-            var matchingCallIns = Arrays.stream(methodToUpdate.instructions).
-                    filter(instruction -> instruction.label.equals("CALL") &&
-                            instruction.lineNumber == lineNumber &&
-                            instruction.code.contains(toFind) &&
-                            !instruction.code.contains("=")).collect(Collectors.toList());
-            if (!matchingCallIns.isEmpty()) {
-                Method.Instruction instruction = matchingCallIns.get(0);
-                if (instruction.code.startsWith("this")) {
-                    boolean inheritsFromAnotherClass = methodParent.code.contains("extends");
-                    // method parent inherits and joern will output "this.(attribute name)" for fields that are inherited
-                    // combine attributes and find the one that is used within the method
-                    if (inheritsFromAnotherClass) {
-                        List<String> inheritedNames = Arrays.stream(methodParent.inheritsFrom).
-                                filter(allClassNames::contains).
-                                collect(Collectors.toList());
-                        var checkAllClasses = allClasses.stream().
-                                filter(aClass -> inheritedNames.contains(aClass.name)
-                                        && !aClass.classType.equals("interface")).
-                                limit(2).collect(Collectors.toList());
-                        if (!checkAllClasses.isEmpty()) {
-                            CPGClass superClass = checkAllClasses.get(0);
-                            Set<Attribute> combinedAttributes = new HashSet<Attribute>(List.of(superClass.attributes));
-                            combinedAttributes.addAll(List.of(methodParent.attributes));
-                            var combinedResult = combinedAttributes.stream().
-                                    filter(attribute -> attribute.name.equals(fieldName)).collect(Collectors.toSet());
-                            attributeUsage.addAll(combinedResult);
-                        }
-                    }
-                    // method parent does not inherit so check method parent's attributes for attribute that is used
-                    else {
-                        var attributeResult = Arrays.stream(methodParent.attributes).
-                                filter(attribute -> attribute.name.equals(fieldName)).collect(Collectors.toSet());
-                        attributeUsage.addAll(attributeResult);
-                    }
-                } else {
-                    Set<Attribute> otherClassAttributes = new HashSet<>();
-                    Set<CPGClass> ignoreParent = new HashSet<>(allClasses);
-                    ignoreParent.remove(methodParent);
-                    ignoreParent.forEach(cpgClass -> Arrays.stream(cpgClass.attributes).
-                            filter(attribute -> attribute.name.equals(fieldName))
-                            .forEach(otherClassAttributes::add));
-                    attributeUsage.addAll(otherClassAttributes);
-                }
-            }
+        allPossibleClasses.add(methodParent);
+        boolean classInherits = methodParent.code.contains("extends");
+        if (classInherits) {
+            int index = methodParent.code.indexOf("extends ");
+            String superClassName = methodParent.code.substring(index).
+                    replace("extends", "").trim().split(" ")[0];
+            CPGClass superClass = helper.getClassFromName(superClassName);
+            Arrays.stream(superClass.attributes).filter(attr -> fieldLine.containsKey(attr.name)).
+                    forEach(possibleAttributes::add);
+            allPossibleClasses.add(superClass);
         }
-        return new ArrayList<>(attributeUsage);
+        Arrays.stream(methodParent.attributes).filter(attr -> fieldLine.containsKey(attr.name)).forEach(possibleAttributes::add);
+        possibleAttributes.forEach(attr -> attributes.put(attr.name, attr));
+        attributes.keySet().forEach(fieldLine::remove);
+        Arrays.stream(methodParent.attributes).filter(attr -> allClassNames.contains(attr.attributeType)).
+                forEach(attr -> allPossibleClasses.add(helper.getClassFromName(attr.attributeType)));
+        Arrays.stream(methodToUpdate.parameters).filter(param -> allClassNames.contains(param.type)).
+                forEach(param -> allPossibleClasses.add(helper.getClassFromName(param.type)));
+        allLocalTypes.stream().filter(allClassNames::contains).forEach(local -> allPossibleClasses.add(helper.getClassFromName(local)));
+        for (CPGClass cpgClass : allPossibleClasses) {
+            Arrays.stream(cpgClass.attributes).filter(attr -> fieldLine.containsKey(attr.name) && attr.code.contains("public")).
+                    forEach(possibleAttributes::add);
+        }
+        possibleAttributes.forEach(attr -> attributes.put(attr.name, attr));
+        return new ArrayList<>(attributes.values());
     }
 }
