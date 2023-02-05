@@ -251,25 +251,27 @@ def create_instruction_dict(curr_instruction):
         method_call = ""
         if calls and instruction_label == "CALL":
             method_call = calls[0].replace("(", "")
+            method_call = method_call.replace("super", "<init>")
             call_list = [
-                item.split(":")[0].replace("<init>", method_call)
+                item.split(":")[0]
                 for item in instruction_call_full_names
                 if method_call in item
+                   and "java" not in item
             ]
-            # Only modify method_call if it is not empty and does not contain "super". This is to account for cases
-            # where two classes could have the same method names (additionally exclude names matching java)
-            # ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell: "ClassA.getA" was
-            # called. instead of just "getA"
-            if call_list and method_call != "super" and method_call:
+            # Account for cases where two classes could have the same method names (additionally exclude names
+            # matching java): ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell:
+            # "ClassA.getA" was called. instead of just "getA"
+            if call_list and method_call:
                 method_call = call_list[0]
-                if "java" not in method_call:
-                    index = method_call.rfind(".")
-                    method_call = method_call[:index] + method_call[index:].replace(
-                        ".", "$"
-                    )
-                    method_call = method_call.split(".")[-1].replace("$", ".")
-                else:
-                    method_call = ""
+                index = method_call.rfind(".")
+                method_call = method_call[:index] + method_call[index:].replace(
+                    ".", "$"
+                )
+                method_call = method_call.split(".")[-1].replace("$", ".")
+                class_name, method_name = method_call.split(".")
+                method_call = method_call.replace("<init>", class_name)
+            else:
+                method_call = ""
         curr_instruction_dict = {
             "label": instruction_label,
             "code": instruction_code.replace("\r\n", ""),
