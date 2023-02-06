@@ -10,16 +10,6 @@ from cpgqls_client import CPGQLSClient, import_code_query
 import logging
 
 
-# Return all of the unique collection types present within the code base
-def return_collection_types(all_attributes):
-    collection_types = {
-        attribute_dict["packageName"].replace("java.util.", "").strip()
-        for attribute_dict in all_attributes
-        if "java.util" in attribute_dict["packageName"]
-    }
-    return collection_types
-
-
 # Return all distinct package names as a set
 def return_all_distinct_package_names(all_classes):
     package_names = {class_dict["packageName"] for class_dict in all_classes}
@@ -79,13 +69,9 @@ def assign_missing_class_info(class_dict, file_lines):
             attribute_modifiers.append("static")
             attribute_type = existing_type
 
-        attribute["parentClassName"] = class_name
         attribute["code"] = attribute_code
         attribute["attributeType"] = attribute_type
         attribute["modifiers"] = attribute_modifiers
-
-    for method in class_dict["methods"]:
-        method["parentClassName"] = class_name
 
     existing_full_name = class_dict["classFullName"].replace(package_name, "")
     new_full_name = existing_full_name.replace(".", "").replace("$", ".").strip()
@@ -126,11 +112,11 @@ def create_attribute_dict(curr_attribute):
         type = type[index_nested + 1: len(type)]
 
     curr_attribute_dict = {
-        "parentClassName": "",
         "name": attribute_name,
+        "parentClass": [{}],
+        "packageName": package_name,
         "code": "",
         "lineNumber": attribute_line_number,
-        "packageName": package_name,
         "modifiers": [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": type,
         "typeList": [],
@@ -210,18 +196,17 @@ def create_method_dict(curr_method):
             return regex_pattern_modifiers + list(difference)
 
         curr_method_dict = {
-            "parentClassName": "",
-            "code": method_code,
-            "lineNumberStart": method_line_number,
-            "lineNumberEnd": method_line_number_end,
-            "totalMethodLength": total_lines,
             "name": method_name.replace("<init>", constructor_name),
+            "parentClass": [{}],
+            "methodBody": method_body,
             "modifiers": get_method_modifiers(
                 regex_pattern_modifiers, method_modifiers
             ),
-            "returnType": return_type,
-            "methodBody": method_body,
             "parameters": get_method_parameters(method_parameters),
+            "returnType": return_type,
+            "lineNumberStart": method_line_number,
+            "lineNumberEnd": method_line_number_end,
+            "totalMethodLength": total_lines,
             "instructions": list(
                 filter(
                     None,
@@ -338,8 +323,7 @@ def retrieve_all_class_names():
     query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).name.toJson'
     result = client.execute(query)
     class_names = []
-    if result["success"]:
-        print(result)
+    if result["success"] and result["stdout"]:
         index = result["stdout"].index('"')
         all_names = json.loads(
             json.loads(result["stdout"][index: len(result["stdout"])])
@@ -413,53 +397,16 @@ def clean_up_external_classes(source_code_json):
                and "java" not in class_name
         ]
         if not filtered_inherits:
-            class_dict["inheritsFrom"] = [
-                className.split(".")[-1] for className in class_dict["inheritsFrom"]
-            ]
+            class_dict["inheritsFrom"] = []
             new_dict["classes"].append(class_dict)
     return new_dict
-
-
-# Update all the type lists for each attribute and method parameter within cpg
-def update_type_lists(source_code_json):
-    all_attributes = [
-        attribute
-        for class_dict in source_code_json["classes"]
-        for attribute in class_dict["attributes"]
-    ]
-    all_parameters = [
-        parameter
-        for class_dict in source_code_json["classes"]
-        for method in class_dict["methods"]
-        for parameter in method["parameters"]
-    ]
-    collection_types = return_collection_types(all_attributes)
-    regex_str = "|".join(collection_types) + "|\[]|<|>|,"
-    regex_pattern = re.compile(regex_str)
-
-    def return_type_lists(type_to_analyze):
-        type_list = [type_to_analyze]
-        new_type = re.sub(regex_pattern, "", type_to_analyze)
-        if len(new_type) != len(type_to_analyze):
-            type_list = new_type.split()
-        return type_list
-
-    # Obtain type lists for all attributes
-    for attribute in all_attributes:
-        attribute["typeList"] = return_type_lists(attribute["attributeType"])
-    # Obtain type lists for all method parameters
-    for method_parameter in all_parameters:
-        method_parameter["typeList"] = return_type_lists(method_parameter["type"])
-    return source_code_json
 
 
 def source_code_json_creation(class_names):
     source_code_json = {"relations": [], "classes": []}
     for class_name in class_names:
         source_code_json["classes"].append(retrieve_class_data(class_name))
-    # Get all the type lists of method params & attributes within cpg (i.e. HashMap<CPGClass, Integer> should return
-    # ["CPGClass", "Integer"]
-    source_code_json = update_type_lists(source_code_json)
+
     # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
     # code base)
     source_code_json = clean_up_external_classes(source_code_json)
