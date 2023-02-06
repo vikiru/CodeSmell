@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
  * The RelationshipManager is responsible for adding relations to the CodePropertyGraph object
  * and adding relationships to each CPGClass's outwardRelations attribute.
  */
-public class RelationshipManager {
+public final class RelationshipManager {
     /**
      * Create a RelationshipManager object which will assign all possible relations, provided a valid CPG and
      * will return a new CPG with relations.
@@ -30,7 +30,7 @@ public class RelationshipManager {
     /**
      * Iterates through all the added relations within cpg to add the respective outward relations to the sourceClass.
      */
-    protected static void assignOutwardRelations(CodePropertyGraph cpg) {
+    private static void assignOutwardRelations(CodePropertyGraph cpg) {
         for (CodePropertyGraph.Relation relation : cpg.getRelations()) {
             CPGClass source = relation.source;
             source.addOutwardRelation(relation);
@@ -52,7 +52,7 @@ public class RelationshipManager {
      * REFLEXIVE_ASSOCIATION assigned if the source and dest class are the same CPGClass object.
      * </p>
      **/
-    protected static void assignAssociation(CodePropertyGraph cpg) {
+    private static void assignAssociation(CodePropertyGraph cpg) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             HashMap<String, Long> typeCountMap = new HashMap<>();
             Set<CPGClass> uniqueDestinationClasses = new HashSet<>();
@@ -103,7 +103,7 @@ public class RelationshipManager {
      * @param destinationClass - The destination CPGClass object
      * @return True or False, depending on if bidirectional association exists or not
      */
-    protected static boolean determineBidirectionalAssociation(CPGClass sourceClass, CPGClass destinationClass) {
+    private static boolean determineBidirectionalAssociation(CPGClass sourceClass, CPGClass destinationClass) {
         boolean bidirectionalAssociationExists = false;
         Set<CPGClass.Attribute> allSourceTypes = sourceClass.getAttributes().stream().
                 filter(attr -> attr.getTypeList().contains(destinationClass) && attr.getParent().equals(sourceClass)).
@@ -124,7 +124,7 @@ public class RelationshipManager {
      * @param destinationClass - The destination CPGClass object
      * @return True or False, depending on if composition exists or not
      */
-    protected static boolean determineCompositionRelationship(CPGClass sourceClass, CPGClass destinationClass) {
+    private static boolean determineCompositionRelationship(CPGClass sourceClass, CPGClass destinationClass) {
         boolean compositionExists = false;
         var constructorResult = sourceClass.getMethods().stream().
                 filter(method -> method.name.equals(sourceClass.name) &&
@@ -161,7 +161,7 @@ public class RelationshipManager {
     /**
      * Iterates through the cpg, assigning dependencies based off of method parameters and method calls.
      */
-    protected static void assignDependency(CodePropertyGraph cpg) {
+    private static void assignDependency(CodePropertyGraph cpg) {
         StatTracker.Helper helper = new StatTracker.Helper(cpg);
         for (CPGClass.Method method : helper.allMethods) {
             CPGClass methodParent = method.getParent();
@@ -203,7 +203,7 @@ public class RelationshipManager {
      *
      * @param cpg - The CodePropertyGraph containing all existing classes and relations
      */
-    protected static void assignInheritance(CodePropertyGraph cpg) {
+    private static void assignInheritance(CodePropertyGraph cpg) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             var filteredInherits = cpgClass.getInheritsFrom().stream().
                     filter(cpgToFind -> !cpgToFind.classType.equals("interface")).collect(Collectors.toList());
@@ -222,7 +222,7 @@ public class RelationshipManager {
     /**
      * Iterates through the cpg and assigns realization relationships.
      */
-    protected static void assignRealization(CodePropertyGraph cpg) {
+    private static void assignRealization(CodePropertyGraph cpg) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             var filteredInherits = cpgClass.getInheritsFrom().stream().
                     filter(cpgToFind -> cpgToFind.classType.equals("interface")).collect(Collectors.toList());
@@ -249,7 +249,7 @@ public class RelationshipManager {
      * @param relationToAdd The relation to be added to the provided CodePropertyGraph object.
      * @return boolean - True or False, depending on if the relation exists within cpg
      */
-    protected static boolean checkRelationExists(CodePropertyGraph codePropertyGraph, CodePropertyGraph.Relation relationToAdd) {
+    private static boolean checkRelationExists(CodePropertyGraph codePropertyGraph, CodePropertyGraph.Relation relationToAdd) {
         var result = codePropertyGraph.getRelations().stream().
                 filter(relation -> relation.source.equals(relationToAdd.source)
                         && relation.destination.equals(relationToAdd.destination)
@@ -266,7 +266,7 @@ public class RelationshipManager {
      * @param count     - A Long representing the count of how many instances of this attribute exist within source class
      * @return A string representing the multiplicity
      */
-    protected static String obtainMultiplicity(String attribute, Long count) {
+    private static String obtainMultiplicity(String attribute, Long count) {
         String multiplicityToReturn = "";
         if (attribute.contains("[]") || attribute.contains("<")) {
             multiplicityToReturn = "1..*";
@@ -291,7 +291,7 @@ public class RelationshipManager {
      *                           within a specific CPGClass
      * @return A String representing the highest multiplicity
      */
-    protected static String returnHighestMultiplicity(Map<String, Long> filteredAttributes) {
+    private static String returnHighestMultiplicity(Map<String, Long> filteredAttributes) {
         ArrayList<String> multiplicityList = new ArrayList<>();
         for (Map.Entry<String, Long> entry : filteredAttributes.entrySet()) {
             String attribute = entry.getKey();
