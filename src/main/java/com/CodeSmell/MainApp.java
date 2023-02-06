@@ -37,8 +37,8 @@ import java.util.Set;
 
 public class MainApp extends Application {
 
-    public static InputStream cpgStream; 
-    
+    public static InputStream cpgStream;
+
     static {
         cpgStream = getBackupStream();
     }
@@ -52,7 +52,7 @@ public class MainApp extends Application {
     }
 
     public static boolean skipJoern;
-    
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -70,10 +70,10 @@ public class MainApp extends Application {
         for (CPGClass graphClass : cpg.getClasses()) {
             UMLClass c = new UMLClass(graphClass.name);
             classMap.put(graphClass, c);
-            for (CPGClass.Method m : graphClass.methods) {
+            for (CPGClass.Method m : graphClass.getMethods()) {
                 c.addMethod(m);
             }
-            for (CPGClass.Attribute a : graphClass.attributes) {
+            for (CPGClass.Attribute a : graphClass.getAttributes()) {
                 c.addAttribute(a);
             }
 
@@ -98,19 +98,19 @@ public class MainApp extends Application {
             relations.add(cr);
             System.out.println(cr);
         }
- 
+
         ArrayList<UMLClass> umlClasses = new ArrayList<UMLClass>(classMap.values());
 
         try {
             LayoutManager.setLayout(umlClasses, relations);
         } catch (IOException e) {
             throw new RuntimeException(
-                "Error invoking graphviz binary (dot)\n" + e);
+                    "Error invoking graphviz binary (dot)\n" + e);
         }
 
     }
 
-    private void removeWhenParserLambdaLimitationFixed(Worker.State newState)  {
+    private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
         if (newState == Worker.State.SUCCEEDED) {
             try {
                 if (cpgStream.available() == 0 && skipJoern) {
@@ -135,7 +135,7 @@ public class MainApp extends Application {
         double startWidth = screenBounds.getWidth() / 2;
         double startHeight = screenBounds.getHeight() * 0.8;
         WebView webView = new WebView();
-        webView.setMaxSize(screenBounds.getWidth() ,screenBounds.getHeight());
+        webView.setMaxSize(screenBounds.getWidth(), screenBounds.getHeight());
         webView.prefHeightProperty().bind(primaryStage.heightProperty());
         webView.prefWidthProperty().bind(primaryStage.heightProperty());
         webView.getEngine().load(location);
@@ -152,10 +152,10 @@ public class MainApp extends Application {
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener(
                 (ov, oldState, newState) -> {
-            removeWhenParserLambdaLimitationFixed(newState);
-        });
+                    removeWhenParserLambdaLimitationFixed(newState);
+                });
 
-  
+
         // hide scroll bars from the webview. source:
         // https://stackoverflow.com/questions/11206942/how-to-hide-scrollbars-in-the-javafx-webview
         webView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {
