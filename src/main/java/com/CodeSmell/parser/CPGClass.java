@@ -71,17 +71,17 @@ public class CPGClass implements Serializable {
     /**
      * The list of classes that the class inherits from in some way (can include interfaces as well)
      */
-    public final String[] inheritsFrom;
+    private ArrayList<CPGClass> inheritsFrom;
 
     /**
      * An array of all of the {@link Attribute} that a class has
      */
-    public final Attribute[] attributes;
+    private ArrayList<Attribute> attributes;
 
     /**
      * All the {@link Method} that a class has
      */
-    public final Method[] methods;
+    private ArrayList<Method> methods;
 
     /**
      * All the outward {@link CodePropertyGraph.Relation} that a class has.
@@ -100,9 +100,8 @@ public class CPGClass implements Serializable {
                     int fileLength,
                     int emptyLines,
                     int nonEmptyLines,
-                    String[] inheritsFrom,
-                    Attribute[] attributes,
-                    Method[] methods) {
+                    ArrayList<Attribute> attributes,
+                    ArrayList<Method> methods) {
         this.name = name;
         this.classFullName = classFullName;
         this.packageName = packageName;
@@ -115,12 +114,35 @@ public class CPGClass implements Serializable {
         this.fileLength = fileLength;
         this.emptyLines = emptyLines;
         this.nonEmptyLines = nonEmptyLines;
-        this.inheritsFrom = inheritsFrom;
         this.attributes = attributes;
         this.methods = methods;
+        this.inheritsFrom = new ArrayList<>();
         this.outwardRelations = new ArrayList<>();
     }
 
+    public ArrayList<Attribute> getAttributes() {
+        return new ArrayList<>(attributes);
+    }
+
+    protected void setAttributes(ArrayList<Attribute> attributes) {
+        this.attributes = attributes;
+    }
+
+    public ArrayList<Method> getMethods() {
+        return new ArrayList<>(methods);
+    }
+
+    protected void setMethods(ArrayList<Method> methods) {
+        this.methods = methods;
+    }
+
+    public ArrayList<CPGClass> getInheritsFrom() {
+        return new ArrayList<>(inheritsFrom);
+    }
+
+    protected void setInheritsFrom(ArrayList<CPGClass> inheritsFrom) {
+        this.inheritsFrom = inheritsFrom;
+    }
 
     /**
      * Add an outward relation to the existing outwardRelations of a given class
@@ -192,9 +214,9 @@ public class CPGClass implements Serializable {
         public final String packageName;
 
         /**
-         * The name of the parent class which owns this attribute
+         * The parent class which owns this attribute
          */
-        public final String parentClassName;
+        private final CPGClass[] parentClass;
 
         /**
          * The full line of code in which the attribute is declared
@@ -225,15 +247,14 @@ public class CPGClass implements Serializable {
 
         public Attribute(String name,
                          String packageName,
-                         String parentClassName,
                          String code,
                          int lineNumber,
                          Modifier[] modifiers,
                          String attributeType,
                          ArrayList<String> typeList) {
             this.name = name;
+            this.parentClass = new CPGClass[1];
             this.packageName = packageName;
-            this.parentClassName = parentClassName;
             this.code = code;
             this.lineNumber = lineNumber;
             this.modifiers = modifiers;
@@ -241,6 +262,13 @@ public class CPGClass implements Serializable {
             this.typeList = typeList;
         }
 
+        public CPGClass getParent() {
+            return parentClass[0];
+        }
+
+        protected void setParent(CPGClass parent) {
+            parentClass[0] = parent;
+        }
 
         @Override
         public String toString() {
@@ -261,7 +289,7 @@ public class CPGClass implements Serializable {
         /**
          * The class which owns the method
          */
-        public final String parentClassName;
+        private final CPGClass[] parentClass;
 
         /**
          * The method body containing the name of the method along with all of its parameters, if any
@@ -316,7 +344,6 @@ public class CPGClass implements Serializable {
         private ArrayList<Attribute> attributeCalls;
 
         public Method(String name,
-                      String parentClassName,
                       String methodBody,
                       Modifier[] modifiers,
                       Parameter[] parameters,
@@ -326,7 +353,7 @@ public class CPGClass implements Serializable {
                       int totalMethodLength,
                       Instruction[] instructions) {
             this.name = name;
-            this.parentClassName = parentClassName;
+            this.parentClass = new CPGClass[1];
             this.methodBody = methodBody;
             this.modifiers = modifiers;
             this.parameters = parameters;
@@ -374,6 +401,14 @@ public class CPGClass implements Serializable {
          */
         protected void setAttributeCalls(ArrayList<Attribute> attributeCalls) {
             this.attributeCalls = attributeCalls;
+        }
+
+        public CPGClass getParent() {
+            return parentClass[0];
+        }
+
+        protected void setParent(CPGClass parent) {
+            parentClass[0] = parent;
         }
 
         @Override
