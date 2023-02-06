@@ -122,7 +122,7 @@ public class Parser {
                 e.printStackTrace();
                 System.exit(1);
             }
-            cpg = assignRelationships(cpg);
+            cpg = updateCPG(cpg);
             writeBackup(cpg);
 
         } else {
@@ -159,7 +159,13 @@ public class Parser {
         }
     }
 
-    protected static CodePropertyGraph assignRelationships(CodePropertyGraph cpg) {
+    /**
+     * Update the properties of each CPGClass and additionally add relations and packages to the cpg.
+     *
+     * @param cpg
+     * @return
+     */
+    protected static CodePropertyGraph updateCPG(CodePropertyGraph cpg) {
         updateCPGClassProperties(cpg);
         RelationshipManager relationshipManager = new RelationshipManager(cpg);
         PackageManager packageManager = new PackageManager(cpg);
