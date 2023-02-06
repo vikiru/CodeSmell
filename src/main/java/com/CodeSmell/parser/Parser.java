@@ -310,12 +310,12 @@ public class Parser {
                 filter(cpgToFind -> !cpgToFind.classType.equals("interface")).collect(Collectors.toList());
         if (!inheritanceCheck.isEmpty()) {
             CPGClass superClass = inheritanceCheck.get(0);
-            ArrayList<Attribute> allAttributes = new ArrayList<>(cpgClass.getAttributes());
-            ArrayList<Method> allMethods = new ArrayList<>(cpgClass.getMethods());
+            Set<Attribute> allAttributes = new LinkedHashSet<>(cpgClass.getAttributes());
+            Set<Method> allMethods = new LinkedHashSet<>(cpgClass.getMethods());
             allAttributes.addAll(superClass.getAttributes());
             allMethods.addAll(superClass.getMethods());
-            cpgClass.setAttributes(allAttributes);
-            cpgClass.setMethods(allMethods);
+            cpgClass.setAttributes(new ArrayList<>(allAttributes));
+            cpgClass.setMethods(new ArrayList<>(allMethods));
         }
         return inheritsFrom;
     }
