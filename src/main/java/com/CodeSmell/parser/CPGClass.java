@@ -243,15 +243,14 @@ public class CPGClass implements Serializable {
          * All the types that can be extracted from the attributeType
          * (i.e. "HashMap < CPGClass, ArrayList< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
          */
-        public final ArrayList<String> typeList;
+        private ArrayList<CPGClass> typeList;
 
         public Attribute(String name,
                          String packageName,
                          String code,
                          int lineNumber,
                          Modifier[] modifiers,
-                         String attributeType,
-                         ArrayList<String> typeList) {
+                         String attributeType) {
             this.name = name;
             this.parentClass = new CPGClass[1];
             this.packageName = packageName;
@@ -259,7 +258,7 @@ public class CPGClass implements Serializable {
             this.lineNumber = lineNumber;
             this.modifiers = modifiers;
             this.attributeType = attributeType;
-            this.typeList = typeList;
+            this.typeList = new ArrayList<>();
         }
 
         public CPGClass getParent() {
@@ -268,6 +267,14 @@ public class CPGClass implements Serializable {
 
         protected void setParent(CPGClass parent) {
             parentClass[0] = parent;
+        }
+
+        public ArrayList<CPGClass> getTypeList() {
+            return new ArrayList<>(typeList);
+        }
+
+        protected void setTypeList(ArrayList<CPGClass> typeList) {
+            this.typeList = typeList;
         }
 
         @Override
@@ -441,12 +448,20 @@ public class CPGClass implements Serializable {
              * All the types that can be extracted from the parameter type
              * (i.e. "HashMap < CPGClass, ArrayList< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
              */
-            public final ArrayList<String> typeList;
+            private ArrayList<CPGClass> typeList;
 
-            public Parameter(String code, String name, String type, ArrayList<String> typeList) {
+            public Parameter(String code, String name, String type) {
                 this.code = code;
                 this.name = name;
                 this.type = type;
+                this.typeList = new ArrayList<>();
+            }
+
+            public ArrayList<CPGClass> getTypeList() {
+                return new ArrayList<>(typeList);
+            }
+
+            protected void setTypeList(ArrayList<CPGClass> typeList) {
                 this.typeList = typeList;
             }
 
