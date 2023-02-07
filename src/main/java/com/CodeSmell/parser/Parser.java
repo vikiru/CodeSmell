@@ -232,13 +232,16 @@ public class Parser {
                 forEach(ins -> allDistinctCalls.add(ins.methodCall));
         // Add all the method calls.
         for (String call : allDistinctCalls) {
-            String className = call.split("\\.")[0].trim();
-            String methodName = call.split("\\.")[1].trim();
-            var methodToAdd = allMethodsInCPG.stream().
-                    filter(method -> (method.getParent().name.equals(className) && method.name.equals(methodName))).
-                    collect(Collectors.toList());
-            if (!methodToAdd.isEmpty()) {
-                methodCalls.add(methodToAdd.get(0));
+            String[] splitted = call.split("\\.");
+            if (splitted.length == 2) {
+                String className = splitted[0].trim();
+                String methodName = splitted[1].trim();
+                var methodToAdd = allMethodsInCPG.stream().
+                        filter(method -> (method.getParent().name.equals(className) && method.name.equals(methodName))).
+                        collect(Collectors.toList());
+                if (!methodToAdd.isEmpty()) {
+                    methodCalls.add(methodToAdd.get(0));
+                }
             }
         }
         //methodToUpdate.setAttributeCalls(returnAttributeCalls(helper, methodToUpdate, allLocalTypes));
