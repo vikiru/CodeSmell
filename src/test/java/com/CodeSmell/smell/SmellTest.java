@@ -42,4 +42,12 @@ public class SmellTest {
         ArrayList<CodeFragment> detections = getDetections(gc);
         assertNotEquals(0, detections.size());
     }
+
+    @Test
+    public void TestLazyClass()
+    {
+        LazyClass lc = new LazyClass("lazyClass", this.cpg);
+        lc.description();
+        lc.returnLazyClasses();
+    }
 }
