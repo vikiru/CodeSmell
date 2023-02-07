@@ -35,7 +35,7 @@ public class Common {
 		for (CPGClass iface : ifaceClasses) {
 			ArrayList<CPGClass> realizors = realizations.stream()
 				.filter(r -> r.destination == iface)
-				.map(r -> r.destination)
+				.map(r -> r.source)
 				.collect(Collectors.toCollection(ArrayList::new));
 			interfaces.put(iface, realizors);
 		}
@@ -52,7 +52,7 @@ public class Common {
 			.collect(Collectors.toSet());
 		return c.getMethods()
 			.stream()
-			.filter(m -> ifaceMethods.contains(m.name ))
+			.filter(m -> ifaceMethods.contains(m.name))
 			.collect(Collectors.toCollection(ArrayList::new))
 			.toArray(new Method[0]);
 	}

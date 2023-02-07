@@ -43,7 +43,7 @@ public class ISPViolation extends Smell {
 	private Iterator<CodeFragment> lastBatch;
 
 	private boolean isNotImplemented(Method m) {
-		// returns true if a method
+		// returns true if a method is not implemented
 		return true;
 	}
 
