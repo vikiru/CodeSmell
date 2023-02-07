@@ -1,9 +1,12 @@
 package com.CodeSmell.smell;
 
 import com.CodeSmell.parser.CodePropertyGraph;
+import com.CodeSmell.parser.CodePropertyGraph.Relation;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.*;
 import com.CodeSmell.model.Pair;
+import com.CodeSmell.model.ClassRelation.RelationshipType;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +16,45 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.List;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class Common { 
 
 	public static StatTracker stats;
 
+	protected static HashMap<CPGClass, ArrayList<CPGClass>> interfaces;
+
 	public static void initStatTracker(CodePropertyGraph cpg) {
 		stats = new StatTracker(cpg);
+		ArrayList<CPGClass> ifaceClasses = stats
+			.distinctClassTypes.get("interface");
+		ArrayList<Relation> realizations = stats
+			.distinctRelations.get(RelationshipType.REALIZATION);
+		interfaces = new HashMap<>();
+
+		for (CPGClass iface : ifaceClasses) {
+			ArrayList<CPGClass> realizors = realizations.stream()
+				.filter(r -> r.destination == iface)
+				.map(r -> r.destination)
+				.collect(Collectors.toCollection(ArrayList::new));
+			interfaces.put(iface, realizors);
+		}
+	}
+
+	// returns the list of methods declared within the interface
+	// which class c extends
+	public static Method[] interfaceMethods(CPGClass c) {
+		
+		CPGClass iface = c.getInheritsFrom().get(0);
+		Set<String> ifaceMethods = iface.getMethods()
+			.stream()
+			.map(m -> m.name)
+			.collect(Collectors.toSet());
+		return c.getMethods()
+			.stream()
+			.filter(m -> ifaceMethods.contains(m.name ))
+			.collect(Collectors.toCollection(ArrayList::new))
+			.toArray(new Method[0]);
 	}
 
 	// returns true if c2 is a nested class (within the same file) of c
