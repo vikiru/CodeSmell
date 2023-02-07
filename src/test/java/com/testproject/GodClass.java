@@ -5,7 +5,7 @@ public class GodClass {
     ClassA field1;
     ClassA[] field2 = new ClassA[2];
     ClassB field3;
-    com.CodeSmell.testproject.InterfaceC field4;
+    InterfaceC field4;
     ClassD[] field5;
     ClassE[] field6;
     ClassD field7;
