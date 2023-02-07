@@ -21,7 +21,7 @@ public final class StatTracker {
 
     /**
      * For every {@link CPGClass} within cpg, maintain a count of many times it was used (how many instances of it are
-     * present as an attributeType, parameter type, how many of its methods appear within methodCalls, and any inheritance/realization
+     * present as an attributeType, parameter type, how many of its.getMethods() appear within methodCalls, and any inheritance/realization
      * relations that exist with the class as the destination).
      */
     public final HashMap<CPGClass, Integer> classUsage = new HashMap<>();
@@ -102,7 +102,7 @@ public final class StatTracker {
     }
 
     /**
-     * Iterates through the cpg to determine how many times an Attribute has been used within methods.
+     * Iterates through the cpg to determine how many times an Attribute has been used within.getMethods().
      *
      * @param attributeUsage
      * @param helper
@@ -119,7 +119,7 @@ public final class StatTracker {
 
     /**
      * For every class within the cpg, return a count of how many times it was used as an attribute type,
-     * inheritance/realization relation, parameter or its methods were used
+     * inheritance/realization relation, parameter or its.getMethods() were used
      *
      * @param cpg        The CodePropertyGraph containing all existing classes and relations
      * @param classUsage
@@ -138,10 +138,9 @@ public final class StatTracker {
                             relation.type.equals(ClassRelation.RelationshipType.REALIZATION))
                             && relation.destination.equals(cpgClass)).collect(Collectors.toList());
             var methodCallsCount = allMethodCallsWithinCPG.stream().
-                    filter(method -> method.parentClassName.equals(cpgClass.name)).collect(Collectors.toList());
+                    filter(method -> method.getParent().equals(cpgClass)).collect(Collectors.toList());
             var parameterUsageCount = allParametersWithinCPG.stream().
-                    filter(parameter -> (parameter.typeList.contains(cpgClass.name)
-                            || parameter.typeList.contains(cpgClass.classFullName))).collect(Collectors.toList());
+                    filter(parameter -> parameter.getTypeList().contains(cpgClass)).collect(Collectors.toList());
             int totalClassUsage = attributeUsageCount.size() + relationCount.size() + methodCallsCount.size() + parameterUsageCount.size();
             classUsage.put(cpgClass, totalClassUsage);
         }
@@ -154,11 +153,11 @@ public final class StatTracker {
     private static void determineMethodUsage(HashMap<CPGClass.Method, Integer> methodUsage, Helper helper) {
         ArrayList<CPGClass.Method> allMethodsWithinCPG = helper.allMethods;
         ArrayList<CPGClass.Method> allMethodCallsWithinCPG = helper.allMethodCalls;
-        // Add all the methods that exist within allMethodCalls of cpg and update the key, if it exists.
+        // Add all the.getMethods() that exist within allMethodCalls of cpg and update the key, if it exists.
         for (CPGClass.Method method : allMethodCallsWithinCPG) {
             methodUsage.put(method, methodUsage.getOrDefault(method, 0) + 1);
         }
-        // Account for unused methods by giving them a value of 0
+        // Account for unused.getMethods() by giving them a value of 0
         for (CPGClass.Method unusedMethod : allMethodsWithinCPG) {
             methodUsage.putIfAbsent(unusedMethod, 0);
         }
@@ -204,13 +203,14 @@ public final class StatTracker {
      * @param distinctAttributeCalls
      * @param helper
      */
-    private static void determineDistinctAttributeCalls(HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctAttributeCalls, Helper helper) {
+    private static void determineDistinctAttributeCalls(HashMap<CPGClass.Method,
+            HashMap<CPGClass, Integer>> distinctAttributeCalls, Helper helper) {
         ArrayList<CPGClass.Method> allMethods = helper.allMethods;
         for (CPGClass.Method method : allMethods) {
             HashMap<CPGClass, Integer> attributeCallClassMap = new HashMap<>();
             method.getAttributeCalls().
-                    forEach(attrCall -> attributeCallClassMap.put(helper.getClassFromName(attrCall.parentClassName),
-                            attributeCallClassMap.getOrDefault(helper.getClassFromName(attrCall.parentClassName), 0) + 1));
+                    forEach(attrCall -> attributeCallClassMap.put(attrCall.getParent(),
+                            attributeCallClassMap.getOrDefault(attrCall.getParent(), 0) + 1));
             distinctAttributeCalls.put(method, attributeCallClassMap);
         }
     }
@@ -219,13 +219,14 @@ public final class StatTracker {
      * @param distinctMethodCalls
      * @param helper
      */
-    private static void determineDistinctMethodCalls(HashMap<CPGClass.Method, HashMap<CPGClass, Integer>> distinctMethodCalls, Helper helper) {
+    private static void determineDistinctMethodCalls(HashMap<CPGClass.Method,
+            HashMap<CPGClass, Integer>> distinctMethodCalls, Helper helper) {
         ArrayList<CPGClass.Method> allMethods = helper.allMethods;
         for (CPGClass.Method method : allMethods) {
             HashMap<CPGClass, Integer> methodCallClassMap = new HashMap<>();
             method.getMethodCalls().
-                    forEach(methodCall -> methodCallClassMap.put(helper.getClassFromName(methodCall.parentClassName),
-                            methodCallClassMap.getOrDefault(helper.getClassFromName(methodCall.parentClassName), 0) + 1));
+                    forEach(methodCall -> methodCallClassMap.put(method.getParent(),
+                            methodCallClassMap.getOrDefault(method.getParent(), 0) + 1));
             distinctMethodCalls.put(method, methodCallClassMap);
         }
     }
@@ -306,9 +307,9 @@ public final class StatTracker {
         for (CPGClass cpgClass : cpg.getClasses()) {
             String filePath = cpgClass.filePath;
             boolean isRootClass = filePath.contains(cpgClass.name);
-            int selfAttributeLength = cpgClass.attributes.length;
+            int selfAttributeLength = cpgClass.getAttributes().size();
             final int[] selfMethodLines = {0};
-            Arrays.stream(cpgClass.methods).forEach(method -> {
+            cpgClass.getMethods().forEach(method -> {
                 selfMethodLines[0] += method.totalMethodLength;
             });
             int selfDeclarationLines = 2;
@@ -321,11 +322,14 @@ public final class StatTracker {
             } else {
                 int nestedTotal = 0;
                 for (CPGClass nestedClass : nestedCheck) {
-                    int attrLength = nestedClass.attributes.length;
+                    int attrLength = Math.toIntExact(nestedClass.getAttributes().stream().
+                            filter(attr -> attr.getParent().equals(nestedClass)).count());
                     final int[] methodLength = {0};
-                    Arrays.stream(nestedClass.methods).forEach(method -> {
-                        methodLength[0] += method.totalMethodLength;
-                    });
+                    nestedClass.getMethods().stream().
+                            filter(method -> method.getParent().equals(nestedClass)).
+                            forEach(method -> {
+                                methodLength[0] += method.totalMethodLength;
+                            });
                     int declLines = 2;
                     nestedTotal += declLines + attrLength + methodLength[0];
                 }
@@ -349,7 +353,7 @@ public final class StatTracker {
                                                           HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassAttributeCalls) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             HashMap<CPGClass, Integer> classIntegerHashMap = new HashMap<>();
-            for (CPGClass.Method method : cpgClass.methods) {
+            for (CPGClass.Method method : cpgClass.getMethods()) {
                 distinctAttributeCalls.get(method).forEach((key, value) -> classIntegerHashMap.
                         put(key, classIntegerHashMap.getOrDefault(key, 0) + value));
             }
@@ -367,7 +371,7 @@ public final class StatTracker {
                                                        HashMap<CPGClass, HashMap<CPGClass, Integer>> totalClassMethodCalls) {
         for (CPGClass cpgClass : cpg.getClasses()) {
             HashMap<CPGClass, Integer> classIntegerHashMap = new HashMap<>();
-            for (CPGClass.Method method : cpgClass.methods) {
+            for (CPGClass.Method method : cpgClass.getMethods()) {
                 distinctMethodCalls.get(method).forEach((key, value) -> classIntegerHashMap.
                         put(key, classIntegerHashMap.getOrDefault(key, 0) + value));
             }
@@ -377,15 +381,11 @@ public final class StatTracker {
 
 
     /**
-     * A class that contains potentially helpful lists containing info such as all attributes, all methods,
+     * A class that contains potentially helpful lists containing info such as all.getAttributes(), all.getMethods(),
      * all method calls, all method parameters, all class names within cpg. Additionally, can retrieve class, method and
      * attribute by name.
      */
     public static final class Helper {
-        /**
-         * The CodePropertyGraph containing all existing classes and relations
-         */
-        private final CodePropertyGraph cpg;
 
         /**
          * All the {@link com.CodeSmell.parser.CPGClass.Attribute} that exist within the cpg
@@ -423,7 +423,6 @@ public final class StatTracker {
         public final ArrayList<String> allMethodNames = new ArrayList<>();
 
         public Helper(CodePropertyGraph cpg) {
-            this.cpg = cpg;
             collectAllAttributes(cpg, allAttributes);
             collectAllMethods(cpg, allMethods);
             collectAllParameters(allMethods, allParameters);
@@ -434,82 +433,25 @@ public final class StatTracker {
         }
 
         /**
-         * @param className
-         * @return
-         */
-        public CPGClass getClassFromName(String className) {
-            CPGClass classToReturn = null;
-            var classResult = cpg.getClasses().stream().
-                    filter(cpgClass -> (cpgClass.name.equals(className) || cpgClass.classFullName.equals(className))).
-                    limit(2).
-                    collect(Collectors.toList());
-            if (!classResult.isEmpty()) {
-                classToReturn = classResult.get(0);
-            }
-            return classToReturn;
-        }
-
-        /**
-         * @param attributeName
-         * @param attributeType
-         * @param parentClassName
-         * @return
-         */
-        public CPGClass.Attribute getAttributeFromName(String attributeName,
-                                                       String attributeType,
-                                                       String parentClassName) {
-            CPGClass.Attribute attributeToReturn = null;
-            var attributeResult = allAttributes.stream().
-                    filter(attribute -> attribute.name.equals(attributeName) &&
-                            attribute.attributeType.equals(attributeType) &&
-                            attribute.parentClassName.equals(parentClassName)).
-                    limit(2).
-                    collect(Collectors.toList());
-            if (!attributeResult.isEmpty()) {
-                attributeToReturn = attributeResult.get(0);
-            }
-            return attributeToReturn;
-        }
-
-        /**
-         * @param methodName
-         * @param parentClassName
-         * @return
-         */
-        public CPGClass.Method getMethodFromName(String methodName,
-                                                 String parentClassName) {
-            CPGClass.Method methodToReturn = null;
-            var methodResult = allMethods.stream().
-                    filter(method -> method.name.equals(methodName) &&
-                            method.parentClassName.equals(parentClassName)).
-                    limit(2).
-                    collect(Collectors.toList());
-            if (!methodResult.isEmpty()) {
-                methodToReturn = methodResult.get(0);
-            }
-            return methodToReturn;
-        }
-
-        /**
-         * Collect all the attributes that exist within cpg
+         * Collect all the.getAttributes() that exist within cpg
          *
          * @param cpg           - The CodePropertyGraph containing all existing classes and relations
          * @param allAttributes
          */
         private static void collectAllAttributes(CodePropertyGraph cpg,
                                                  ArrayList<CPGClass.Attribute> allAttributes) {
-            cpg.getClasses().forEach(cpgClass -> allAttributes.addAll(Arrays.asList(cpgClass.attributes)));
+            cpg.getClasses().forEach(cpgClass -> allAttributes.addAll((cpgClass.getAttributes())));
         }
 
         /**
-         * Collect all the methods that exist within cpg
+         * Collect all the.getMethods() that exist within cpg
          *
          * @param cpg        - The CodePropertyGraph containing all existing classes and relations
          * @param allMethods
          */
         private static void collectAllMethods(CodePropertyGraph cpg,
                                               ArrayList<CPGClass.Method> allMethods) {
-            cpg.getClasses().forEach(cpgClass -> allMethods.addAll(Arrays.asList(cpgClass.methods)));
+            cpg.getClasses().forEach(cpgClass -> allMethods.addAll((cpgClass.getMethods())));
         }
 
         /**
@@ -555,7 +497,7 @@ public final class StatTracker {
          */
         private static void collectAllMethodNames(CodePropertyGraph cpg,
                                                   ArrayList<String> allMethodNames) {
-            cpg.getClasses().forEach(cpgClass -> Arrays.stream(cpgClass.methods).forEach(method -> allMethodNames.add(method.name)));
+            cpg.getClasses().forEach(cpgClass -> cpgClass.getMethods().forEach(method -> allMethodNames.add(method.name)));
         }
 
     }
