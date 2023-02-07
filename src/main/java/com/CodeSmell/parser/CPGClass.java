@@ -505,7 +505,11 @@ public class CPGClass implements Serializable {
 
             @Override
             public String toString() {
-                return this.code;
+                return String.format(
+                    "label: %s\n" +
+                    "code: %s\n" + 
+                    "methodCall: %s",
+                    label, code, methodCall);
             }
         }
     }

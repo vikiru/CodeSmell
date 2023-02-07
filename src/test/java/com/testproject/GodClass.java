@@ -18,6 +18,7 @@ public class GodClass {
     public GodClass(ClassA a1, ClassA a2) {
         this.field2[0] = a1;
         this.field2[1] = a2;
+        ISPClass isp =  new ISPClass();
     }
 
     public boolean compareAs() {

@@ -30,14 +30,14 @@ public class Common {
 			.distinctClassTypes.get("interface");
 		ArrayList<Relation> realizations = stats
 			.distinctRelations.get(RelationshipType.REALIZATION);
-		interfaces = new HashMap<>();
+		Common.interfaces = new HashMap<>();
 
 		for (CPGClass iface : ifaceClasses) {
 			ArrayList<CPGClass> realizors = realizations.stream()
 				.filter(r -> r.destination == iface)
 				.map(r -> r.source)
 				.collect(Collectors.toCollection(ArrayList::new));
-			interfaces.put(iface, realizors);
+			Common.interfaces.put(iface, realizors);
 		}
 	}
 
