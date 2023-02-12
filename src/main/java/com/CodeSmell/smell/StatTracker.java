@@ -175,7 +175,7 @@ public final class StatTracker {
         for (CPGClass.Method method : allMethods) {
             HashMap<CPGClass.Method.Parameter, Integer> parameterUsageMap = new HashMap<>();
             for (CPGClass.Method.Parameter parameter : method.parameters) {
-                var filteredInstructions = Arrays.stream(method.instructions).filter(ins -> ins.label.equals("IDENTIFIER")
+                var filteredInstructions = method.instructions.stream().filter(ins -> ins.label.equals("IDENTIFIER")
                         && ins.code.contains(parameter.name)).collect(Collectors.toList());
                 parameterUsageMap.put(parameter, filteredInstructions.size());
             }
@@ -472,7 +472,7 @@ public final class StatTracker {
          */
         private static void collectAllParameters(ArrayList<CPGClass.Method> allMethods,
                                                  ArrayList<CPGClass.Method.Parameter> allParameters) {
-            allMethods.forEach(method -> allParameters.addAll(Arrays.asList(method.parameters)));
+            allMethods.forEach(method -> allParameters.addAll(method.parameters));
         }
 
         /**
