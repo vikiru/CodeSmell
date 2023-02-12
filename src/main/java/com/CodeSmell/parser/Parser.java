@@ -167,7 +167,7 @@ public class Parser {
      */
     protected static CodePropertyGraph updateCPG(CodePropertyGraph cpg) {
         updateCPGClassProperties(cpg);
-        RelationshipManager relationshipManager = new RelationshipManager(cpg);
+        //RelationshipManager relationshipManager = new RelationshipManager(cpg);
         PackageManager packageManager = new PackageManager(cpg);
         return cpg;
     }
@@ -199,7 +199,7 @@ public class Parser {
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (CPGClass.Method method : cpgClass.getMethods()) {
                 // Set typeLists for all parameters of the method
-                Arrays.stream(method.parameters).
+                method.parameters.
                         forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
                 // Get the attribute and method calls of each method
                 methodCallMap.put(method, returnMethodCalls(cpg, method));
@@ -226,7 +226,7 @@ public class Parser {
         ArrayList<Method> methodCalls = new ArrayList<>();
         // Get all possible calls where the instruction's methodCall is not empty
         Set<String> allDistinctCalls = new HashSet<>();
-        Arrays.stream(methodToUpdate.instructions).
+        methodToUpdate.instructions.stream().
                 filter(instruction -> instruction.label.equals("CALL")
                         && (!instruction.methodCall.equals(""))).
                 forEach(ins -> allDistinctCalls.add(ins.methodCall));
@@ -263,7 +263,7 @@ public class Parser {
         Set<Attribute> possibleAttributes = new HashSet<>();
         HashMap<String, Attribute> attributes = new HashMap<>();
         HashMap<String, Integer> fieldLine = new HashMap<>();
-        Arrays.stream(methodToUpdate.instructions).filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
+        methodToUpdate.instructions.stream().filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
                 forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
         CPGClass methodParent = methodToUpdate.getParent();
         allPossibleClasses.add(methodParent);
@@ -280,7 +280,7 @@ public class Parser {
         attributes.keySet().forEach(fieldLine::remove);
         methodParent.getAttributes().stream().filter(attr -> attr.getTypeList().size() == 1).
                 forEach(attr -> allPossibleClasses.addAll(attr.getTypeList()));
-        Arrays.stream(methodToUpdate.parameters).filter(parameter -> parameter.getTypeList().size() == 1).
+        methodToUpdate.parameters.stream().filter(parameter -> parameter.getTypeList().size() == 1).
                 forEach(parameter -> allPossibleClasses.addAll(parameter.getTypeList()));
         allPossibleClasses.addAll(allLocalTypes);
         for (CPGClass cpgClass : allPossibleClasses) {
