@@ -2,7 +2,7 @@ package com.CodeSmell.parser;
 
 import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
-import com.CodeSmell.smell.StatTracker;
+import com.CodeSmell.stat.Helper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
@@ -167,7 +167,7 @@ public class Parser {
      */
     protected static CodePropertyGraph updateCPG(CodePropertyGraph cpg) {
         updateCPGClassProperties(cpg);
-        //RelationshipManager relationshipManager = new RelationshipManager(cpg);
+        RelationshipManager relationshipManager = new RelationshipManager(cpg);
         PackageManager packageManager = new PackageManager(cpg);
         return cpg;
     }
@@ -178,7 +178,6 @@ public class Parser {
      * and finally, updating the attribute and method calls of each method.
      *
      * @param cpg - The CodePropertyGraph containing the source code information
-     * @return The updated method with its methodCalls
      */
     protected static void updateCPGClassProperties(CodePropertyGraph cpg) {
         LinkedHashMap<Method, ArrayList<Method>> methodCallMap = new LinkedHashMap<>();
@@ -203,7 +202,7 @@ public class Parser {
                         forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
                 // Get the attribute and method calls of each method
                 methodCallMap.put(method, returnMethodCalls(cpg, method));
-                attributeCallMap.put(method, returnAttributeCalls(cpg, method));
+                attributeCallMap.put(method, returnAttributeCalls(method));
             }
         }
         // Finally, set attribute calls and method calls of all methods.
@@ -221,8 +220,7 @@ public class Parser {
      */
     protected static ArrayList<Method> returnMethodCalls(CodePropertyGraph cpg, Method methodToUpdate) {
         // Helper variables
-        StatTracker.Helper helper = new StatTracker.Helper(cpg);
-        ArrayList<Method> allMethodsInCPG = helper.allMethods;
+        Helper helper = new Helper(cpg);
         ArrayList<Method> methodCalls = new ArrayList<>();
         // Get all possible calls where the instruction's methodCall is not empty
         Set<String> allDistinctCalls = new HashSet<>();
@@ -236,11 +234,17 @@ public class Parser {
             if (splitted.length == 2) {
                 String className = splitted[0].trim();
                 String methodName = splitted[1].trim();
-                var methodToAdd = allMethodsInCPG.stream().
-                        filter(method -> (method.getParent().name.equals(className) && method.name.equals(methodName))).
+                CPGClass cpgClass;
+                var classResult = cpg.getClasses().stream().
+                        filter(cpgToFind -> cpgToFind.name.equals(className)).limit(2).
                         collect(Collectors.toList());
-                if (!methodToAdd.isEmpty()) {
-                    methodCalls.add(methodToAdd.get(0));
+                if (!classResult.isEmpty()) {
+                    cpgClass = classResult.get(0);
+                    var methodCheck = cpgClass.getMethods().stream().
+                            filter(method -> method.name.equals(methodName)).limit(2).collect(Collectors.toList());
+                    if (!methodCheck.isEmpty()) {
+                        methodCalls.add(methodCheck.get(0));
+                    }
                 }
             }
         }
@@ -250,11 +254,10 @@ public class Parser {
     /**
      * Return all the attributes that a method calls
      *
-     * @param cpg
      * @param methodToUpdate
      * @return
      */
-    protected static ArrayList<Attribute> returnAttributeCalls(CodePropertyGraph cpg, Method methodToUpdate) {
+    protected static ArrayList<Attribute> returnAttributeCalls(Method methodToUpdate) {
         Set<CPGClass> allPossibleClasses = new HashSet<>();
         // Get all local classes created
         Set<CPGClass> allLocalTypes = new HashSet<>();
