@@ -31,8 +31,8 @@ public class PackageManager {
                 // Handle adding of new files and classes within those files
                 Package.File newFile = new Package.File(fileName, filePath);
                 var fileClasses = cpg.getClasses().stream().
-                        filter(nestedClasses -> nestedClasses.filePath.equals(filePath)).collect(Collectors.toList());
-                fileClasses.sort(comparing(classes -> classes.classFullName));
+                        filter(nestedClasses -> nestedClasses.filePath.equals(filePath)).
+                        sorted(comparing(classes -> classes.classFullName)).collect(Collectors.toList());
                 if (!fileClasses.isEmpty()) {
                     fileClasses.forEach(fileClass -> Package.File.addClass(newFile.classes, fileClass));
                 }
