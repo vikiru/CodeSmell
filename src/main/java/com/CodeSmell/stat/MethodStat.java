@@ -22,26 +22,35 @@ public final class MethodStat {
     /**
      * A map containing a count of how many times each method within cpg has called this method, >= 0.
      */
-    public final HashMap<CPGClass.Method, Integer> methodsWhichCallMethod = new HashMap<>();
+    public final Map<CPGClass.Method, Integer> methodsWhichCallMethod;
     /**
      * A map containing a count of how many times each class within cpg has called this method, >= 0.
      */
-    public final HashMap<CPGClass, Integer> classesWhichCallMethod = new HashMap<>();
+    public final Map<CPGClass, Integer> classesWhichCallMethod = new HashMap<>();
+    /**
+     *
+     */
+
+    public final Map<CPGClass, ArrayList<CPGClass.Method>> totalClassMethodCalls;
+    public final Map<CPGClass, ArrayList<CPGClass.Attribute>> totalClassAttributeCalls;
+
     /**
      * A map containing a count of how many times each parameter within this method was used, >= 0
      */
-    public final HashMap<CPGClass.Method.Parameter, Integer> parameterUsage = new HashMap<>();
+    public final Map<CPGClass.Method.Parameter, Integer> parameterUsage;
     /**
      * All the non-duplicated instructions that appear as-is in the .java file for a given method.
      */
-    public final ArrayList<CPGClass.Method.Instruction> uniqueInstructions = new ArrayList<>();
+    public final List<CPGClass.Method.Instruction> uniqueInstructions;
 
     public MethodStat(CPGClass.Method method, Helper helper) {
         this.method = method;
-        determineMethodUsage(method, helper, methodsWhichCallMethod, classesWhichCallMethod);
+        this.methodsWhichCallMethod = Collections.unmodifiableMap(determineMethodUsage(method, helper, classesWhichCallMethod));
+        this.totalClassAttributeCalls = Collections.unmodifiableMap(determineTotalAttributeCalls(method));
+        this.totalClassMethodCalls = Collections.unmodifiableMap(determineTotalMethodCalls(method));
         this.methodUsage = returnTotalUsage(methodsWhichCallMethod);
-        determineParameterUsage(method, parameterUsage);
-        obtainUniqueInstructions(method, helper, uniqueInstructions);
+        this.parameterUsage = Collections.unmodifiableMap(determineParameterUsage(method));
+        this.uniqueInstructions = Collections.unmodifiableList(obtainUniqueInstructions(method, helper));
     }
 
     /**
@@ -50,13 +59,12 @@ public final class MethodStat {
      *
      * @param method                 The method being analyzed
      * @param helper                 The helper consisting of useful collections of elements within cpg
-     * @param methodsWhichCallMethod The map indicating how many times each method has called this method
      * @param classesWhichCallMethod The map indicating how many times each class has called this method
      */
-    private static void determineMethodUsage(CPGClass.Method method,
-                                             Helper helper,
-                                             HashMap<CPGClass.Method, Integer> methodsWhichCallMethod,
-                                             HashMap<CPGClass, Integer> classesWhichCallMethod) {
+    private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method,
+                                                                      Helper helper,
+                                                                      Map<CPGClass, Integer> classesWhichCallMethod) {
+        Map<CPGClass.Method, Integer> methodsWhichCallMethod = new HashMap<>();
         ArrayList<CPGClass.Method> allMethods = helper.allMethods;
         String toFind = method.getParent().name + "." + method.name;
         for (CPGClass.Method methodInCPG : allMethods) {
@@ -69,6 +77,7 @@ public final class MethodStat {
         }
         methodsWhichCallMethod.forEach((key, value) -> classesWhichCallMethod.
                 put(key.getParent(), classesWhichCallMethod.getOrDefault(key.getParent(), 0) + value));
+        return methodsWhichCallMethod;
     }
 
     /**
@@ -78,36 +87,53 @@ public final class MethodStat {
      * @param methodsWhichCallMethod The map indicating how many times each method has called this method
      * @return An integer value representing how many times this method has been called within cpg
      */
-    private static int returnTotalUsage(HashMap<CPGClass.Method, Integer> methodsWhichCallMethod) {
+    private static int returnTotalUsage(Map<CPGClass.Method, Integer> methodsWhichCallMethod) {
         final int[] count = {0};
         methodsWhichCallMethod.forEach((key, value) -> count[0] += value);
         return count[0];
     }
 
+    private static HashMap<CPGClass, ArrayList<CPGClass.Method>> determineTotalMethodCalls(CPGClass.Method method) {
+        HashMap<CPGClass, ArrayList<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
+        for (CPGClass.Method methodCall : method.getMethodCalls()) {
+            totalMethodClassCalls.putIfAbsent(methodCall.getParent(), new ArrayList<>());
+            totalMethodClassCalls.get(methodCall.getParent()).add(methodCall);
+        }
+        return totalMethodClassCalls;
+    }
+
+    private static HashMap<CPGClass, ArrayList<CPGClass.Attribute>> determineTotalAttributeCalls(CPGClass.Method method) {
+        HashMap<CPGClass, ArrayList<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
+        for (CPGClass.Attribute attributeCall : method.getAttributeCalls()) {
+            totalAttributeClassCalls.putIfAbsent(attributeCall.getParent(), new ArrayList<>());
+            totalAttributeClassCalls.get(attributeCall.getParent()).add(attributeCall);
+        }
+        return totalAttributeClassCalls;
+    }
+
     /**
      * Determine how many times the parameters of this method were used within the method's instructions.
      *
-     * @param method         The method being analyzed
-     * @param parameterUsage The map indicating how many times each method parameter was used
+     * @param method The method being analyzed
      */
-    private static void determineParameterUsage(CPGClass.Method method,
-                                                HashMap<CPGClass.Method.Parameter, Integer> parameterUsage) {
+    private static Map<CPGClass.Method.Parameter, Integer> determineParameterUsage(CPGClass.Method method) {
+        Map<CPGClass.Method.Parameter, Integer> parameterUsage = new HashMap<>();
         for (CPGClass.Method.Parameter parameter : method.parameters) {
             var filteredInstructions = method.instructions.stream().filter(ins -> ins.label.equals("IDENTIFIER")
                     && ins.code.contains(parameter.name)).collect(Collectors.toList());
             parameterUsage.put(parameter, filteredInstructions.size());
         }
+        return parameterUsage;
     }
 
     /**
      * Analyze the existing method and its instructions and return a new list filled with only unique constructions
      * that would appear the same as if read from the .java file.
      *
-     * @param method             The method being analyzed
-     * @param uniqueInstructions The list of unique instructions
+     * @param method The method being analyzed
      */
-    private static void obtainUniqueInstructions(CPGClass.Method method, Helper helper,
-                                                 ArrayList<CPGClass.Method.Instruction> uniqueInstructions) {
+    private static List<CPGClass.Method.Instruction> obtainUniqueInstructions(CPGClass.Method method, Helper helper) {
+        List<CPGClass.Method.Instruction> uniqueInstructions = new ArrayList<>();
         ArrayList<String> allAttributeNames = helper.allAttributeNames;
         method.getParent().getAttributes().forEach(attr -> allAttributeNames.add(attr.name));
         String[] ignoredLabels = new String[]{"FIELD_IDENTIFIER", "IDENTIFIER", "LITERAL",
@@ -129,6 +155,7 @@ public final class MethodStat {
             }
         }
         uniqueInstructions.sort(comparing(ins -> ins.lineNumber));
+        return uniqueInstructions;
     }
 
     @Override
