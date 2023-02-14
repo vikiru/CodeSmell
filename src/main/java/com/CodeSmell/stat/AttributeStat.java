@@ -2,10 +2,7 @@ package com.CodeSmell.stat;
 
 import com.CodeSmell.parser.CPGClass;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class AttributeStat {
     /**
@@ -40,7 +37,7 @@ public final class AttributeStat {
      * @param helper    The helper consisting of useful collections of elements within cpg
      */
     private static Map<CPGClass.Method, Integer> determineAttributeUsage(CPGClass.Attribute attribute, Helper helper) {
-        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
+        List<CPGClass.Method> allMethods = helper.allMethods;
         Map<CPGClass.Method, Integer> methodsWhichCallAttr = new HashMap<>();
         for (CPGClass.Method method : allMethods) {
             int count = 0;

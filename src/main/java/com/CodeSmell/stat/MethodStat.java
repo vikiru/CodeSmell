@@ -3,6 +3,7 @@ package com.CodeSmell.stat;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,7 @@ public final class MethodStat {
      */
     private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method, Helper helper) {
         Map<CPGClass.Method, Integer> methodsWhichCallMethod = new HashMap<>();
-        ArrayList<CPGClass.Method> allMethods = helper.allMethods;
+        List<CPGClass.Method> allMethods = helper.allMethods;
         String toFind = method.getParent().name + "." + method.name;
         for (CPGClass.Method methodInCPG : allMethods) {
             int count = 0;
@@ -144,7 +145,7 @@ public final class MethodStat {
      */
     private static List<CPGClass.Method.Instruction> obtainUniqueInstructions(CPGClass.Method method, Helper helper) {
         List<CPGClass.Method.Instruction> uniqueInstructions = new ArrayList<>();
-        ArrayList<String> allAttributeNames = helper.allAttributeNames;
+        List<String> allAttributeNames = helper.allAttributeNames;
         method.getParent().getAttributes().forEach(attr -> allAttributeNames.add(attr.name));
         String[] ignoredLabels = new String[]{"FIELD_IDENTIFIER", "IDENTIFIER", "LITERAL",
                 "METHOD", "METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT", "METHOD_RETURN"};
