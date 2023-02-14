@@ -10,8 +10,7 @@ import java.util.List;
 
 /**
  * A class that contains potentially helpful lists containing info such as all attributes, all methods,
- * all method calls, all method parameters, all class names within cpg. Additionally, can retrieve class, method and
- * attribute by name.
+ * all method calls, all method parameters, all class names within cpg.
  */
 public class Helper {
     /**
@@ -46,7 +45,6 @@ public class Helper {
      * All the {@link com.CodeSmell.parser.CPGClass.Method} calls that exist within the cpg
      */
     public final List<CPGClass.Method> allMethodCalls;
-
 
     public Helper(CodePropertyGraph cpg) {
         this.allAttributes = collectAllAttributes(cpg);
@@ -97,7 +95,6 @@ public class Helper {
         return Collections.unmodifiableList(allClassNames);
     }
 
-
     /**
      * Collect all the methods that exist within cpg.
      *
@@ -113,7 +110,7 @@ public class Helper {
      * Collect all the method names that exist within the cpg into one single list.
      *
      * @param cpg The CodePropertyGraph containing all existing classes and relations
-     * @return
+     * @return A list of all the method names within cpg
      */
     private static List<String> collectAllMethodNames(CodePropertyGraph cpg) {
         List<String> allMethodNames = new ArrayList<>();
@@ -125,7 +122,7 @@ public class Helper {
      * Collect all the attribute calls of each method into one single list.
      *
      * @param allMethods All the methods within cpg
-     * @return
+     * @return A list of all the attributes within cpg
      */
     private static List<CPGClass.Attribute> collectAllAttributeCalls(List<CPGClass.Method> allMethods) {
         List<CPGClass.Attribute> allAttributeCalls = new ArrayList<>();
@@ -137,7 +134,7 @@ public class Helper {
      * Collect all the method calls of each method into one single list.
      *
      * @param allMethods All the methods within cpg
-     * @return
+     * @return A list of all the method calls within cpg
      */
     private static List<CPGClass.Method> collectAllMethodCalls(List<CPGClass.Method> allMethods) {
         List<CPGClass.Method> allMethodCalls = new ArrayList<>();
@@ -145,11 +142,11 @@ public class Helper {
         return Collections.unmodifiableList(allMethodCalls);
     }
 
-
     /**
      * Collect all the method parameters of each method into one single list.
      *
      * @param allMethods All the methods within cpg
+     * @return A list of all the method parameters within cpg
      */
     private static List<CPGClass.Method.Parameter> collectAllParameters(List<CPGClass.Method> allMethods) {
         List<CPGClass.Method.Parameter> allParameters = new ArrayList<>();
