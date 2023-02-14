@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * A class that is meant to contain potentially useful statistics that can aid in the detection of code smells and
  * for general use case purposes including determining potential bugs within the CodeSmell tool itself.
  */
-public final class StatTracker {
+public class StatTracker {
     public final Helper helper;
 
     /**
@@ -91,7 +91,7 @@ public final class StatTracker {
         }
         return Collections.unmodifiableMap(classStats);
     }
-    
+
     private static Map<String, Integer> determinePackageUsage(Map<CPGClass, ClassStat> classStats) {
         Map<String, Integer> packageUse = new HashMap<>();
         List<ClassStat> classStatVals = new ArrayList<>(classStats.values());

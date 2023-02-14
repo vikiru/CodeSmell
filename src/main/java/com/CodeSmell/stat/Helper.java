@@ -13,7 +13,7 @@ import java.util.List;
  * all method calls, all method parameters, all class names within cpg. Additionally, can retrieve class, method and
  * attribute by name.
  */
-public final class Helper {
+public class Helper {
     /**
      * All the {@link com.CodeSmell.parser.CPGClass.Attribute} that exist within the cpg
      */

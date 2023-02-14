@@ -7,7 +7,7 @@ import com.CodeSmell.parser.CodePropertyGraph;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class ClassStat {
+public class ClassStat {
     /**
      * The reference to the class that this ClassStat is providing statistics on
      */
@@ -47,7 +47,13 @@ public final class ClassStat {
      * Groups all the methods of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
     public final Map<CPGClass.Modifier, List<CPGClass.Method>> modifierGroupedMethods;
+    /**
+     * The total distinct attribute calls that this class makes to other classes (including itself) via its methods.
+     */
     public final Map<CPGClass, Integer> totalClassAttributeCalls;
+    /**
+     * The total distinct method calls that this class makes to other classes (including itself) via its methods.
+     */
     public final Map<CPGClass, Integer> totalClassMethodCalls;
 
     public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
@@ -64,12 +70,27 @@ public final class ClassStat {
         this.totalClassMethodCalls = determineTotalClassMethodCalls(methodStats);
     }
 
+    /**
+     * Create AttributeStats for every attribute within a CPGClass.
+     *
+     * @param cpgClass
+     * @param helper
+     * @return
+     */
     private static List<AttributeStat> createAttributeStat(CPGClass cpgClass, Helper helper) {
         List<AttributeStat> attributeStats = new ArrayList<>();
         cpgClass.getAttributes().forEach(attribute -> attributeStats.add(new AttributeStat(attribute, helper)));
         return Collections.unmodifiableList(attributeStats);
     }
 
+    /**
+     * Create MethodStats for every method within a CPGClass.
+     *
+     * @param cpgClass
+     * @param cpg
+     * @param helper
+     * @return
+     */
     private static List<MethodStat> createMethodStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
         List<MethodStat> methodStats = new ArrayList<>();
         cpgClass.getMethods().forEach(method -> methodStats.add(new MethodStat(method, cpg, helper)));

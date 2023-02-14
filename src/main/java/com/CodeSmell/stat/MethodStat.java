@@ -11,7 +11,7 @@ import static java.util.Comparator.comparing;
 /**
  * MethodStat contains stats relevant to a given method pertaining to how it is used within cpg.
  */
-public final class MethodStat {
+public class MethodStat {
     /**
      * The reference to the method that this MethodStat is providing information about
      */

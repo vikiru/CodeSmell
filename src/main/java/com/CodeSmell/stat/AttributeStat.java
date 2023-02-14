@@ -4,7 +4,7 @@ import com.CodeSmell.parser.CPGClass;
 
 import java.util.*;
 
-public final class AttributeStat {
+public class AttributeStat {
     /**
      * The reference to the attribute that this AttributeStat is referring to
      */
