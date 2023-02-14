@@ -27,9 +27,9 @@ public class Common {
 
     public static void initStatTracker(CodePropertyGraph cpg) {
         stats = new StatTracker(cpg);
-        ArrayList<CPGClass> ifaceClasses = stats
+        List<CPGClass> ifaceClasses = stats
                 .distinctClassTypes.get("interface");
-        ArrayList<Relation> realizations = stats
+        List<Relation> realizations = stats
                 .distinctRelations.get(RelationshipType.REALIZATION);
         Common.interfaces = new HashMap<>();
 
