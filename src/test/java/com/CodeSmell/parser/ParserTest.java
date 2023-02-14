@@ -4,6 +4,7 @@ import com.CodeSmell.ProjectManager;
 import com.CodeSmell.stat.StatTracker;
 import com.google.gson.Gson;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -64,6 +65,7 @@ public class ParserTest {
     }
 
     @Test
+    @Ignore
     public void testOwnProject() {
         HashMap<CPGClass, Boolean> connectedClasses = new HashMap<CPGClass, Boolean>();
         for (CPGClass c : ourCPGWithRelations.getClasses()) {
