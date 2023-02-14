@@ -4,10 +4,7 @@ import com.CodeSmell.model.ClassRelation;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ClassStat {
@@ -24,24 +21,24 @@ public final class ClassStat {
      * a class was used as a parameter type, inheritance or realization relation target, how many times it was used
      * as an attribute type, and how many times its attributes and methods were called
      */
-    public final HashMap<String, Integer> usageMap = new HashMap<>();
+    public final Map<String, Integer> usageMap = new HashMap<>();
     /**
      * The total number of non-empty lines present within a file (excludes package and import statements)
      */
     public final int totalClassLines;
     /**
      * A detailed overview indicating how totalClassLines was determined showing how many lines were associated with
-     * attributes, methods, class declaration, any and all nested classes
+     * attributes, methods, class declaration, and all nested classes
      */
-    public final HashMap<String, Integer> classLineMap = new HashMap<>();
+    public final Map<String, Integer> classLineMap = new HashMap<>();
     /**
      * Groups all the attributes of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
-    public final HashMap<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes = new HashMap<>();
+    public final Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes;
     /**
      * Groups all the methods of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
-    public final HashMap<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods = new HashMap<>();
+    public final Map<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods;
     /**
      * A list containing all the attribute stats of a given class
      */
@@ -50,31 +47,13 @@ public final class ClassStat {
      * A list containing all the method stats of a given class
      */
     public final ArrayList<MethodStat> methodStats = new ArrayList<>();
-    public final ArrayList<String> unusedImports = new ArrayList<>(); // TODO
 
     public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
         this.cpgClass = cpgClass;
-        createAttributeMethodStats(cpgClass, helper, attributeStats, methodStats);
         this.classUsage = returnTotalUsage(cpgClass, cpg, helper, attributeStats, methodStats, usageMap);
         this.totalClassLines = determineTotalClassLines(cpgClass, cpg, classLineMap);
-        groupAttributesByModifiers(cpgClass, modifierGroupedAttributes);
-        groupMethodsByModifiers(cpgClass, modifierGroupedMethods);
-    }
-
-    /**
-     * Create all the attribute and method stat objects for a given class.
-     */
-    private static void createAttributeMethodStats(CPGClass cpgClass,
-                                                   Helper helper,
-                                                   ArrayList<AttributeStat> attributeStats,
-                                                   ArrayList<MethodStat> methodStats) {
-        cpgClass.getAttributes().stream().
-                filter(attribute -> attribute.getParent().equals(cpgClass)).
-                forEach(attribute -> attributeStats.add(new AttributeStat(attribute, helper)));
-
-        cpgClass.getMethods().stream().
-                filter(method -> method.getParent().equals(cpgClass)).
-                forEach(method -> methodStats.add(new MethodStat(method, helper)));
+        this.modifierGroupedAttributes = groupAttributesByModifiers(cpgClass);
+        this.modifierGroupedMethods = groupMethodsByModifiers(cpgClass);
     }
 
     /**
@@ -89,7 +68,7 @@ public final class ClassStat {
     private static int returnTotalUsage(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper,
                                         ArrayList<AttributeStat> attributeStats,
                                         ArrayList<MethodStat> methodStats,
-                                        HashMap<String, Integer> usageMap) {
+                                        Map<String, Integer> usageMap) {
         // Count how many times cpgClass appears as a type
         int attributeTypeCount = Math.toIntExact(helper.allAttributes.stream().
                 filter(attribute -> (attribute.getTypeList().contains(cpgClass))).count());
@@ -131,7 +110,7 @@ public final class ClassStat {
      */
     private static int determineTotalClassLines(CPGClass cpgClass,
                                                 CodePropertyGraph cpg,
-                                                HashMap<String, Integer> classLineMap) {
+                                                Map<String, Integer> classLineMap) {
         var filePathResult = cpg.getClasses().stream().
                 filter(cpgToFind -> cpgToFind.filePath.equals(cpgClass.filePath)).
                 collect(Collectors.toList());
@@ -164,16 +143,16 @@ public final class ClassStat {
     /**
      * Group all the attributes present within a class by 'PUBLIC', 'PRIVATE' and 'PACKAGE PRIVATE' modifiers.
      *
-     * @param cpgClass                  The class being analyzed
-     * @param modifierGroupedAttributes The map containing all the attributes grouped by modifier
+     * @param cpgClass The class being analyzed
+     * @return
      */
-    private static void groupAttributesByModifiers(CPGClass cpgClass,
-                                                   HashMap<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes) {
+    private static Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> groupAttributesByModifiers(CPGClass cpgClass) {
+        Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes = new HashMap<>();
         modifierGroupedAttributes.put(CPGClass.Modifier.PUBLIC, new ArrayList<>());
         modifierGroupedAttributes.put(CPGClass.Modifier.PRIVATE, new ArrayList<>());
         modifierGroupedAttributes.put(CPGClass.Modifier.PACKAGE_PRIVATE, new ArrayList<>());
         for (CPGClass.Attribute attribute : cpgClass.getAttributes()) {
-            List<CPGClass.Modifier> modList = Arrays.asList(attribute.modifiers);
+            List<CPGClass.Modifier> modList = attribute.modifiers;
             if (modList.contains(CPGClass.Modifier.PUBLIC)) {
                 modifierGroupedAttributes.get(CPGClass.Modifier.PUBLIC).add(attribute);
             } else if (modList.contains(CPGClass.Modifier.PRIVATE)) {
@@ -182,16 +161,16 @@ public final class ClassStat {
                 modifierGroupedAttributes.get(CPGClass.Modifier.PACKAGE_PRIVATE).add(attribute);
             }
         }
+        return Collections.unmodifiableMap(modifierGroupedAttributes);
     }
 
     /**
      * Group all the methods present within a class by 'PUBLIC', 'PRIVATE' and 'PACKAGE PRIVATE' modifiers.
      *
-     * @param cpgClass               The class being analyzed
-     * @param modifierGroupedMethods The map containing all the methods grouped by modifier
+     * @param cpgClass The class being analyzed
      */
-    private static void groupMethodsByModifiers(CPGClass cpgClass,
-                                                HashMap<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods) {
+    private static Map<CPGClass.Modifier, ArrayList<CPGClass.Method>> groupMethodsByModifiers(CPGClass cpgClass) {
+        HashMap<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods = new HashMap<>();
         modifierGroupedMethods.put(CPGClass.Modifier.PUBLIC, new ArrayList<>());
         modifierGroupedMethods.put(CPGClass.Modifier.PRIVATE, new ArrayList<>());
         modifierGroupedMethods.put(CPGClass.Modifier.PACKAGE_PRIVATE, new ArrayList<>());
@@ -205,6 +184,7 @@ public final class ClassStat {
                 modifierGroupedMethods.get(CPGClass.Modifier.PACKAGE_PRIVATE).add(method);
             }
         }
+        return Collections.unmodifiableMap(modifierGroupedMethods);
     }
 
     /**
