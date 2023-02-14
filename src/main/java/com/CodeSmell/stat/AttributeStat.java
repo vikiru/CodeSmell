@@ -3,7 +3,9 @@ package com.CodeSmell.stat;
 import com.CodeSmell.parser.CPGClass;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public final class AttributeStat {
     /**
@@ -17,15 +19,16 @@ public final class AttributeStat {
     /**
      * A total count of how many times each method within cpg calls this attribute within their method's instructions
      */
-    public final HashMap<CPGClass.Method, Integer> methodsWhichCallAttr = new HashMap<>();
+    public final Map<CPGClass.Method, Integer> methodsWhichCallAttr;
     /**
      * A total count of how many times each class within cpg calls this attribute through all of their methods.
      */
-    public final HashMap<CPGClass, Integer> classesWhichCallAttr = new HashMap<>();
+    public final Map<CPGClass, Integer> classesWhichCallAttr;
 
     public AttributeStat(CPGClass.Attribute attribute, Helper helper) {
         this.attribute = attribute;
-        determineAttributeUsage(attribute, helper, methodsWhichCallAttr, classesWhichCallAttr);
+        this.methodsWhichCallAttr = determineAttributeUsage(attribute, helper);
+        this.classesWhichCallAttr = determineClassAttributeUsage(methodsWhichCallAttr);
         this.attributeUsage = returnTotalUsage(methodsWhichCallAttr);
     }
 
@@ -33,16 +36,12 @@ public final class AttributeStat {
      * Determine how many times this attribute was used in each method within cpg and additionally,
      * how many times it was used per class in cpg.
      *
-     * @param attribute            The attribute being analyzed
-     * @param helper               The helper consisting of useful collections of elements within cpg
-     * @param methodsWhichCallAttr The map indicating how many times each method has called this attribute
-     * @param classWhichCallAttr   The map indicating how many times each class has called this attribute
+     * @param attribute The attribute being analyzed
+     * @param helper    The helper consisting of useful collections of elements within cpg
      */
-    private static void determineAttributeUsage(CPGClass.Attribute attribute,
-                                                Helper helper,
-                                                HashMap<CPGClass.Method, Integer> methodsWhichCallAttr,
-                                                HashMap<CPGClass, Integer> classWhichCallAttr) {
+    private static Map<CPGClass.Method, Integer> determineAttributeUsage(CPGClass.Attribute attribute, Helper helper) {
         ArrayList<CPGClass.Method> allMethods = helper.allMethods;
+        Map<CPGClass.Method, Integer> methodsWhichCallAttr = new HashMap<>();
         for (CPGClass.Method method : allMethods) {
             int count = 0;
             if (method.getAttributeCalls().contains(attribute)) {
@@ -52,8 +51,14 @@ public final class AttributeStat {
             }
             methodsWhichCallAttr.put(method, count);
         }
+        return Collections.unmodifiableMap(methodsWhichCallAttr);
+    }
+
+    private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<CPGClass.Method, Integer> methodsWhichCallAttr) {
+        Map<CPGClass, Integer> classWhichCallAttr = new HashMap<>();
         methodsWhichCallAttr.forEach((key, value) -> classWhichCallAttr.
                 put(key.getParent(), classWhichCallAttr.getOrDefault(key.getParent(), 0) + value));
+        return Collections.unmodifiableMap(classWhichCallAttr);
     }
 
     /**
@@ -62,7 +67,7 @@ public final class AttributeStat {
      * @param methodsWhichCallAttr The map indicating how many times each method has called this attribute
      * @return An integer representing the total number of times this attribute was used within cpg
      */
-    private static int returnTotalUsage(HashMap<CPGClass.Method, Integer> methodsWhichCallAttr) {
+    private static int returnTotalUsage(Map<CPGClass.Method, Integer> methodsWhichCallAttr) {
         final int[] count = {0};
         methodsWhichCallAttr.forEach((key, value) -> count[0] += value);
         return count[0];
