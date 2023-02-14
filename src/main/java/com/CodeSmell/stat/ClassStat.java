@@ -47,7 +47,8 @@ public final class ClassStat {
      * Groups all the methods of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
     public final Map<CPGClass.Modifier, List<CPGClass.Method>> modifierGroupedMethods;
-
+    public final Map<CPGClass, Integer> totalClassAttributeCalls;
+    public final Map<CPGClass, Integer> totalClassMethodCalls;
 
     public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
         this.cpgClass = cpgClass;
@@ -59,6 +60,8 @@ public final class ClassStat {
         this.totalClassLines = returnTotalClassLines(classLineMap);
         this.modifierGroupedAttributes = groupAttributesByModifiers(cpgClass);
         this.modifierGroupedMethods = groupMethodsByModifiers(cpgClass);
+        this.totalClassAttributeCalls = determineTotalClassAttributeCalls(methodStats);
+        this.totalClassMethodCalls = determineTotalClassMethodCalls(methodStats);
     }
 
     private static List<AttributeStat> createAttributeStat(CPGClass cpgClass, Helper helper) {
@@ -72,7 +75,6 @@ public final class ClassStat {
         cpgClass.getMethods().forEach(method -> methodStats.add(new MethodStat(method, cpg, helper)));
         return Collections.unmodifiableList(methodStats);
     }
-
 
     /**
      * Determine how many times a given CPGClass was used throughout the cpg as an attribute type,
@@ -235,6 +237,25 @@ public final class ClassStat {
         methodStats.forEach(method -> total[0] += method.methodUsage);
         return total[0];
     }
+
+    private static Map<CPGClass, Integer> determineTotalClassAttributeCalls(List<MethodStat> methodStats) {
+        Map<CPGClass, Integer> totalClassAttributeCalls = new HashMap<>();
+        methodStats.
+                forEach(methodStat -> methodStat.distinctAttributeCalls.
+                        forEach((key, value) -> totalClassAttributeCalls.put(key,
+                                totalClassAttributeCalls.getOrDefault(key, 0) + value.size())));
+        return Collections.unmodifiableMap(totalClassAttributeCalls);
+    }
+
+    private static Map<CPGClass, Integer> determineTotalClassMethodCalls(List<MethodStat> methodStats) {
+        Map<CPGClass, Integer> totalClassMethodCalls = new HashMap<>();
+        methodStats.
+                forEach(methodStat -> methodStat.distinctMethodCalls.
+                        forEach((key, value) -> totalClassMethodCalls.put(key,
+                                totalClassMethodCalls.getOrDefault(key, 0) + value.size())));
+        return Collections.unmodifiableMap(totalClassMethodCalls);
+    }
+
 
     @Override
     public String toString() {
