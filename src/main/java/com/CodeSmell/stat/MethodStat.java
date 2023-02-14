@@ -57,11 +57,11 @@ public class MethodStat {
     }
 
     /**
-     * Determine how many times this method was used by each method within cpg and additionally,
-     * how many times each class has called this method.
+     * Determine how many times this method was used by each method within cpg.
      *
      * @param method The method being analyzed
      * @param helper The helper consisting of useful collections of elements within cpg
+     * @return A map indicating how many times each method in cpg uses this method
      */
     private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method, Helper helper) {
         Map<CPGClass.Method, Integer> methodsWhichCallMethod = new HashMap<>();
@@ -78,6 +78,12 @@ public class MethodStat {
         return Collections.unmodifiableMap(methodsWhichCallMethod);
     }
 
+    /**
+     * Determine how many times this method was used by each class within cpg.
+     *
+     * @param methodsWhichCallMethod A map indicating how many times each method in cpg uses this method
+     * @return A map indicating how many times each class in cpg uses this method
+     */
     private static Map<CPGClass, Integer> determineClassMethodUsage(Map<CPGClass.Method, Integer> methodsWhichCallMethod) {
         Map<CPGClass, Integer> classesWhichCallMethod = new HashMap<>();
         methodsWhichCallMethod.forEach((key, value) -> classesWhichCallMethod.
@@ -98,6 +104,13 @@ public class MethodStat {
         return count[0];
     }
 
+    /**
+     * Group the method calls of this method to its parentClass.
+     *
+     * @param method The method being analyzed
+     * @param cpg    The CodePropertyGraph containing existing classes and relations
+     * @return A map indicating which methods of each class were used within this method's instructions
+     */
     private static Map<CPGClass, List<CPGClass.Method>> determineDistinctMethodCalls(CPGClass.Method method,
                                                                                      CodePropertyGraph cpg) {
         Map<CPGClass, List<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
@@ -109,6 +122,13 @@ public class MethodStat {
         return Collections.unmodifiableMap(totalMethodClassCalls);
     }
 
+    /**
+     * Group the attribute calls of this method to its parentClass.
+     *
+     * @param method The method being analyzed
+     * @param cpg    The CodePropertyGraph containing existing classes and relations
+     * @return A map indicating which attributes of each class were used within this method's instructions
+     */
     private static Map<CPGClass, List<CPGClass.Attribute>> determineDistinctAttributeCalls(CPGClass.Method method,
                                                                                            CodePropertyGraph cpg) {
         Map<CPGClass, List<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
@@ -124,6 +144,7 @@ public class MethodStat {
      * Determine how many times the parameters of this method were used within the method's instructions.
      *
      * @param method The method being analyzed
+     * @return A map indicating how many times each parameter of a method was used
      */
     private static Map<CPGClass.Method.Parameter, Integer> determineParameterUsage(CPGClass.Method method) {
         Map<CPGClass.Method.Parameter, Integer> parameterUsage = new HashMap<>();
@@ -140,6 +161,7 @@ public class MethodStat {
      * that would appear the same as if read from the .java file.
      *
      * @param method The method being analyzed
+     * @return A list containing all the unique instructions that would appear as-is within the .java file
      */
     private static List<CPGClass.Method.Instruction> obtainUniqueInstructions(CPGClass.Method method, Helper helper) {
         List<CPGClass.Method.Instruction> uniqueInstructions = new ArrayList<>();
