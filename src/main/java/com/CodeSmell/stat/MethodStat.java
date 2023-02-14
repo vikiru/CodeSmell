@@ -3,7 +3,6 @@ package com.CodeSmell.stat;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,14 +29,13 @@ public final class MethodStat {
      */
     public final Map<CPGClass, Integer> classesWhichCallMethod;
     /**
-     * A map containing a count of how many times the methods of another class were used within this method
-     */
-    public final Map<CPGClass, ArrayList<CPGClass.Method>> totalClassMethodCalls;
-    /**
      * A map containing a count of how many times the attributes of another class were used within this method
      */
-    public final Map<CPGClass, ArrayList<CPGClass.Attribute>> totalClassAttributeCalls;
-
+    public final Map<CPGClass, List<CPGClass.Attribute>> distinctAttributeCalls;
+    /**
+     * A map containing a count of how many times the methods of another class were used within this method
+     */
+    public final Map<CPGClass, List<CPGClass.Method>> distinctMethodCalls;
     /**
      * A map containing a count of how many times each parameter within this method was used, >= 0
      */
@@ -51,8 +49,8 @@ public final class MethodStat {
         this.method = method;
         this.methodsWhichCallMethod = determineMethodUsage(method, helper);
         this.classesWhichCallMethod = determineClassMethodUsage(methodsWhichCallMethod);
-        this.totalClassAttributeCalls = determineTotalAttributeCalls(method, cpg);
-        this.totalClassMethodCalls = determineTotalMethodCalls(method, cpg);
+        this.distinctAttributeCalls = determineDistinctAttributeCalls(method, cpg);
+        this.distinctMethodCalls = determineDistinctMethodCalls(method, cpg);
         this.methodUsage = returnTotalUsage(methodsWhichCallMethod);
         this.parameterUsage = determineParameterUsage(method);
         this.uniqueInstructions = obtainUniqueInstructions(method, helper);
@@ -100,9 +98,9 @@ public final class MethodStat {
         return count[0];
     }
 
-    private static Map<CPGClass, ArrayList<CPGClass.Method>> determineTotalMethodCalls(CPGClass.Method method,
-                                                                                       CodePropertyGraph cpg) {
-        Map<CPGClass, ArrayList<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
+    private static Map<CPGClass, List<CPGClass.Method>> determineDistinctMethodCalls(CPGClass.Method method,
+                                                                                     CodePropertyGraph cpg) {
+        Map<CPGClass, List<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
         for (CPGClass.Method methodCall : method.getMethodCalls()) {
             totalMethodClassCalls.putIfAbsent(methodCall.getParent(), new ArrayList<>());
             totalMethodClassCalls.get(methodCall.getParent()).add(methodCall);
@@ -111,9 +109,9 @@ public final class MethodStat {
         return Collections.unmodifiableMap(totalMethodClassCalls);
     }
 
-    private static Map<CPGClass, ArrayList<CPGClass.Attribute>> determineTotalAttributeCalls(CPGClass.Method method,
-                                                                                             CodePropertyGraph cpg) {
-        Map<CPGClass, ArrayList<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
+    private static Map<CPGClass, List<CPGClass.Attribute>> determineDistinctAttributeCalls(CPGClass.Method method,
+                                                                                           CodePropertyGraph cpg) {
+        Map<CPGClass, List<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
         for (CPGClass.Attribute attributeCall : method.getAttributeCalls()) {
             totalAttributeClassCalls.putIfAbsent(attributeCall.getParent(), new ArrayList<>());
             totalAttributeClassCalls.get(attributeCall.getParent()).add(attributeCall);
@@ -146,12 +144,11 @@ public final class MethodStat {
     private static List<CPGClass.Method.Instruction> obtainUniqueInstructions(CPGClass.Method method, Helper helper) {
         List<CPGClass.Method.Instruction> uniqueInstructions = new ArrayList<>();
         List<String> allAttributeNames = helper.allAttributeNames;
-        method.getParent().getAttributes().forEach(attr -> allAttributeNames.add(attr.name));
         String[] ignoredLabels = new String[]{"FIELD_IDENTIFIER", "IDENTIFIER", "LITERAL",
                 "METHOD", "METHOD_PARAMETER_IN", "METHOD_PARAMETER_OUT", "METHOD_RETURN"};
         String[] ignoredCode = new String[]{"<operator>", "<empty>"};
-        ArrayList<String> ignoredLabelList = new ArrayList<>(Arrays.asList(ignoredLabels));
-        ArrayList<String> ignoredCodeList = new ArrayList<>(Arrays.asList(ignoredCode));
+        List<String> ignoredLabelList = new ArrayList<>(Arrays.asList(ignoredLabels));
+        List<String> ignoredCodeList = new ArrayList<>(Arrays.asList(ignoredCode));
         var filteredIns = method.instructions.stream().
                 filter(ins -> !ignoredLabelList.contains(ins.label)
                         && !ignoredCodeList.contains(ins.code) && !ins.code.contains("$id")
