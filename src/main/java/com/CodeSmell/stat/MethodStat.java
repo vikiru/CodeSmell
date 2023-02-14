@@ -27,7 +27,7 @@ public final class MethodStat {
     /**
      * A map containing a count of how many times each class within cpg has called this method, >= 0.
      */
-    public final Map<CPGClass, Integer> classesWhichCallMethod = new HashMap<>();
+    public final Map<CPGClass, Integer> classesWhichCallMethod;
     /**
      * A map containing a count of how many times the methods of another class were used within this method
      */
@@ -48,24 +48,23 @@ public final class MethodStat {
 
     public MethodStat(CPGClass.Method method, CodePropertyGraph cpg, Helper helper) {
         this.method = method;
-        this.methodsWhichCallMethod = Collections.unmodifiableMap(determineMethodUsage(method, helper, classesWhichCallMethod));
-        this.totalClassAttributeCalls = Collections.unmodifiableMap(determineTotalAttributeCalls(method, cpg));
-        this.totalClassMethodCalls = Collections.unmodifiableMap(determineTotalMethodCalls(method, cpg));
+        this.methodsWhichCallMethod = determineMethodUsage(method, helper);
+        this.classesWhichCallMethod = determineClassMethodUsage(methodsWhichCallMethod);
+        this.totalClassAttributeCalls = determineTotalAttributeCalls(method, cpg);
+        this.totalClassMethodCalls = determineTotalMethodCalls(method, cpg);
         this.methodUsage = returnTotalUsage(methodsWhichCallMethod);
-        this.parameterUsage = Collections.unmodifiableMap(determineParameterUsage(method));
-        this.uniqueInstructions = Collections.unmodifiableList(obtainUniqueInstructions(method, helper));
+        this.parameterUsage = determineParameterUsage(method);
+        this.uniqueInstructions = obtainUniqueInstructions(method, helper);
     }
 
     /**
      * Determine how many times this method was used by each method within cpg and additionally,
      * how many times each class has called this method.
      *
-     * @param method                 The method being analyzed
-     * @param helper                 The helper consisting of useful collections of elements within cpg
-     * @param classesWhichCallMethod The map indicating how many times each class has called this method
+     * @param method The method being analyzed
+     * @param helper The helper consisting of useful collections of elements within cpg
      */
-    private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method, Helper helper,
-                                                                      Map<CPGClass, Integer> classesWhichCallMethod) {
+    private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method, Helper helper) {
         Map<CPGClass.Method, Integer> methodsWhichCallMethod = new HashMap<>();
         ArrayList<CPGClass.Method> allMethods = helper.allMethods;
         String toFind = method.getParent().name + "." + method.name;
@@ -77,9 +76,14 @@ public final class MethodStat {
             }
             methodsWhichCallMethod.put(methodInCPG, count);
         }
+        return Collections.unmodifiableMap(methodsWhichCallMethod);
+    }
+
+    private static Map<CPGClass, Integer> determineClassMethodUsage(Map<CPGClass.Method, Integer> methodsWhichCallMethod) {
+        Map<CPGClass, Integer> classesWhichCallMethod = new HashMap<>();
         methodsWhichCallMethod.forEach((key, value) -> classesWhichCallMethod.
                 put(key.getParent(), classesWhichCallMethod.getOrDefault(key.getParent(), 0) + value));
-        return methodsWhichCallMethod;
+        return Collections.unmodifiableMap(classesWhichCallMethod);
     }
 
     /**
@@ -95,24 +99,26 @@ public final class MethodStat {
         return count[0];
     }
 
-    private static HashMap<CPGClass, ArrayList<CPGClass.Method>> determineTotalMethodCalls(CPGClass.Method method, CodePropertyGraph cpg) {
-        HashMap<CPGClass, ArrayList<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
+    private static Map<CPGClass, ArrayList<CPGClass.Method>> determineTotalMethodCalls(CPGClass.Method method,
+                                                                                       CodePropertyGraph cpg) {
+        Map<CPGClass, ArrayList<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
         for (CPGClass.Method methodCall : method.getMethodCalls()) {
             totalMethodClassCalls.putIfAbsent(methodCall.getParent(), new ArrayList<>());
             totalMethodClassCalls.get(methodCall.getParent()).add(methodCall);
         }
         cpg.getClasses().forEach(cpgClass -> totalMethodClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
-        return totalMethodClassCalls;
+        return Collections.unmodifiableMap(totalMethodClassCalls);
     }
 
-    private static HashMap<CPGClass, ArrayList<CPGClass.Attribute>> determineTotalAttributeCalls(CPGClass.Method method, CodePropertyGraph cpg) {
-        HashMap<CPGClass, ArrayList<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
+    private static Map<CPGClass, ArrayList<CPGClass.Attribute>> determineTotalAttributeCalls(CPGClass.Method method,
+                                                                                             CodePropertyGraph cpg) {
+        Map<CPGClass, ArrayList<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
         for (CPGClass.Attribute attributeCall : method.getAttributeCalls()) {
             totalAttributeClassCalls.putIfAbsent(attributeCall.getParent(), new ArrayList<>());
             totalAttributeClassCalls.get(attributeCall.getParent()).add(attributeCall);
         }
         cpg.getClasses().forEach(cpgClass -> totalAttributeClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
-        return totalAttributeClassCalls;
+        return Collections.unmodifiableMap(totalAttributeClassCalls);
     }
 
     /**
@@ -127,7 +133,7 @@ public final class MethodStat {
                     && ins.code.contains(parameter.name)).collect(Collectors.toList());
             parameterUsage.put(parameter, filteredInstructions.size());
         }
-        return parameterUsage;
+        return Collections.unmodifiableMap(parameterUsage);
     }
 
     /**
@@ -146,7 +152,8 @@ public final class MethodStat {
         ArrayList<String> ignoredLabelList = new ArrayList<>(Arrays.asList(ignoredLabels));
         ArrayList<String> ignoredCodeList = new ArrayList<>(Arrays.asList(ignoredCode));
         var filteredIns = method.instructions.stream().
-                filter(ins -> !ignoredLabelList.contains(ins.label) && !ignoredCodeList.contains(ins.code) && !ins.code.contains("$id")
+                filter(ins -> !ignoredLabelList.contains(ins.label)
+                        && !ignoredCodeList.contains(ins.code) && !ins.code.contains("$id")
                         && ins.lineNumber >= method.lineNumberStart).
                 collect(Collectors.toCollection(ArrayList::new));
         for (CPGClass.Method.Instruction ins : filteredIns) {
@@ -154,12 +161,13 @@ public final class MethodStat {
                     filter(insToFind -> insToFind.code.contains(ins.code)
                             && insToFind.code.length() > ins.code.length()).collect(Collectors.toList());
             String testStr = ins.code.replace("this.", "").trim();
-            if (isSubString.isEmpty() && !allAttributeNames.contains(testStr) && (ins.code.endsWith(")") || ins.code.endsWith(";"))) {
+            if (isSubString.isEmpty() && !allAttributeNames.contains(testStr)
+                    && (ins.code.endsWith(")") || ins.code.endsWith(";"))) {
                 uniqueInstructions.add(ins);
             }
         }
         uniqueInstructions.sort(comparing(ins -> ins.lineNumber));
-        return uniqueInstructions;
+        return Collections.unmodifiableList(uniqueInstructions);
     }
 
     @Override
