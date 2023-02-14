@@ -32,11 +32,18 @@ public final class StatTracker {
      */
     public final HashMap<CPGClass, ClassStat> classStats = new HashMap<>();
 
+    public final HashMap<String, Integer> packageUse = new HashMap<>();
+    public final ArrayList<CPGClass.Method> longParameterMethod = new ArrayList<>();
+    public final ArrayList<CPGClass.Method> longMethods = new ArrayList<>();
+
     public StatTracker(CodePropertyGraph cpg) {
         helper = new Helper(cpg);
+        createStatObjects(cpg, helper, classStats);
         determineDistinctClassTypes(cpg, distinctClassTypes);
         determineDistinctRelations(cpg, distinctRelations);
-        createStatObjects(cpg, helper, classStats);
+        determinePackageUsage(classStats, packageUse);
+        findLongParameterMethods(helper, longParameterMethod, 4);
+        findLongMethods(helper, longMethods, 30);
     }
 
     /**
@@ -82,6 +89,27 @@ public final class StatTracker {
             distinctClassTypes.putIfAbsent(classType, new ArrayList<>());
             distinctClassTypes.get(classType).add(cpgClass);
         }
+    }
+
+    private static void determinePackageUsage(HashMap<CPGClass, ClassStat> classStats, HashMap<String, Integer> packageUse) {
+        ArrayList<ClassStat> classStatVals = new ArrayList<>(classStats.values());
+        classStatVals.forEach(classStat ->
+                packageUse.put(classStat.cpgClass.packageName,
+                        packageUse.getOrDefault((classStat.cpgClass.packageName), 0) + classStat.classUsage));
+    }
+
+    private static void findLongParameterMethods(Helper helper, ArrayList<CPGClass.Method> longParameterMethod, int limit) {
+        var longParamResult = helper.allMethods.stream().
+                filter(method -> method.parameters.size() >= limit).distinct().
+                collect(Collectors.toList());
+        longParameterMethod.addAll(longParamResult);
+    }
+
+    private static void findLongMethods(Helper helper, ArrayList<CPGClass.Method> longMethods, int limit) {
+        var longMethodsResult = helper.allMethods.stream().
+                filter(method -> method.totalMethodLength >= limit).distinct().
+                collect(Collectors.toList());
+        longMethods.addAll(longMethodsResult);
     }
 
 }
