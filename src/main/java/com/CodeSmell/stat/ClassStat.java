@@ -13,6 +13,14 @@ public final class ClassStat {
      */
     public final CPGClass cpgClass;
     /**
+     * A list containing all the attribute stats of a given class
+     */
+    public final List<AttributeStat> attributeStats;
+    /**
+     * A list containing all the method stats of a given class
+     */
+    public final List<MethodStat> methodStats;
+    /**
      * The total number of times this class was used within cpg
      */
     public final int classUsage;
@@ -39,17 +47,12 @@ public final class ClassStat {
      * Groups all the methods of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
     public final Map<CPGClass.Modifier, List<CPGClass.Method>> modifierGroupedMethods;
-    /**
-     * A list containing all the attribute stats of a given class
-     */
-    public final List<AttributeStat> attributeStats = new ArrayList<>();
-    /**
-     * A list containing all the method stats of a given class
-     */
-    public final List<MethodStat> methodStats = new ArrayList<>();
+
 
     public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
         this.cpgClass = cpgClass;
+        this.attributeStats = createAttributeStat(cpgClass, helper);
+        this.methodStats = createMethodStat(cpgClass, cpg, helper);
         this.usageMap = determineClassUsage(cpgClass, cpg, helper, attributeStats, methodStats);
         this.classUsage = returnTotalUsage(usageMap);
         this.classLineMap = determineTotalClassLines(cpgClass, cpg);
@@ -57,6 +60,19 @@ public final class ClassStat {
         this.modifierGroupedAttributes = groupAttributesByModifiers(cpgClass);
         this.modifierGroupedMethods = groupMethodsByModifiers(cpgClass);
     }
+
+    private static List<AttributeStat> createAttributeStat(CPGClass cpgClass, Helper helper) {
+        List<AttributeStat> attributeStats = new ArrayList<>();
+        cpgClass.getAttributes().forEach(attribute -> attributeStats.add(new AttributeStat(attribute, helper)));
+        return Collections.unmodifiableList(attributeStats);
+    }
+
+    private static List<MethodStat> createMethodStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
+        List<MethodStat> methodStats = new ArrayList<>();
+        cpgClass.getMethods().forEach(method -> methodStats.add(new MethodStat(method, cpg, helper)));
+        return Collections.unmodifiableList(methodStats);
+    }
+
 
     /**
      * Determine how many times a given CPGClass was used throughout the cpg as an attribute type,
