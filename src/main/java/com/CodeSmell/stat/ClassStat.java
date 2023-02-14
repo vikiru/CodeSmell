@@ -21,7 +21,7 @@ public final class ClassStat {
      * a class was used as a parameter type, inheritance or realization relation target, how many times it was used
      * as an attribute type, and how many times its attributes and methods were called
      */
-    public final Map<String, Integer> usageMap = new HashMap<>();
+    public final Map<String, Integer> usageMap;
     /**
      * The total number of non-empty lines present within a file (excludes package and import statements)
      */
@@ -30,28 +30,30 @@ public final class ClassStat {
      * A detailed overview indicating how totalClassLines was determined showing how many lines were associated with
      * attributes, methods, class declaration, and all nested classes
      */
-    public final Map<String, Integer> classLineMap = new HashMap<>();
+    public final Map<String, Integer> classLineMap;
     /**
      * Groups all the attributes of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
-    public final Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes;
+    public final Map<CPGClass.Modifier, List<CPGClass.Attribute>> modifierGroupedAttributes;
     /**
      * Groups all the methods of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
-    public final Map<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods;
+    public final Map<CPGClass.Modifier, List<CPGClass.Method>> modifierGroupedMethods;
     /**
      * A list containing all the attribute stats of a given class
      */
-    public final ArrayList<AttributeStat> attributeStats = new ArrayList<>();
+    public final List<AttributeStat> attributeStats = new ArrayList<>();
     /**
      * A list containing all the method stats of a given class
      */
-    public final ArrayList<MethodStat> methodStats = new ArrayList<>();
+    public final List<MethodStat> methodStats = new ArrayList<>();
 
     public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
         this.cpgClass = cpgClass;
-        this.classUsage = returnTotalUsage(cpgClass, cpg, helper, attributeStats, methodStats, usageMap);
-        this.totalClassLines = determineTotalClassLines(cpgClass, cpg, classLineMap);
+        this.usageMap = determineClassUsage(cpgClass, cpg, helper, attributeStats, methodStats);
+        this.classUsage = returnTotalUsage(usageMap);
+        this.classLineMap = determineTotalClassLines(cpgClass, cpg);
+        this.totalClassLines = returnTotalClassLines(classLineMap);
         this.modifierGroupedAttributes = groupAttributesByModifiers(cpgClass);
         this.modifierGroupedMethods = groupMethodsByModifiers(cpgClass);
     }
@@ -65,10 +67,10 @@ public final class ClassStat {
      * Additionally, maintain a more detailed overview of this via usageMap.
      * </p>
      */
-    private static int returnTotalUsage(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper,
-                                        ArrayList<AttributeStat> attributeStats,
-                                        ArrayList<MethodStat> methodStats,
-                                        Map<String, Integer> usageMap) {
+    private static Map<String, Integer> determineClassUsage(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper,
+                                                            List<AttributeStat> attributeStats,
+                                                            List<MethodStat> methodStats) {
+        Map<String, Integer> usageMap = new HashMap<>();
         // Count how many times cpgClass appears as a type
         int attributeTypeCount = Math.toIntExact(helper.allAttributes.stream().
                 filter(attribute -> (attribute.getTypeList().contains(cpgClass))).count());
@@ -92,30 +94,30 @@ public final class ClassStat {
         usageMap.put("inheritanceCount", inheritanceCount);
         usageMap.put("realizationCount", realizationCount);
         usageMap.put("parameterCount", parameterCount);
-        final int[] classUsage = {0};
-        usageMap.values().forEach(value -> classUsage[0] += value);
-        return classUsage[0];
+        return Collections.unmodifiableMap(usageMap);
+    }
+
+    private static int returnTotalUsage(Map<String, Integer> usageMap) {
+        final int[] count = {0};
+        usageMap.forEach((key, value) -> count[0] += value);
+        return count[0];
     }
 
     /**
-     * Given a CPGClass object, return an int representing the total lines present within that file. Accounting for
+     * Given a CPGClass object, return a map representing the total lines present within that file. Accounting for
      * nested classes and classes that inherit from a superclass. Additionally, update the classLineMap with a detailed
      * overview of how the final returned value was calculated.
      *
-     * @param cpgClass     - The class being analyzed
-     * @param cpg          - The CodePropertyGraph containing the classes present in the codebase
-     * @param classLineMap - A hashmap containing string keys and integer values representing the total contribution that
-     *                     each key makes to the final returned integer value from this method
+     * @param cpgClass - The class being analyzed
+     * @param cpg      - The CodePropertyGraph containing the classes present in the codebase
      * @return An integer value representing the total amount of non-empty lines present within a class.
      */
-    private static int determineTotalClassLines(CPGClass cpgClass,
-                                                CodePropertyGraph cpg,
-                                                Map<String, Integer> classLineMap) {
+    private static Map<String, Integer> determineTotalClassLines(CPGClass cpgClass, CodePropertyGraph cpg) {
+        Map<String, Integer> classLineMap = new HashMap<>();
         var filePathResult = cpg.getClasses().stream().
                 filter(cpgToFind -> cpgToFind.filePath.equals(cpgClass.filePath)).
                 collect(Collectors.toList());
         boolean isRoot = cpgClass.filePath.contains(cpgClass.name);
-        int totalSelfLines = 0;
         int totalNestedLines = 0;
         for (CPGClass classWithinFile : filePathResult) {
             int declarationLength = 2;
@@ -128,7 +130,6 @@ public final class ClassStat {
                     filter(method -> method.getParent().name.equals(classWithinFile.name)).
                     forEach(method -> methodLength[0] += method.totalMethodLength);
             if (classWithinFile.name.equals(cpgClass.name)) {
-                totalSelfLines += attributeLength[0] + declarationLength + methodLength[0];
                 classLineMap.put("attributeLineCount", attributeLength[0]);
                 classLineMap.put("declarationLineCount", declarationLength);
                 classLineMap.put("methodLineCount", methodLength[0]);
@@ -137,7 +138,13 @@ public final class ClassStat {
             }
         }
         classLineMap.put("nestedLineTotal", totalNestedLines);
-        return totalSelfLines + totalNestedLines;
+        return Collections.unmodifiableMap(classLineMap);
+    }
+
+    private static int returnTotalClassLines(Map<String, Integer> classLineMap) {
+        final int[] count = {0};
+        classLineMap.forEach((key, value) -> count[0] += value);
+        return count[0];
     }
 
     /**
@@ -146,7 +153,7 @@ public final class ClassStat {
      * @param cpgClass The class being analyzed
      * @return
      */
-    private static Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> groupAttributesByModifiers(CPGClass cpgClass) {
+    private static Map<CPGClass.Modifier, List<CPGClass.Attribute>> groupAttributesByModifiers(CPGClass cpgClass) {
         Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes = new HashMap<>();
         modifierGroupedAttributes.put(CPGClass.Modifier.PUBLIC, new ArrayList<>());
         modifierGroupedAttributes.put(CPGClass.Modifier.PRIVATE, new ArrayList<>());
@@ -169,7 +176,7 @@ public final class ClassStat {
      *
      * @param cpgClass The class being analyzed
      */
-    private static Map<CPGClass.Modifier, ArrayList<CPGClass.Method>> groupMethodsByModifiers(CPGClass cpgClass) {
+    private static Map<CPGClass.Modifier, List<CPGClass.Method>> groupMethodsByModifiers(CPGClass cpgClass) {
         HashMap<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods = new HashMap<>();
         modifierGroupedMethods.put(CPGClass.Modifier.PUBLIC, new ArrayList<>());
         modifierGroupedMethods.put(CPGClass.Modifier.PRIVATE, new ArrayList<>());
@@ -194,7 +201,7 @@ public final class ClassStat {
      * @param attributeStats A list containing all the attribute stats for attributes belonging to this class
      * @return An integer value representing the total number of times the attributes of this class were used
      */
-    private static int returnTotalAttributeCalls(ArrayList<AttributeStat> attributeStats) {
+    private static int returnTotalAttributeCalls(List<AttributeStat> attributeStats) {
         int[] total = {0};
         attributeStats.forEach(attribute -> total[0] += attribute.attributeUsage);
         return total[0];
@@ -207,7 +214,7 @@ public final class ClassStat {
      * @param methodStats A list containing all the method stats for methods belonging to this class
      * @return An integer value representing the total number of times the methods of this class was used
      */
-    private static int returnTotalMethodCalls(ArrayList<MethodStat> methodStats) {
+    private static int returnTotalMethodCalls(List<MethodStat> methodStats) {
         int[] total = {0};
         methodStats.forEach(method -> total[0] += method.methodUsage);
         return total[0];
