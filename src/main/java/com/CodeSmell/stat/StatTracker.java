@@ -45,18 +45,20 @@ public final class StatTracker {
     }
 
     /**
-     * Iterate through the cpg to create stat objects corresponding to elements within the graph.
+     * Iterates through the cpg to determine all the distinct class types that are present such as
+     * abstract class, class, enum, interface.
      *
-     * @param cpg    The CodePropertyGraph containing all existing classes and relations
-     * @param helper The helper consisting of useful collections of elements within cpg
+     * @param cpg The CodePropertyGraph containing all existing classes and relations
      * @return
      */
-    private static Map<CPGClass, ClassStat> createStatObjects(CodePropertyGraph cpg, Helper helper) {
-        Map<CPGClass, ClassStat> classStats = new HashMap<>();
+    private static Map<String, List<CPGClass>> determineDistinctClassTypes(CodePropertyGraph cpg) {
+        Map<String, List<CPGClass>> distinctClassTypes = new TreeMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            classStats.put(cpgClass, new ClassStat(cpgClass, cpg, helper));
+            String classType = cpgClass.classType;
+            distinctClassTypes.putIfAbsent(classType, new ArrayList<>());
+            distinctClassTypes.get(classType).add(cpgClass);
         }
-        return Collections.unmodifiableMap(classStats);
+        return Collections.unmodifiableMap(distinctClassTypes);
     }
 
     /**
@@ -76,22 +78,20 @@ public final class StatTracker {
     }
 
     /**
-     * Iterates through the cpg to determine all the distinct class types that are present such as
-     * abstract class, class, enum, interface.
+     * Iterate through the cpg to create stat objects corresponding to elements within the graph.
      *
-     * @param cpg The CodePropertyGraph containing all existing classes and relations
+     * @param cpg    The CodePropertyGraph containing all existing classes and relations
+     * @param helper The helper consisting of useful collections of elements within cpg
      * @return
      */
-    private static Map<String, List<CPGClass>> determineDistinctClassTypes(CodePropertyGraph cpg) {
-        Map<String, List<CPGClass>> distinctClassTypes = new TreeMap<>();
+    private static Map<CPGClass, ClassStat> createStatObjects(CodePropertyGraph cpg, Helper helper) {
+        Map<CPGClass, ClassStat> classStats = new HashMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            String classType = cpgClass.classType;
-            distinctClassTypes.putIfAbsent(classType, new ArrayList<>());
-            distinctClassTypes.get(classType).add(cpgClass);
+            classStats.put(cpgClass, new ClassStat(cpgClass, cpg, helper));
         }
-        return Collections.unmodifiableMap(distinctClassTypes);
+        return Collections.unmodifiableMap(classStats);
     }
-
+    
     private static Map<String, Integer> determinePackageUsage(Map<CPGClass, ClassStat> classStats) {
         Map<String, Integer> packageUse = new HashMap<>();
         List<ClassStat> classStatVals = new ArrayList<>(classStats.values());
