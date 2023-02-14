@@ -28,7 +28,7 @@ public class CPGClass implements Serializable {
     /**
      * The import statements imported from the file where the class is defined
      */
-    public final List<String> importStatements;
+    public final String[] importStatements;
 
     /**
      * The class declaration (i.e. "public abstract class Smell")
@@ -93,7 +93,7 @@ public class CPGClass implements Serializable {
     public CPGClass(String name,
                     String classFullName,
                     String packageName,
-                    ArrayList<String> importStatements,
+                    String[] importStatements,
                     String code,
                     int lineNumber,
                     ArrayList<Modifier> modifiers,
@@ -107,7 +107,7 @@ public class CPGClass implements Serializable {
         this.name = name;
         this.classFullName = classFullName;
         this.packageName = packageName;
-        this.importStatements = Collections.unmodifiableList(importStatements);
+        this.importStatements = importStatements;
         this.code = code;
         this.lineNumber = lineNumber;
         this.modifiers = Collections.unmodifiableList(modifiers);
