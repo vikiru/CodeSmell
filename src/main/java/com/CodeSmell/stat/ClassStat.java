@@ -101,10 +101,6 @@ public class ClassStat {
      * Determine how many times a given CPGClass was used throughout the cpg as an attribute type,
      * parameter type, the destination of an inheritance or realization relationship, the amount of times
      * its attributes and methods were called.
-     *
-     * <p>
-     * Additionally, maintain a more detailed overview of this via usageMap.
-     * </p>
      */
     private static Map<String, Integer> determineClassUsage(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper,
                                                             List<AttributeStat> attributeStats,
@@ -208,12 +204,15 @@ public class ClassStat {
     private static Map<CPGClass.Modifier, List<CPGClass.Attribute>> groupAttributesByModifiers(CPGClass cpgClass) {
         Map<CPGClass.Modifier, ArrayList<CPGClass.Attribute>> modifierGroupedAttributes = new HashMap<>();
         modifierGroupedAttributes.put(CPGClass.Modifier.PUBLIC, new ArrayList<>());
+        modifierGroupedAttributes.put(CPGClass.Modifier.PROTECTED, new ArrayList<>());
         modifierGroupedAttributes.put(CPGClass.Modifier.PRIVATE, new ArrayList<>());
         modifierGroupedAttributes.put(CPGClass.Modifier.PACKAGE_PRIVATE, new ArrayList<>());
         for (CPGClass.Attribute attribute : cpgClass.getAttributes()) {
             List<CPGClass.Modifier> modList = attribute.modifiers;
             if (modList.contains(CPGClass.Modifier.PUBLIC)) {
                 modifierGroupedAttributes.get(CPGClass.Modifier.PUBLIC).add(attribute);
+            } else if (modList.contains(CPGClass.Modifier.PROTECTED)) {
+                modifierGroupedAttributes.get(CPGClass.Modifier.PROTECTED).add(attribute);
             } else if (modList.contains(CPGClass.Modifier.PRIVATE)) {
                 modifierGroupedAttributes.get(CPGClass.Modifier.PRIVATE).add(attribute);
             } else {
@@ -232,12 +231,15 @@ public class ClassStat {
     private static Map<CPGClass.Modifier, List<CPGClass.Method>> groupMethodsByModifiers(CPGClass cpgClass) {
         HashMap<CPGClass.Modifier, ArrayList<CPGClass.Method>> modifierGroupedMethods = new HashMap<>();
         modifierGroupedMethods.put(CPGClass.Modifier.PUBLIC, new ArrayList<>());
+        modifierGroupedMethods.put(CPGClass.Modifier.PROTECTED, new ArrayList<>());
         modifierGroupedMethods.put(CPGClass.Modifier.PRIVATE, new ArrayList<>());
         modifierGroupedMethods.put(CPGClass.Modifier.PACKAGE_PRIVATE, new ArrayList<>());
         for (CPGClass.Method method : cpgClass.getMethods()) {
             List<CPGClass.Modifier> modList = method.modifiers;
             if (modList.contains(CPGClass.Modifier.PUBLIC)) {
                 modifierGroupedMethods.get(CPGClass.Modifier.PUBLIC).add(method);
+            } else if (modList.contains(CPGClass.Modifier.PROTECTED)) {
+                modifierGroupedMethods.get(CPGClass.Modifier.PROTECTED).add(method);
             } else if (modList.contains(CPGClass.Modifier.PRIVATE)) {
                 modifierGroupedMethods.get(CPGClass.Modifier.PRIVATE).add(method);
             } else {
