@@ -1,6 +1,7 @@
 package com.CodeSmell.stat;
 
 import com.CodeSmell.parser.CPGClass;
+import com.CodeSmell.parser.CodePropertyGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,10 +29,12 @@ public final class MethodStat {
      */
     public final Map<CPGClass, Integer> classesWhichCallMethod = new HashMap<>();
     /**
-     *
+     * A map containing a count of how many times the methods of another class were used within this method
      */
-
     public final Map<CPGClass, ArrayList<CPGClass.Method>> totalClassMethodCalls;
+    /**
+     * A map containing a count of how many times the attributes of another class were used within this method
+     */
     public final Map<CPGClass, ArrayList<CPGClass.Attribute>> totalClassAttributeCalls;
 
     /**
@@ -43,11 +46,11 @@ public final class MethodStat {
      */
     public final List<CPGClass.Method.Instruction> uniqueInstructions;
 
-    public MethodStat(CPGClass.Method method, Helper helper) {
+    public MethodStat(CPGClass.Method method, CodePropertyGraph cpg, Helper helper) {
         this.method = method;
         this.methodsWhichCallMethod = Collections.unmodifiableMap(determineMethodUsage(method, helper, classesWhichCallMethod));
-        this.totalClassAttributeCalls = Collections.unmodifiableMap(determineTotalAttributeCalls(method));
-        this.totalClassMethodCalls = Collections.unmodifiableMap(determineTotalMethodCalls(method));
+        this.totalClassAttributeCalls = Collections.unmodifiableMap(determineTotalAttributeCalls(method, cpg));
+        this.totalClassMethodCalls = Collections.unmodifiableMap(determineTotalMethodCalls(method, cpg));
         this.methodUsage = returnTotalUsage(methodsWhichCallMethod);
         this.parameterUsage = Collections.unmodifiableMap(determineParameterUsage(method));
         this.uniqueInstructions = Collections.unmodifiableList(obtainUniqueInstructions(method, helper));
@@ -61,8 +64,7 @@ public final class MethodStat {
      * @param helper                 The helper consisting of useful collections of elements within cpg
      * @param classesWhichCallMethod The map indicating how many times each class has called this method
      */
-    private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method,
-                                                                      Helper helper,
+    private static Map<CPGClass.Method, Integer> determineMethodUsage(CPGClass.Method method, Helper helper,
                                                                       Map<CPGClass, Integer> classesWhichCallMethod) {
         Map<CPGClass.Method, Integer> methodsWhichCallMethod = new HashMap<>();
         ArrayList<CPGClass.Method> allMethods = helper.allMethods;
@@ -93,21 +95,23 @@ public final class MethodStat {
         return count[0];
     }
 
-    private static HashMap<CPGClass, ArrayList<CPGClass.Method>> determineTotalMethodCalls(CPGClass.Method method) {
+    private static HashMap<CPGClass, ArrayList<CPGClass.Method>> determineTotalMethodCalls(CPGClass.Method method, CodePropertyGraph cpg) {
         HashMap<CPGClass, ArrayList<CPGClass.Method>> totalMethodClassCalls = new HashMap<>();
         for (CPGClass.Method methodCall : method.getMethodCalls()) {
             totalMethodClassCalls.putIfAbsent(methodCall.getParent(), new ArrayList<>());
             totalMethodClassCalls.get(methodCall.getParent()).add(methodCall);
         }
+        cpg.getClasses().forEach(cpgClass -> totalMethodClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
         return totalMethodClassCalls;
     }
 
-    private static HashMap<CPGClass, ArrayList<CPGClass.Attribute>> determineTotalAttributeCalls(CPGClass.Method method) {
+    private static HashMap<CPGClass, ArrayList<CPGClass.Attribute>> determineTotalAttributeCalls(CPGClass.Method method, CodePropertyGraph cpg) {
         HashMap<CPGClass, ArrayList<CPGClass.Attribute>> totalAttributeClassCalls = new HashMap<>();
         for (CPGClass.Attribute attributeCall : method.getAttributeCalls()) {
             totalAttributeClassCalls.putIfAbsent(attributeCall.getParent(), new ArrayList<>());
             totalAttributeClassCalls.get(attributeCall.getParent()).add(attributeCall);
         }
+        cpg.getClasses().forEach(cpgClass -> totalAttributeClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
         return totalAttributeClassCalls;
     }
 
