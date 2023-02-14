@@ -1,8 +1,9 @@
 package com.CodeSmell.parser;
 
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * A class within the {@link CodePropertyGraph}.
@@ -27,7 +28,7 @@ public class CPGClass implements Serializable {
     /**
      * The import statements imported from the file where the class is defined
      */
-    public final String[] importStatements;
+    public final List<String> importStatements;
 
     /**
      * The class declaration (i.e. "public abstract class Smell")
@@ -42,7 +43,7 @@ public class CPGClass implements Serializable {
     /**
      * The list containing all the {@link Modifier} of the class
      */
-    public final ArrayList<Modifier> modifiers;
+    public final List<Modifier> modifiers;
 
     /**
      * The type of the class ("abstract class", "class", "enum", "interface")
@@ -72,27 +73,27 @@ public class CPGClass implements Serializable {
     /**
      * The list of classes that the class inherits from in some way (can include interfaces as well)
      */
-    private ArrayList<CPGClass> inheritsFrom;
+    private List<CPGClass> inheritsFrom;
 
     /**
      * An array of all of the {@link Attribute} that a class has
      */
-    private ArrayList<Attribute> attributes;
+    private List<Attribute> attributes;
 
     /**
      * All the {@link Method} that a class has
      */
-    private ArrayList<Method> methods;
+    private List<Method> methods;
 
     /**
      * All the outward {@link CodePropertyGraph.Relation} that a class has.
      */
-    private ArrayList<CodePropertyGraph.Relation> outwardRelations;
+    private List<CodePropertyGraph.Relation> outwardRelations;
 
     public CPGClass(String name,
                     String classFullName,
                     String packageName,
-                    String[] importStatements,
+                    ArrayList<String> importStatements,
                     String code,
                     int lineNumber,
                     ArrayList<Modifier> modifiers,
@@ -106,10 +107,10 @@ public class CPGClass implements Serializable {
         this.name = name;
         this.classFullName = classFullName;
         this.packageName = packageName;
-        this.importStatements = importStatements;
+        this.importStatements = Collections.unmodifiableList(importStatements);
         this.code = code;
         this.lineNumber = lineNumber;
-        this.modifiers = new ArrayList<>(Collections.unmodifiableList(modifiers));
+        this.modifiers = Collections.unmodifiableList(modifiers);
         this.classType = classType;
         this.filePath = filePath;
         this.fileLength = fileLength;
@@ -121,28 +122,28 @@ public class CPGClass implements Serializable {
         this.outwardRelations = new ArrayList<>();
     }
 
-    public ArrayList<Attribute> getAttributes() {
+    public List<Attribute> getAttributes() {
         return new ArrayList<>(attributes);
     }
 
-    protected void setAttributes(ArrayList<Attribute> attributes) {
-        this.attributes = new ArrayList<>(Collections.unmodifiableList(attributes));
+    protected void setAttributes(List<Attribute> attributes) {
+        this.attributes = Collections.unmodifiableList(attributes);
     }
 
-    public ArrayList<Method> getMethods() {
+    public List<Method> getMethods() {
         return new ArrayList<>(methods);
     }
 
-    protected void setMethods(ArrayList<Method> methods) {
-        this.methods = new ArrayList<>(Collections.unmodifiableList(methods));
+    protected void setMethods(List<Method> methods) {
+        this.methods = Collections.unmodifiableList(methods);
     }
 
-    public ArrayList<CPGClass> getInheritsFrom() {
+    public List<CPGClass> getInheritsFrom() {
         return new ArrayList<>(inheritsFrom);
     }
 
-    protected void setInheritsFrom(ArrayList<CPGClass> inheritsFrom) {
-        this.inheritsFrom = new ArrayList<>(Collections.unmodifiableList(inheritsFrom));
+    protected void setInheritsFrom(List<CPGClass> inheritsFrom) {
+        this.inheritsFrom = Collections.unmodifiableList(inheritsFrom);
     }
 
     /**
@@ -159,7 +160,7 @@ public class CPGClass implements Serializable {
      *
      * @return - The outward relations of a given class
      */
-    public ArrayList<CodePropertyGraph.Relation> getOutwardRelations() {
+    public List<CodePropertyGraph.Relation> getOutwardRelations() {
         return new ArrayList<>(this.outwardRelations);
     }
 
@@ -210,7 +211,7 @@ public class CPGClass implements Serializable {
 
         /**
          * The name of the package in which the type of the Attribute originates from
-         * (i.e. "java.util.ArrayList")
+         * (i.e. "java.util.List")
          */
         public final String packageName;
 
@@ -233,7 +234,7 @@ public class CPGClass implements Serializable {
          * All the modifiers that the attribute has
          * {@link Modifier}
          */
-        public final Modifier[] modifiers;
+        public final List<Modifier> modifiers;
 
         /**
          * The full type of the attribute
@@ -242,22 +243,22 @@ public class CPGClass implements Serializable {
 
         /**
          * All the types that can be extracted from the attributeType
-         * (i.e. "HashMap < CPGClass, ArrayList< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
+         * (i.e. "HashMap < CPGClass, List< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
          */
-        private ArrayList<CPGClass> typeList;
+        private List<CPGClass> typeList;
 
         public Attribute(String name,
                          String packageName,
                          String code,
                          int lineNumber,
-                         Modifier[] modifiers,
+                         ArrayList<Modifier> modifiers,
                          String attributeType) {
             this.name = name;
             this.parentClass = new CPGClass[1];
             this.packageName = packageName;
             this.code = code;
             this.lineNumber = lineNumber;
-            this.modifiers = modifiers;
+            this.modifiers = Collections.unmodifiableList(modifiers);
             this.attributeType = attributeType;
             this.typeList = new ArrayList<>();
         }
@@ -270,12 +271,12 @@ public class CPGClass implements Serializable {
             parentClass[0] = parent;
         }
 
-        public ArrayList<CPGClass> getTypeList() {
+        public List<CPGClass> getTypeList() {
             return new ArrayList<>(typeList);
         }
 
-        protected void setTypeList(ArrayList<CPGClass> typeList) {
-            this.typeList = new ArrayList<>(Collections.unmodifiableList(typeList));
+        protected void setTypeList(List<CPGClass> typeList) {
+            this.typeList = Collections.unmodifiableList(typeList);
         }
 
         @Override
@@ -308,12 +309,12 @@ public class CPGClass implements Serializable {
         /**
          * All the {@link Modifier} that a method has
          */
-        public final ArrayList<Modifier> modifiers;
+        public final List<Modifier> modifiers;
 
         /**
          * All the method {@link Parameter} belonging to a method
          */
-        public final ArrayList<Parameter> parameters;
+        public final List<Parameter> parameters;
 
         /**
          * The return type of the method, if any
@@ -339,17 +340,17 @@ public class CPGClass implements Serializable {
         /**
          * All the method {@link Instruction} belonging to a method
          */
-        public final ArrayList<Instruction> instructions;
+        public final List<Instruction> instructions;
 
         /**
          * All the methods that this method calls, if any
          */
-        private ArrayList<Method> methodCalls;
+        private List<Method> methodCalls;
 
         /**
          * All the attributes that this method uses, if any
          */
-        private ArrayList<Attribute> attributeCalls;
+        private List<Attribute> attributeCalls;
 
         public Method(String name,
                       String methodBody,
@@ -363,13 +364,13 @@ public class CPGClass implements Serializable {
             this.name = name;
             this.parentClass = new CPGClass[1];
             this.methodBody = methodBody;
-            this.modifiers = new ArrayList<>(Collections.unmodifiableList(modifiers));
-            this.parameters = new ArrayList<>(Collections.unmodifiableList(parameters));
+            this.modifiers = Collections.unmodifiableList(modifiers);
+            this.parameters = Collections.unmodifiableList(parameters);
             this.returnType = returnType;
             this.lineNumberStart = lineNumberStart;
             this.lineNumberEnd = lineNumberEnd;
             this.totalMethodLength = totalMethodLength;
-            this.instructions = new ArrayList<>(Collections.unmodifiableList(instructions));
+            this.instructions = Collections.unmodifiableList(instructions);
             this.attributeCalls = new ArrayList<>();
             this.methodCalls = new ArrayList<>();
         }
@@ -380,7 +381,7 @@ public class CPGClass implements Serializable {
          *
          * @return - All the method calls of the method
          */
-        public ArrayList<Method> getMethodCalls() {
+        public List<Method> getMethodCalls() {
             return new ArrayList<>(methodCalls);
         }
 
@@ -389,8 +390,8 @@ public class CPGClass implements Serializable {
          *
          * @param methodCalls - The methodCalls belonging to the method
          */
-        protected void setMethodCalls(ArrayList<Method> methodCalls) {
-            this.methodCalls = new ArrayList<>(Collections.unmodifiableList(methodCalls));
+        protected void setMethodCalls(List<Method> methodCalls) {
+            this.methodCalls = Collections.unmodifiableList(methodCalls);
         }
 
         /**
@@ -398,7 +399,7 @@ public class CPGClass implements Serializable {
          *
          * @return - All the attribute calls of the method
          */
-        public ArrayList<Attribute> getAttributeCalls() {
+        public List<Attribute> getAttributeCalls() {
             return new ArrayList<>(attributeCalls);
         }
 
@@ -407,8 +408,8 @@ public class CPGClass implements Serializable {
          *
          * @param attributeCalls - The attributeCalls belonging to the method
          */
-        protected void setAttributeCalls(ArrayList<Attribute> attributeCalls) {
-            this.attributeCalls = new ArrayList<>(Collections.unmodifiableList(attributeCalls));
+        protected void setAttributeCalls(List<Attribute> attributeCalls) {
+            this.attributeCalls = Collections.unmodifiableList(attributeCalls);
         }
 
         public CPGClass getParent() {
@@ -447,9 +448,9 @@ public class CPGClass implements Serializable {
 
             /**
              * All the types that can be extracted from the parameter type
-             * (i.e. "HashMap < CPGClass, ArrayList< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
+             * (i.e. "HashMap < CPGClass, List< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
              */
-            private ArrayList<CPGClass> typeList;
+            private List<CPGClass> typeList;
 
             public Parameter(String code, String name, String type) {
                 this.code = code;
@@ -458,12 +459,12 @@ public class CPGClass implements Serializable {
                 this.typeList = new ArrayList<>();
             }
 
-            public ArrayList<CPGClass> getTypeList() {
+            public List<CPGClass> getTypeList() {
                 return new ArrayList<>(typeList);
             }
 
-            protected void setTypeList(ArrayList<CPGClass> typeList) {
-                this.typeList = new ArrayList<>(Collections.unmodifiableList(typeList));
+            protected void setTypeList(List<CPGClass> typeList) {
+                this.typeList = Collections.unmodifiableList(typeList);
             }
 
             @Override
