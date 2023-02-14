@@ -51,6 +51,12 @@ public class AttributeStat {
         return Collections.unmodifiableMap(methodsWhichCallAttr);
     }
 
+    /**
+     * Determine the total number of times another class has accessed this attribute via all of its methods combined.
+     *
+     * @param methodsWhichCallAttr A map representing how many times each method within cpg has called this attribute
+     * @return A map representing how many times each class has called this attribute
+     */
     private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<CPGClass.Method, Integer> methodsWhichCallAttr) {
         Map<CPGClass, Integer> classWhichCallAttr = new HashMap<>();
         methodsWhichCallAttr.forEach((key, value) -> classWhichCallAttr.
