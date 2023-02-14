@@ -12,26 +12,37 @@ import java.util.stream.Collectors;
  * for general use case purposes including determining potential bugs within the CodeSmell tool itself.
  */
 public class StatTracker {
+    /**
+     * A helper object consisting of potentially useful collections of elements withing cpg such as
+     * all attributes, all methods, method parameters, method calls, attribute calls, and names of classes,
+     * attributes and methods within cpg.
+     */
     public final Helper helper;
-
     /**
      * Group all {@link CPGClass} by their classType.
      */
     public final Map<String, List<CPGClass>> distinctClassTypes;
-
     /**
      * Group all the relations present within cpg by their {@link com.CodeSmell.model.ClassRelation.RelationshipType}
      */
     public final Map<ClassRelation.RelationshipType, List<CodePropertyGraph.Relation>> distinctRelations;
-
     /**
      * Group all the {@link CPGClass} with a {@link ClassStat} containing statistics about that class and its
      * attributes and methods via {@link AttributeStat} and {@link MethodStat} respectively
      */
     public final Map<CPGClass, ClassStat> classStats;
-
+    /**
+     * Group all classes to their respective packages and maintain a sum of the usage of each class within that package
+     * as the total package usage for that package
+     */
     public final Map<String, Integer> packageUse;
+    /**
+     * Group all methods with a parameter length being greater than a provided limit, as of this moment - 4 parameters.
+     */
     public final List<CPGClass.Method> longParameterMethod;
+    /**
+     * Group all methods with a total method length being greater than a provided limit, as of this moment - 30 lines.
+     */
     public final List<CPGClass.Method> longMethods;
 
     public StatTracker(CodePropertyGraph cpg) {
@@ -49,7 +60,7 @@ public class StatTracker {
      * abstract class, class, enum, interface.
      *
      * @param cpg The CodePropertyGraph containing all existing classes and relations
-     * @return
+     * @return A map containing all the distinct class types within cpg
      */
     private static Map<String, List<CPGClass>> determineDistinctClassTypes(CodePropertyGraph cpg) {
         Map<String, List<CPGClass>> distinctClassTypes = new TreeMap<>();
@@ -65,7 +76,7 @@ public class StatTracker {
      * Iterates through the cpg and groups all relations by RelationshipType.
      *
      * @param cpg The CodePropertyGraph containing all existing classes and relations
-     * @return
+     * @return A map containing all the distinct relations within cpg
      */
     private static Map<ClassRelation.RelationshipType, List<CodePropertyGraph.Relation>> determineDistinctRelations(CodePropertyGraph cpg) {
         Map<ClassRelation.RelationshipType, List<CodePropertyGraph.Relation>> distinctRelations = new HashMap<>();
@@ -82,7 +93,7 @@ public class StatTracker {
      *
      * @param cpg    The CodePropertyGraph containing all existing classes and relations
      * @param helper The helper consisting of useful collections of elements within cpg
-     * @return
+     * @return A map containing a stat object for every class
      */
     private static Map<CPGClass, ClassStat> createStatObjects(CodePropertyGraph cpg, Helper helper) {
         Map<CPGClass, ClassStat> classStats = new HashMap<>();
@@ -92,6 +103,12 @@ public class StatTracker {
         return Collections.unmodifiableMap(classStats);
     }
 
+    /**
+     * Determine the usage of each package by summing the class usage of every class within that package.
+     *
+     * @param classStats A map containing a class stat for every class
+     * @return A map indicating how many times each package was used
+     */
     private static Map<String, Integer> determinePackageUsage(Map<CPGClass, ClassStat> classStats) {
         Map<String, Integer> packageUse = new HashMap<>();
         List<ClassStat> classStatVals = new ArrayList<>(classStats.values());
@@ -101,11 +118,25 @@ public class StatTracker {
         return Collections.unmodifiableMap(packageUse);
     }
 
+    /**
+     * Group all methods with a total number of parameters greater than or equal to a specified limit value into a single list.
+     *
+     * @param helper The helper consisting of useful collections of elements within cpg
+     * @param limit  The minimum number of parameters a method should have to be considered a long parameter method
+     * @return A list of all methods within cpg that satisfy this criteria
+     */
     private static List<CPGClass.Method> findLongParameterMethods(Helper helper, int limit) {
         return helper.allMethods.stream().
                 filter(method -> method.parameters.size() >= limit).distinct().collect(Collectors.toUnmodifiableList());
     }
 
+    /**
+     * Group all methods with a total method length greater than or equal to a specified limit value into a single list.
+     *
+     * @param helper The helper consisting of useful collections of elements within cpg
+     * @param limit  The minimum length that a method should be to be considered a long method
+     * @return A list of methods within cpg that satisfy this criteria
+     */
     private static List<CPGClass.Method> findLongMethods(Helper helper, int limit) {
         return helper.allMethods.stream().
                 filter(method -> method.totalMethodLength >= limit).distinct().collect(Collectors.toUnmodifiableList());
