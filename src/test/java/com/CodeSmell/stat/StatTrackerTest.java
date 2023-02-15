@@ -6,13 +6,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
 public class StatTrackerTest {
     private static CodePropertyGraph cpg;
     private static StatTracker statTracker;
-    private static ArrayList<ClassStat> classStats;
+    private static List<ClassStat> classStats;
 
     @BeforeClass
     public static void before() {
