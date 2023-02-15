@@ -43,6 +43,14 @@ public final class Package implements Serializable {
         classes.add(fileToAdd);
     }
 
+    @Override
+    public String toString() {
+        return "Package{" +
+                "packageName='" + packageName + '\'' +
+                ", files=" + files +
+                ", subPackages=" + subPackages +
+                '}';
+    }
 
     /**
      * A file that exists within a package, can contain 1 or more classes
@@ -76,5 +84,15 @@ public final class Package implements Serializable {
         public static void addClass(ArrayList<CPGClass> classes, CPGClass cpgClassToAdd) {
             classes.add(cpgClassToAdd);
         }
+
+        @Override
+        public String toString() {
+            return "File{" +
+                    "fileName='" + fileName + '\'' +
+                    ", filePath='" + filePath + '\'' +
+                    ", classes=" + classes +
+                    '}';
+        }
     }
+
 }

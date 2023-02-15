@@ -2,7 +2,7 @@ package com.CodeSmell.parser;
 
 import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
-import com.CodeSmell.smell.StatTracker;
+import com.CodeSmell.stat.Helper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
@@ -178,7 +178,6 @@ public class Parser {
      * and finally, updating the attribute and method calls of each method.
      *
      * @param cpg - The CodePropertyGraph containing the source code information
-     * @return The updated method with its methodCalls
      */
     protected static void updateCPGClassProperties(CodePropertyGraph cpg) {
         LinkedHashMap<Method, ArrayList<Method>> methodCallMap = new LinkedHashMap<>();
@@ -199,11 +198,11 @@ public class Parser {
         for (CPGClass cpgClass : cpg.getClasses()) {
             for (CPGClass.Method method : cpgClass.getMethods()) {
                 // Set typeLists for all parameters of the method
-                Arrays.stream(method.parameters).
+                method.parameters.
                         forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
                 // Get the attribute and method calls of each method
                 methodCallMap.put(method, returnMethodCalls(cpg, method));
-                attributeCallMap.put(method, returnAttributeCalls(cpg, method));
+                attributeCallMap.put(method, returnAttributeCalls(method));
             }
         }
         // Finally, set attribute calls and method calls of all methods.
@@ -221,12 +220,11 @@ public class Parser {
      */
     protected static ArrayList<Method> returnMethodCalls(CodePropertyGraph cpg, Method methodToUpdate) {
         // Helper variables
-        StatTracker.Helper helper = new StatTracker.Helper(cpg);
-        ArrayList<Method> allMethodsInCPG = helper.allMethods;
+        Helper helper = new Helper(cpg);
         ArrayList<Method> methodCalls = new ArrayList<>();
         // Get all possible calls where the instruction's methodCall is not empty
         Set<String> allDistinctCalls = new HashSet<>();
-        Arrays.stream(methodToUpdate.instructions).
+        methodToUpdate.instructions.stream().
                 filter(instruction -> instruction.label.equals("CALL")
                         && (!instruction.methodCall.equals(""))).
                 forEach(ins -> allDistinctCalls.add(ins.methodCall));
@@ -236,11 +234,17 @@ public class Parser {
             if (splitted.length == 2) {
                 String className = splitted[0].trim();
                 String methodName = splitted[1].trim();
-                var methodToAdd = allMethodsInCPG.stream().
-                        filter(method -> (method.getParent().name.equals(className) && method.name.equals(methodName))).
+                CPGClass cpgClass;
+                var classResult = cpg.getClasses().stream().
+                        filter(cpgToFind -> cpgToFind.name.equals(className)).limit(2).
                         collect(Collectors.toList());
-                if (!methodToAdd.isEmpty()) {
-                    methodCalls.add(methodToAdd.get(0));
+                if (!classResult.isEmpty()) {
+                    cpgClass = classResult.get(0);
+                    var methodCheck = cpgClass.getMethods().stream().
+                            filter(method -> method.name.equals(methodName)).limit(2).collect(Collectors.toList());
+                    if (!methodCheck.isEmpty()) {
+                        methodCalls.add(methodCheck.get(0));
+                    }
                 }
             }
         }
@@ -250,11 +254,10 @@ public class Parser {
     /**
      * Return all the attributes that a method calls
      *
-     * @param cpg
      * @param methodToUpdate
      * @return
      */
-    protected static ArrayList<Attribute> returnAttributeCalls(CodePropertyGraph cpg, Method methodToUpdate) {
+    protected static ArrayList<Attribute> returnAttributeCalls(Method methodToUpdate) {
         Set<CPGClass> allPossibleClasses = new HashSet<>();
         // Get all local classes created
         Set<CPGClass> allLocalTypes = new HashSet<>();
@@ -263,7 +266,7 @@ public class Parser {
         Set<Attribute> possibleAttributes = new HashSet<>();
         HashMap<String, Attribute> attributes = new HashMap<>();
         HashMap<String, Integer> fieldLine = new HashMap<>();
-        Arrays.stream(methodToUpdate.instructions).filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
+        methodToUpdate.instructions.stream().filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
                 forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
         CPGClass methodParent = methodToUpdate.getParent();
         allPossibleClasses.add(methodParent);
@@ -280,7 +283,7 @@ public class Parser {
         attributes.keySet().forEach(fieldLine::remove);
         methodParent.getAttributes().stream().filter(attr -> attr.getTypeList().size() == 1).
                 forEach(attr -> allPossibleClasses.addAll(attr.getTypeList()));
-        Arrays.stream(methodToUpdate.parameters).filter(parameter -> parameter.getTypeList().size() == 1).
+        methodToUpdate.parameters.stream().filter(parameter -> parameter.getTypeList().size() == 1).
                 forEach(parameter -> allPossibleClasses.addAll(parameter.getTypeList()));
         allPossibleClasses.addAll(allLocalTypes);
         for (CPGClass cpgClass : allPossibleClasses) {
