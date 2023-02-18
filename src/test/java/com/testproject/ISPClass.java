@@ -32,7 +32,7 @@ import java.lang.Math;
  * 		ISPClassTwo, ISPClassThree
  * methods
  *	    methodWithError()
- * 
+ * 	
  */
 
 public class ISPClass implements ISPViolationTestInterface {
