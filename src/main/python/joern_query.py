@@ -200,6 +200,8 @@ def create_method_dict(curr_method):
         return parameters_list
 
     def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
+        regex_pattern_modifiers = [mod.strip() for mod in regex_pattern_modifiers]
+        joern_modifiers = [mod.strip() for mod in joern_modifiers]
         final_set = set(regex_pattern_modifiers).union(set(joern_modifiers))
         final_list = list(final_set)
         return final_list

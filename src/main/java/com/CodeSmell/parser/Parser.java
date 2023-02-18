@@ -44,7 +44,8 @@ public class Parser {
         }
 
         public boolean shouldSkipField(FieldAttributes f) {
-            return listParameterizedType.equals(f.getDeclaredType());
+            return false;
+            //return listParameterizedType.equals(f.getDeclaredType());
         }
     }
 
