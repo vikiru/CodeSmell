@@ -203,7 +203,7 @@ public class Parser {
                         forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
                 // Get the attribute and method calls of each method
                 methodCallMap.put(method, returnMethodCalls(cpg, method));
-                attributeCallMap.put(method, returnAttributeCalls(method));
+                attributeCallMap.put(method, returnAttributeCalls(cpg, method));
             }
         }
         // Finally, set attribute calls and method calls of all methods.
@@ -258,7 +258,8 @@ public class Parser {
      * @param methodToUpdate
      * @return
      */
-    protected static ArrayList<Attribute> returnAttributeCalls(Method methodToUpdate) {
+    protected static ArrayList<Attribute> returnAttributeCalls(CodePropertyGraph cpg, Method methodToUpdate) {
+        Helper helper = new Helper(cpg);
         Set<CPGClass> allPossibleClasses = new HashSet<>();
         // Get all local classes created
         Set<CPGClass> allLocalTypes = new HashSet<>();
@@ -286,6 +287,16 @@ public class Parser {
                 forEach(attr -> allPossibleClasses.addAll(attr.getTypeList()));
         methodToUpdate.parameters.stream().filter(parameter -> parameter.getTypeList().size() == 1).
                 forEach(parameter -> allPossibleClasses.addAll(parameter.getTypeList()));
+        Set<String> staticClasses = new HashSet<String>();
+        methodToUpdate.instructions.stream().
+                filter(instruction -> instruction.label.equals("IDENTIFIER") && helper.allClassNames.contains(instruction.code)).
+                forEach(instruction -> staticClasses.add(instruction.code));
+        for (String className : staticClasses) {
+            var classSearch = cpg.getClasses().stream().filter(cpgClass -> cpgClass.name.equals(className)).limit(2).collect(Collectors.toList());
+            if (!classSearch.isEmpty()) {
+                allPossibleClasses.add(classSearch.get(0));
+            }
+        }
         allPossibleClasses.addAll(allLocalTypes);
         for (CPGClass cpgClass : allPossibleClasses) {
             cpgClass.getAttributes().stream().filter(attr -> fieldLine.containsKey(attr.name) && attr.code.contains("public")).
