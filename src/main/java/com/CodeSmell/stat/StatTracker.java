@@ -171,7 +171,7 @@ public class StatTracker {
     }
 
     /**
-     * Group all methods with a total number of parameters greater than or equal to a
+     * Group all methods with a total number of parameters greater than a
      * specified limit value into a single list.
      *
      * @param helper The helper consisting of useful collections of elements within cpg
@@ -180,13 +180,13 @@ public class StatTracker {
      */
     private static List<CPGClass.Method> findLongParameterMethods(Helper helper, int limit) {
         return helper.allMethods.stream()
-                .filter(method -> method.parameters.size() >= limit)
+                .filter(method -> method.parameters.size() > limit)
                 .distinct()
                 .collect(Collectors.toUnmodifiableList());
     }
 
     /**
-     * Group all methods with a total method length greater than or equal to a specified limit
+     * Group all methods with a total method length greater than a specified limit
      * value into a single list.
      *
      * @param helper The helper consisting of useful collections of elements within cpg
@@ -195,7 +195,7 @@ public class StatTracker {
      */
     private static List<Method> findLongMethods(Helper helper, int limit) {
         return helper.allMethods.stream()
-                .filter(method -> method.totalMethodLength >= limit)
+                .filter(method -> method.totalMethodLength > limit)
                 .distinct()
                 .collect(Collectors.toUnmodifiableList());
     }
