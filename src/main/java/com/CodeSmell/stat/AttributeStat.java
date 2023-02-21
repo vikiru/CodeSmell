@@ -2,6 +2,7 @@ package com.CodeSmell.stat;
 
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class AttributeStat {
     /**
      * A total count of how many times each method within cpg calls this attribute within their method's instructions
      */
-    public final Map<CPGClass.Method, Integer> methodsWhichCallAttr;
+    public final Map<Method, Integer> methodsWhichCallAttr;
     /**
      * A total count of how many times each class within cpg calls this attribute through all of their methods.
      */
@@ -37,10 +38,10 @@ public class AttributeStat {
      * @param attribute The attribute being analyzed
      * @param helper    The helper consisting of useful collections of elements within cpg
      */
-    private static Map<CPGClass.Method, Integer> determineAttributeUsage(Attribute attribute, Helper helper) {
-        List<CPGClass.Method> allMethods = helper.allMethods;
-        Map<CPGClass.Method, Integer> methodsWhichCallAttr = new HashMap<>();
-        for (CPGClass.Method method : allMethods) {
+    protected static Map<Method, Integer> determineAttributeUsage(Attribute attribute, Helper helper) {
+        List<Method> allMethods = helper.allMethods;
+        Map<Method, Integer> methodsWhichCallAttr = new HashMap<>();
+        for (Method method : allMethods) {
             int count = 0;
             if (method.getAttributeCalls().contains(attribute)) {
                 count = Math.toIntExact(method.instructions
@@ -60,7 +61,7 @@ public class AttributeStat {
      * @param methodsWhichCallAttr A map representing how many times each method within cpg has called this attribute
      * @return A map representing how many times each class has called this attribute
      */
-    private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<CPGClass.Method, Integer> methodsWhichCallAttr) {
+    private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<Method, Integer> methodsWhichCallAttr) {
         Map<CPGClass, Integer> classWhichCallAttr = new HashMap<>();
         methodsWhichCallAttr
                 .forEach((key, value) -> classWhichCallAttr.put(key.getParent(),
@@ -74,7 +75,7 @@ public class AttributeStat {
      * @param methodsWhichCallAttr The map indicating how many times each method has called this attribute
      * @return An integer representing the total number of times this attribute was used within cpg
      */
-    private static int returnTotalUsage(Map<CPGClass.Method, Integer> methodsWhichCallAttr) {
+    private static int returnTotalUsage(Map<Method, Integer> methodsWhichCallAttr) {
         final int[] count = {0};
         methodsWhichCallAttr.forEach((key, value) -> count[0] += value);
         return count[0];
