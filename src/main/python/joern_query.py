@@ -426,7 +426,7 @@ if __name__ == "__main__":
     )
     total_time = 0
 
-    server_endpoint = "localhost:" + sys.argv[-1]
+    server_endpoint = "127.0.0.1:" + sys.argv[-1]
     project_dir = sys.argv[-2]
     project_name = "analyzedProject"
 
