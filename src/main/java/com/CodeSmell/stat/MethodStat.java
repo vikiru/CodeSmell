@@ -5,7 +5,6 @@ import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
 import com.CodeSmell.parser.CPGClass.Method.Instruction;
 import com.CodeSmell.parser.CPGClass.Method.Parameter;
-import com.CodeSmell.parser.CodePropertyGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +71,6 @@ public class MethodStat {
         List<Method> allMethods = helper.allMethods;
         String toFind = method.getParent().name + "." + method.name;
         for (Method methodInCPG : allMethods) {
-            int count = 0;
             Map<String, Set<Integer>> lineCallMap = new HashMap<>();
             lineCallMap.put(toFind, new HashSet<>());
             if (methodInCPG.getMethodCalls().contains(method)) {
@@ -83,7 +81,7 @@ public class MethodStat {
                 matchingInstructions
                         .forEach(ins -> lineCallMap.get(toFind).add(ins.lineNumber));
             }
-            count = lineCallMap.get(toFind).size();
+            int count = lineCallMap.get(toFind).size();
             methodsWhichCallMethod.put(methodInCPG, count);
         }
         return Collections.unmodifiableMap(methodsWhichCallMethod);
