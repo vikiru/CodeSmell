@@ -70,7 +70,7 @@ public class ISPClass implements ISPViolationTestInterface {
 	// all methods in the same way ISPClass 
 	// does.
 
-	public static class ISPClassTwo {
+	public static class ISPClassTwo implements ISPViolationTestInterface {
 
 		private double f;
 
@@ -89,13 +89,19 @@ public class ISPClass implements ISPViolationTestInterface {
 		public static boolean blackBox() {
 			return ISPClass.blackBox();
 		}
+
+		public void conditionalError() {
+			// this is a conditional error
+			// it counts as implementing the method  
+			if (blackBox()) { throw new RuntimeException("Test"); };
+		}
 	}
 
 	// a class that should be grouped
 	// along with ISPClassTwo 
 	// in terms of suggested segregations
 
-	public static class ISPClassThree {
+	public static class ISPClassThree implements ISPViolationTestInterface {
 
 		private double f;
 
@@ -113,13 +119,19 @@ public class ISPClass implements ISPViolationTestInterface {
 		public static boolean blackBox() {
 			return !ISPClass.blackBox();
 		}
+
+		public void conditionalError() {
+			// this is a conditional error
+			// it counts as implementing the method  
+			if (blackBox()) { throw new RuntimeException("Test"); };
+		}
 	}
 
 	// finally, there is one more class
 	// for which ALL methods are properly
 	// implemented
 
-	public static class NoneISPClass {
+	public static class NoneISPClass implements ISPViolationTestInterface {
 
 		private static double f;
 
@@ -136,6 +148,13 @@ public class ISPClass implements ISPViolationTestInterface {
 
 		public static boolean blackBox() {
 			return NoneISPClass.f < 0.25 && !ISPClass.blackBox();
+		}
+
+		public void conditionalError() {
+			// this is a conditional error
+			// it counts as implementing the method  
+			String tryToThrowDetectionOff = "throw";
+			if (blackBox()) { throw new RuntimeException("Test"); };
 		}
 	}
 }

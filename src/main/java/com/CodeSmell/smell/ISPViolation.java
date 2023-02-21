@@ -75,16 +75,24 @@ public class ISPViolation extends Smell {
         //   2.) The method throws an error
         //   declaration unconditionally
 
-        System.out.println(m.name + " ==========");
-        if (m.instructions.size() == 0) {
+        if (getMethodStats(m).uniqueInstructions.size() == 0) {
             return true;
         }
+        boolean foundControlStructure = false;
         for (Instruction i : m.instructions) {
-            if (i.label.equals("CONTROL_STRUCTURE")) {
-                System.out.println(i);
+            if (!foundControlStructure && 
+                    i.label.equals("CONTROL_STRUCTURE")) {
+                return false;
+            } 
+
+            if (!foundControlStructure) {
+                if (i.label.equals("CALL") && 
+                        i.code.startsWith("throw")) {
+                    return true;
+                }
             }
         }
-        return true;
+        return false;
     }
 
     private boolean containsViolation(
@@ -95,14 +103,17 @@ public class ISPViolation extends Smell {
             Method[] ifaceMethods = Common.interfaceMethods(c);
             for (Method m : ifaceMethods) {
                 if (isNotImplemented(m)) {
+                    System.out.println(m + " is not implemented");
                     Method m2 = iface.getMethods()
                             .stream()
                             .filter(m3 -> m3.name.equals(m.name))
                             .findFirst()
                             .orElseThrow(RuntimeException::new);
                     ArrayList<CPGClass> arr = this.segregations
-                            .getOrDefault(m2, new ArrayList<>());
+                            .getOrDefault(m, new ArrayList<>());
+                    System.out.println(m + " is not implemented");
                     arr.add(c);
+                    this.segregations.put(m, arr);
                 }
             }
         }
@@ -123,8 +134,10 @@ public class ISPViolation extends Smell {
         this.segregations = new HashMap<>();
         while (this.interfaces.hasNext()) {
             Map.Entry<CPGClass, ArrayList<CPGClass>> iface = this.interfaces.next();
+            System.out.println(iface);
             CPGClass[] implementors = iface.getValue().toArray(new CPGClass[0]);
             if (containsViolation(iface.getKey(), implementors)) {
+                System.out.println(iface.getKey() + " contains violation");
                 return processDetection(implementors.length);
             }
         }
@@ -174,17 +187,20 @@ public class ISPViolation extends Smell {
 
         refinedSegregations.forEach((seg) -> {
             String description = String.format(
-                    "Move methods %s into new interface with classes",
+                    "Move methods %s into new interface with classes %s",
                     seg.methodSet, seg.classSet);
             lastBatch.add(CodeFragment.makeFragment(
                     description,
-                    seg.methodSet.toArray(),
-                    seg.classSet.toArray()));
+                    seg.methodSet.toArray(new Method[0]),
+                    seg.classSet.toArray(new CPGClass[0])));
         });
 
         this.lastBatch = lastBatch.iterator();
 
         // may be null if item was removed from segregations
-        return this.lastBatch.next();
+        if (this.lastBatch.hasNext()) {
+            return this.lastBatch.next();
+        }
+        return null;    
     }
 }
