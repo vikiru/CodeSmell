@@ -3,6 +3,7 @@ package com.CodeSmell.stat;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Method.Instruction;
 import com.CodeSmell.parser.CPGClass.Method.Parameter;
 import com.CodeSmell.parser.CodePropertyGraph;
 
@@ -46,7 +47,7 @@ public class MethodStat {
     /**
      * All the non-duplicated instructions that appear as-is in the .java file for a given method.
      */
-    public final List<Method.Instruction> uniqueInstructions;
+    public final List<Instruction> uniqueInstructions;
 
     public MethodStat(Method method, CodePropertyGraph cpg, Helper helper) {
         this.method = method;
@@ -171,8 +172,8 @@ public class MethodStat {
      * @param method The method being analyzed
      * @return A list containing all the unique instructions that would appear as-is within the .java file
      */
-    private static List<Method.Instruction> obtainUniqueInstructions(Method method, Helper helper) {
-        List<Method.Instruction> uniqueInstructions = new ArrayList<>();
+    private static List<Instruction> obtainUniqueInstructions(Method method, Helper helper) {
+        List<Instruction> uniqueInstructions = new ArrayList<>();
         List<String> allAttributeNames = helper.allAttributeNames;
         String[] ignoredLabels = new String[]{"FIELD_IDENTIFIER", "IDENTIFIER", "LITERAL",
                 "METHOD", "Parameter_IN", "Parameter_OUT", "METHOD_RETURN"};
@@ -185,7 +186,7 @@ public class MethodStat {
                         && !ignoredCodeList.contains(ins.code) && !ins.code.contains("$id")
                         && ins.lineNumber >= method.lineNumberStart)
                 .collect(Collectors.toCollection(ArrayList::new));
-        for (Method.Instruction ins : filteredIns) {
+        for (Instruction ins : filteredIns) {
             var isSubString = filteredIns
                     .stream()
                     .filter(insToFind -> insToFind.code.contains(ins.code)
