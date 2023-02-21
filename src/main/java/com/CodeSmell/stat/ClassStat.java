@@ -188,22 +188,14 @@ public class ClassStat {
      * @return A map containing attributes grouped by their modifier
      */
     private static Map<Modifier, List<Attribute>> groupAttributesByModifiers(CPGClass cpgClass) {
-        Map<Modifier, ArrayList<Attribute>> modifierGroupedAttributes = new HashMap<>();
-        modifierGroupedAttributes.put(Modifier.PUBLIC, new ArrayList<>());
-        modifierGroupedAttributes.put(Modifier.PROTECTED, new ArrayList<>());
-        modifierGroupedAttributes.put(Modifier.PRIVATE, new ArrayList<>());
-        modifierGroupedAttributes.put(Modifier.PACKAGE_PRIVATE, new ArrayList<>());
-        for (Attribute attribute : cpgClass.getAttributes()) {
-            List<Modifier> modList = attribute.modifiers;
-            if (modList.contains(Modifier.PUBLIC)) {
-                modifierGroupedAttributes.get(Modifier.PUBLIC).add(attribute);
-            } else if (modList.contains(Modifier.PROTECTED)) {
-                modifierGroupedAttributes.get(Modifier.PROTECTED).add(attribute);
-            } else if (modList.contains(Modifier.PRIVATE)) {
-                modifierGroupedAttributes.get(Modifier.PRIVATE).add(attribute);
-            } else {
-                modifierGroupedAttributes.get(Modifier.PACKAGE_PRIVATE).add(attribute);
-            }
+        Map<Modifier, List<Attribute>> modifierGroupedAttributes = new HashMap<>();
+        Modifier[] accessModifiers = new Modifier[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.PACKAGE_PRIVATE};
+        for (Modifier modifier : accessModifiers) {
+            var attributeMatchingModifier = cpgClass.getAttributes()
+                    .stream()
+                    .filter(attribute -> attribute.modifiers.contains(modifier))
+                    .collect(Collectors.toUnmodifiableList());
+            modifierGroupedAttributes.put(modifier, attributeMatchingModifier);
         }
         return Collections.unmodifiableMap(modifierGroupedAttributes);
     }
@@ -215,22 +207,14 @@ public class ClassStat {
      * @return A map containing methods grouped by their modifiers
      */
     private static Map<Modifier, List<Method>> groupMethodsByModifiers(CPGClass cpgClass) {
-        HashMap<Modifier, ArrayList<Method>> modifierGroupedMethods = new HashMap<>();
-        modifierGroupedMethods.put(Modifier.PUBLIC, new ArrayList<>());
-        modifierGroupedMethods.put(Modifier.PROTECTED, new ArrayList<>());
-        modifierGroupedMethods.put(Modifier.PRIVATE, new ArrayList<>());
-        modifierGroupedMethods.put(Modifier.PACKAGE_PRIVATE, new ArrayList<>());
-        for (Method method : cpgClass.getMethods()) {
-            List<Modifier> modList = method.modifiers;
-            if (modList.contains(Modifier.PUBLIC)) {
-                modifierGroupedMethods.get(Modifier.PUBLIC).add(method);
-            } else if (modList.contains(Modifier.PROTECTED)) {
-                modifierGroupedMethods.get(Modifier.PROTECTED).add(method);
-            } else if (modList.contains(Modifier.PRIVATE)) {
-                modifierGroupedMethods.get(Modifier.PRIVATE).add(method);
-            } else {
-                modifierGroupedMethods.get(Modifier.PACKAGE_PRIVATE).add(method);
-            }
+        Map<Modifier, List<Method>> modifierGroupedMethods = new HashMap<>();
+        Modifier[] accessModifiers = new Modifier[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.PACKAGE_PRIVATE};
+        for (Modifier modifier : accessModifiers) {
+            var methodMatchingModifier = cpgClass.getMethods()
+                    .stream()
+                    .filter(method -> method.modifiers.contains(modifier))
+                    .collect(Collectors.toUnmodifiableList());
+            modifierGroupedMethods.put(modifier, methodMatchingModifier);
         }
         return Collections.unmodifiableMap(modifierGroupedMethods);
     }
