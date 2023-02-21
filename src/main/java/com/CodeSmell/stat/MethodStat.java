@@ -182,7 +182,7 @@ public class MethodStat {
                             && insToFind.code.length() > ins.code.length()).collect(Collectors.toList());
             String testStr = ins.code.replace("this.", "").trim();
             if (isSubString.isEmpty() && !allAttributeNames.contains(testStr)
-                    && (ins.code.endsWith(")") || ins.code.endsWith(";"))) {
+                    && (ins.code.endsWith(")") || ins.code.endsWith(";") || ins.code.contains("="))) {
                 uniqueInstructions.add(ins);
             }
         }
