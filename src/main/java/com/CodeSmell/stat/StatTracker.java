@@ -60,7 +60,7 @@ public class StatTracker {
         helper = new Helper(cpg);
         this.distinctClassTypes = determineDistinctClassTypes(cpg);
         this.distinctRelations = determineDistinctRelations(cpg);
-        this.attributeStats = createAttributeStats(cpg, helper);
+        this.attributeStats = createAttributeStats(helper);
         this.methodStats = createMethodStats(cpg, helper);
         this.classStats = createClassStats(cpg, helper, attributeStats, methodStats);
         this.packageUse = determinePackageUsage(classStats);
@@ -81,7 +81,7 @@ public class StatTracker {
             var allMatchingClasses = cpg.getClasses()
                     .stream()
                     .filter(cpgClass -> cpgClass.classType.equals(classType))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toUnmodifiableList());
             distinctClassTypes.put(classType, allMatchingClasses);
         }
         return Collections.unmodifiableMap(distinctClassTypes);
@@ -99,7 +99,7 @@ public class StatTracker {
             var allMatchingRelations = cpg.getRelations()
                     .stream()
                     .filter(relation -> relation.type.equals(relationshipType))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toUnmodifiableList());
             distinctRelations.put(relationshipType, allMatchingRelations);
         }
         return Collections.unmodifiableMap(distinctRelations);
@@ -136,11 +136,10 @@ public class StatTracker {
     }
 
     /**
-     * @param cpg
      * @param helper
      * @return
      */
-    private static Map<Attribute, AttributeStat> createAttributeStats(CodePropertyGraph cpg, Helper helper) {
+    private static Map<Attribute, AttributeStat> createAttributeStats(Helper helper) {
         Map<Attribute, AttributeStat> attributeStats = new HashMap<>();
         helper.allAttributes.forEach(attribute -> attributeStats.put(attribute, new AttributeStat(attribute, helper)));
         return Collections.unmodifiableMap(attributeStats);
