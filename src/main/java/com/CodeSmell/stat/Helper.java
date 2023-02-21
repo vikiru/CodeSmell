@@ -1,19 +1,21 @@
 package com.CodeSmell.stat;
 
-import com.CodeSmell.parser.CPGClass;
+import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.Method.Parameter;
 import com.CodeSmell.parser.CodePropertyGraph;
 
 import java.util.*;
 
 /**
  * A class that contains potentially helpful lists containing info such as all attributes, all methods,
- * all method calls, all method parameters, all class names within cpg.
+ * all method calls, all Parameters, all class names within cpg.
  */
 public class Helper {
     /**
-     * All the {@link com.CodeSmell.parser.CPGClass.Attribute} that exist within the cpg
+     * All the {@link Attribute} that exist within the cpg
      */
-    public final List<CPGClass.Attribute> allAttributes;
+    public final List<Attribute> allAttributes;
     /**
      * All the attribute names that exist within the cpg
      */
@@ -23,25 +25,25 @@ public class Helper {
      */
     public final List<String> allClassNames;
     /**
-     * All the {@link com.CodeSmell.parser.CPGClass.Method} that exist within the cpg
+     * All the {@link Method} that exist within the cpg
      */
-    public final List<CPGClass.Method> allMethods;
+    public final List<Method> allMethods;
     /**
      * All the method names that exist within the cpg
      */
     public final List<String> allMethodNames;
     /**
-     * All the {@link com.CodeSmell.parser.CPGClass.Method.Parameter} that exist within the cpg
+     * All the {@link Parameter} that exist within the cpg
      */
-    public final List<CPGClass.Method.Parameter> allParameters;
+    public final List<Parameter> allParameters;
     /**
-     * All the {@link com.CodeSmell.parser.CPGClass.Attribute} calls that exist within the cpg
+     * All the {@link Attribute} calls that exist within the cpg
      */
-    public final List<CPGClass.Attribute> allAttributeCalls;
+    public final List<Attribute> allAttributeCalls;
     /**
-     * All the {@link com.CodeSmell.parser.CPGClass.Method} calls that exist within the cpg
+     * All the {@link Method} calls that exist within the cpg
      */
-    public final List<CPGClass.Method> allMethodCalls;
+    public final List<Method> allMethodCalls;
 
     public Helper(CodePropertyGraph cpg) {
         this.allAttributes = collectAllAttributes(cpg);
@@ -59,11 +61,10 @@ public class Helper {
      *
      * @param cpg The CodePropertyGraph containing all existing classes and relations
      */
-    private static List<CPGClass.Attribute> collectAllAttributes(CodePropertyGraph cpg) {
-        Set<CPGClass.Attribute> allAttributes = new HashSet<>();
-        cpg.getClasses().
-                forEach(cpgClass -> allAttributes.addAll(cpgClass.getAttributes()));
-        List<CPGClass.Attribute> toReturn = new ArrayList<>(allAttributes);
+    private static List<Attribute> collectAllAttributes(CodePropertyGraph cpg) {
+        Set<Attribute> allAttributes = new HashSet<>();
+        cpg.getClasses().forEach(cpgClass -> allAttributes.addAll(cpgClass.getAttributes()));
+        List<Attribute> toReturn = new ArrayList<>(allAttributes);
         return Collections.unmodifiableList(toReturn);
     }
 
@@ -72,7 +73,7 @@ public class Helper {
      *
      * @param allAttributes
      */
-    private static List<String> collectAllAttributeNames(List<CPGClass.Attribute> allAttributes) {
+    private static List<String> collectAllAttributeNames(List<Attribute> allAttributes) {
         Set<String> allAttributeNames = new HashSet<>();
         allAttributes.forEach(attribute -> allAttributeNames.add(attribute.name));
         List<String> toReturn = new ArrayList<>(allAttributeNames);
@@ -97,10 +98,10 @@ public class Helper {
      *
      * @param cpg The CodePropertyGraph containing all existing classes and relations
      */
-    private static List<CPGClass.Method> collectAllMethods(CodePropertyGraph cpg) {
-        Set<CPGClass.Method> allMethods = new HashSet<>();
+    private static List<Method> collectAllMethods(CodePropertyGraph cpg) {
+        Set<Method> allMethods = new HashSet<>();
         cpg.getClasses().forEach(cpgClass -> allMethods.addAll(cpgClass.getMethods()));
-        List<CPGClass.Method> toReturn = new ArrayList<>(allMethods);
+        List<Method> toReturn = new ArrayList<>(allMethods);
         return Collections.unmodifiableList(toReturn);
     }
 
@@ -110,7 +111,7 @@ public class Helper {
      * @param allMethods
      * @return A list of all the method names within cpg
      */
-    private static List<String> collectAllMethodNames(List<CPGClass.Method> allMethods) {
+    private static List<String> collectAllMethodNames(List<Method> allMethods) {
         Set<String> allMethodNames = new HashSet<>();
         allMethods.forEach(method -> allMethodNames.add(method.name));
         List<String> toReturn = new ArrayList<>(allMethodNames);
@@ -123,10 +124,10 @@ public class Helper {
      * @param allMethods All the methods within cpg
      * @return A list of all the attributes within cpg
      */
-    private static List<CPGClass.Attribute> collectAllAttributeCalls(List<CPGClass.Method> allMethods) {
-        Set<CPGClass.Attribute> allAttributeCalls = new HashSet<>();
+    private static List<Attribute> collectAllAttributeCalls(List<Method> allMethods) {
+        Set<Attribute> allAttributeCalls = new HashSet<>();
         allMethods.forEach(method -> allAttributeCalls.addAll(method.getAttributeCalls()));
-        List<CPGClass.Attribute> toReturn = new ArrayList<>(allAttributeCalls);
+        List<Attribute> toReturn = new ArrayList<>(allAttributeCalls);
         return Collections.unmodifiableList(toReturn);
     }
 
@@ -136,21 +137,21 @@ public class Helper {
      * @param allMethods All the methods within cpg
      * @return A list of all the method calls within cpg
      */
-    private static List<CPGClass.Method> collectAllMethodCalls(List<CPGClass.Method> allMethods) {
-        Set<CPGClass.Method> allMethodCalls = new HashSet<>();
+    private static List<Method> collectAllMethodCalls(List<Method> allMethods) {
+        Set<Method> allMethodCalls = new HashSet<>();
         allMethods.forEach(method -> allMethodCalls.addAll(method.getMethodCalls()));
-        List<CPGClass.Method> toReturn = new ArrayList<>(allMethodCalls);
+        List<Method> toReturn = new ArrayList<>(allMethodCalls);
         return Collections.unmodifiableList(toReturn);
     }
 
     /**
-     * Collect all the method parameters of each method into one single list.
+     * Collect all the Parameters of each method into one single list.
      *
      * @param allMethods All the methods within cpg
-     * @return A list of all the method parameters within cpg
+     * @return A list of all the Parameters within cpg
      */
-    private static List<CPGClass.Method.Parameter> collectAllParameters(List<CPGClass.Method> allMethods) {
-        List<CPGClass.Method.Parameter> allParameters = new ArrayList<>();
+    private static List<Parameter> collectAllParameters(List<Method> allMethods) {
+        List<Parameter> allParameters = new ArrayList<>();
         allMethods.forEach(method -> allParameters.addAll((method.parameters)));
         return Collections.unmodifiableList(allParameters);
     }
