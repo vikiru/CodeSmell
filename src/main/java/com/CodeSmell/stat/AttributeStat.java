@@ -1,6 +1,7 @@
 package com.CodeSmell.stat;
 
 import com.CodeSmell.parser.CPGClass;
+import com.CodeSmell.parser.CPGClass.Attribute;
 
 import java.util.*;
 
@@ -8,7 +9,7 @@ public class AttributeStat {
     /**
      * The reference to the attribute that this AttributeStat is referring to
      */
-    public final CPGClass.Attribute attribute;
+    public final Attribute attribute;
     /**
      * An integer value representing the total number of times this attribute was throughout the methods in cpg
      */
@@ -22,7 +23,7 @@ public class AttributeStat {
      */
     public final Map<CPGClass, Integer> classesWhichCallAttr;
 
-    public AttributeStat(CPGClass.Attribute attribute, Helper helper) {
+    public AttributeStat(Attribute attribute, Helper helper) {
         this.attribute = attribute;
         this.methodsWhichCallAttr = determineAttributeUsage(attribute, helper);
         this.classesWhichCallAttr = determineClassAttributeUsage(methodsWhichCallAttr);
@@ -36,15 +37,17 @@ public class AttributeStat {
      * @param attribute The attribute being analyzed
      * @param helper    The helper consisting of useful collections of elements within cpg
      */
-    private static Map<CPGClass.Method, Integer> determineAttributeUsage(CPGClass.Attribute attribute, Helper helper) {
+    private static Map<CPGClass.Method, Integer> determineAttributeUsage(Attribute attribute, Helper helper) {
         List<CPGClass.Method> allMethods = helper.allMethods;
         Map<CPGClass.Method, Integer> methodsWhichCallAttr = new HashMap<>();
         for (CPGClass.Method method : allMethods) {
             int count = 0;
             if (method.getAttributeCalls().contains(attribute)) {
-                count = Math.toIntExact(method.instructions.stream().
-                        filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")
-                                && instruction.code.contains(attribute.name)).count());
+                count = Math.toIntExact(method.instructions
+                        .stream()
+                        .filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")
+                                && instruction.code.contains(attribute.name))
+                        .count());
             }
             methodsWhichCallAttr.put(method, count);
         }
@@ -59,8 +62,9 @@ public class AttributeStat {
      */
     private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<CPGClass.Method, Integer> methodsWhichCallAttr) {
         Map<CPGClass, Integer> classWhichCallAttr = new HashMap<>();
-        methodsWhichCallAttr.forEach((key, value) -> classWhichCallAttr.
-                put(key.getParent(), classWhichCallAttr.getOrDefault(key.getParent(), 0) + value));
+        methodsWhichCallAttr
+                .forEach((key, value) -> classWhichCallAttr.put(key.getParent(),
+                        classWhichCallAttr.getOrDefault(key.getParent(), 0) + value));
         return Collections.unmodifiableMap(classWhichCallAttr);
     }
 
