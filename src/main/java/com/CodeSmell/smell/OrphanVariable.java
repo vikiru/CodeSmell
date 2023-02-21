@@ -53,7 +53,7 @@ public class OrphanVariable extends Smell {
             }
         }
     }
-    
+
     /**
      * Given a CPGClass, return a list of attributes matching the conditions necessary to be considered a constant
      * within that class.
@@ -68,11 +68,10 @@ public class OrphanVariable extends Smell {
     protected static List<CPGClass.Attribute> returnClassConstants(CPGClass cpgClass,
                                                                    List<String> primitiveTypeList) {
         return cpgClass.getAttributes().stream().
-                filter(attribute ->
-                        attribute.modifiers.contains(CPGClass.Modifier.PUBLIC) &&
-                                attribute.modifiers.contains(CPGClass.Modifier.STATIC) &&
-                                attribute.modifiers.contains(CPGClass.Modifier.FINAL) &&
-                                primitiveTypeList.contains(attribute.attributeType)).collect(Collectors.toList());
+                filter(attribute -> attribute.modifiers.contains(CPGClass.Modifier.PUBLIC) &&
+                        attribute.modifiers.contains(CPGClass.Modifier.STATIC) &&
+                        attribute.modifiers.contains(CPGClass.Modifier.FINAL) &&
+                        primitiveTypeList.contains(attribute.attributeType)).collect(Collectors.toList());
     }
 
     /**
