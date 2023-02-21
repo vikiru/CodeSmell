@@ -1,6 +1,5 @@
 package com.CodeSmell.stat;
 
-import com.CodeSmell.model.ClassRelation;
 import com.CodeSmell.model.ClassRelation.*;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.*;
@@ -255,9 +254,9 @@ public class ClassStat {
     private static Map<CPGClass, Integer> determineTotalClassAttributeCalls(Map<Method, MethodStat> methodStats) {
         Map<CPGClass, Integer> totalClassAttributeCalls = new HashMap<>();
         methodStats
-                .forEach((key, value) -> value.distinctAttributeCalls
+                .forEach((key, value) -> value.totalAttributeCalls
                         .forEach((attrKey, attrVal) -> totalClassAttributeCalls.put(attrKey,
-                                totalClassAttributeCalls.getOrDefault(attrKey, 0) + attrVal.size())));
+                                totalClassAttributeCalls.getOrDefault(attrKey, 0) + attrVal)));
         return Collections.unmodifiableMap(totalClassAttributeCalls);
     }
 
@@ -271,9 +270,9 @@ public class ClassStat {
     private static Map<CPGClass, Integer> determineTotalClassMethodCalls(Map<Method, MethodStat> methodStats) {
         Map<CPGClass, Integer> totalClassMethodCalls = new HashMap<>();
         methodStats
-                .forEach((key, value) -> value.distinctMethodCalls
+                .forEach((key, value) -> value.totalMethodCalls
                         .forEach((methodKey, methodValue) -> totalClassMethodCalls.put(methodKey,
-                                totalClassMethodCalls.getOrDefault(methodKey, 0) + methodValue.size())));
+                                totalClassMethodCalls.getOrDefault(methodKey, 0) + methodValue)));
         return Collections.unmodifiableMap(totalClassMethodCalls);
     }
 
