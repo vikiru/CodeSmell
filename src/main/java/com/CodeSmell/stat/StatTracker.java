@@ -31,13 +31,11 @@ public class StatTracker {
      * attributes and methods via {@link AttributeStat} and {@link MethodStat} respectively
      */
     public final Map<CPGClass, ClassStat> classStats;
-
     /**
      * Group all the {@link CPGClass.Attribute} with a {@link AttributeStat} containing statistics about that
      * attribute
      */
     public final Map<CPGClass.Attribute, AttributeStat> attributeStats;
-
     /**
      * Group all the {@link CPGClass.Method} with a {@link MethodStat} containing statistics about that method
      */
@@ -61,8 +59,8 @@ public class StatTracker {
         this.distinctClassTypes = determineDistinctClassTypes(cpg);
         this.distinctRelations = determineDistinctRelations(cpg);
         this.classStats = createClassStats(cpg, helper);
-        this.attributeStats = createAttributeStats(cpg, helper);
-        this.methodStats = createMethodStats(cpg, helper);
+        this.attributeStats = createAttributeStats(classStats);
+        this.methodStats = createMethodStats(classStats);
         this.packageUse = determinePackageUsage(classStats);
         this.longParameterMethod = findLongParameterMethods(helper, 4);
         this.longMethods = findLongMethods(helper, 30);
@@ -117,27 +115,22 @@ public class StatTracker {
     }
 
     /**
-     * @param cpg
-     * @param helper
+     * @param classStats
      * @return
      */
-    private static Map<CPGClass.Attribute, AttributeStat> createAttributeStats(CodePropertyGraph cpg, Helper helper) {
+    private static Map<CPGClass.Attribute, AttributeStat> createAttributeStats(Map<CPGClass, ClassStat> classStats) {
         Map<CPGClass.Attribute, AttributeStat> attributeStats = new HashMap<>();
-        cpg.getClasses().forEach(cpgClass -> cpgClass.getAttributes().
-                forEach(attribute -> attributeStats.putIfAbsent(attribute, new AttributeStat(attribute, helper))));
+        classStats.values().forEach(classStat -> attributeStats.putAll(classStat.attributeStats));
         return Collections.unmodifiableMap(attributeStats);
     }
 
     /**
-     * @param cpg
-     * @param helper
+     * @param classStats
      * @return
      */
-    private static Map<CPGClass.Method, MethodStat> createMethodStats(CodePropertyGraph cpg, Helper helper) {
+    private static Map<CPGClass.Method, MethodStat> createMethodStats(Map<CPGClass, ClassStat> classStats) {
         Map<CPGClass.Method, MethodStat> methodStats = new HashMap<>();
-        cpg.getClasses().
-                forEach(cpgClass -> cpgClass.getMethods().
-                        forEach(method -> methodStats.putIfAbsent(method, new MethodStat(method, cpg, helper))));
+        classStats.values().forEach(classStat -> methodStats.putAll(classStat.methodStats));
         return Collections.unmodifiableMap(methodStats);
     }
 
