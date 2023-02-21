@@ -6,8 +6,7 @@ import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.*;
 import com.CodeSmell.model.Pair;
 import com.CodeSmell.model.ClassRelation.RelationshipType;
-import com.CodeSmell.stat.StatTracker;
-
+import com.CodeSmell.stat.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +39,15 @@ public class Common {
                     .collect(Collectors.toCollection(ArrayList::new));
             Common.interfaces.put(iface, realizors);
         }
+    }
+
+    public static MethodStat getMethodStats(Method m) {
+        for (MethodStat ms : stats.classStats.get(m.getParent()).methodStats) {
+            if (ms.method == m) {
+                return ms;
+            }
+        }
+        throw new IllegalArgumentException("No method stats for method " + m);
     }
 
     // returns the list of methods declared within the interface

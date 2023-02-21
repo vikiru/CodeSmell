@@ -29,8 +29,11 @@ public class SmellTest {
 
     public ArrayList<CodeFragment> getDetections(Smell smell) {
         ArrayList<CodeFragment> arr = new ArrayList<CodeFragment>();
+        System.out.println("\nsmell " + smell.name);
         while (smell.detect()) {
-            arr.add(smell.lastDetection);
+            CodeFragment f = smell.lastDetection;
+            arr.add(f);
+            System.out.println(f);
         }
         return arr;
     }
@@ -48,6 +51,6 @@ public class SmellTest {
         System.out.println("ISP Violation Test:");
         ISPViolation  smell = new ISPViolation(this.cpg);
         ArrayList<CodeFragment> detections = getDetections(smell);
-        //assertNotEquals(0, detections.size());
+        assertNotEquals(0, detections.size());
     }
 }

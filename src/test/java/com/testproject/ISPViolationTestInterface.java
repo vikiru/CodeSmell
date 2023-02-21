@@ -16,6 +16,5 @@ public interface ISPViolationTestInterface {
     // this is counts as actually "implementing"
     // behaviour instead of bypassing the function
     // 
-
     public void conditionalError(); 
 }

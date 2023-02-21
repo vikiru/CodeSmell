@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A class within the {@link CodePropertyGraph}.
  */
 public class CPGClass implements Serializable {
+
     /**
      * The name of the class
      */
@@ -96,7 +98,7 @@ public class CPGClass implements Serializable {
                     String[] importStatements,
                     String code,
                     int lineNumber,
-                    ArrayList<Modifier> modifiers,
+                    List<Modifier> modifiers,
                     String classType,
                     String filePath,
                     int fileLength,
@@ -166,7 +168,7 @@ public class CPGClass implements Serializable {
 
     @Override
     public String toString() {
-        return this.code;
+        return this.name;
     }
 
     /**
