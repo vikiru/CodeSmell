@@ -49,8 +49,8 @@ public class RefusedBequest extends Smell {
                 String description = "";
                 description += subClass.name + " does not make full use of all the inherited properties of superclass: " +
                         superClass.name;
-                CPGClass.Attribute[] unusedAttributes = returnUnusedAttributes(subClass, superClassStats.attributeStats);
-                CPGClass.Method[] unusedMethods = returnUnusedMethods(subClass, superClassStats.methodStats);
+                CPGClass.Attribute[] unusedAttributes = returnUnusedAttributes(subClass, (List<AttributeStat>) superClassStats.attributeStats.values());
+                CPGClass.Method[] unusedMethods = returnUnusedMethods(subClass, (List<MethodStat>) superClassStats.methodStats.values());
                 CPGClass[] affectedClasses = new CPGClass[]{subClass, superClass};
                 detections.add(CodeFragment.makeFragment(description, affectedClasses, unusedAttributes, unusedMethods));
             }

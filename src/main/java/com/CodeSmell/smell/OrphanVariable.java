@@ -38,7 +38,7 @@ public class OrphanVariable extends Smell {
         for (ClassStat classStat : statTracker.classStats.values()) {
             List<CPGClass.Attribute> classConstants = returnClassConstants(classStat.cpgClass, primitiveTypeList);
             if (!classConstants.isEmpty()) {
-                List<AttributeStat> classConstantStats = classStat.attributeStats.stream().
+                List<AttributeStat> classConstantStats = classStat.attributeStats.values().stream().
                         filter(attributeStat -> classConstants.contains(attributeStat.attribute)).
                         collect(Collectors.toList());
                 List<AttributeStat> filteredAttributeStats = returnFilteredStats(classStat.cpgClass, classConstantStats);
