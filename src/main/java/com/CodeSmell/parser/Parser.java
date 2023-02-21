@@ -183,15 +183,16 @@ public class Parser {
     protected static void updateCPGClassProperties(CodePropertyGraph cpg) {
         LinkedHashMap<Method, ArrayList<Method>> methodCallMap = new LinkedHashMap<>();
         LinkedHashMap<Method, ArrayList<Attribute>> attributeCallMap = new LinkedHashMap<>();
-        // Set inheritsFrom lists for all classes within cpg
-        // Additionally, if a class inheritsFrom a superclass, add all of its attributes and methods here.
-        cpg.getClasses().
-                forEach(cpgClass -> cpgClass.setInheritsFrom(returnInheritsFrom(cpgClass, cpg)));
         // Set parent classes for all attributes and methods
         cpg.getClasses().
                 forEach(cpgClass -> cpgClass.getAttributes().forEach(attribute -> attribute.setParent(cpgClass)));
         cpg.getClasses().
                 forEach(cpgClass -> cpgClass.getMethods().forEach(method -> method.setParent(cpgClass)));
+        // Set inheritsFrom lists for all classes within cpg
+        // Additionally, if a class inheritsFrom a superclass, add all of its attributes and methods here.
+        cpg.getClasses().
+                forEach(cpgClass -> cpgClass.setInheritsFrom(returnInheritsFrom(cpgClass, cpg)));
+
         // Set typeLists for all attributes
         cpg.getClasses().
                 forEach(cpgClass -> cpgClass.getAttributes().
