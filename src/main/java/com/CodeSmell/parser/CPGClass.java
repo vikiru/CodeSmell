@@ -50,7 +50,7 @@ public class CPGClass implements Serializable {
     /**
      * The type of the class ("abstract class", "class", "enum", "interface")
      */
-    public final String classType;
+    public final ClassType classType;
 
     /**
      * The full filepath pointing to where the class is stored
@@ -98,8 +98,8 @@ public class CPGClass implements Serializable {
                     String[] importStatements,
                     String code,
                     int lineNumber,
-                    List<Modifier> modifiers,
-                    String classType,
+                    ArrayList<Modifier> modifiers,
+                    ClassType classType,
                     String filePath,
                     int fileLength,
                     int emptyLines,
@@ -169,6 +169,27 @@ public class CPGClass implements Serializable {
     @Override
     public String toString() {
         return this.name;
+    }
+
+    /**
+     * The type belonging to a given CPGClass.
+     */
+    public enum ClassType {
+        ABSTRACT_CLASS("abstract class"),
+        CLASS("class"),
+        ENUM("enum"),
+        INTERFACE("interface");
+
+        public final String typeString;
+
+        ClassType(String typeString) {
+            this.typeString = typeString;
+        }
+
+        @Override
+        public String toString() {
+            return this.typeString;
+        }
     }
 
     /**
