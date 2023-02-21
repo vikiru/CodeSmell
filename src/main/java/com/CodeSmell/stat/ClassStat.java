@@ -13,13 +13,13 @@ public class ClassStat {
      */
     public final CPGClass cpgClass;
     /**
-     * A list containing all the attribute stats of a given class
+     * A map containing all the attribute stats of a given class
      */
-    public final List<AttributeStat> attributeStats;
+    public final Map<CPGClass.Attribute, AttributeStat> attributeStats;
     /**
-     * A list containing all the method stats of a given class
+     * A map containing all the method stats of a given class
      */
-    public final List<MethodStat> methodStats;
+    public final Map<CPGClass.Method, MethodStat> methodStats;
     /**
      * The total number of times this class was used within cpg
      */
@@ -40,11 +40,11 @@ public class ClassStat {
      */
     public final Map<String, Integer> classLineMap;
     /**
-     * Groups all the attributes of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
+     * Groups all the attributes of a given class by "PUBLIC", "PROTECTED", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
     public final Map<CPGClass.Modifier, List<CPGClass.Attribute>> modifierGroupedAttributes;
     /**
-     * Groups all the methods of a given class by "PUBLIC", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
+     * Groups all the methods of a given class by "PUBLIC", "PROTECTED", "PRIVATE" and "PACKAGE PRIVATE" modifiers.
      */
     public final Map<CPGClass.Modifier, List<CPGClass.Method>> modifierGroupedMethods;
     /**
@@ -75,12 +75,14 @@ public class ClassStat {
      *
      * @param cpgClass The class belonging to this ClassStat
      * @param helper   The helper containing useful collections of elements within cpg
-     * @return A list of stats pertaining to every attribute belonging to this class
+     * @return A map of stats pertaining to every attribute belonging to this class
      */
-    private static List<AttributeStat> createAttributeStat(CPGClass cpgClass, Helper helper) {
-        List<AttributeStat> attributeStats = new ArrayList<>();
-        cpgClass.getAttributes().forEach(attribute -> attributeStats.add(new AttributeStat(attribute, helper)));
-        return Collections.unmodifiableList(attributeStats);
+    private static Map<CPGClass.Attribute, AttributeStat> createAttributeStat(CPGClass cpgClass, Helper helper) {
+        Map<CPGClass.Attribute, AttributeStat> attributeStats = new HashMap<>();
+        cpgClass.getAttributes().stream().
+                filter(attribute -> attribute.getParent() == cpgClass).
+                forEach(attribute -> attributeStats.put(attribute, new AttributeStat(attribute, helper)));
+        return Collections.unmodifiableMap(attributeStats);
     }
 
     /**
@@ -89,12 +91,14 @@ public class ClassStat {
      * @param cpgClass The class belonging to this ClassStat
      * @param cpg      The CodePropertyGraph containing existing classes and relations
      * @param helper   The helper containing useful collections of elements within cpg
-     * @return A list of stats pertaining to every method belonging to this class
+     * @return A map of stats pertaining to every method belonging to this class
      */
-    private static List<MethodStat> createMethodStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
-        List<MethodStat> methodStats = new ArrayList<>();
-        cpgClass.getMethods().forEach(method -> methodStats.add(new MethodStat(method, cpg, helper)));
-        return Collections.unmodifiableList(methodStats);
+    private static Map<CPGClass.Method, MethodStat> createMethodStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
+        Map<CPGClass.Method, MethodStat> methodStats = new HashMap<>();
+        cpgClass.getMethods().stream().
+                filter(method -> method.getParent() == cpgClass).
+                forEach(method -> methodStats.put(method, new MethodStat(method, cpg, helper)));
+        return Collections.unmodifiableMap(methodStats);
     }
 
     /**
@@ -103,8 +107,8 @@ public class ClassStat {
      * its attributes and methods were called.
      */
     private static Map<String, Integer> determineClassUsage(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper,
-                                                            List<AttributeStat> attributeStats,
-                                                            List<MethodStat> methodStats) {
+                                                            Map<CPGClass.Attribute, AttributeStat> attributeStats,
+                                                            Map<CPGClass.Method, MethodStat> methodStats) {
         Map<String, Integer> usageMap = new HashMap<>();
         // Count how many times cpgClass appears as a type
         int attributeTypeCount = Math.toIntExact(helper.allAttributes.stream().
@@ -253,12 +257,12 @@ public class ClassStat {
      * Iterate through the stats of every attribute present within this class and return a total referring to
      * how many times all the attributes belonging to this class were used throughout cpg.
      *
-     * @param attributeStats A list containing all the attribute stats for attributes belonging to this class
+     * @param attributeStats A map containing all the attribute stats for attributes belonging to this class
      * @return An integer value representing the total number of times the attributes of this class were used
      */
-    private static int returnTotalAttributeCalls(List<AttributeStat> attributeStats) {
+    private static int returnTotalAttributeCalls(Map<CPGClass.Attribute, AttributeStat> attributeStats) {
         int[] total = {0};
-        attributeStats.forEach(attribute -> total[0] += attribute.attributeUsage);
+        attributeStats.forEach((key, value) -> total[0] += value.attributeUsage);
         return total[0];
     }
 
@@ -266,12 +270,12 @@ public class ClassStat {
      * Iterate through the stats of every method present within this class and return a total referring to how many
      * times all the methods belonging to this class were used throughout cpg.
      *
-     * @param methodStats A list containing all the method stats for methods belonging to this class
+     * @param methodStats A map containing all the method stats for methods belonging to this class
      * @return An integer value representing the total number of times the methods of this class was used
      */
-    private static int returnTotalMethodCalls(List<MethodStat> methodStats) {
+    private static int returnTotalMethodCalls(Map<CPGClass.Method, MethodStat> methodStats) {
         int[] total = {0};
-        methodStats.forEach(method -> total[0] += method.methodUsage);
+        methodStats.forEach((key, value) -> total[0] += value.methodUsage);
         return total[0];
     }
 
@@ -282,12 +286,12 @@ public class ClassStat {
      * @param methodStats A list containing the stats of every method present within a given class
      * @return A map representing how many distinct attributes of another class were used
      */
-    private static Map<CPGClass, Integer> determineTotalClassAttributeCalls(List<MethodStat> methodStats) {
+    private static Map<CPGClass, Integer> determineTotalClassAttributeCalls(Map<CPGClass.Method, MethodStat> methodStats) {
         Map<CPGClass, Integer> totalClassAttributeCalls = new HashMap<>();
         methodStats.
-                forEach(methodStat -> methodStat.distinctAttributeCalls.
-                        forEach((key, value) -> totalClassAttributeCalls.put(key,
-                                totalClassAttributeCalls.getOrDefault(key, 0) + value.size())));
+                forEach((key, value) -> value.distinctAttributeCalls.
+                        forEach((attrKey, attrVal) -> totalClassAttributeCalls.put(attrKey,
+                                totalClassAttributeCalls.getOrDefault(attrKey, 0) + attrVal.size())));
         return Collections.unmodifiableMap(totalClassAttributeCalls);
     }
 
@@ -298,12 +302,12 @@ public class ClassStat {
      * @param methodStats A list containing the stats of every method present within a given class
      * @return A map representing how many distinct methods of another class were used
      */
-    private static Map<CPGClass, Integer> determineTotalClassMethodCalls(List<MethodStat> methodStats) {
+    private static Map<CPGClass, Integer> determineTotalClassMethodCalls(Map<CPGClass.Method, MethodStat> methodStats) {
         Map<CPGClass, Integer> totalClassMethodCalls = new HashMap<>();
         methodStats.
-                forEach(methodStat -> methodStat.distinctMethodCalls.
-                        forEach((key, value) -> totalClassMethodCalls.put(key,
-                                totalClassMethodCalls.getOrDefault(key, 0) + value.size())));
+                forEach((key, value) -> value.distinctMethodCalls.
+                        forEach((methodKey, methodValue) -> totalClassMethodCalls.put(methodKey,
+                                totalClassMethodCalls.getOrDefault(methodKey, 0) + methodValue.size())));
         return Collections.unmodifiableMap(totalClassMethodCalls);
     }
 
