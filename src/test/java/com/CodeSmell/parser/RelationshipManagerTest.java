@@ -1,7 +1,10 @@
 package com.CodeSmell.parser;
 
-import com.CodeSmell.ProjectManager;
 import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.parser.CPGClass.*;
+import com.CodeSmell.parser.CodePropertyGraph.*;
+import com.CodeSmell.ProjectManager;
+import com.CodeSmell.model.ClassRelation.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,14 +30,15 @@ public class RelationshipManagerTest {
 
     @Test
     public void testBidirectionalRelationship() {
-        var result = cpgToAnalyze.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION)).
-                collect(Collectors.toList());
+        var result = cpgToAnalyze.getRelations()
+                .stream()
+                .filter(relation -> relation.type.equals(RelationshipType.BIDIRECTIONAL_ASSOCIATION))
+                .collect(Collectors.toList());
 
         assertTrue("There should be an even number of bi-directional relations or 0 relations of this type",
                 (result.size() == 0 || result.size() % 2 == 0));
 
-        for (CodePropertyGraph.Relation relation : result) {
+        for (Relation relation : result) {
             CPGClass sourceClass = relation.source;
             CPGClass destinationClass = relation.destination;
             String multiplicity = relation.multiplicity;
@@ -42,13 +46,18 @@ public class RelationshipManagerTest {
             assertFalse("Should not be same class", sameClass);
             assertNotEquals("Multiplicity should not be blank", "", multiplicity);
 
-            var destClassHasAttrMatchingSrc = destinationClass.getAttributes().stream().
-                    filter(attribute -> attribute.getTypeList().contains(sourceClass)).collect(Collectors.toList());
+            var destClassHasAttrMatchingSrc = destinationClass.getAttributes()
+                    .stream()
+                    .filter(attribute -> attribute.getTypeList().contains(sourceClass))
+                    .collect(Collectors.toList());
             assertFalse("Destination class should have reference to source class",
                     destClassHasAttrMatchingSrc.isEmpty());
 
-            var checkMatchingRelation = result.stream().filter(relToFind -> relToFind.source.equals(destinationClass) &&
-                    relToFind.destination.equals(sourceClass)).collect(Collectors.toList());
+            var checkMatchingRelation = result
+                    .stream()
+                    .filter(relToFind -> relToFind.source.equals(destinationClass) &&
+                            relToFind.destination.equals(sourceClass))
+                    .collect(Collectors.toList());
             assertFalse("There should be a matching bi-directional relation in opposite direction",
                     checkMatchingRelation.isEmpty());
         }
@@ -56,11 +65,12 @@ public class RelationshipManagerTest {
 
     @Test
     public void testUnidirectionalAssociation() {
-        var result = cpgToAnalyze.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION)).
-                collect(Collectors.toList());
+        var result = cpgToAnalyze.getRelations()
+                .stream()
+                .filter(relation -> relation.type.equals(RelationshipType.UNIDIRECTIONAL_ASSOCIATION))
+                .collect(Collectors.toList());
 
-        for (CodePropertyGraph.Relation relation : result) {
+        for (Relation relation : result) {
             CPGClass sourceClass = relation.source;
             CPGClass destinationClass = relation.destination;
             String multiplicity = relation.multiplicity;
@@ -68,8 +78,10 @@ public class RelationshipManagerTest {
             assertFalse("Should not be same class", sameClass);
             assertNotEquals("Multiplicity should not be blank", "", multiplicity);
 
-            var destClassHasAttrMatchingSrc = destinationClass.getAttributes().stream().
-                    filter(attribute -> attribute.getTypeList().contains(sourceClass)).collect(Collectors.toList());
+            var destClassHasAttrMatchingSrc = destinationClass.getAttributes()
+                    .stream()
+                    .filter(attribute -> attribute.getTypeList().contains(sourceClass))
+                    .collect(Collectors.toList());
             assertTrue("Destination class should not have reference to source class",
                     destClassHasAttrMatchingSrc.isEmpty());
             boolean checkComposition = RelationshipManager.determineCompositionRelationship(sourceClass, destinationClass);
@@ -79,11 +91,12 @@ public class RelationshipManagerTest {
 
     @Test
     public void testReflexiveAssociation() {
-        var result = cpgToAnalyze.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION)).
-                collect(Collectors.toList());
+        var result = cpgToAnalyze.getRelations()
+                .stream()
+                .filter(relation -> relation.type.equals(RelationshipType.REFLEXIVE_ASSOCIATION))
+                .collect(Collectors.toList());
 
-        for (CodePropertyGraph.Relation relation : result) {
+        for (Relation relation : result) {
             CPGClass sourceClass = relation.source;
             CPGClass destinationClass = relation.destination;
             String multiplicity = relation.multiplicity;
@@ -95,11 +108,12 @@ public class RelationshipManagerTest {
 
     @Test
     public void testComposition() {
-        var result = cpgToAnalyze.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.COMPOSITION)).
-                collect(Collectors.toList());
+        var result = cpgToAnalyze.getRelations()
+                .stream()
+                .filter(relation -> relation.type.equals(RelationshipType.COMPOSITION))
+                .collect(Collectors.toList());
 
-        for (CodePropertyGraph.Relation relation : result) {
+        for (Relation relation : result) {
             CPGClass sourceClass = relation.source;
             CPGClass destinationClass = relation.destination;
             String multiplicity = relation.multiplicity;
@@ -107,8 +121,10 @@ public class RelationshipManagerTest {
             assertFalse("Should not be same class", sameClass);
             assertNotEquals("Multiplicity should not be blank", "", multiplicity);
 
-            var destClassHasAttrMatchingSrc = destinationClass.getAttributes().stream().
-                    filter(attribute -> attribute.getTypeList().contains(sourceClass)).collect(Collectors.toList());
+            var destClassHasAttrMatchingSrc = destinationClass.getAttributes()
+                    .stream()
+                    .filter(attribute -> attribute.getTypeList().contains(sourceClass))
+                    .collect(Collectors.toList());
             assertTrue("Destination class should not have reference to source class",
                     destClassHasAttrMatchingSrc.isEmpty());
 
@@ -170,16 +186,19 @@ public class RelationshipManagerTest {
 
     @Test
     public void testRealization() {
-        var result = cpgToAnalyze.getRelations().stream().
-                filter(relation -> relation.type.equals(ClassRelation.RelationshipType.REALIZATION)).
-                collect(Collectors.toList());
+        var result = cpgToAnalyze.getRelations()
+                .stream()
+                .filter(relation -> relation.type.equals(RelationshipType.REALIZATION))
+                .collect(Collectors.toList());
 
-        var interfaceCheck = cpgToAnalyze.getClasses().stream().
-                filter(cpgToFind -> cpgToFind.classType.equals("interface")).collect(Collectors.toList());
+        var interfaceCheck = cpgToAnalyze.getClasses()
+                .stream().
+                filter(cpgToFind -> cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                .collect(Collectors.toList());
         assertFalse("Interfaces should be present within cpg, if there is any realization relation",
                 (interfaceCheck.isEmpty() && result.isEmpty()));
 
-        for (CodePropertyGraph.Relation relation : result) {
+        for (Relation relation : result) {
             CPGClass sourceClass = relation.source;
             CPGClass destinationClass = relation.destination;
             String multiplicity = relation.multiplicity;
@@ -191,8 +210,8 @@ public class RelationshipManagerTest {
             destClassMethods.removeAll(sourceClassMethods);
 
             assertEquals("Multiplicity should be blank", "", multiplicity);
-            assertEquals("Destination class should be interface", "interface", destinationClass.classType);
-            assertEquals("Source class should be a class", "class", sourceClass.classType);
+            assertEquals("Destination class should be interface", ClassType.INTERFACE, destinationClass.classType);
+            assertEquals("Source class should be a class", ClassType.CLASS, sourceClass.classType);
             assertTrue("Source class should implement all the methods of destination class", destClassMethods.isEmpty());
         }
     }
