@@ -42,7 +42,7 @@ public class Common {
     }
 
     public static MethodStat getMethodStats(Method m) {
-        for (MethodStat ms : stats.classStats.get(m.getParent()).methodStats) {
+        for (MethodStat ms : stats.methodStats.values()) {
             if (ms.method == m) {
                 return ms;
             }
