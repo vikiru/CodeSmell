@@ -1,6 +1,5 @@
 package com.CodeSmell.stat;
 
-import com.CodeSmell.model.ClassRelation;
 import com.CodeSmell.model.ClassRelation.*;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.*;
@@ -61,9 +60,9 @@ public class StatTracker {
         helper = new Helper(cpg);
         this.distinctClassTypes = determineDistinctClassTypes(cpg);
         this.distinctRelations = determineDistinctRelations(cpg);
-        this.classStats = createClassStats(cpg, helper);
-        this.attributeStats = createAttributeStats(classStats);
-        this.methodStats = createMethodStats(classStats);
+        this.attributeStats = createAttributeStats(cpg, helper);
+        this.methodStats = createMethodStats(cpg, helper);
+        this.classStats = createClassStats(cpg, helper, attributeStats, methodStats);
         this.packageUse = determinePackageUsage(classStats);
         this.longParameterMethod = findLongParameterMethods(helper, 4);
         this.longMethods = findLongMethods(helper, 30);
@@ -109,35 +108,52 @@ public class StatTracker {
     /**
      * Iterate through the cpg to create stat objects corresponding to elements within the graph.
      *
-     * @param cpg    The CodePropertyGraph containing all existing classes and relations
-     * @param helper The helper consisting of useful collections of elements within cpg
+     * @param cpg            The CodePropertyGraph containing all existing classes and relations
+     * @param helper         The helper consisting of useful collections of elements within cpg
+     * @param attributeStats
+     * @param methodStats
      * @return A map containing a stat object for every class
      */
-    private static Map<CPGClass, ClassStat> createClassStats(CodePropertyGraph cpg, Helper helper) {
+    private static Map<CPGClass, ClassStat> createClassStats(CodePropertyGraph cpg,
+                                                             Helper helper,
+                                                             Map<Attribute, AttributeStat> attributeStats,
+                                                             Map<Method, MethodStat> methodStats) {
         Map<CPGClass, ClassStat> classStats = new HashMap<>();
         for (CPGClass cpgClass : cpg.getClasses()) {
-            classStats.put(cpgClass, new ClassStat(cpgClass, cpg, helper));
+            Map<Attribute, AttributeStat> filteredAttributeStats =
+                    attributeStats.entrySet()
+                            .stream()
+                            .filter(entry -> entry.getKey().getParent() == cpgClass)
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            Map<Method, MethodStat> filteredMethodStats =
+                    methodStats.entrySet()
+                            .stream()
+                            .filter(entry -> entry.getKey().getParent() == cpgClass)
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            classStats.put(cpgClass, new ClassStat(cpgClass, cpg, helper, filteredAttributeStats, filteredMethodStats));
         }
         return Collections.unmodifiableMap(classStats);
     }
 
     /**
-     * @param classStats
+     * @param cpg
+     * @param helper
      * @return
      */
-    private static Map<Attribute, AttributeStat> createAttributeStats(Map<CPGClass, ClassStat> classStats) {
+    private static Map<Attribute, AttributeStat> createAttributeStats(CodePropertyGraph cpg, Helper helper) {
         Map<Attribute, AttributeStat> attributeStats = new HashMap<>();
-        classStats.values().forEach(classStat -> attributeStats.putAll(classStat.attributeStats));
+        helper.allAttributes.forEach(attribute -> attributeStats.put(attribute, new AttributeStat(attribute, helper)));
         return Collections.unmodifiableMap(attributeStats);
     }
 
     /**
-     * @param classStats
+     * @param cpg
+     * @param helper
      * @return
      */
-    private static Map<CPGClass.Method, MethodStat> createMethodStats(Map<CPGClass, ClassStat> classStats) {
+    private static Map<CPGClass.Method, MethodStat> createMethodStats(CodePropertyGraph cpg, Helper helper) {
         Map<Method, MethodStat> methodStats = new HashMap<>();
-        classStats.values().forEach(classStat -> methodStats.putAll(classStat.methodStats));
+        helper.allMethods.forEach(method -> methodStats.put(method, new MethodStat(method, cpg, helper)));
         return Collections.unmodifiableMap(methodStats);
     }
 

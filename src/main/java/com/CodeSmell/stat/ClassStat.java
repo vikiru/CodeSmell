@@ -58,10 +58,12 @@ public class ClassStat {
      */
     public final Map<CPGClass, Integer> totalClassMethodCalls;
 
-    public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
+    public ClassStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper,
+                     Map<Attribute, AttributeStat> attributeStats,
+                     Map<Method, MethodStat> methodStats) {
         this.cpgClass = cpgClass;
-        this.attributeStats = createAttributeStat(cpgClass, helper);
-        this.methodStats = createMethodStat(cpgClass, cpg, helper);
+        this.attributeStats = Collections.unmodifiableMap(attributeStats);
+        this.methodStats = Collections.unmodifiableMap(methodStats);
         this.usageMap = determineClassUsage(cpgClass, cpg, helper, attributeStats, methodStats);
         this.classUsage = returnTotalUsage(usageMap);
         this.classLineMap = determineTotalClassLines(cpgClass, cpg);
@@ -70,39 +72,6 @@ public class ClassStat {
         this.modifierGroupedMethods = groupMethodsByModifiers(cpgClass);
         this.totalClassAttributeCalls = determineTotalClassAttributeCalls(methodStats);
         this.totalClassMethodCalls = determineTotalClassMethodCalls(methodStats);
-    }
-
-    /**
-     * Create AttributeStats for every attribute within a CPGClass.
-     *
-     * @param cpgClass The class belonging to this ClassStat
-     * @param helper   The helper containing useful collections of elements within cpg
-     * @return A map of stats pertaining to every attribute belonging to this class
-     */
-    private static Map<Attribute, AttributeStat> createAttributeStat(CPGClass cpgClass, Helper helper) {
-        Map<Attribute, AttributeStat> attributeStats = new HashMap<>();
-        cpgClass.getAttributes()
-                .stream()
-                .filter(attribute -> attribute.getParent() == cpgClass)
-                .forEach(attribute -> attributeStats.put(attribute, new AttributeStat(attribute, helper)));
-        return Collections.unmodifiableMap(attributeStats);
-    }
-
-    /**
-     * Create MethodStats for every method within a CPGClass.
-     *
-     * @param cpgClass The class belonging to this ClassStat
-     * @param cpg      The CodePropertyGraph containing existing classes and relations
-     * @param helper   The helper containing useful collections of elements within cpg
-     * @return A map of stats pertaining to every method belonging to this class
-     */
-    private static Map<Method, MethodStat> createMethodStat(CPGClass cpgClass, CodePropertyGraph cpg, Helper helper) {
-        Map<Method, MethodStat> methodStats = new HashMap<>();
-        cpgClass.getMethods()
-                .stream()
-                .filter(method -> method.getParent() == cpgClass)
-                .forEach(method -> methodStats.put(method, new MethodStat(method, cpg, helper)));
-        return Collections.unmodifiableMap(methodStats);
     }
 
     /**
