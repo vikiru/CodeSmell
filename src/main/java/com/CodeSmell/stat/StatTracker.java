@@ -61,7 +61,7 @@ public class StatTracker {
         this.distinctClassTypes = determineDistinctClassTypes(cpg);
         this.distinctRelations = determineDistinctRelations(cpg);
         this.attributeStats = createAttributeStats(helper);
-        this.methodStats = createMethodStats(helper);
+        this.methodStats = createMethodStats(cpg, helper);
         this.classStats = createClassStats(cpg, helper, attributeStats, methodStats);
         this.packageUse = determinePackageUsage(classStats);
         this.longParameterMethod = findLongParameterMethods(helper, 4);
@@ -146,12 +146,13 @@ public class StatTracker {
     }
 
     /**
+     * @param cpg
      * @param helper
      * @return
      */
-    private static Map<CPGClass.Method, MethodStat> createMethodStats(Helper helper) {
+    private static Map<CPGClass.Method, MethodStat> createMethodStats(CodePropertyGraph cpg, Helper helper) {
         Map<Method, MethodStat> methodStats = new HashMap<>();
-        helper.allMethods.forEach(method -> methodStats.put(method, new MethodStat(method, helper)));
+        helper.allMethods.forEach(method -> methodStats.put(method, new MethodStat(method, cpg, helper)));
         return Collections.unmodifiableMap(methodStats);
     }
 
