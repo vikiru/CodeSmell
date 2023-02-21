@@ -43,7 +43,7 @@ def assign_missing_class_info(class_dict, file_lines):
     class_modifiers = [
         modifier.strip() for modifier in modifiers_pattern.findall(class_declaration)
     ]
-    class_type = class_dict["classType"]
+    class_type = class_dict["classType"].strip()
     if "abstract" in class_modifiers:
         class_type = "abstract class"
 
