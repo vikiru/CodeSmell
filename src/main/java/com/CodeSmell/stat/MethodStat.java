@@ -5,6 +5,7 @@ import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
 import com.CodeSmell.parser.CPGClass.Method.Instruction;
 import com.CodeSmell.parser.CPGClass.Method.Parameter;
+import com.CodeSmell.parser.CodePropertyGraph;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,12 +49,12 @@ public class MethodStat {
      */
     public final List<Instruction> uniqueInstructions;
 
-    public MethodStat(Method method, Helper helper) {
+    public MethodStat(Method method, CodePropertyGraph cpg, Helper helper) {
         this.method = method;
         this.methodsWhichCallMethod = determineMethodUsage(method, helper);
         this.classesWhichCallMethod = determineClassMethodUsage(methodsWhichCallMethod);
-        this.totalAttributeCalls = determineTotalAttributeCalls(method, helper);
-        this.totalMethodCalls = determineTotalMethodCalls(method, helper);
+        this.totalAttributeCalls = determineTotalAttributeCalls(method, cpg, helper);
+        this.totalMethodCalls = determineTotalMethodCalls(method, cpg, helper);
         this.methodUsage = returnTotalUsage(methodsWhichCallMethod);
         this.parameterUsage = determineParameterUsage(method);
         this.uniqueInstructions = obtainUniqueInstructions(method, helper);
@@ -122,7 +123,7 @@ public class MethodStat {
      * @param helper The helper containing useful collections of elements within cpg
      * @return A map indicating which methods of each class were used within this method's instructions
      */
-    private static Map<CPGClass, Integer> determineTotalMethodCalls(Method method, Helper helper) {
+    private static Map<CPGClass, Integer> determineTotalMethodCalls(Method method, CodePropertyGraph cpg, Helper helper) {
         Map<CPGClass, Integer> totalMethodClassCalls = new HashMap<>();
         for (Method methodCall : method.getMethodCalls()) {
             Map<Method, Integer> methodUsage = determineMethodUsage(methodCall, helper);
@@ -130,6 +131,7 @@ public class MethodStat {
             totalMethodClassCalls.put(methodCall.getParent(),
                     totalMethodClassCalls.getOrDefault(methodCall.getParent(), 0) + count);
         }
+        cpg.getClasses().forEach(cpgClass -> totalMethodClassCalls.putIfAbsent(cpgClass, 0));
         return Collections.unmodifiableMap(totalMethodClassCalls);
     }
 
@@ -141,7 +143,7 @@ public class MethodStat {
      * @param helper The helper containing useful collections of elements within cpg
      * @return A map indicating which attributes of each class were used within this method's instructions
      */
-    private static Map<CPGClass, Integer> determineTotalAttributeCalls(Method method, Helper helper) {
+    private static Map<CPGClass, Integer> determineTotalAttributeCalls(Method method, CodePropertyGraph cpg, Helper helper) {
         Map<CPGClass, Integer> totalAttributeClassCalls = new HashMap<>();
         for (Attribute attributeCall : method.getAttributeCalls()) {
             Map<Method, Integer> attributeUsage = AttributeStat.determineAttributeUsage(attributeCall, helper);
@@ -149,6 +151,7 @@ public class MethodStat {
             totalAttributeClassCalls.put(attributeCall.getParent(),
                     totalAttributeClassCalls.getOrDefault(attributeCall.getParent(), 0) + count);
         }
+        cpg.getClasses().forEach(cpgClass -> totalAttributeClassCalls.putIfAbsent(cpgClass, 0));
         return Collections.unmodifiableMap(totalAttributeClassCalls);
     }
 
