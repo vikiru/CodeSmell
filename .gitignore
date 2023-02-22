@@ -2,6 +2,7 @@
 .idea
 .vscode
 *.iml
+*.pyc
 target
 src/main/python/cpgqls_client/__pycache__/*
 workspace

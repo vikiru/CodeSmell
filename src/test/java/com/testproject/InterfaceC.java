@@ -1,5 +1,5 @@
-package com.CodeSmell.testproject;
+package com.testproject;
 
 public interface InterfaceC {
-	public void doThing();
+    public void doThing();
 }

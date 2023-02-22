@@ -1,11 +1,12 @@
 package com.CodeSmell.parser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * A class that is meant to represent that packages that exist within a given codebase.
  */
-public final class Package {
+public final class Package implements Serializable {
 
     /**
      * The name of the package
@@ -42,11 +43,19 @@ public final class Package {
         classes.add(fileToAdd);
     }
 
+    @Override
+    public String toString() {
+        return "Package{" +
+                "packageName='" + packageName + '\'' +
+                ", files=" + files +
+                ", subPackages=" + subPackages +
+                '}';
+    }
 
     /**
      * A file that exists within a package, can contain 1 or more classes
      */
-    public static final class File {
+    public static final class File implements Serializable {
         /**
          * The name of the file (e.g. CPGClass.java)
          */
@@ -75,5 +84,15 @@ public final class Package {
         public static void addClass(ArrayList<CPGClass> classes, CPGClass cpgClassToAdd) {
             classes.add(cpgClassToAdd);
         }
+
+        @Override
+        public String toString() {
+            return "File{" +
+                    "fileName='" + fileName + '\'' +
+                    ", filePath='" + filePath + '\'' +
+                    ", classes=" + classes +
+                    '}';
+        }
     }
+
 }

@@ -16,4 +16,6 @@ module jfx {
     opens com.CodeSmell.smell to com.google.gson, javafx.fxml;
     exports com.CodeSmell.view;
     opens com.CodeSmell.view to com.google.gson, javafx.fxml;
+    exports com.CodeSmell.stat;
+    opens com.CodeSmell.stat to com.google.gson, javafx.fxml;
 }

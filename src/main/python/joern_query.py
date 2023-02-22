@@ -10,16 +10,6 @@ from cpgqls_client import CPGQLSClient, import_code_query
 import logging
 
 
-# Return all of the unique collection types present within the code base
-def return_collection_types(all_attributes):
-    collection_types = {
-        attribute_dict["packageName"].replace("java.util.", "").strip()
-        for attribute_dict in all_attributes
-        if "java.util" in attribute_dict["packageName"]
-    }
-    return collection_types
-
-
 # Return all distinct package names as a set
 def return_all_distinct_package_names(all_classes):
     package_names = {class_dict["packageName"] for class_dict in all_classes}
@@ -28,10 +18,11 @@ def return_all_distinct_package_names(all_classes):
 
 # Read a file from the file path that Joern gives and return a list of all the lines
 def read_file(file_path):
-    file = open(file_path, "r")
-    lines = file.read().splitlines()
-    file.close()
-    return lines
+    if os.path.exists(file_path):
+        file = open(file_path, "r")
+        lines = file.read().splitlines()
+        file.close()
+        return lines
 
 
 # Assign missing class info to each class dictionary
@@ -52,7 +43,7 @@ def assign_missing_class_info(class_dict, file_lines):
     class_modifiers = [
         modifier.strip() for modifier in modifiers_pattern.findall(class_declaration)
     ]
-    class_type = class_dict["classType"]
+    class_type = class_dict["classType"].strip()
     if "abstract" in class_modifiers:
         class_type = "abstract class"
 
@@ -79,13 +70,16 @@ def assign_missing_class_info(class_dict, file_lines):
             attribute_modifiers.append("static")
             attribute_type = existing_type
 
-        attribute["parentClassName"] = class_name
         attribute["code"] = attribute_code
         attribute["attributeType"] = attribute_type
         attribute["modifiers"] = attribute_modifiers
 
+    # Cleanup default constructors
     for method in class_dict["methods"]:
-        method["parentClassName"] = class_name
+        if method["name"] == "" and method["returnType"] == "<empty>":
+            method["name"] = class_name
+            method["methodBody"] = class_name + "()"
+            method["returnType"] = ""
 
     existing_full_name = class_dict["classFullName"].replace(package_name, "")
     new_full_name = existing_full_name.replace(".", "").replace("$", ".").strip()
@@ -126,11 +120,11 @@ def create_attribute_dict(curr_attribute):
         type = type[index_nested + 1: len(type)]
 
     curr_attribute_dict = {
-        "parentClassName": "",
         "name": attribute_name,
+        "parentClass": [{}],
+        "packageName": package_name,
         "code": "",
         "lineNumber": attribute_line_number,
-        "packageName": package_name,
         "modifiers": [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": type,
         "typeList": [],
@@ -142,96 +136,98 @@ def create_attribute_dict(curr_attribute):
 def create_method_dict(curr_method):
     method_name = curr_method["_1"]
     method_code = curr_method["_2"]
-    method_line_number = int(curr_method["_3"])
-    method_line_number_end = int(curr_method["_4"])
-    total_lines = method_line_number_end - method_line_number
-    method_signature = curr_method["_5"]
-    method_modifiers = [modifier.lower() for modifier in curr_method["_6"]]
-    if not method_modifiers:
-        method_modifiers = ["package private"]
-    method_parameters = curr_method["_7"]
-    method_instructions = curr_method["_8"]
+    # Default values for default constructor
+    method_line_number = 0
+    method_line_number_end = 0
+    total_lines = 0
+    method_modifiers = [modifier.lower() for modifier in curr_method["_5"] if modifier != "CONSTRUCTOR"]
+    method_parameters = []
+    method_instructions = []
+    if len(curr_method) == 7:
+        method_line_number = int(curr_method["_3"])
+        method_line_number_end = int(curr_method["_4"])
+        total_lines = (method_line_number_end - method_line_number) + 1
+        if not method_modifiers and method_name != "<init>":
+            method_modifiers = ["package private"]
+        method_parameters = curr_method["_6"]
+        method_instructions = curr_method["_7"]
 
-    if "<empty>" in method_code or "<lambda>" in method_name:
-        return
-    else:
-        # Get the modifiers, return type and the method body from the full method body provided by Joern.
-        modifiers_pattern = re.compile(
-            "(private|public|protected|static|final|synchronized|virtual|volatile|abstract|native)"
-        )
-        regex_pattern_modifiers = modifiers_pattern.findall(method_code)
+    # Get the modifiers, return type and the method body from the full method body provided by Joern.
+    modifiers_pattern = re.compile(
+        "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
+    )
+    regex_pattern_modifiers = modifiers_pattern.findall(method_code)
 
-        method_with_return = re.sub(modifiers_pattern, "", method_code).strip()
+    method_with_return = re.sub(modifiers_pattern, "", method_code).strip()
 
-        method_name_pattern = re.compile(r"(^[a-zA-z]*)")
+    method_name_pattern = re.compile(r"(^[a-zA-z]*)")
 
-        # Get the return type of the method, if any.
-        return_type_pattern = re.compile(r"(^[a-zA-z]*\s)")
-        method_return_type = return_type_pattern.findall(method_with_return)
-        return_type = ""
-        if method_return_type:
-            return_type = method_return_type[0].strip()
+    # Get the return type of the method, if any.
+    return_type_pattern = re.compile(r"(^[a-zA-z]*\s)")
+    method_return_type = return_type_pattern.findall(method_with_return)
+    return_type = ""
+    if method_return_type:
+        return_type = method_return_type[0].strip()
 
-        # Get the method body with any method parameters.
-        method_body = re.sub(return_type_pattern, "", method_with_return)
-        if not return_type:
-            # Handle all Collection types (Set, HashMap, ArrayList, etc)
-            index = method_body.find(">")
-            return_type = method_body[0: index + 1]
-            if "(" in return_type or not return_type:
-                return_type = ""
-            if return_type in method_body:
-                method_body = method_body.replace(return_type, "").strip()
+    # Get the method body with any method parameters.
+    method_body = re.sub(return_type_pattern, "", method_with_return)
+    if not return_type:
+        # Handle all Collection types (Set, HashMap, ArrayList, etc)
+        index = method_body.find(">")
+        return_type = method_body[0: index + 1]
+        if "(" in return_type or not return_type:
+            return_type = ""
+        if return_type in method_body:
+            method_body = method_body.replace(return_type, "").strip()
 
-        # If the method is a constructor, find the name of the class.
-        constructor_name = method_name_pattern.findall(method_body)[0]
+    # If the method is a constructor, find the name of the class.
+    constructor_name = method_name_pattern.findall(method_body)[0]
 
-        # Return a list containing dictionaries for each parameter within the method body
-        def get_method_parameters(parameters):
-            parameters_list = []
-            for parameter in parameters:
-                evaluation_strategy = parameter["_1"]
-                code = parameter["_2"]
-                type = code.split(" ")[0]
-                name = code.split(" ")[1]
-                parameter_dict = {
-                    "code": code,
-                    "name": name,
-                    "type": type,
-                    "typeList": [],
-                }
-                parameters_list.append(parameter_dict)
-            return parameters_list
+    # Return a list containing dictionaries for each parameter within the method body
+    def get_method_parameters(parameters):
+        parameters_list = []
+        for parameter in parameters:
+            code = parameter["_1"]
+            type = code.split(" ")[0]
+            name = code.split(" ")[1]
+            parameter_dict = {
+                "code": code,
+                "name": name,
+                "type": type,
+                "typeList": [],
+            }
+            parameters_list.append(parameter_dict)
+        return parameters_list
 
-        def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
-            set_regex = set(regex_pattern_modifiers)
-            set_joern = set(joern_modifiers)
-            difference = set_regex - set_joern
-            return regex_pattern_modifiers + list(difference)
+    def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
+        regex_pattern_modifiers = [mod.strip() for mod in regex_pattern_modifiers]
+        joern_modifiers = [mod.strip() for mod in joern_modifiers]
+        final_set = set(regex_pattern_modifiers).union(set(joern_modifiers))
+        final_list = list(final_set)
+        return final_list
 
-        curr_method_dict = {
-            "parentClassName": "",
-            "code": method_code,
-            "lineNumberStart": method_line_number,
-            "lineNumberEnd": method_line_number_end,
-            "totalMethodLength": total_lines,
-            "name": method_name.replace("<init>", constructor_name),
-            "modifiers": get_method_modifiers(
-                regex_pattern_modifiers, method_modifiers
-            ),
-            "returnType": return_type,
-            "methodBody": method_body,
-            "parameters": get_method_parameters(method_parameters),
-            "instructions": list(
-                filter(
-                    None,
-                    list(map(create_instruction_dict, method_instructions)),
-                )
-            ),
-            "methodCalls": [],
-            "attributeCalls": [],
-        }
-        return curr_method_dict
+    curr_method_dict = {
+        "name": method_name.replace("<init>", constructor_name),
+        "parentClass": [{}],
+        "methodBody": method_body,
+        "modifiers": get_method_modifiers(
+            regex_pattern_modifiers, method_modifiers
+        ),
+        "parameters": get_method_parameters(method_parameters),
+        "returnType": return_type,
+        "lineNumberStart": method_line_number,
+        "lineNumberEnd": method_line_number_end,
+        "totalMethodLength": total_lines,
+        "instructions": list(
+            filter(
+                None,
+                list(map(create_instruction_dict, method_instructions)),
+            )
+        ),
+        "methodCalls": [],
+        "attributeCalls": [],
+    }
+    return curr_method_dict
 
 
 # For every method's instruction, create a dictionary and return it.
@@ -240,45 +236,41 @@ def create_instruction_dict(curr_instruction):
     instruction_code = curr_instruction["_2"]
     instruction_line_number = curr_instruction["_3"]
     instruction_call_full_names = curr_instruction["_4"]
-    instruction_call_type_full_name = curr_instruction["_5"]
 
-    if "<empty>" in instruction_code:
-        return
-    else:
-        # Get the method call in each line of code, if any.
-        method_call_pattern = re.compile(r"([a-zA-Z]*\()")
-        calls = method_call_pattern.findall(instruction_code)
-        method_call = ""
-        if calls and instruction_label == "CALL":
-            method_call = calls[0].replace("(", "")
-            method_call = method_call.replace("super", "<init>")
-            call_list = [
-                item.split(":")[0]
-                for item in instruction_call_full_names
-                if method_call in item
-                   and "java" not in item
-            ]
-            # Account for cases where two classes could have the same method names (additionally exclude names
-            # matching java): ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell:
-            # "ClassA.getA" was called. instead of just "getA"
-            if call_list and method_call:
-                method_call = call_list[0]
-                index = method_call.rfind(".")
-                method_call = method_call[:index] + method_call[index:].replace(
-                    ".", "$"
-                )
-                method_call = method_call.split(".")[-1].replace("$", ".")
-                class_name, method_name = method_call.split(".")
-                method_call = method_call.replace("<init>", class_name)
-            else:
-                method_call = ""
-        curr_instruction_dict = {
-            "label": instruction_label,
-            "code": instruction_code.replace("\r\n", ""),
-            "lineNumber": int(instruction_line_number),
-            "methodCall": method_call,
-        }
-        return curr_instruction_dict
+    # Get the method call in each line of code, if any.
+    method_call_pattern = re.compile(r"([a-zA-Z]*\()")
+    calls = method_call_pattern.findall(instruction_code)
+    method_call = ""
+    acceptable_labels = ["CALL", "RETURN"]
+    if calls and instruction_label in acceptable_labels:
+        method_call = calls[0].replace("(", "")
+        method_call = method_call.replace("super", "<init>")
+        call_list = [
+            item.split(":")[0]
+            for item in instruction_call_full_names
+            if method_call in item
+        ]
+        # Account for cases where two classes could have the same method names (additionally exclude names
+        # matching java): ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell:
+        # "ClassA.getA" was called. instead of just "getA"
+        if call_list and method_call:
+            method_call = call_list[0]
+            index = method_call.rfind(".")
+            method_call = method_call[:index] + method_call[index:].replace(
+                ".", "$"
+            )
+            method_call = method_call.split(".")[-1].replace("$", ".")
+            class_name, method_name = method_call.split(".")[0], method_call.split(".")[1]
+            method_call = method_call.replace("<init>", class_name)
+        else:
+            method_call = ""
+    curr_instruction_dict = {
+        "label": instruction_label,
+        "code": instruction_code.replace("\r\n", ""),
+        "lineNumber": int(instruction_line_number),
+        "methodCall": method_call,
+    }
+    return curr_instruction_dict
 
 
 # For every class, create a dictionary and return it.
@@ -290,10 +282,10 @@ def create_class_dict(curr_class):
     line_number = curr_class["_5"]
     class_modifiers = curr_class["_6"]
     class_attributes = curr_class["_7"]
-    class_methods = curr_class["_8"]
-    file_name = curr_class["_9"]
+    file_name = curr_class["_8"]
+    class_methods = curr_class["_9"]
 
-    # Get the type of the object, either a interface, class, enum or abstract class.
+    # Get the type of the object, either an interface, class, enum or abstract class.
     def get_type(declaration):
         if "abstract class" in declaration:
             return "abstract class"
@@ -336,16 +328,14 @@ def create_class_dict(curr_class):
 
 # Execute a single query to retrieve all the class names within the source code
 def retrieve_all_class_names():
-    query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).name.toJson'
+    query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).fullName.toJson'
     result = client.execute(query)
     class_names = []
-    if result["success"]:
-        print(result)
+    if result["success"] and result["stdout"]:
         index = result["stdout"].index('"')
         all_names = json.loads(
             json.loads(result["stdout"][index: len(result["stdout"])])
         )
-        # add packages (node.fullName to make sure any classes that inherit from external libraries are removed)
         class_names = [name.replace("$", ".") for name in all_names]
     else:
         print("joern_query :: Retrieve class names failure", file=sys.stderr)
@@ -355,46 +345,42 @@ def retrieve_all_class_names():
 
 # Execute a single query to get all the data of a class
 def retrieve_class_data(name):
-    class_query = (
-            'cpg.typeDecl.isExternal(false).name("'
-            + name
-            + '").map(node => (node.name, node.fullName, '
-              "node.inheritsFromTypeFullName.l, node.code, "
-              "node.lineNumber,"
-              "node.astChildren.isModifier.modifierType.l, "
-              "node.astChildren.isMember.l.map(node => (node.name, "
-              "node.typeFullName,"
-              "node.code, node.lineNumber, "
-              "node.astChildren.isModifier.modifierType.l)),"
-              "node.astChildren.isMethod.filter(node => "
-              "node.lineNumber != None"
-              "&& node.lineNumberEnd != None).l.map(node => ("
-              "node.name, node.code,"
-              "node.lineNumber, node.lineNumberEnd, node.signature, "
-              "node.astChildren.isModifier.modifierType.l, "
-              "node.astChildren.isParameter.filter(node => "
-              "!node.name.contains("
-              '"this")).l.map(node => (node.evaluationStrategy, '
-              "node.code, node.name, "
-              "node.typeFullName)), node.ast.filter(node => node.lineNumber != None).l.map(node => ("
-              "node.label, node.code,"
-              "node.lineNumber, node.ast.isCall.methodFullName.l, node.ast.isCall.typeFullName.l)))), node.filename)).toJson"
-    )
+    class_query = 'cpg.typeDecl.isExternal(false).fullName("' + name \
+                  + '").map(node => (node.name, node.fullName, node.inheritsFromTypeFullName.l, node.code, ' \
+                    "node.lineNumber, node.astChildren.isModifier.modifierType.l, node.astChildren.isMember.l.map(" \
+                    "node => (node.name, node.typeFullName, node.code, node.lineNumber, " \
+                    "node.astChildren.isModifier.modifierType.l)), node.filename," \
+                    "node.astChildren.isMethod.filter(node => " \
+                    '!node.code.contains("<lambda>") && ' \
+                    '!node.name.contains("<clinit>")).l.map(' \
+                    "node => (node.name, node.code, " \
+                    "node.lineNumber, node.lineNumberEnd, " \
+                    "node.astChildren.isModifier" \
+                    ".modifierType.l, " \
+                    "node.astChildren.isParameter.filter(" \
+                    "node => !node.name.contains(" \
+                    '"this")).l.map(node => (node.code, ' \
+                    "node.name, node.typeFullName)), " \
+                    "node.ast.filter(node => node.lineNumber != None).l.map(node => (node.label, " \
+                    "node.code, node.lineNumber, " \
+                    "node.ast.isCall.methodFullName.l" \
+                    ")))))).toJson"
     start = time.time()
     result = client.execute(class_query)
     end = time.time()
     if result["success"] and result["stdout"] is not "":
+        index = result["stdout"].index('"')
+        # Returns a list of dictionaries, extract first element of that list
+        joern_class_data = json.loads(
+            json.loads(result["stdout"][index: len(result["stdout"])])
+        )
+        name = joern_class_data[0]["_1"]
         logging.info(
             "The class data for "
             + name.replace(".", "$")
             + " has been retrieved. Completed in {0} seconds.".format(
                 format(end - start, ".2f")
             )
-        )
-        index = result["stdout"].index('"')
-        # Returns a list of dictionaries, extract first element of that list
-        joern_class_data = json.loads(
-            json.loads(result["stdout"][index: len(result["stdout"])])
         )
         class_dict = create_class_dict(joern_class_data[0])
     else:
@@ -414,53 +400,16 @@ def clean_up_external_classes(source_code_json):
                and "java" not in class_name
         ]
         if not filtered_inherits:
-            class_dict["inheritsFrom"] = [
-                className.split(".")[-1] for className in class_dict["inheritsFrom"]
-            ]
+            class_dict["inheritsFrom"] = []
             new_dict["classes"].append(class_dict)
     return new_dict
-
-
-# Update all the type lists for each attribute and method parameter within cpg
-def update_type_lists(source_code_json):
-    all_attributes = [
-        attribute
-        for class_dict in source_code_json["classes"]
-        for attribute in class_dict["attributes"]
-    ]
-    all_parameters = [
-        parameter
-        for class_dict in source_code_json["classes"]
-        for method in class_dict["methods"]
-        for parameter in method["parameters"]
-    ]
-    collection_types = return_collection_types(all_attributes)
-    regex_str = "|".join(collection_types) + "|\[]|<|>|,"
-    regex_pattern = re.compile(regex_str)
-
-    def return_type_lists(type_to_analyze):
-        type_list = [type_to_analyze]
-        new_type = re.sub(regex_pattern, "", type_to_analyze)
-        if len(new_type) != len(type_to_analyze):
-            type_list = new_type.split()
-        return type_list
-
-    # Obtain type lists for all attributes
-    for attribute in all_attributes:
-        attribute["typeList"] = return_type_lists(attribute["attributeType"])
-    # Obtain type lists for all method parameters
-    for method_parameter in all_parameters:
-        method_parameter["typeList"] = return_type_lists(method_parameter["type"])
-    return source_code_json
 
 
 def source_code_json_creation(class_names):
     source_code_json = {"relations": [], "classes": []}
     for class_name in class_names:
         source_code_json["classes"].append(retrieve_class_data(class_name))
-    # Get all the type lists of method params & attributes within cpg (i.e. HashMap<CPGClass, Integer> should return
-    # ["CPGClass", "Integer"]
-    source_code_json = update_type_lists(source_code_json)
+
     # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
     # code base)
     source_code_json = clean_up_external_classes(source_code_json)
@@ -477,7 +426,7 @@ if __name__ == "__main__":
     )
     total_time = 0
 
-    server_endpoint = "localhost:" + sys.argv[-1]
+    server_endpoint = "127.0.0.1:" + sys.argv[-1]
     project_dir = sys.argv[-2]
     project_name = "analyzedProject"
 

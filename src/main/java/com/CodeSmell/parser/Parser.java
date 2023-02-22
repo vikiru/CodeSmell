@@ -1,12 +1,8 @@
 package com.CodeSmell.parser;
 
-import com.CodeSmell.parser.CPGClass.Attribute;
-import com.CodeSmell.parser.CPGClass.Method;
-import com.CodeSmell.smell.StatTracker;
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.CodeSmell.parser.CPGClass.*;
+import com.CodeSmell.stat.Helper;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
@@ -19,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * The Parser class that reads in the JSON source code of the project that is being analysed and then
- * converts the JSON code to a code property object that can be
+ * converts the JSON code to a code property object
  */
 public class Parser {
 
@@ -47,7 +43,8 @@ public class Parser {
         }
 
         public boolean shouldSkipField(FieldAttributes f) {
-            return listParameterizedType.equals(f.getDeclaredType());
+            return false;
+            //return listParameterizedType.equals(f.getDeclaredType());
         }
     }
 
@@ -125,7 +122,7 @@ public class Parser {
                 e.printStackTrace();
                 System.exit(1);
             }
-            cpg = assignRelationships(cpg);
+            updateCPG(cpg);
             writeBackup(cpg);
 
         } else {
@@ -162,139 +159,230 @@ public class Parser {
         }
     }
 
-    protected static CodePropertyGraph assignRelationships(CodePropertyGraph cpg) {
-        cpg = assignProperAttributesAndMethods(cpg, 2);
+    /**
+     * Update the properties of each CPGClass and additionally add relations and packages to the cpg.
+     *
+     * @param cpg
+     */
+    protected static void updateCPG(CodePropertyGraph cpg) {
+        updateCPGClassProperties(cpg);
         RelationshipManager relationshipManager = new RelationshipManager(cpg);
-        cpg = relationshipManager.cpg;
-        return cpg;
+        PackageManager packageManager = new PackageManager(cpg);
     }
 
     /**
-     * Iterates through the provided CodePropertyGraph object, calling helper
-     * methods to update the attributes and methods. Once each attribute and method is updated,
-     * a new CPGClass is created containing these new Attribute and Method objects. This class is then added to a
-     * new CodePropertyGraph which will finally be returned at the end.
+     * Updates the properties of each CPGClass within the CPG. This includes its inheritFrom list, updating
+     * the parent of all of its attributes and methods, updating the type lists of each attribute and parameter,
+     * and finally, updating the attribute and method calls of each method.
      *
-     * @param cpg        - The CodePropertyGraph object containing the updated Attribute and Methods
-     * @param iterations - The number of iterations that the method must be called in order to properly update fields and methods.
+     * @param cpg - The CodePropertyGraph containing the source code information
+     */
+    protected static void updateCPGClassProperties(CodePropertyGraph cpg) {
+        LinkedHashMap<Method, ArrayList<Method>> methodCallMap = new LinkedHashMap<>();
+        LinkedHashMap<Method, ArrayList<Attribute>> attributeCallMap = new LinkedHashMap<>();
+        // Set parent classes for all attributes and methods
+        cpg.getClasses()
+                .forEach(cpgClass -> cpgClass.getAttributes()
+                        .forEach(attribute -> attribute.setParent(cpgClass)));
+        cpg.getClasses()
+                .forEach(cpgClass -> cpgClass.getMethods()
+                        .forEach(method -> method.setParent(cpgClass)));
+        // Set inheritsFrom lists for all classes within cpg
+        // Additionally, if a class inheritsFrom a superclass, add all of its attributes and methods here.
+        cpg.getClasses().forEach(cpgClass -> cpgClass.setInheritsFrom(returnInheritsFrom(cpgClass, cpg)));
+
+        // Set typeLists for all attributes
+        cpg.getClasses()
+                .forEach(cpgClass -> cpgClass.getAttributes()
+                        .forEach(attribute -> attribute.setTypeList(returnTypeLists(attribute.attributeType, cpg))));
+        for (CPGClass cpgClass : cpg.getClasses()) {
+            for (Method method : cpgClass.getMethods()) {
+                // Set typeLists for all parameters of the method
+                method.parameters.forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
+                // Get the attribute and method calls of each method
+                methodCallMap.put(method, returnMethodCalls(cpg, method));
+                attributeCallMap.put(method, returnAttributeCalls(cpg, method));
+            }
+        }
+        // Finally, set attribute calls and method calls of all methods.
+        methodCallMap.forEach(Method::setMethodCalls);
+        attributeCallMap.forEach(Method::setAttributeCalls);
+    }
+
+
+    /**
+     * Return all the method calls that a method calls.
+     *
+     * @param cpg
+     * @param methodToUpdate
      * @return
      */
-    protected static CodePropertyGraph assignProperAttributesAndMethods(CodePropertyGraph cpg, int iterations) {
-        CodePropertyGraph graph = new CodePropertyGraph();
-        for (CPGClass cpgClass : cpg.getClasses()) {
-            ArrayList<Attribute> properAttributes = new ArrayList<>(Arrays.asList(cpgClass.attributes));
-            ArrayList<Method> properMethods = new ArrayList<>();
-            for (Method m : cpgClass.methods) {
-                int iterationNumber = (iterations - 1) == 0 ? 2 : 1;
-                Method properMethod = updateMethodWithMethodCalls(cpg, m, iterationNumber);
-                properMethods.add(properMethod);
-            }
-            CPGClass properClass = new CPGClass(cpgClass.name, cpgClass.classFullName, cpgClass.packageName,
-                    cpgClass.importStatements, cpgClass.code, cpgClass.lineNumber, cpgClass.modifiers,
-                    cpgClass.classType, cpgClass.filePath, cpgClass.fileLength, cpgClass.nonEmptyLines,
-                    cpgClass.emptyLines, cpgClass.inheritsFrom,
-                    properAttributes.toArray(new Attribute[properAttributes.size()]),
-                    properMethods.toArray(new Method[properMethods.size()]));
-            graph.addClass(properClass);
-        }
-        if (iterations - 1 == 0) {
-            return graph;
-        } else return assignProperAttributesAndMethods(graph, iterations - 1);
-    }
-
-    /**
-     * Updates a given method with its proper methodCalls, requires two iterations to get all the proper method
-     * calls of each method called within this list.
-     *
-     * @param cpg            - The CodePropertyGraph containing the source code information
-     * @param methodToUpdate - The method that is having its methodCalls field updated
-     * @return The updated method with its methodCalls
-     */
-    protected static Method updateMethodWithMethodCalls(CodePropertyGraph cpg,
-                                                        Method methodToUpdate,
-                                                        int iterationNumber) {
+    protected static ArrayList<Method> returnMethodCalls(CodePropertyGraph cpg, Method methodToUpdate) {
         // Helper variables
-        StatTracker.Helper helper = new StatTracker.Helper(cpg);
-        ArrayList<Method> allMethodsInCPG = helper.allMethods;
+        Helper helper = new Helper(cpg);
         ArrayList<Method> methodCalls = new ArrayList<>();
         // Get all possible calls where the instruction's methodCall is not empty
         Set<String> allDistinctCalls = new HashSet<>();
-        Arrays.stream(methodToUpdate.instructions).
-                filter(instruction -> instruction.label.equals("CALL")
-                        && (!instruction.methodCall.equals(""))).
-                forEach(ins -> allDistinctCalls.add(ins.methodCall));
-        Set<String> allLocalTypes = new HashSet<>();
+        methodToUpdate.instructions
+                .stream()
+                .filter(instruction -> instruction.label.equals("CALL")
+                        && (!instruction.methodCall.equals("")))
+                .forEach(ins -> allDistinctCalls.add(ins.methodCall));
         // Add all the method calls.
         for (String call : allDistinctCalls) {
-            String className = call.split("\\.")[0].trim();
-            String methodName = call.split("\\.")[1].trim();
-            var methodToAdd = allMethodsInCPG.stream().
-                    filter(method -> (method.parentClassName.equals(className) && method.name.equals(methodName))).
-                    collect(Collectors.toList());
-            if (!methodToAdd.isEmpty()) {
-                methodCalls.add(methodToAdd.get(0));
-                // Add local variables to a temp set to be used to find attribute usage.
-                if (className.equals(methodName)) {
-                    allLocalTypes.add(className);
+            String[] splitted = call.split("\\.");
+            if (splitted.length == 2) {
+                String className = splitted[0].trim();
+                String methodName = splitted[1].trim();
+                CPGClass cpgClass;
+                var classResult = cpg.getClasses()
+                        .stream()
+                        .filter(cpgToFind -> cpgToFind.name.equals(className))
+                        .limit(2)
+                        .collect(Collectors.toList());
+                if (!classResult.isEmpty()) {
+                    cpgClass = classResult.get(0);
+                    var methodCheck = cpgClass.getMethods()
+                            .stream()
+                            .filter(method -> method.name.equals(methodName))
+                            .limit(2)
+                            .collect(Collectors.toList());
+                    if (!methodCheck.isEmpty()) {
+                        methodCalls.add(methodCheck.get(0));
+                    }
                 }
             }
         }
-        ArrayList<Attribute> attributeUsage = updateMethodWithAttributeUsage(helper, methodToUpdate, allLocalTypes);
-        if (iterationNumber == 1) {
-            Method properMethod = new Method(methodToUpdate.name, methodToUpdate.parentClassName, methodToUpdate.methodBody,
-                    methodToUpdate.modifiers, methodToUpdate.parameters, methodToUpdate.returnType, methodToUpdate.lineNumberStart,
-                    methodToUpdate.lineNumberEnd, methodToUpdate.totalMethodLength, methodToUpdate.instructions);
-            properMethod.setMethodCalls(methodCalls);
-            properMethod.setAttributeCalls(attributeUsage);
-            return properMethod;
-        } else {
-            for (Method m : methodToUpdate.getMethodCalls()) {
-                var result = allMethodsInCPG.stream().
-                        filter(method -> method.name.equals(m.name) && method.parentClassName.equals(m.parentClassName))
-                        .collect(Collectors.toList());
-                methodCalls.add(result.get(0));
-            }
-            methodToUpdate.setMethodCalls(methodCalls);
-            methodToUpdate.setAttributeCalls(attributeUsage);
-            return methodToUpdate;
-        }
+        return methodCalls;
     }
 
-    protected static ArrayList<Attribute> updateMethodWithAttributeUsage(StatTracker.Helper helper,
-                                                                         Method methodToUpdate,
-                                                                         Set<String> allLocalTypes) {
+    /**
+     * Return all the attributes that a method calls
+     *
+     * @param methodToUpdate
+     * @return
+     */
+    protected static ArrayList<Attribute> returnAttributeCalls(CodePropertyGraph cpg, Method methodToUpdate) {
+        Helper helper = new Helper(cpg);
         Set<CPGClass> allPossibleClasses = new HashSet<>();
+        // Get all local classes created
+        Set<CPGClass> allLocalTypes = new HashSet<>();
+        methodToUpdate.getMethodCalls()
+                .stream()
+                .filter(method -> method.name.equals(method.getParent().name))
+                .forEach(method -> allLocalTypes.add(method.getParent()));
         Set<Attribute> possibleAttributes = new HashSet<>();
-        ArrayList<String> allClassNames = helper.allClassNames;
         HashMap<String, Attribute> attributes = new HashMap<>();
         HashMap<String, Integer> fieldLine = new HashMap<>();
-        Arrays.stream(methodToUpdate.instructions).filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
-                forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
-        CPGClass methodParent = helper.getClassFromName(methodToUpdate.parentClassName);
+        methodToUpdate.instructions
+                .stream()
+                .filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER"))
+                .forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
+        CPGClass methodParent = methodToUpdate.getParent();
         allPossibleClasses.add(methodParent);
         boolean classInherits = methodParent.code.contains("extends");
         if (classInherits) {
-            int index = methodParent.code.indexOf("extends ");
-            String superClassName = methodParent.code.substring(index).
-                    replace("extends", "").trim().split(" ")[0];
-            CPGClass superClass = helper.getClassFromName(superClassName);
-            Arrays.stream(superClass.attributes).filter(attr -> fieldLine.containsKey(attr.name)).
-                    forEach(possibleAttributes::add);
-            allPossibleClasses.add(superClass);
+            var result = methodParent.getInheritsFrom()
+                    .stream()
+                    .filter(cpgToFind -> !cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                    .collect(Collectors.toList());
+            if (!result.isEmpty()) {
+                allPossibleClasses.add(result.get(0));
+            }
         }
-        Arrays.stream(methodParent.attributes).filter(attr -> fieldLine.containsKey(attr.name)).forEach(possibleAttributes::add);
+        methodParent.getAttributes().stream().filter(attr -> fieldLine.containsKey(attr.name)).forEach(possibleAttributes::add);
         possibleAttributes.forEach(attr -> attributes.put(attr.name, attr));
         attributes.keySet().forEach(fieldLine::remove);
-        Arrays.stream(methodParent.attributes).filter(attr -> allClassNames.contains(attr.attributeType)).
-                forEach(attr -> allPossibleClasses.add(helper.getClassFromName(attr.attributeType)));
-        Arrays.stream(methodToUpdate.parameters).filter(param -> allClassNames.contains(param.type)).
-                forEach(param -> allPossibleClasses.add(helper.getClassFromName(param.type)));
-        allLocalTypes.stream().filter(allClassNames::contains).forEach(local -> allPossibleClasses.add(helper.getClassFromName(local)));
+        methodParent.getAttributes()
+                .stream()
+                .filter(attr -> attr.getTypeList().size() == 1)
+                .forEach(attr -> allPossibleClasses.addAll(attr.getTypeList()));
+        methodToUpdate.parameters
+                .stream()
+                .filter(parameter -> parameter.getTypeList().size() == 1)
+                .forEach(parameter -> allPossibleClasses.addAll(parameter.getTypeList()));
+        Set<String> staticClasses = new HashSet<String>();
+        methodToUpdate.instructions
+                .stream()
+                .filter(instruction -> instruction.label.equals("IDENTIFIER") && helper.allClassNames.contains(instruction.code))
+                .forEach(instruction -> staticClasses.add(instruction.code));
+        for (String className : staticClasses) {
+            var classSearch = cpg.getClasses()
+                    .stream()
+                    .filter(cpgClass -> cpgClass.name.equals(className))
+                    .limit(2)
+                    .collect(Collectors.toList());
+            if (!classSearch.isEmpty()) {
+                allPossibleClasses.add(classSearch.get(0));
+            }
+        }
+        allPossibleClasses.addAll(allLocalTypes);
         for (CPGClass cpgClass : allPossibleClasses) {
-            Arrays.stream(cpgClass.attributes).filter(attr -> fieldLine.containsKey(attr.name) && attr.code.contains("public")).
-                    forEach(possibleAttributes::add);
+            cpgClass.getAttributes()
+                    .stream()
+                    .filter(attr -> fieldLine.containsKey(attr.name) && attr.code.contains("public"))
+                    .forEach(possibleAttributes::add);
         }
         possibleAttributes.forEach(attr -> attributes.put(attr.name, attr));
         return new ArrayList<>(attributes.values());
+    }
+
+
+    /**
+     * Return the list of CPGClasses that a given CPGClass inherits from (either interfaces or class / abstract class)
+     */
+    protected static ArrayList<CPGClass> returnInheritsFrom(CPGClass cpgClass, CodePropertyGraph cpg) {
+        String[] code = cpgClass.code.replaceAll(",", " ").split(" ");
+        ArrayList<CPGClass> inheritsFrom = new ArrayList<>();
+        for (String splitStr : code) {
+            var classFindResult = cpg.getClasses()
+                    .stream()
+                    .filter(cpgToFind -> cpgToFind.name.equals(splitStr)
+                            && !cpgToFind.name.equals(cpgClass.name))
+                    .limit(2)
+                    .collect(Collectors.toList());
+            if (!classFindResult.isEmpty()) {
+                inheritsFrom.add(classFindResult.get(0));
+            }
+        }
+        // Add all super class attributes and methods
+        var inheritanceCheck = inheritsFrom
+                .stream()
+                .filter(cpgToFind -> !cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                .collect(Collectors.toList());
+        if (!inheritanceCheck.isEmpty()) {
+            CPGClass superClass = inheritanceCheck.get(0);
+            Set<Attribute> allAttributes = new LinkedHashSet<>(cpgClass.getAttributes());
+            Set<Method> allMethods = new LinkedHashSet<>(cpgClass.getMethods());
+            allAttributes.addAll(superClass.getAttributes());
+            allMethods.addAll(superClass.getMethods());
+            cpgClass.setAttributes(new ArrayList<>(allAttributes));
+            cpgClass.setMethods(new ArrayList<>(allMethods));
+        }
+        return inheritsFrom;
+    }
+
+    /**
+     * Return all the types (CPGClass) that are associated within a given string belonging to a parameter or
+     * attribute
+     *
+     * @param type
+     * @param cpg
+     * @return
+     */
+    protected static ArrayList<CPGClass> returnTypeLists(String type, CodePropertyGraph cpg) {
+        type = type.replace("<", " ").replace(">", " ").replace("[]", "");
+        String[] splitStr = type.split(" ");
+        Set<CPGClass> distinctTypes = new HashSet<>();
+        for (String str : splitStr) {
+            var typeCheck = cpg.getClasses()
+                    .stream()
+                    .filter(cpgClass -> cpgClass.name.equals(str) || cpgClass.classFullName.equals(str))
+                    .collect(Collectors.toList());
+            if (!typeCheck.isEmpty()) {
+                distinctTypes.add(typeCheck.get(0));
+            }
+        }
+        return new ArrayList<>(distinctTypes);
     }
 }
