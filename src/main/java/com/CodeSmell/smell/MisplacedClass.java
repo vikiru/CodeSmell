@@ -11,20 +11,28 @@ import java.util.Map;
 public class MisplacedClass extends Smell{
 
     public static StatTracker stats;
-
-    protected MisplacedClass(String name, CodePropertyGraph cpg) {
+    ArrayList<CPGClass> misplacedClasses = new ArrayList<>();
+    public MisplacedClass(String name, CodePropertyGraph cpg) {
         super(name, cpg);
         stats = new StatTracker(cpg);
+        returnMisplacedClasses();
     }
 
     @Override
     public CodeFragment detectNext() {
-        return null;
+        CPGClass[] classes = new CPGClass[1];
+        if(!misplacedClasses.isEmpty())
+        {
+            classes[0] = misplacedClasses.remove(0);
+            return new CodeFragment("Misplaced Classes",classes,null,null,null,null,null);
+        }
+        else
+            return null;
     }
 
-    public ArrayList<CPGClass> returnMisplacedClasses()
+    public void returnMisplacedClasses()
     {
-        ArrayList<CPGClass> misplacedClasses = new ArrayList<>();
+
         HashMap<CPGClass, Pair<Integer,Integer>> packageUsages= new HashMap<>();
         for(Map.Entry<CPGClass, HashMap<CPGClass, Integer>> classes : stats.totalClassMethodCalls.entrySet())
         {
@@ -46,11 +54,14 @@ public class MisplacedClass extends Smell{
         }
         for(Map.Entry<CPGClass, Pair<Integer,Integer>> classesEntry : packageUsages.entrySet())
         {
-            if(classesEntry.getValue().getKey()<=classesEntry.getValue().getValue())
+            if(classesEntry.getValue().getKey()<classesEntry.getValue().getValue())
             {
                 misplacedClasses.add(classesEntry.getKey());
             }
         }
+    }
+
+    public ArrayList<CPGClass> getMisplacedClasses() {
         return misplacedClasses;
     }
 

@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * Algorithm:
  * 0. Abstract classes/interfaces could be considered if there are not ever implemented
- * 0.1 A class thats not connected to any other
+ * 0.1 A class that's not connected to any other
  * 1. Gather a list of all the methods in the class
  * 2. See if those methods call other methods (If these methods call other methods it is likely this class is doing something.
  *    Need to think about a threshold)
@@ -34,7 +34,7 @@ public class LazyClass extends Smell{
     ArrayList<Class> classes = new ArrayList<>();
 
     public static StatTracker stats;
-
+    ArrayList<CPGClass> lazyClasses = new ArrayList<>();
     protected LazyClass(String name, CodePropertyGraph cpg) {
         super(name, cpg);
         stats = new StatTracker(cpg);
@@ -73,7 +73,7 @@ public class LazyClass extends Smell{
 
     public ArrayList<CPGClass> returnLazyClasses()
     {
-        ArrayList<CPGClass> lazyClasses = new ArrayList<>();
+
         HashMap<CPGClass, Pair<Integer,Integer>> usesAndUsages = new HashMap<>();
         for(Map.Entry<CPGClass, Integer> classes : stats.classUsage.entrySet())
         {
@@ -101,7 +101,7 @@ public class LazyClass extends Smell{
 
     @Override
     public CodeFragment detectNext() {
-        return null;
+        return new CodeFragment(null,(CPGClass[])lazyClasses.toArray(),null,null,null,null,null);
     }
 
     @Override
