@@ -51,6 +51,15 @@ public class SmellTest {
         System.out.println("ISP Violation Test:");
         ISPViolation  smell = new ISPViolation(this.cpg);
         ArrayList<CodeFragment> detections = getDetections(smell);
+
+        // one description should suggest to move 
+        // move methodWithError() into new interface 
+        // with the classes that implement it [NoneISPClass]
+        // 
+
+        // another should suggest
+        // move blankMethod() into a new interface
+        // with [NoneISPClass, ISPClassThree, ISPClassTwo]
         assertNotEquals(0, detections.size());
     }
 }

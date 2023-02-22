@@ -74,7 +74,10 @@ public class ISPViolation extends Smell {
         //   1.) The method is either blank
         //   2.) The method throws an error
         //   declaration unconditionally
-
+        System.out.println(m.instructions);
+        System.out.println(getMethodStats(m).uniqueInstructions);
+        System.out.println(getMethodStats(m).uniqueInstructions.size());
+        System.out.println("^^^^^^^^^^^^");
         if (getMethodStats(m).uniqueInstructions.size() == 0) {
             return true;
         }
@@ -100,10 +103,10 @@ public class ISPViolation extends Smell {
             CPGClass[] implementors) {
 
         for (CPGClass c : implementors) {
+            System.out.println("Class c " + c);
             Method[] ifaceMethods = Common.interfaceMethods(c);
             for (Method m : ifaceMethods) {
                 if (isNotImplemented(m)) {
-                    System.out.println(m + " is not implemented");
                     Method m2 = iface.getMethods()
                             .stream()
                             .filter(m3 -> m3.name.equals(m.name))
@@ -115,6 +118,7 @@ public class ISPViolation extends Smell {
                     arr.add(c);
                     this.segregations.put(m, arr);
                 }
+                System.out.println("?????");
             }
         }
         return this.segregations.size() != 0;
@@ -134,7 +138,7 @@ public class ISPViolation extends Smell {
         this.segregations = new HashMap<>();
         while (this.interfaces.hasNext()) {
             Map.Entry<CPGClass, ArrayList<CPGClass>> iface = this.interfaces.next();
-            System.out.println(iface);
+            System.out.println("Checking interface " + iface);
             CPGClass[] implementors = iface.getValue().toArray(new CPGClass[0]);
             if (containsViolation(iface.getKey(), implementors)) {
                 System.out.println(iface.getKey() + " contains violation");
@@ -159,6 +163,7 @@ public class ISPViolation extends Smell {
         ArrayList<Segregation> refinedSegregations = new ArrayList<>();
 
         for (Method m : this.segregations.keySet()) {
+            System.out.println("Method here " +m);
             ArrayList<CPGClass> effectedClasses = this.segregations.get(m);
             if (effectedClasses.size() >= numImplementors) {
                 // if the implementation is ignored for

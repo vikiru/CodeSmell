@@ -16,18 +16,16 @@ import java.lang.Math;
  * should point to a set of classes which all
  * implement the same subset of methods of an interface.
  * 
- * The set of methods should also be included in each detection.
+ * The following segregations are expected:
  * 
- * The following detections are expected:
- * 
- * Detection 1:
+ * Segregation 1:
  * classes
  * 		ISPClass
  * methods
  * 		methodWithError() 
  * 		blankMethod() 
  * 
- * Detection 2:
+ * Segregation 2:
  * classes
  * 		ISPClassTwo, ISPClassThree
  * methods
