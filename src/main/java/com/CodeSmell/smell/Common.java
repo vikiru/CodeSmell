@@ -27,7 +27,7 @@ public class Common {
     public static void initStatTracker(CodePropertyGraph cpg) {
         stats = new StatTracker(cpg);
         List<CPGClass> ifaceClasses = stats
-                .distinctClassTypes.get("interface");
+                .distinctClassTypes.get(ClassType.INTERFACE);
         List<Relation> realizations = stats
                 .distinctRelations.get(RelationshipType.REALIZATION);
         Common.interfaces = new HashMap<>();
@@ -42,7 +42,7 @@ public class Common {
     }
 
     public static MethodStat getMethodStats(Method m) {
-        for (MethodStat ms : stats.classStats.get(m.getParent()).methodStats) {
+        for (MethodStat ms : stats.methodStats.values()) {
             if (ms.method == m) {
                 return ms;
             }

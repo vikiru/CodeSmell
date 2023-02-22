@@ -1,7 +1,6 @@
 package com.CodeSmell.parser;
 
-import com.CodeSmell.parser.CPGClass.Attribute;
-import com.CodeSmell.parser.CPGClass.Method;
+import com.CodeSmell.parser.CPGClass.*;
 import com.CodeSmell.stat.Helper;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -123,7 +122,7 @@ public class Parser {
                 e.printStackTrace();
                 System.exit(1);
             }
-            cpg = updateCPG(cpg);
+            updateCPG(cpg);
             writeBackup(cpg);
 
         } else {
@@ -164,13 +163,11 @@ public class Parser {
      * Update the properties of each CPGClass and additionally add relations and packages to the cpg.
      *
      * @param cpg
-     * @return
      */
-    protected static CodePropertyGraph updateCPG(CodePropertyGraph cpg) {
+    protected static void updateCPG(CodePropertyGraph cpg) {
         updateCPGClassProperties(cpg);
         RelationshipManager relationshipManager = new RelationshipManager(cpg);
         PackageManager packageManager = new PackageManager(cpg);
-        return cpg;
     }
 
     /**
@@ -184,24 +181,24 @@ public class Parser {
         LinkedHashMap<Method, ArrayList<Method>> methodCallMap = new LinkedHashMap<>();
         LinkedHashMap<Method, ArrayList<Attribute>> attributeCallMap = new LinkedHashMap<>();
         // Set parent classes for all attributes and methods
-        cpg.getClasses().
-                forEach(cpgClass -> cpgClass.getAttributes().forEach(attribute -> attribute.setParent(cpgClass)));
-        cpg.getClasses().
-                forEach(cpgClass -> cpgClass.getMethods().forEach(method -> method.setParent(cpgClass)));
+        cpg.getClasses()
+                .forEach(cpgClass -> cpgClass.getAttributes()
+                        .forEach(attribute -> attribute.setParent(cpgClass)));
+        cpg.getClasses()
+                .forEach(cpgClass -> cpgClass.getMethods()
+                        .forEach(method -> method.setParent(cpgClass)));
         // Set inheritsFrom lists for all classes within cpg
         // Additionally, if a class inheritsFrom a superclass, add all of its attributes and methods here.
-        cpg.getClasses().
-                forEach(cpgClass -> cpgClass.setInheritsFrom(returnInheritsFrom(cpgClass, cpg)));
+        cpg.getClasses().forEach(cpgClass -> cpgClass.setInheritsFrom(returnInheritsFrom(cpgClass, cpg)));
 
         // Set typeLists for all attributes
-        cpg.getClasses().
-                forEach(cpgClass -> cpgClass.getAttributes().
-                        forEach(attribute -> attribute.setTypeList(returnTypeLists(attribute.attributeType, cpg))));
+        cpg.getClasses()
+                .forEach(cpgClass -> cpgClass.getAttributes()
+                        .forEach(attribute -> attribute.setTypeList(returnTypeLists(attribute.attributeType, cpg))));
         for (CPGClass cpgClass : cpg.getClasses()) {
-            for (CPGClass.Method method : cpgClass.getMethods()) {
+            for (Method method : cpgClass.getMethods()) {
                 // Set typeLists for all parameters of the method
-                method.parameters.
-                        forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
+                method.parameters.forEach(parameter -> parameter.setTypeList(returnTypeLists(parameter.type, cpg)));
                 // Get the attribute and method calls of each method
                 methodCallMap.put(method, returnMethodCalls(cpg, method));
                 attributeCallMap.put(method, returnAttributeCalls(cpg, method));
@@ -226,10 +223,11 @@ public class Parser {
         ArrayList<Method> methodCalls = new ArrayList<>();
         // Get all possible calls where the instruction's methodCall is not empty
         Set<String> allDistinctCalls = new HashSet<>();
-        methodToUpdate.instructions.stream().
-                filter(instruction -> instruction.label.equals("CALL")
-                        && (!instruction.methodCall.equals(""))).
-                forEach(ins -> allDistinctCalls.add(ins.methodCall));
+        methodToUpdate.instructions
+                .stream()
+                .filter(instruction -> instruction.label.equals("CALL")
+                        && (!instruction.methodCall.equals("")))
+                .forEach(ins -> allDistinctCalls.add(ins.methodCall));
         // Add all the method calls.
         for (String call : allDistinctCalls) {
             String[] splitted = call.split("\\.");
@@ -237,13 +235,18 @@ public class Parser {
                 String className = splitted[0].trim();
                 String methodName = splitted[1].trim();
                 CPGClass cpgClass;
-                var classResult = cpg.getClasses().stream().
-                        filter(cpgToFind -> cpgToFind.name.equals(className)).limit(2).
-                        collect(Collectors.toList());
+                var classResult = cpg.getClasses()
+                        .stream()
+                        .filter(cpgToFind -> cpgToFind.name.equals(className))
+                        .limit(2)
+                        .collect(Collectors.toList());
                 if (!classResult.isEmpty()) {
                     cpgClass = classResult.get(0);
-                    var methodCheck = cpgClass.getMethods().stream().
-                            filter(method -> method.name.equals(methodName)).limit(2).collect(Collectors.toList());
+                    var methodCheck = cpgClass.getMethods()
+                            .stream()
+                            .filter(method -> method.name.equals(methodName))
+                            .limit(2)
+                            .collect(Collectors.toList());
                     if (!methodCheck.isEmpty()) {
                         methodCalls.add(methodCheck.get(0));
                     }
@@ -264,19 +267,25 @@ public class Parser {
         Set<CPGClass> allPossibleClasses = new HashSet<>();
         // Get all local classes created
         Set<CPGClass> allLocalTypes = new HashSet<>();
-        methodToUpdate.getMethodCalls().stream().filter(method -> method.name.equals(method.getParent().name)).
-                forEach(method -> allLocalTypes.add(method.getParent()));
+        methodToUpdate.getMethodCalls()
+                .stream()
+                .filter(method -> method.name.equals(method.getParent().name))
+                .forEach(method -> allLocalTypes.add(method.getParent()));
         Set<Attribute> possibleAttributes = new HashSet<>();
         HashMap<String, Attribute> attributes = new HashMap<>();
         HashMap<String, Integer> fieldLine = new HashMap<>();
-        methodToUpdate.instructions.stream().filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER")).
-                forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
+        methodToUpdate.instructions
+                .stream()
+                .filter(instruction -> instruction.label.equals("FIELD_IDENTIFIER"))
+                .forEach(ins -> fieldLine.putIfAbsent(ins.code, ins.lineNumber));
         CPGClass methodParent = methodToUpdate.getParent();
         allPossibleClasses.add(methodParent);
         boolean classInherits = methodParent.code.contains("extends");
         if (classInherits) {
-            var result = methodParent.getInheritsFrom().stream().
-                    filter(cpgToFind -> !cpgToFind.classType.equals("interface")).collect(Collectors.toList());
+            var result = methodParent.getInheritsFrom()
+                    .stream()
+                    .filter(cpgToFind -> !cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                    .collect(Collectors.toList());
             if (!result.isEmpty()) {
                 allPossibleClasses.add(result.get(0));
             }
@@ -284,24 +293,35 @@ public class Parser {
         methodParent.getAttributes().stream().filter(attr -> fieldLine.containsKey(attr.name)).forEach(possibleAttributes::add);
         possibleAttributes.forEach(attr -> attributes.put(attr.name, attr));
         attributes.keySet().forEach(fieldLine::remove);
-        methodParent.getAttributes().stream().filter(attr -> attr.getTypeList().size() == 1).
-                forEach(attr -> allPossibleClasses.addAll(attr.getTypeList()));
-        methodToUpdate.parameters.stream().filter(parameter -> parameter.getTypeList().size() == 1).
-                forEach(parameter -> allPossibleClasses.addAll(parameter.getTypeList()));
+        methodParent.getAttributes()
+                .stream()
+                .filter(attr -> attr.getTypeList().size() == 1)
+                .forEach(attr -> allPossibleClasses.addAll(attr.getTypeList()));
+        methodToUpdate.parameters
+                .stream()
+                .filter(parameter -> parameter.getTypeList().size() == 1)
+                .forEach(parameter -> allPossibleClasses.addAll(parameter.getTypeList()));
         Set<String> staticClasses = new HashSet<String>();
-        methodToUpdate.instructions.stream().
-                filter(instruction -> instruction.label.equals("IDENTIFIER") && helper.allClassNames.contains(instruction.code)).
-                forEach(instruction -> staticClasses.add(instruction.code));
+        methodToUpdate.instructions
+                .stream()
+                .filter(instruction -> instruction.label.equals("IDENTIFIER") && helper.allClassNames.contains(instruction.code))
+                .forEach(instruction -> staticClasses.add(instruction.code));
         for (String className : staticClasses) {
-            var classSearch = cpg.getClasses().stream().filter(cpgClass -> cpgClass.name.equals(className)).limit(2).collect(Collectors.toList());
+            var classSearch = cpg.getClasses()
+                    .stream()
+                    .filter(cpgClass -> cpgClass.name.equals(className))
+                    .limit(2)
+                    .collect(Collectors.toList());
             if (!classSearch.isEmpty()) {
                 allPossibleClasses.add(classSearch.get(0));
             }
         }
         allPossibleClasses.addAll(allLocalTypes);
         for (CPGClass cpgClass : allPossibleClasses) {
-            cpgClass.getAttributes().stream().filter(attr -> fieldLine.containsKey(attr.name) && attr.code.contains("public")).
-                    forEach(possibleAttributes::add);
+            cpgClass.getAttributes()
+                    .stream()
+                    .filter(attr -> fieldLine.containsKey(attr.name) && attr.code.contains("public"))
+                    .forEach(possibleAttributes::add);
         }
         possibleAttributes.forEach(attr -> attributes.put(attr.name, attr));
         return new ArrayList<>(attributes.values());
@@ -315,17 +335,21 @@ public class Parser {
         String[] code = cpgClass.code.replaceAll(",", " ").split(" ");
         ArrayList<CPGClass> inheritsFrom = new ArrayList<>();
         for (String splitStr : code) {
-            var classFindResult = cpg.getClasses().stream().filter(cpgToFind -> cpgToFind.name.equals(splitStr)
-                            && !cpgToFind.name.equals(cpgClass.name)).
-                    limit(2).
-                    collect(Collectors.toList());
+            var classFindResult = cpg.getClasses()
+                    .stream()
+                    .filter(cpgToFind -> cpgToFind.name.equals(splitStr)
+                            && !cpgToFind.name.equals(cpgClass.name))
+                    .limit(2)
+                    .collect(Collectors.toList());
             if (!classFindResult.isEmpty()) {
                 inheritsFrom.add(classFindResult.get(0));
             }
         }
         // Add all super class attributes and methods
-        var inheritanceCheck = inheritsFrom.stream().
-                filter(cpgToFind -> !cpgToFind.classType.equals("interface")).collect(Collectors.toList());
+        var inheritanceCheck = inheritsFrom
+                .stream()
+                .filter(cpgToFind -> !cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                .collect(Collectors.toList());
         if (!inheritanceCheck.isEmpty()) {
             CPGClass superClass = inheritanceCheck.get(0);
             Set<Attribute> allAttributes = new LinkedHashSet<>(cpgClass.getAttributes());
@@ -351,9 +375,10 @@ public class Parser {
         String[] splitStr = type.split(" ");
         Set<CPGClass> distinctTypes = new HashSet<>();
         for (String str : splitStr) {
-            var typeCheck = cpg.getClasses().stream().
-                    filter(cpgClass -> cpgClass.name.equals(str) ||
-                            cpgClass.classFullName.equals(str)).collect(Collectors.toList());
+            var typeCheck = cpg.getClasses()
+                    .stream()
+                    .filter(cpgClass -> cpgClass.name.equals(str) || cpgClass.classFullName.equals(str))
+                    .collect(Collectors.toList());
             if (!typeCheck.isEmpty()) {
                 distinctTypes.add(typeCheck.get(0));
             }

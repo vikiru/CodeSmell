@@ -1,6 +1,9 @@
 package com.CodeSmell.parser;
 
-import com.CodeSmell.model.ClassRelation;
+import com.CodeSmell.model.ClassRelation.RelationshipType;
+import com.CodeSmell.parser.CodePropertyGraph.*;
+import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.parser.CPGClass.Method;
 import com.CodeSmell.stat.Helper;
 
 import java.util.*;
@@ -31,7 +34,7 @@ public class RelationshipManager {
      * Iterates through all the added relations within cpg to add the respective outward relations to the sourceClass.
      */
     protected static void assignOutwardRelations(CodePropertyGraph cpg) {
-        for (CodePropertyGraph.Relation relation : cpg.getRelations()) {
+        for (Relation relation : cpg.getRelations()) {
             CPGClass source = relation.source;
             source.addOutwardRelation(relation);
         }
@@ -56,38 +59,43 @@ public class RelationshipManager {
         for (CPGClass cpgClass : cpg.getClasses()) {
             HashMap<String, Long> typeCountMap = new HashMap<>();
             Set<CPGClass> uniqueDestinationClasses = new HashSet<>();
-            Set<CPGClass.Attribute> filteredAttribute = new HashSet<>();
-            cpgClass.getAttributes().stream().filter(attr -> (attr.getParent().equals(cpgClass))).
-                    forEach(attribute -> uniqueDestinationClasses.addAll(attribute.getTypeList()));
-            cpgClass.getAttributes().stream().filter(attr -> (attr.getParent().equals(cpgClass))).
-                    forEach(filteredAttribute::add);
-            for (CPGClass.Attribute attr : filteredAttribute) {
+            Set<Attribute> filteredAttribute = new HashSet<>();
+            cpgClass.getAttributes()
+                    .stream()
+                    .filter(attr -> (attr.getParent().equals(cpgClass)))
+                    .forEach(attribute -> uniqueDestinationClasses.addAll(attribute.getTypeList()));
+            cpgClass.getAttributes()
+                    .stream()
+                    .filter(attr -> (attr.getParent().equals(cpgClass)))
+                    .forEach(filteredAttribute::add);
+            for (Attribute attr : filteredAttribute) {
                 typeCountMap.put(attr.attributeType, typeCountMap.getOrDefault(attr.attributeType, 0L) + 1L);
             }
             for (CPGClass destClass : uniqueDestinationClasses) {
-                Map<String, Long> filtered = typeCountMap.entrySet().stream()
+                Map<String, Long> filtered = typeCountMap.entrySet()
+                        .stream()
                         .filter(entry -> entry.getKey().contains(destClass.name) || entry.getKey().contains(destClass.classFullName))
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 String highestMultiplicity = returnHighestMultiplicity(filtered);
-                ClassRelation.RelationshipType type = null;
+                RelationshipType type = null;
                 boolean isReflexive = cpgClass.name.equals(destClass.name);
                 boolean isBidirectional = determineBidirectionalAssociation(cpgClass, destClass);
                 boolean isComposition = determineCompositionRelationship(cpgClass, destClass);
                 if (isReflexive) {
-                    type = ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION;
+                    type = RelationshipType.REFLEXIVE_ASSOCIATION;
                 } else {
                     if (isBidirectional) {
-                        type = ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION;
+                        type = RelationshipType.BIDIRECTIONAL_ASSOCIATION;
                     }
                     if (isComposition && !isBidirectional) {
-                        type = ClassRelation.RelationshipType.COMPOSITION;
+                        type = RelationshipType.COMPOSITION;
                     }
                     if (!isBidirectional && !isComposition) {
-                        type = ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
+                        type = RelationshipType.UNIDIRECTIONAL_ASSOCIATION;
                     }
                 }
-                CodePropertyGraph.Relation relationToAdd = new
-                        CodePropertyGraph.Relation(cpgClass, destClass, type, highestMultiplicity);
+                Relation relationToAdd = new
+                        Relation(cpgClass, destClass, type, highestMultiplicity);
                 if (!checkRelationExists(cpg, relationToAdd)) {
                     cpg.addRelation(relationToAdd);
                 }
@@ -105,12 +113,14 @@ public class RelationshipManager {
      */
     protected static boolean determineBidirectionalAssociation(CPGClass sourceClass, CPGClass destinationClass) {
         boolean bidirectionalAssociationExists = false;
-        Set<CPGClass.Attribute> allSourceTypes = sourceClass.getAttributes().stream().
-                filter(attr -> attr.getTypeList().contains(destinationClass) && attr.getParent().equals(sourceClass)).
-                collect(Collectors.toSet());
-        Set<CPGClass.Attribute> allDestinationTypes = destinationClass.getAttributes().stream().
-                filter(attr -> (attr.getTypeList().contains(sourceClass)) && attr.getParent().equals(destinationClass)).
-                collect(Collectors.toSet());
+        Set<Attribute> allSourceTypes = sourceClass.getAttributes()
+                .stream()
+                .filter(attr -> attr.getTypeList().contains(destinationClass) && attr.getParent().equals(sourceClass))
+                .collect(Collectors.toSet());
+        Set<Attribute> allDestinationTypes = destinationClass.getAttributes()
+                .stream()
+                .filter(attr -> (attr.getTypeList().contains(sourceClass)) && attr.getParent().equals(destinationClass))
+                .collect(Collectors.toSet());
         if (!allSourceTypes.isEmpty() && !allDestinationTypes.isEmpty()) {
             bidirectionalAssociationExists = true;
         }
@@ -126,21 +136,26 @@ public class RelationshipManager {
      */
     protected static boolean determineCompositionRelationship(CPGClass sourceClass, CPGClass destinationClass) {
         boolean compositionExists = false;
-        var constructorResult = sourceClass.getMethods().stream().
-                filter(method -> method.name.equals(sourceClass.name) &&
+        var constructorResult = sourceClass.getMethods()
+                .stream()
+                .filter(method -> method.name.equals(sourceClass.name) &&
                         method.getParent().equals(sourceClass) &&
-                        !method.methodBody.contains(destinationClass.name)).collect(Collectors.toList());
-        var filteredAttributes = sourceClass.getAttributes().stream().
-                filter(attribute -> attribute.getTypeList().contains(destinationClass)
+                        !method.methodBody.contains(destinationClass.name))
+                .collect(Collectors.toList());
+        var filteredAttributes = sourceClass.getAttributes()
+                .stream()
+                .filter(attribute -> attribute.getTypeList().contains(destinationClass)
                         && attribute.getParent().equals(sourceClass)
-                        && !attribute.code.contains("static")).collect(Collectors.toList());
+                        && !attribute.code.contains("static"))
+                .collect(Collectors.toList());
         String codeToFind = "= new " + destinationClass.name;
         // A constructor does not exist, but attributes matching destination class exist,
         // filter these attributes such that they contain "new" and are not static, or the attribute contains final
         if (constructorResult.isEmpty() && !filteredAttributes.isEmpty()) {
-            var compositionAttribute = filteredAttributes.stream().filter(attribute ->
-                    attribute.code.contains(codeToFind)
-                            || attribute.code.contains("final")).collect(Collectors.toList());
+            var compositionAttribute = filteredAttributes
+                    .stream()
+                    .filter(attribute -> attribute.code.contains(codeToFind) || attribute.code.contains("final"))
+                    .collect(Collectors.toList());
             if (!compositionAttribute.isEmpty()) {
                 compositionExists = true;
             }
@@ -148,9 +163,11 @@ public class RelationshipManager {
         // A constructor exists and destination class does not appear within parameters
         // The constructor's instruction contains "= new (destination class name)"
         else if (!constructorResult.isEmpty() && !filteredAttributes.isEmpty()) {
-            CPGClass.Method sourceConstructor = constructorResult.get(0);
-            var constructorIns = sourceConstructor.instructions.stream().
-                    filter(instruction -> instruction.code.contains(codeToFind)).collect(Collectors.toList());
+            Method sourceConstructor = constructorResult.get(0);
+            var constructorIns = sourceConstructor.instructions
+                    .stream()
+                    .filter(instruction -> instruction.code.contains(codeToFind))
+                    .collect(Collectors.toList());
             if (!constructorIns.isEmpty()) {
                 compositionExists = true;
             }
@@ -163,14 +180,16 @@ public class RelationshipManager {
      */
     protected static void assignDependency(CodePropertyGraph cpg) {
         Helper helper = new Helper(cpg);
-        for (CPGClass.Method method : helper.allMethods) {
+        for (Method method : helper.allMethods) {
             CPGClass methodParent = method.getParent();
-            var filteredRelations = cpg.getRelations().stream().
-                    filter(relation -> (relation.type.equals(ClassRelation.RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
-                            relation.type.equals(ClassRelation.RelationshipType.BIDIRECTIONAL_ASSOCIATION) ||
-                            relation.type.equals(ClassRelation.RelationshipType.REFLEXIVE_ASSOCIATION) ||
-                            relation.type.equals(ClassRelation.RelationshipType.COMPOSITION)) &&
-                            relation.source.equals(methodParent)).collect(Collectors.toList());
+            var filteredRelations = cpg.getRelations()
+                    .stream()
+                    .filter(relation -> (relation.type.equals(RelationshipType.UNIDIRECTIONAL_ASSOCIATION) ||
+                            relation.type.equals(RelationshipType.BIDIRECTIONAL_ASSOCIATION) ||
+                            relation.type.equals(RelationshipType.REFLEXIVE_ASSOCIATION) ||
+                            relation.type.equals(RelationshipType.COMPOSITION)) &&
+                            relation.source.equals(methodParent))
+                    .collect(Collectors.toList());
             // Create a set which contains all the classes which srcClass has some kind of association relation to
             Set<CPGClass> classesToIgnore = new HashSet<>();
             filteredRelations.forEach(relation -> classesToIgnore.add(relation.destination));
@@ -179,17 +198,17 @@ public class RelationshipManager {
             classesToIgnore.add(methodParent);
             // Create a single set containing all classes that exist within method params and method calls
             Set<CPGClass> classesToAddDependencies = new HashSet<>();
-            method.getMethodCalls().stream().
-                    filter(methodCall -> !methodCall.getParent().equals(methodParent)).
-                    forEach(methodCall -> classesToAddDependencies.add(methodCall.getParent()));
+            method.getMethodCalls()
+                    .stream()
+                    .filter(methodCall -> !methodCall.getParent().equals(methodParent))
+                    .forEach(methodCall -> classesToAddDependencies.add(methodCall.getParent()));
             // Add all classes that exist within cpg and exist as parameters to the classesToAddDependencies set.
-            method.parameters.
-                    forEach(methodParameter -> classesToAddDependencies.addAll(methodParameter.getTypeList()));
+            method.parameters.forEach(methodParameter -> classesToAddDependencies.addAll(methodParameter.getTypeList()));
             // Remove all occurrences of elements within classesToIgnore and add dependencies accordingly
             classesToAddDependencies.removeAll(classesToIgnore);
             for (CPGClass destinationClass : classesToAddDependencies) {
-                CodePropertyGraph.Relation relationToAdd = new CodePropertyGraph.Relation
-                        (methodParent, destinationClass, ClassRelation.RelationshipType.DEPENDENCY, "");
+                Relation relationToAdd = new Relation
+                        (methodParent, destinationClass, RelationshipType.DEPENDENCY, "");
                 if (!checkRelationExists(cpg, relationToAdd)) {
                     cpg.addRelation(relationToAdd);
                 }
@@ -205,12 +224,14 @@ public class RelationshipManager {
      */
     protected static void assignInheritance(CodePropertyGraph cpg) {
         for (CPGClass cpgClass : cpg.getClasses()) {
-            var filteredInherits = cpgClass.getInheritsFrom().stream().
-                    filter(cpgToFind -> !cpgToFind.classType.equals("interface")).collect(Collectors.toList());
+            var filteredInherits = cpgClass.getInheritsFrom()
+                    .stream()
+                    .filter(cpgToFind -> !cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                    .collect(Collectors.toList());
             if (!filteredInherits.isEmpty()) {
                 for (CPGClass dest : filteredInherits) {
-                    CodePropertyGraph.Relation relationToAdd =
-                            new CodePropertyGraph.Relation(cpgClass, dest, ClassRelation.RelationshipType.INHERITANCE, "");
+                    Relation relationToAdd =
+                            new Relation(cpgClass, dest, RelationshipType.INHERITANCE, "");
                     if (!checkRelationExists(cpg, relationToAdd)) {
                         cpg.addRelation(relationToAdd);
                     }
@@ -224,12 +245,14 @@ public class RelationshipManager {
      */
     protected static void assignRealization(CodePropertyGraph cpg) {
         for (CPGClass cpgClass : cpg.getClasses()) {
-            var filteredInherits = cpgClass.getInheritsFrom().stream().
-                    filter(cpgToFind -> cpgToFind.classType.equals("interface")).collect(Collectors.toList());
+            var filteredInherits = cpgClass.getInheritsFrom()
+                    .stream()
+                    .filter(cpgToFind -> cpgToFind.classType.equals(CPGClass.ClassType.INTERFACE))
+                    .collect(Collectors.toList());
             if (!filteredInherits.isEmpty()) {
                 for (CPGClass dest : filteredInherits) {
-                    CodePropertyGraph.Relation relationToAdd =
-                            new CodePropertyGraph.Relation(cpgClass, dest, ClassRelation.RelationshipType.REALIZATION, "");
+                    Relation relationToAdd =
+                            new Relation(cpgClass, dest, RelationshipType.REALIZATION, "");
                     if (!checkRelationExists(cpg, relationToAdd)) {
                         cpg.addRelation(relationToAdd);
                     }
@@ -249,12 +272,14 @@ public class RelationshipManager {
      * @param relationToAdd The relation to be added to the provided CodePropertyGraph object.
      * @return boolean - True or False, depending on if the relation exists within cpg
      */
-    protected static boolean checkRelationExists(CodePropertyGraph codePropertyGraph, CodePropertyGraph.Relation relationToAdd) {
-        var result = codePropertyGraph.getRelations().stream().
-                filter(relation -> relation.source.equals(relationToAdd.source)
+    protected static boolean checkRelationExists(CodePropertyGraph codePropertyGraph, Relation relationToAdd) {
+        var result = codePropertyGraph.getRelations()
+                .stream()
+                .filter(relation -> relation.source.equals(relationToAdd.source)
                         && relation.destination.equals(relationToAdd.destination)
                         && relation.type.equals(relationToAdd.type)
-                        && relation.multiplicity.equals(relationToAdd.multiplicity)).collect(Collectors.toList());
+                        && relation.multiplicity.equals(relationToAdd.multiplicity))
+                .collect(Collectors.toList());
         return !result.isEmpty();
     }
 
@@ -299,7 +324,10 @@ public class RelationshipManager {
             multiplicityList.add(obtainMultiplicity(attribute, count));
         }
         // Return the highest multiplicity (account for cases where both 1 to 1 and 1 to many exist, for a given destination class type)
-        var result = multiplicityList.stream().filter(multiplicity -> multiplicity.equals("1..*")).collect(Collectors.toList());
+        var result = multiplicityList
+                .stream()
+                .filter(multiplicity -> multiplicity.equals("1..*"))
+                .collect(Collectors.toList());
         if (!result.isEmpty()) {
             return "1..*";
         } else return multiplicityList.get(0);

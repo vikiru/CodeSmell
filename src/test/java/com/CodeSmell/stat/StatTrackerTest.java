@@ -66,7 +66,7 @@ public class StatTrackerTest {
     @Test
     public void testAttributeUsage() {
         for (ClassStat classStat : classStats) {
-            for (AttributeStat attributeStat : classStat.attributeStats) {
+            for (AttributeStat attributeStat : classStat.attributeStats.values()) {
                 int expected = attributeStat.attributeUsage;
                 int[] methodCheck = {0};
                 int[] classCheck = {0};
@@ -85,7 +85,7 @@ public class StatTrackerTest {
     @Test
     public void testMethodUsage() {
         for (ClassStat classStat : classStats) {
-            for (MethodStat methodStat : classStat.methodStats) {
+            for (MethodStat methodStat : classStat.methodStats.values()) {
                 int expected = methodStat.methodUsage;
                 int[] methodCheck = {0};
                 int[] classCheck = {0};

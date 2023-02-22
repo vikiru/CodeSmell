@@ -49,8 +49,8 @@ public class RefusedBequest extends Smell {
                 String description = "";
                 description += subClass.name + " does not make full use of all the inherited properties of superclass: " +
                         superClass.name;
-                CPGClass.Attribute[] unusedAttributes = returnUnusedAttributes(subClass, superClassStats.attributeStats);
-                CPGClass.Method[] unusedMethods = returnUnusedMethods(subClass, superClassStats.methodStats);
+                CPGClass.Attribute[] unusedAttributes = returnUnusedAttributes(subClass, superClassStats.attributeStats.values());
+                CPGClass.Method[] unusedMethods = returnUnusedMethods(subClass, superClassStats.methodStats.values());
                 CPGClass[] affectedClasses = new CPGClass[]{subClass, superClass};
                 detections.add(CodeFragment.makeFragment(description, affectedClasses, unusedAttributes, unusedMethods));
             }
@@ -62,7 +62,7 @@ public class RefusedBequest extends Smell {
      * @param attributeStats
      * @return
      */
-    protected static CPGClass.Attribute[] returnUnusedAttributes(CPGClass subClass, List<AttributeStat> attributeStats) {
+    protected static CPGClass.Attribute[] returnUnusedAttributes(CPGClass subClass, Collection<AttributeStat> attributeStats) {
         Set<CPGClass.Attribute> unusedAttributes = new HashSet<>();
         attributeStats.stream().
                 filter(attributeStat -> attributeStat.classesWhichCallAttr.get(subClass) == 0).
@@ -75,7 +75,7 @@ public class RefusedBequest extends Smell {
      * @param methodStats
      * @return
      */
-    protected static CPGClass.Method[] returnUnusedMethods(CPGClass subClass, List<MethodStat> methodStats) {
+    protected static CPGClass.Method[] returnUnusedMethods(CPGClass subClass, Collection<MethodStat> methodStats) {
         Set<CPGClass.Method> unusedMethods = new HashSet<>();
         methodStats.stream().
                 filter(methodStat -> methodStat.classesWhichCallMethod.get(subClass) == 0).

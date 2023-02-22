@@ -60,7 +60,7 @@ public class ParserTest {
                     .collect(Collectors.toList());
 
             assertEquals("There should be no duplicate relations between src and dest class",
-                    true, additionalCheck.size() == 1);
+                    1, additionalCheck.size());
         }
     }
 

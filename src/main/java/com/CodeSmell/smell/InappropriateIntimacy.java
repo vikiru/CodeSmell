@@ -36,7 +36,7 @@ public class InappropriateIntimacy extends Smell {
                     map(Map.Entry::getValue).flatMap(Collection::stream).collect(Collectors.toList());
             List<CPGClass.Method> getters = returnGetters(classStat.cpgClass, filteredAttributes);
             if (!filteredAttributes.isEmpty() && !getters.isEmpty()) {
-                List<MethodStat> filteredMethodStat = classStat.methodStats.stream().
+                List<MethodStat> filteredMethodStat = classStat.methodStats.values().stream().
                         filter(methodStat -> getters.contains(methodStat.method)).
                         collect(Collectors.toList());
                 CPGClass.Attribute[] affectedAttributes = returnAffectedAttributes(getters);
