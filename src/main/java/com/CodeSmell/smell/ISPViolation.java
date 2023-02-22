@@ -74,10 +74,10 @@ public class ISPViolation extends Smell {
         //   1.) The method is either blank
         //   2.) The method throws an error
         //   declaration unconditionally
-        System.out.println(m.instructions);
-        System.out.println(getMethodStats(m).uniqueInstructions);
-        System.out.println(getMethodStats(m).uniqueInstructions.size());
-        System.out.println("^^^^^^^^^^^^");
+       // System.out.println(m.instructions);
+       // System.out.println(getMethodStats(m).uniqueInstructions);
+       // System.out.println(getMethodStats(m).uniqueInstructions.size());
+       // System.out.println("^^^^^^^^^^^^");
         if (getMethodStats(m).uniqueInstructions.size() == 0) {
             return true;
         }
@@ -114,7 +114,8 @@ public class ISPViolation extends Smell {
                             .orElseThrow(RuntimeException::new);
                     ArrayList<CPGClass> arr = this.segregations
                             .getOrDefault(m, new ArrayList<>());
-                    System.out.println(m + " is not implemented");
+                    System.out.print(m + " is not implemented");
+                    System.out.println(" within " + m.getParent());
                     arr.add(c);
                     this.segregations.put(m, arr);
                 }
