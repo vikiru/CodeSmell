@@ -103,7 +103,6 @@ public class ISPViolation extends Smell {
             CPGClass[] implementors) {
 
         for (CPGClass c : implementors) {
-            System.out.println("Class c " + c);
             Method[] ifaceMethods = Common.interfaceMethods(c);
             for (Method m : ifaceMethods) {
                 if (isNotImplemented(m)) {
@@ -119,7 +118,6 @@ public class ISPViolation extends Smell {
                     arr.add(c);
                     this.segregations.put(m, arr);
                 }
-                System.out.println("?????");
             }
         }
         return this.segregations.size() != 0;
@@ -164,7 +162,6 @@ public class ISPViolation extends Smell {
         ArrayList<Segregation> refinedSegregations = new ArrayList<>();
 
         for (Method m : this.segregations.keySet()) {
-            System.out.println("Method here " +m);
             ArrayList<CPGClass> effectedClasses = this.segregations.get(m);
             if (effectedClasses.size() >= numImplementors) {
                 // if the implementation is ignored for
