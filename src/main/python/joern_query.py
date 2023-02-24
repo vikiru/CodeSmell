@@ -10,6 +10,15 @@ from create_dictionary import *
 import logging
 
 
+# Handle all error situations
+def handle_errors(error_message, stderr=""):
+    logging.error(error_message)
+    if stderr:
+        logging.error(stderr.strip())
+    client.execute(delete_query(project_name))
+    exit(1)
+
+
 # Execute a single query to retrieve all the class names within the source code
 def retrieve_all_class_names():
     query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).fullName.toJson'
@@ -22,10 +31,10 @@ def retrieve_all_class_names():
         )
         class_names = [name.replace("$", ".") for name in all_names]
     else:
-        logging.error("Retrieve class names failure")
-        logging.error(result["stderr"].strip())
-        client.execute(delete_query(project_name))
-        exit(1)
+        handle_errors(
+            "Retrieve class names failure for {dir}".format(dir=project_dir),
+            result["stderr"],
+        )
     return class_names
 
 
@@ -35,8 +44,8 @@ def retrieve_class_data(name):
         'cpg.typeDecl.isExternal(false).fullName("'
         + name
         + '").map(node => (node.name, node.fullName, node.inheritsFromTypeFullName.l, node.code, '
-        "node.lineNumber, node.astChildren.isModifier.modifierType.l, node.astChildren.isMember.l.map("
-        "node => (node.name, node.typeFullName, node.code, node.lineNumber, "
+        "node.lineNumber, node.astChildren.isMember.l.map("
+        "node => (node.name, node.typeFullName, node.lineNumber, "
         "node.astChildren.isModifier.modifierType.l)), node.filename,"
         "node.astChildren.isMethod.filter(node => "
         '!node.code.contains("<lambda>") && '
@@ -56,10 +65,10 @@ def retrieve_class_data(name):
     if result["success"] and result["stdout"] != "":
         index = result["stdout"].index('"')
         # Returns a list of dictionaries, extract first element of that list
-        # joern_class_data = json.loads(
-        #    json.loads(result["stdout"][index : len(result["stdout"])])
-        # )
-        # name = joern_class_data[0]["_1"]
+        joern_class_data = json.loads(
+            json.loads(result["stdout"][index : len(result["stdout"])])
+        )
+        name = joern_class_data[0]["_1"]
         logging.info(
             "The class data for "
             + name.replace(".", "$")
@@ -69,10 +78,9 @@ def retrieve_class_data(name):
         )
         # class_dict = create_class_dict(joern_class_data[0])
     else:
-        logging.error("Retrieve class data failure for " + name)
-        logging.error(result["stderr"].strip())
-        client.execute(delete_query(project_name))
-        exit(1)
+        handle_errors(
+            "Retrieve class data failure for {name}".format(name=name), result["stderr"]
+        )
 
 
 def source_code_json_creation(class_names):
@@ -99,7 +107,7 @@ if __name__ == "__main__":
 
     server_endpoint = "127.0.0.1:" + sys.argv[-1]
     project_dir = sys.argv[-2]
-    project_name = "analyzedProject222"
+    project_name = "analyzedProject"
 
     client = None
     index = 1
@@ -156,9 +164,9 @@ if __name__ == "__main__":
             class_name_retrieval_time = end - start
             total_time += class_name_retrieval_time
         else:
-            logging.info("No class names or error in retrieving class names")
-            client.execute(delete_query(project_name))
-            exit(1)
+            handle_errors(
+                "No class names were retrieved from Joern. Potentially empty directory."
+            )
 
         # Create the source code json representation
         start = time.time()
@@ -188,7 +196,7 @@ if __name__ == "__main__":
                 (-1).to_bytes(4, byteorder=sys.byteorder, signed=True)
             )
         else:
-            logging.error("Source code json creation failure, no classes")
+            handle_errors("Source code json creation failure, no classes in dictionary")
 
         # Close and delete the project from user's bin/joern/joern-cli/workspace
         start = time.time()
@@ -204,6 +212,4 @@ if __name__ == "__main__":
         logging.info("Total time taken: {0} seconds.".format(format(total_time, ".2f")))
         exit(0)
     else:
-        logging.error("Source Code Import Failure for project_dir " + project_dir)
-        logging.error(result["stderr"].strip())
-        exit(1)
+        handle_errors("Source Code Import Failure")
