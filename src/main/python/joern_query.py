@@ -114,10 +114,10 @@ def create_attribute_dict(curr_attribute):
     package_name = ""
     if index != -1:
         package_name = attribute_type_full_name.replace("[]", "").replace("$", ".")
-        type = attribute_type_full_name[index + 1: len(attribute_type_full_name)]
+        type = attribute_type_full_name[index + 1 : len(attribute_type_full_name)]
     index_nested = type.rfind("$")
     if index_nested != -1:
-        type = type[index_nested + 1: len(type)]
+        type = type[index_nested + 1 : len(type)]
 
     curr_attribute_dict = {
         "name": attribute_name,
@@ -140,7 +140,9 @@ def create_method_dict(curr_method):
     method_line_number = 0
     method_line_number_end = 0
     total_lines = 0
-    method_modifiers = [modifier.lower() for modifier in curr_method["_5"] if modifier != "CONSTRUCTOR"]
+    method_modifiers = [
+        modifier.lower() for modifier in curr_method["_5"] if modifier != "CONSTRUCTOR"
+    ]
     method_parameters = []
     method_instructions = []
     if len(curr_method) == 7:
@@ -174,7 +176,7 @@ def create_method_dict(curr_method):
     if not return_type:
         # Handle all Collection types (Set, HashMap, ArrayList, etc)
         index = method_body.find(">")
-        return_type = method_body[0: index + 1]
+        return_type = method_body[0 : index + 1]
         if "(" in return_type or not return_type:
             return_type = ""
         if return_type in method_body:
@@ -210,9 +212,7 @@ def create_method_dict(curr_method):
         "name": method_name.replace("<init>", constructor_name),
         "parentClass": [{}],
         "methodBody": method_body,
-        "modifiers": get_method_modifiers(
-            regex_pattern_modifiers, method_modifiers
-        ),
+        "modifiers": get_method_modifiers(regex_pattern_modifiers, method_modifiers),
         "parameters": get_method_parameters(method_parameters),
         "returnType": return_type,
         "lineNumberStart": method_line_number,
@@ -256,11 +256,12 @@ def create_instruction_dict(curr_instruction):
         if call_list and method_call:
             method_call = call_list[0]
             index = method_call.rfind(".")
-            method_call = method_call[:index] + method_call[index:].replace(
-                ".", "$"
-            )
+            method_call = method_call[:index] + method_call[index:].replace(".", "$")
             method_call = method_call.split(".")[-1].replace("$", ".")
-            class_name, method_name = method_call.split(".")[0], method_call.split(".")[1]
+            class_name, method_name = (
+                method_call.split(".")[0],
+                method_call.split(".")[1],
+            )
             method_call = method_call.replace("<init>", class_name)
         else:
             method_call = ""
@@ -299,7 +300,7 @@ def create_class_dict(curr_class):
     def get_name_without_separators(name):
         if "$" in name:
             index = name.rindex("$")
-            name = name[index + 1: len(name)]
+            name = name[index + 1 : len(name)]
         return name
 
     curr_class_dict = {
@@ -331,49 +332,52 @@ def retrieve_all_class_names():
     query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).fullName.toJson'
     result = client.execute(query)
     class_names = []
-    if result["success"] and result["stdout"]:
+    if result["success"] and result["stdout"] != "":
         index = result["stdout"].index('"')
         all_names = json.loads(
-            json.loads(result["stdout"][index: len(result["stdout"])])
+            json.loads(result["stdout"][index : len(result["stdout"])])
         )
         class_names = [name.replace("$", ".") for name in all_names]
     else:
         print("joern_query :: Retrieve class names failure", file=sys.stderr)
-        print("joern_query :: ",result, file=sys.stderr)
+        print("joern_query :: ", result, file=sys.stderr)
         exit(1)
     return class_names
 
 
 # Execute a single query to get all the data of a class
 def retrieve_class_data(name):
-    class_query = 'cpg.typeDecl.isExternal(false).fullName("' + name \
-                  + '").map(node => (node.name, node.fullName, node.inheritsFromTypeFullName.l, node.code, ' \
-                    "node.lineNumber, node.astChildren.isModifier.modifierType.l, node.astChildren.isMember.l.map(" \
-                    "node => (node.name, node.typeFullName, node.code, node.lineNumber, " \
-                    "node.astChildren.isModifier.modifierType.l)), node.filename," \
-                    "node.astChildren.isMethod.filter(node => " \
-                    '!node.code.contains("<lambda>") && ' \
-                    '!node.name.contains("<clinit>")).l.map(' \
-                    "node => (node.name, node.code, " \
-                    "node.lineNumber, node.lineNumberEnd, " \
-                    "node.astChildren.isModifier" \
-                    ".modifierType.l, " \
-                    "node.astChildren.isParameter.filter(" \
-                    "node => !node.name.contains(" \
-                    '"this")).l.map(node => (node.code, ' \
-                    "node.name, node.typeFullName)), " \
-                    "node.ast.filter(node => node.lineNumber != None).l.map(node => (node.label, " \
-                    "node.code, node.lineNumber, " \
-                    "node.ast.isCall.methodFullName.l" \
-                    ")))))).toJson"
+    class_query = (
+        'cpg.typeDecl.isExternal(false).fullName("'
+        + name
+        + '").map(node => (node.name, node.fullName, node.inheritsFromTypeFullName.l, node.code, '
+        "node.lineNumber, node.astChildren.isModifier.modifierType.l, node.astChildren.isMember.l.map("
+        "node => (node.name, node.typeFullName, node.code, node.lineNumber, "
+        "node.astChildren.isModifier.modifierType.l)), node.filename,"
+        "node.astChildren.isMethod.filter(node => "
+        '!node.code.contains("<lambda>") && '
+        '!node.name.contains("<clinit>")).l.map('
+        "node => (node.name, node.code, "
+        "node.lineNumber, node.lineNumberEnd, "
+        "node.astChildren.isModifier"
+        ".modifierType.l, "
+        "node.astChildren.isParameter.filter("
+        "node => !node.name.contains("
+        '"this")).l.map(node => (node.code, '
+        "node.name, node.typeFullName)), "
+        "node.ast.filter(node => node.lineNumber != None).l.map(node => (node.label, "
+        "node.code, node.lineNumber, "
+        "node.ast.isCall.methodFullName.l"
+        ")))))).toJson"
+    )
     start = time.time()
     result = client.execute(class_query)
     end = time.time()
-    if result["success"] and result["stdout"] is not "":
+    if result["success"] and result["stdout"] != "":
         index = result["stdout"].index('"')
         # Returns a list of dictionaries, extract first element of that list
         joern_class_data = json.loads(
-            json.loads(result["stdout"][index: len(result["stdout"])])
+            json.loads(result["stdout"][index : len(result["stdout"])])
         )
         name = joern_class_data[0]["_1"]
         logging.info(
@@ -398,7 +402,7 @@ def clean_up_external_classes(source_code_json):
             class_name
             for class_name in class_dict["inheritsFrom"]
             if class_name.replace(root_pkg, "") == class_name
-               and "java" not in class_name
+            and "java" not in class_name
         ]
         if not filtered_inherits:
             class_dict["inheritsFrom"] = []
@@ -453,7 +457,7 @@ if __name__ == "__main__":
 
     if "Windows" in platform.platform():
         index = project_dir.find(":")
-        win_drive = project_dir[0: index + 1]
+        win_drive = project_dir[0 : index + 1]
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
@@ -464,7 +468,7 @@ if __name__ == "__main__":
     result = client.execute(query)
     end = time.time()
 
-    if result["success"] and not result["stderr"]:
+    if result["success"] and result["stdout"] != "":
         logging.info(
             "The source code has been successfully imported. Completed in {0} seconds.".format(
                 format(end - start, ".2f")
@@ -524,7 +528,7 @@ if __name__ == "__main__":
         query = 'delete ("' + project_name + '")'
         result = client.execute(query)
         end = time.time()
-        if result["success"]:
+        if result["success"] and result["stdout"] != "":
             logging.info(
                 "The source code has been successfully removed. Completed in {0} seconds.".format(
                     format(end - start, ".2f")
