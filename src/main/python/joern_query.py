@@ -1,12 +1,11 @@
 import sys
 import json
-import os
 import platform
-import re
 import time
+import os
 from pathlib import Path
 from time import sleep
-from cpgqls_client import CPGQLSClient, import_code_query
+from cpgqls_client import CPGQLSClient, import_code_query, delete_query
 from create_dictionary import *
 import logging
 
@@ -23,8 +22,9 @@ def retrieve_all_class_names():
         )
         class_names = [name.replace("$", ".") for name in all_names]
     else:
-        print("joern_query :: Retrieve class names failure", file=sys.stderr)
-        logging.error(result["stderr"])
+        logging.error("Retrieve class names failure")
+        logging.error(result["stderr"].strip())
+        client.execute(delete_query(project_name))
         exit(1)
     return class_names
 
@@ -69,8 +69,9 @@ def retrieve_class_data(name):
         )
         # class_dict = create_class_dict(joern_class_data[0])
     else:
-        logging.error("joern_query :: Retrieve class data failure for " + name)
-        logging.error(result["stderr"])
+        logging.error("Retrieve class data failure for " + name)
+        logging.error(result["stderr"].strip())
+        client.execute(delete_query(project_name))
         exit(1)
 
 
@@ -97,7 +98,7 @@ if __name__ == "__main__":
 
     server_endpoint = "127.0.0.1:" + sys.argv[-1]
     project_dir = sys.argv[-2]
-    project_name = "analyzedProject22"
+    project_name = "analyzedProject222"
 
     client = None
     index = 1
@@ -154,7 +155,8 @@ if __name__ == "__main__":
             class_name_retrieval_time = end - start
             total_time += class_name_retrieval_time
         else:
-            print("joern_query :: Retrieve class names failure", file=sys.stderr)
+            logging.info("No class names or error in retrieving class names")
+            client.execute(delete_query(project_name))
             exit(1)
 
         # Create the source code json representation
@@ -201,6 +203,6 @@ if __name__ == "__main__":
         logging.info("Total time taken: {0} seconds.".format(format(total_time, ".2f")))
         exit(0)
     else:
-        logging.error("joern_query :: Source Code Import Failure")
-        logging.error(result["stderr"])
+        logging.error("Source Code Import Failure for project_dir " + project_dir)
+        logging.error(result["stderr"].strip())
         exit(1)
