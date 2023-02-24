@@ -78,7 +78,8 @@ def retrieve_class_data(name):
 def source_code_json_creation(class_names):
     source_code_json = {"relations": [], "classes": []}
     for class_name in class_names:
-        source_code_json["classes"].append(retrieve_class_data(class_name))
+        # source_code_json["classes"].append(retrieve_class_data(class_name))
+        retrieve_class_data(class_name)
 
     # Handle deletion of any classes which inherit from something that is external (i.e. not present within java or
     # code base)
@@ -187,7 +188,7 @@ if __name__ == "__main__":
                 (-1).to_bytes(4, byteorder=sys.byteorder, signed=True)
             )
         else:
-            print("joern_query :: Source code json creation failure", file=sys.stderr)
+            logging.error("Source code json creation failure, no classes")
 
         # Close and delete the project from user's bin/joern/joern-cli/workspace
         start = time.time()
