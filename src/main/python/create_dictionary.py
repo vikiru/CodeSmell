@@ -16,6 +16,24 @@ MODIFIERS_PATTERN = re.compile(
     "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
 )
 
+# Remove package and any nesting in a class full name to get the proper name of the class.
+def return_name_without_package(class_full_name):
+    name = class_full_name
+    if "." in class_full_name:
+        index = class_full_name.rindex(".")
+        name = class_full_name[index + 1 :]
+    if "$" in name:
+        index = name.rindex("$")
+        name = name[index + 1 :]
+    return name
+
+
+# Determine package name from the joern_json (prior to creation of dictionary)
+def return_package_name(curr_class):
+    class_full_name = curr_class["_2"]
+    replace_str = "." + class_full_name
+    return class_full_name.replace(replace_str, "").strip()
+
 
 # Return all distinct package names as a set
 def return_all_distinct_package_names(all_classes):
@@ -245,7 +263,7 @@ def create_instruction_dict(curr_instruction):
     instruction_label = curr_instruction["_1"]
     instruction_code = curr_instruction["_2"]
     instruction_line_number = curr_instruction["_3"]
-    instruction_call_full_names = curr_instruction["_4"]
+    # instruction_call_full_names = curr_instruction["_4"] #TODO: leave blank for now,
 
     # Get the method call in each line of code, if any.
     method_call_pattern = re.compile(r"([a-zA-Z]*\()")
@@ -325,7 +343,7 @@ def create_class_dict(curr_class):
             "importStatements": [],
             "modifiers": [],
             "classFullName": class_full_name,
-            "inheritsFrom": inherits_from_list,
+            "inheritsFrom": [],
             "classType": get_class_type(class_declaration),
             "filePath": file_name,
             "fileLength": 0,
@@ -355,11 +373,11 @@ def clean_up_external_classes(source_code_json):
     for class_dict in source_code_json["classes"]:
         filtered_inherits = [
             class_name
-            for class_name in class_dict["inheritsFrom"]
+            for class_name in class_dict["_3"]
             if class_name.replace(root_pkg, "") == class_name
             and "java" not in class_name
         ]
         if not filtered_inherits:
-            class_dict["inheritsFrom"] = []
+            class_dict["_3"] = []
             new_dict["classes"].append(class_dict)
     return new_dict
