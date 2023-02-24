@@ -10,7 +10,8 @@ from create_dictionary import *
 import logging
 
 
-# Handle all error situations
+# Handle all error situations by logging the error message and joern's error message, if present.
+# Followed by deleting the project from /bin/joern-cli/workspace/ and exiting with error code
 def handle_errors(error_message, stderr=""):
     logging.error(error_message)
     if stderr:
