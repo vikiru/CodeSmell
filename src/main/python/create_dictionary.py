@@ -95,21 +95,22 @@ def assign_missing_class_info(class_dict, file_lines):
 def create_attribute_dict(curr_attribute):
     attribute_name = curr_attribute["_1"]
     attribute_type_full_name = curr_attribute["_2"]
-    attribute_code = curr_attribute["_3"]
-    attribute_line_number = int(curr_attribute["_4"])
-    attribute_modifiers = curr_attribute["_5"]
+    attribute_line_number = int(curr_attribute["_3"])
+    attribute_modifiers = curr_attribute["_4"]
     if not attribute_modifiers:
         attribute_modifiers = ["package private"]
 
     index = attribute_type_full_name.rfind(".")
-    type = attribute_type_full_name
+    attribute_type = attribute_type_full_name
     package_name = ""
     if index != -1:
         package_name = attribute_type_full_name.replace("[]", "").replace("$", ".")
-        type = attribute_type_full_name[index + 1 : len(attribute_type_full_name)]
-    index_nested = type.rfind("$")
+        attribute_type = attribute_type_full_name[
+            index + 1 : len(attribute_type_full_name)
+        ]
+    index_nested = attribute_type.rfind("$")
     if index_nested != -1:
-        type = type[index_nested + 1 : len(type)]
+        attribute_type = attribute_type[index_nested + 1 : len(attribute_type)]
 
     curr_attribute_dict = {
         "name": attribute_name,
@@ -118,10 +119,35 @@ def create_attribute_dict(curr_attribute):
         "code": "",
         "lineNumber": attribute_line_number,
         "modifiers": [modifier.lower() for modifier in attribute_modifiers],
-        "attributeType": type,
+        "attributeType": attribute_type,
         "typeList": [],
     }
     return curr_attribute_dict
+
+
+def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
+    regex_pattern_modifiers = [mod.strip() for mod in regex_pattern_modifiers]
+    joern_modifiers = [mod.strip() for mod in joern_modifiers]
+    final_set = set(regex_pattern_modifiers).union(set(joern_modifiers))
+    final_list = list(final_set)
+    return final_list
+
+
+# Return a list containing dictionaries for each parameter within the method body
+def get_method_parameters(parameters):
+    parameters_list = []
+    for parameter in parameters:
+        code = parameter["_1"]
+        parameter_type = code.split(" ")[0]
+        name = code.split(" ")[1]
+        parameter_dict = {
+            "code": code,
+            "name": name,
+            "type": parameter_type,
+            "typeList": [],
+        }
+        parameters_list.append(parameter_dict)
+    return parameters_list
 
 
 # For every method, create a dictionary and return it.
@@ -176,29 +202,6 @@ def create_method_dict(curr_method):
 
     # If the method is a constructor, find the name of the class.
     constructor_name = method_name_pattern.findall(method_body)[0]
-
-    # Return a list containing dictionaries for each parameter within the method body
-    def get_method_parameters(parameters):
-        parameters_list = []
-        for parameter in parameters:
-            code = parameter["_1"]
-            type = code.split(" ")[0]
-            name = code.split(" ")[1]
-            parameter_dict = {
-                "code": code,
-                "name": name,
-                "type": type,
-                "typeList": [],
-            }
-            parameters_list.append(parameter_dict)
-        return parameters_list
-
-    def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
-        regex_pattern_modifiers = [mod.strip() for mod in regex_pattern_modifiers]
-        joern_modifiers = [mod.strip() for mod in joern_modifiers]
-        final_set = set(regex_pattern_modifiers).union(set(joern_modifiers))
-        final_list = list(final_set)
-        return final_list
 
     curr_method_dict = {
         "name": method_name.replace("<init>", constructor_name),
@@ -266,6 +269,25 @@ def create_instruction_dict(curr_instruction):
     return curr_instruction_dict
 
 
+# Get the type of the object, either an interface, class, enum or abstract class.
+def get_class_type(declaration):
+    if "abstract class" in declaration:
+        return "abstract class"
+    elif "class" in declaration:
+        return "class"
+    elif "enum" in declaration:
+        return "enum"
+    elif "interface" in declaration:
+        return "interface"
+
+
+def get_name_without_separators(name):
+    if "$" in name:
+        index = name.rindex("$")
+        name = name[index + 1 : len(name)]
+    return name
+
+
 # For every class, create a dictionary and return it.
 def create_class_dict(curr_class):
     class_name = curr_class["_1"]
@@ -273,27 +295,9 @@ def create_class_dict(curr_class):
     inherits_from_list = curr_class["_3"]
     class_declaration = curr_class["_4"]
     line_number = curr_class["_5"]
-    class_modifiers = curr_class["_6"]
-    class_attributes = curr_class["_7"]
-    file_name = curr_class["_8"]
-    class_methods = curr_class["_9"]
-
-    # Get the type of the object, either an interface, class, enum or abstract class.
-    def get_type(declaration):
-        if "abstract class" in declaration:
-            return "abstract class"
-        elif "class" in declaration:
-            return "class"
-        elif "enum" in declaration:
-            return "enum"
-        elif "interface" in declaration:
-            return "interface"
-
-    def get_name_without_separators(name):
-        if "$" in name:
-            index = name.rindex("$")
-            name = name[index + 1 : len(name)]
-        return name
+    class_attributes = curr_class["_6"]
+    file_name = curr_class["_7"]
+    class_methods = curr_class["_8"]
 
     curr_class_dict = {
         "name": get_name_without_separators(class_name),
@@ -303,7 +307,7 @@ def create_class_dict(curr_class):
         "modifiers": [],
         "classFullName": class_full_name,
         "inheritsFrom": inherits_from_list,
-        "classType": get_type(class_declaration),
+        "classType": get_class_type(class_declaration),
         "filePath": file_name,
         "fileLength": 0,
         "emptyLines": 0,
@@ -320,7 +324,10 @@ def create_class_dict(curr_class):
 
 
 def clean_up_external_classes(source_code_json):
-    root_pkg = return_all_distinct_package_names(source_code_json["classes"])[0]
+    all_pkgs = return_all_distinct_package_names(source_code_json["classes"])
+    root_pkg = ""
+    if all_pkgs:
+        root_pkg = [0]
     new_dict = {"relations": [], "classes": []}
     for class_dict in source_code_json["classes"]:
         filtered_inherits = [
