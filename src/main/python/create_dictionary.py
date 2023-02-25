@@ -14,6 +14,8 @@ ENUM = "enum"
 PUBLIC = "public"
 PRIVATE = "private"
 PACKAGE_PRIVATE = "package private"
+ABSTRACT = "abstract"
+NATIVE = "native"
 
 CLASSES = "classes"
 
@@ -28,11 +30,23 @@ CODE = "code"
 MODIFIERS = "modifiers"
 LINE_NUM = "lineNumber"
 
+MAX_LINES = 100
+
 
 # Space is needed to pickup, ABSTRACT_CLASS and not "class abstractClass" for example
 MODIFIERS_PATTERN = re.compile(
     "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
 )
+
+# Return the total method lines of a class, used to determine if
+# instructions should be handled one by one or all at once
+def return_total_method_lines(class_dict):
+    total = 0
+    methods = class_dict["methods"]
+    line_nums = [method[LINE_NUM] for method in methods]
+    for line_num in line_nums:
+        total += line_num
+    return total
 
 
 # Remove package and any nesting in a class full name to get the proper name of the class.
