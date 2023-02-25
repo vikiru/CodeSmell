@@ -1,29 +1,48 @@
 import os
 import re
 
-# Helper constants that are defined more than once within this file.
+# Helper constants
 INIT_METHOD = "<init>"
+NESTED_SEP = "$"
+DOT_SEP = "."
 
 ABSTRACT_CLASS = "abstract class"
 CLASS = "class"
 INTERFACE = "interface"
 ENUM = "enum"
 
+PUBLIC = "public"
+PRIVATE = "private"
 PACKAGE_PRIVATE = "package private"
+
+CLASSES = "classes"
+
+SUCCESS = "success"
+STDOUT = "stdout"
+STDERR = "stderr"
+DEC_FORMATTER = ".2f"
+LOG_FILE = "joern_query.log"
+
+NAME = "name"
+CODE = "code"
+MODIFIERS = "modifiers"
+LINE_NUM = "lineNumber"
+
 
 # Space is needed to pickup, ABSTRACT_CLASS and not "class abstractClass" for example
 MODIFIERS_PATTERN = re.compile(
     "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
 )
 
+
 # Remove package and any nesting in a class full name to get the proper name of the class.
 def return_name_without_package(class_full_name):
     name = class_full_name
-    if "." in class_full_name:
-        index = class_full_name.rindex(".")
+    if DOT_SEP in class_full_name:
+        index = class_full_name.rindex(DOT_SEP)
         name = class_full_name[index + 1 :]
-    if "$" in name:
-        index = name.rindex("$")
+    if NESTED_SEP in name:
+        index = name.rindex(NESTED_SEP)
         name = name[index + 1 :]
     return name
 
@@ -31,7 +50,7 @@ def return_name_without_package(class_full_name):
 # Determine package name from the joern_json (prior to creation of dictionary)
 def return_package_name(curr_class):
     class_full_name = curr_class["_2"]
-    replace_str = "." + class_full_name
+    replace_str = DOT_SEP + class_full_name
     return class_full_name.replace(replace_str, "").strip()
 
 
@@ -54,8 +73,8 @@ def read_file(file_path):
 
 # Assign missing class info to each class dictionary
 def assign_missing_class_info(class_dict, file_lines):
-    class_name = class_dict["name"]
-    class_decl_line_number = int(class_dict["lineNumber"])
+    class_name = class_dict[NAME]
+    class_decl_line_number = int(class_dict[LINE_NUM])
 
     package_name = ""
     if file_lines[0].startswith("package"):
@@ -73,7 +92,7 @@ def assign_missing_class_info(class_dict, file_lines):
 
     for attribute in class_dict["attributes"]:
         existing_type = attribute["attributeType"]
-        line_number = attribute["lineNumber"]
+        line_number = attribute[LINE_NUM]
         attribute_code = file_lines[line_number - 1].strip()
         attribute_modifiers = [
             modifier.strip() for modifier in MODIFIERS_PATTERN.findall(attribute_code)
@@ -86,38 +105,40 @@ def assign_missing_class_info(class_dict, file_lines):
         if not attribute_modifiers and ENUM not in class_type:
             attribute_modifiers = [PACKAGE_PRIVATE]
         elif ENUM in class_type and existing_type == class_name:
-            if "public" in class_modifiers:
-                attribute_modifiers.append("public")
-            elif "private" in class_modifiers:
-                attribute_modifiers.append("private")
+            if PUBLIC in class_modifiers:
+                attribute_modifiers.append(PUBLIC)
+            elif PRIVATE in class_modifiers:
+                attribute_modifiers.append(PRIVATE)
             attribute_modifiers.append("final")
             attribute_modifiers.append("static")
             attribute_type = existing_type
 
-        attribute["code"] = attribute_code
+        attribute[CODE] = attribute_code
         attribute["attributeType"] = attribute_type
-        attribute["modifiers"] = attribute_modifiers
+        attribute[MODIFIERS] = attribute_modifiers
 
     # Cleanup default constructors
     for method in class_dict["methods"]:
-        if method["name"] == "" and method["returnType"] == "<empty>":
-            method["name"] = class_name
+        if method[NAME] == "" and method["returnType"] == "<empty>":
+            method[NAME] = class_name
             method["methodBody"] = class_name + "()"
             method["returnType"] = ""
 
     existing_full_name = class_dict["classFullName"].replace(package_name, "")
-    new_full_name = existing_full_name.replace(".", "").replace("$", ".").strip()
+    new_full_name = (
+        existing_full_name.replace(DOT_SEP, "").replace(NESTED_SEP, DOT_SEP).strip()
+    )
     total_file_length = len(file_lines)
     empty_lines = len([line for line in file_lines if line == ""])
     non_empty_lines = total_file_length - empty_lines
     class_dict["classFullName"] = new_full_name
     class_dict["classType"] = class_type
-    class_dict["code"] = class_declaration
+    class_dict[CODE] = class_declaration
     class_dict["fileLength"] = total_file_length
     class_dict["emptyLines"] = empty_lines
     class_dict["nonEmptyLines"] = non_empty_lines
     class_dict["importStatements"] = import_statements
-    class_dict["modifiers"] = class_modifiers
+    class_dict[MODIFIERS] = class_modifiers
     class_dict["packageName"] = package_name
 
     return class_dict
@@ -132,25 +153,27 @@ def create_attribute_dict(curr_attribute):
     if not attribute_modifiers:
         attribute_modifiers = [PACKAGE_PRIVATE]
 
-    index = attribute_type_full_name.rfind(".")
+    index = attribute_type_full_name.rfind(DOT_SEP)
     attribute_type = attribute_type_full_name
     package_name = ""
     if index != -1:
-        package_name = attribute_type_full_name.replace("[]", "").replace("$", ".")
+        package_name = attribute_type_full_name.replace("[]", "").replace(
+            NESTED_SEP, DOT_SEP
+        )
         attribute_type = attribute_type_full_name[
             index + 1 : len(attribute_type_full_name)
         ]
-    index_nested = attribute_type.rfind("$")
+    index_nested = attribute_type.rfind(NESTED_SEP)
     if index_nested != -1:
         attribute_type = attribute_type[index_nested + 1 : len(attribute_type)]
 
     curr_attribute_dict = {
-        "name": attribute_name,
+        NAME: attribute_name,
         "parentClass": [{}],
         "packageName": package_name,
-        "code": "",
-        "lineNumber": attribute_line_number,
-        "modifiers": [modifier.lower() for modifier in attribute_modifiers],
+        CODE: "",
+        LINE_NUM: attribute_line_number,
+        MODIFIERS: [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": attribute_type,
         "typeList": [],
     }
@@ -175,8 +198,8 @@ def get_method_parameters(parameters):
         parameter_type = code.split(" ")[0]
         name = code.split(" ")[1]
         parameter_dict = {
-            "code": code,
-            "name": name,
+            CODE: code,
+            NAME: name,
             "type": parameter_type,
             "typeList": [],
         }
@@ -236,10 +259,10 @@ def create_method_dict(curr_method):
     constructor_name = method_name_pattern.findall(method_body)[0]
 
     curr_method_dict = {
-        "name": method_name.replace(INIT_METHOD, constructor_name),
+        NAME: method_name.replace(INIT_METHOD, constructor_name),
         "parentClass": [{}],
         "methodBody": method_body,
-        "modifiers": get_method_modifiers(regex_pattern_modifiers, method_modifiers),
+        MODIFIERS: get_method_modifiers(regex_pattern_modifiers, method_modifiers),
         "parameters": get_method_parameters(method_parameters),
         "returnType": return_type,
         "lineNumberStart": method_line_number,
@@ -283,12 +306,14 @@ def create_instruction_dict(curr_instruction):
         # "ClassA.getA" was called. instead of just "getA"
         if call_list and method_call:
             method_call = call_list[0]
-            index = method_call.rfind(".")
-            method_call = method_call[:index] + method_call[index:].replace(".", "$")
-            method_call = method_call.split(".")[-1].replace("$", ".")
+            index = method_call.rfind(DOT_SEP)
+            method_call = method_call[:index] + method_call[index:].replace(
+                DOT_SEP, NESTED_SEP
+            )
+            method_call = method_call.split(DOT_SEP)[-1].replace(NESTED_SEP, DOT_SEP)
             class_name, method_name = (
-                method_call.split(".")[0],
-                method_call.split(".")[1],
+                method_call.split(DOT_SEP)[0],
+                method_call.split(DOT_SEP)[1],
             )
             method_call = method_call.replace(INIT_METHOD, class_name)
         else:
@@ -296,8 +321,8 @@ def create_instruction_dict(curr_instruction):
 
     curr_instruction_dict = {
         "label": instruction_label,
-        "code": instruction_code.replace("\r\n", ""),
-        "lineNumber": int(instruction_line_number),
+        CODE: instruction_code.replace("\r\n", ""),
+        LINE_NUM: int(instruction_line_number),
         "methodCall": method_call,
     }
 
@@ -318,8 +343,8 @@ def get_class_type(declaration):
 
 # Return the name of a class without the separators, this is used mainly for nested classes.
 def get_name_without_separators(name):
-    if "$" in name:
-        index = name.rindex("$")
+    if NESTED_SEP in name:
+        index = name.rindex(NESTED_SEP)
         name = name[index + 1 : len(name)]
     return name
 
@@ -337,11 +362,11 @@ def create_class_dict(curr_class):
         class_methods = curr_class["_8"]
 
         curr_class_dict = {
-            "name": get_name_without_separators(class_name),
-            "code": "",
-            "lineNumber": int(line_number),
+            NAME: get_name_without_separators(class_name),
+            CODE: "",
+            LINE_NUM: int(line_number),
             "importStatements": [],
-            "modifiers": [],
+            MODIFIERS: [],
             "classFullName": class_full_name,
             "inheritsFrom": [],
             "classType": get_class_type(class_declaration),
@@ -365,12 +390,12 @@ def create_class_dict(curr_class):
 
 # Remove all classes that inherit from external packages outside of the source code
 def clean_up_external_classes(source_code_json):
-    all_pkgs = return_all_distinct_package_names(source_code_json["classes"])
+    all_pkgs = return_all_distinct_package_names(source_code_json[CLASSES])
     root_pkg = ""
     if all_pkgs:
         root_pkg = all_pkgs[0]
-    new_dict = {"relations": [], "classes": []}
-    for class_dict in source_code_json["classes"]:
+    new_dict = {"relations": [], CLASSES: []}
+    for class_dict in source_code_json[CLASSES]:
         filtered_inherits = [
             class_name
             for class_name in class_dict["_3"]
@@ -379,5 +404,5 @@ def clean_up_external_classes(source_code_json):
         ]
         if not filtered_inherits:
             class_dict["_3"] = []
-            new_dict["classes"].append(class_dict)
+            new_dict[CLASSES].append(class_dict)
     return new_dict
