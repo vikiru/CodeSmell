@@ -112,10 +112,12 @@ public class ISPViolation extends Smell {
                             .orElseThrow(RuntimeException::new);
                     ArrayList<CPGClass> arr = this.segregations
                             .getOrDefault(m2, new ArrayList<>());
-                    System.out.print(m2 + " is not implemented");
+                    System.out.print(m2 + " is not implemented in " + c.name);
                     System.out.println(" within " + m.getParent());
                     arr.add(c);
                     this.segregations.put(m2, arr);
+                } else {
+                    System.out.print(m + " is implemented in " + c.name);
                 }
             }
         }
@@ -140,6 +142,8 @@ public class ISPViolation extends Smell {
             if (containsViolation(iface.getKey(), implementors)) {
                 System.out.println(iface.getKey() + " contains violation");
                 return processDetection(iface.getKey(), implementors.length);
+            } else {
+                System.out.println(iface.getKey() + " does not contain violation");
             }
         }
         return null;

@@ -17,12 +17,36 @@ import java.util.Set;
 import java.util.List;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class Common {
 
     public static StatTracker stats;
 
     protected static HashMap<CPGClass, ArrayList<CPGClass>> interfaces;
+
+    // temporary function to simplify running smell test routine
+    public static Stream<Smell> buildSmellStream(CodePropertyGraph cpg) {
+        ISPViolation s1 = new ISPViolation(cpg);
+        OrphanVariable s2  = new OrphanVariable(cpg);
+        FeatureEnvy s3  = new FeatureEnvy(cpg);
+        GodClass s4 = new GodClass(cpg);
+        InappropriateIntimacy s5 = new InappropriateIntimacy(cpg);
+        ISPViolation s6 = new ISPViolation(cpg);
+        OrphanVariable s7 = new OrphanVariable(cpg);
+        RefusedBequest s8 = new RefusedBequest(cpg);
+        Stream.Builder<Smell> sb = Stream.builder();
+        sb.add(s1);
+        sb.add(s2);
+        sb.add(s3);
+        sb.add(s4);
+        sb.add(s5);
+        sb.add(s6);
+        sb.add(s7);
+        sb.add(s8);
+        return sb.build();
+    }
 
     public static void initStatTracker(CodePropertyGraph cpg) {
         stats = new StatTracker(cpg);
