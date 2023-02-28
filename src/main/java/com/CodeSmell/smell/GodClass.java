@@ -75,6 +75,7 @@ public class GodClass extends Smell {
 		for (int i=contentSorter.itemCount()-1; i >= 0; i--) {
 			CPGClass c =  contentSorter.getKey(i);
 			int lineCount = contentSorter.getVal(i);
+			System.out.print(c + ":  line count: " + lineCount);
 
 			if (lineCount < minLineCount) {
 				continue;
@@ -87,9 +88,10 @@ public class GodClass extends Smell {
 					"%s exceeds max line count (%d lines)",
 					c.name, lineCount);
 			}
-
-			double proportion = lineCount / contentSorter.getTotal();
+			
+			double proportion = ((float) lineCount / contentSorter.getTotal());
 			if (proportion > contentThreshold) {
+				System.out.println("????");
 				description += String.format(
 					"%s contains %f%% of the instructions (%d lines)",
 					c.name, proportion * 100, lineCount);
@@ -97,7 +99,8 @@ public class GodClass extends Smell {
 
 			int relationIndex =  relationSorter.getIndex(c);
 			int relationSize = relationSorter.getVal(relationIndex);
-			proportion = relationSize / relationSorter.getTotal();
+			proportion = ((float) relationSize / relationSorter.getTotal());
+			System.out.println(" :  relation proportion: " + proportion);
 			if (proportion > relationThreshold) {
 				description += String.format(
 					"%s contains %f%% of all relations (%d)",

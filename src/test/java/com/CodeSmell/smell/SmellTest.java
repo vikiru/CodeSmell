@@ -51,9 +51,12 @@ public class SmellTest {
     @Test
     public void TestGodClass() {
         System.out.println("GodClass Test:");
-        GodClass gc = new GodClass(this.cpg, -1, -1, -1, -1);
+        GodClass gc = new GodClass(this.cpg, -1, -1, 0, -1);
         ArrayList<CodeFragment> detections = getDetections(gc);
-        //assertNotEquals(0, detections.size());
+        assertEquals(0, detections.size());
+        gc = new GodClass(this.cpg, -1, 0.3, 0, -1);
+        detections = getDetections(gc);
+        assertEquals(1, detections.size());
     }
 
     @Test
@@ -71,19 +74,18 @@ public class SmellTest {
         ArrayList<Method> ifaceMethods = new ArrayList<Method>(
             Arrays.asList(interfaceMethods(c2)));
         Method blankMethod = Arrays.stream(originalInterfaceMethods(c2))
-            .filter(m -> 
-                m.toString().equals("blankMethod() : void")).findFirst().get();
+            .filter(m -> m.toString().equals("blankMethod() : void")).findFirst().get();
         assertNotNull(blankMethod);
 
         CPGClass[] classes = new CPGClass[] {c3, c2};
 
         Collection<CodeFragment> detection1 = detections
-                .stream()
-                .filter(codeFrag -> 
-                    Set.of(codeFrag.classes).equals(Set.of(classes))
-                        && 
-                    Set.of(codeFrag.methods).equals(Set.of(blankMethod)))
-                .collect(Collectors.toList());
+            .stream()
+            .filter(codeFrag -> 
+                Set.of(codeFrag.classes).equals(Set.of(classes))
+                    && 
+                Set.of(codeFrag.methods).equals(Set.of(blankMethod)))
+            .collect(Collectors.toList());
         assertEquals(1, detection1.size());
     }
 }
