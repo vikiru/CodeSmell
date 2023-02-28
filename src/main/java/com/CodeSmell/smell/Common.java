@@ -75,6 +75,12 @@ public class Common {
                 .toArray(new Method[0]);
     }
 
+    // returns the method objects for the interface of a classifier
+    public static Method[] originalInterfaceMethods(CPGClass c) {
+        CPGClass iface = c.getInheritsFrom().get(0);
+        return iface.getMethods().toArray(new Method[0]);
+    }
+
     // returns true if c2 is a nested class (within the same file) of c
     public static boolean isNestedClass(CPGClass c2, CPGClass c) {
         return c.classFullName.startsWith(c + ".");

@@ -76,10 +76,7 @@ public class ISPViolation extends Smell {
         //   1.) The method is either blank
         //   2.) The method throws an error
         //   declaration unconditionally
-       // System.out.println(m.instructions);
-       // System.out.println(getMethodStats(m).uniqueInstructions);
-       // System.out.println(getMethodStats(m).uniqueInstructions.size());
-       // System.out.println("^^^^^^^^^^^^");
+
         if (getMethodStats(m).uniqueInstructions.size() == 0) {
             return true;
         }
@@ -139,7 +136,6 @@ public class ISPViolation extends Smell {
         this.segregations = new HashMap<>();
         while (this.interfaces.hasNext()) {
             Map.Entry<CPGClass, ArrayList<CPGClass>> iface = this.interfaces.next();
-            System.out.println("Checking interface " + iface);
             CPGClass[] implementors = iface.getValue().toArray(new CPGClass[0]);
             if (containsViolation(iface.getKey(), implementors)) {
                 System.out.println(iface.getKey() + " contains violation");
@@ -168,17 +164,11 @@ public class ISPViolation extends Smell {
 
         // each element comprises one detection.
         ArrayList<Segregation> refinedSegregations = new ArrayList<>();
-        //ArrayList<Method> ifaceMethods = iface.getMethods();
 
-        System.out.println(this.segregations);
-        System.out.println("ONE");
         Set<CPGClass> allNonImplementingClasses = new HashSet<>();
         for (Method m : this.segregations.keySet()) {
             allNonImplementingClasses.addAll(this.segregations.get(m));
         }
-
-        System.out.println(allNonImplementingClasses);
-        System.out.println("TWO");
 
         // group sets of classes such that
         // all classes have usable implementations
@@ -200,8 +190,6 @@ public class ISPViolation extends Smell {
             refinedSegregations.add(s);
 
         }
-        System.out.println(refinedSegregations);
-        System.out.println("THREE");
 
         // pass 2
         // if any sets of classes are the same, group the two Segregations together

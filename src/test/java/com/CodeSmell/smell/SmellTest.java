@@ -20,6 +20,7 @@ import static com.CodeSmell.smell.Common.initStatTracker;
 import static com.CodeSmell.smell.Common.interfaceMethods;
 import static com.CodeSmell.smell.Common.stats;
 import static com.CodeSmell.smell.Common.findClassByName;
+import static com.CodeSmell.smell.Common.originalInterfaceMethods;
 import com.CodeSmell.stat.StatTracker;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,36 +63,26 @@ public class SmellTest {
         ArrayList<CodeFragment> detections = getDetections(smell);
         assertEquals(2, detections.size());
 
-        // one description should suggest to move 
-        // move methodWithError() into new interface 
-        // with the classes that implement it [NoneISPClass]
-        // 
-
-        // another should suggest
-        // move blankMethod() into a new interface
-        // with [NoneISPClass, ISPClassThree, ISPClassTwo]
-
         CPGClass c2 = findClassByName(this.cpg, "ISPClass.ISPClassTwo");
         CPGClass c3 = findClassByName(this.cpg, "ISPClass.ISPClassThree");
         assertNotNull(c2);
         assertNotNull(c3);
+
         ArrayList<Method> ifaceMethods = new ArrayList<Method>(
             Arrays.asList(interfaceMethods(c2)));
-        Method blankMethod = ifaceMethods
-            .stream()
+        Method blankMethod = Arrays.stream(originalInterfaceMethods(c2))
             .filter(m -> 
                 m.toString().equals("blankMethod() : void")).findFirst().get();
-
         assertNotNull(blankMethod);
 
         CPGClass[] classes = new CPGClass[] {c3, c2};
-        Method[] methods = new Method[] {blankMethod};
+
         Collection<CodeFragment> detection1 = detections
                 .stream()
                 .filter(codeFrag -> 
-                    Set.of(codeFrag.classes).equals(Set.of(classes)))
-                    //    && 
-                   // Arrays.equals(codeFrag.methods, methods))
+                    Set.of(codeFrag.classes).equals(Set.of(classes))
+                        && 
+                    Set.of(codeFrag.methods).equals(Set.of(blankMethod)))
                 .collect(Collectors.toList());
         assertEquals(1, detection1.size());
     }
