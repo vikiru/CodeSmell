@@ -1,5 +1,7 @@
 import os
 import re
+import logging
+from timeit import default_timer as timer
 
 # Helper constants
 INIT_METHOD = "<init>"
@@ -23,6 +25,7 @@ SUCCESS = "success"
 STDOUT = "stdout"
 STDERR = "stderr"
 DEC_FORMATTER = ".2f"
+LOG_FORMATTER = "%(asctime)s %(levelname)s %(message)s"
 LOG_FILE = "joern_query.log"
 
 NAME = "name"
@@ -30,27 +33,44 @@ CODE = "code"
 MODIFIERS = "modifiers"
 LINE_NUM = "lineNumber"
 
-MAX_LINES = 100
-
-
 # Space is needed to pickup, ABSTRACT_CLASS and not "class abstractClass" for example
 MODIFIERS_PATTERN = re.compile(
     "(private |public |protected |static |final |synchronized |virtual |volatile |abstract |native )"
 )
 
-# Return the total method lines of a class, used to determine if
-# instructions should be handled one by one or all at once
-def return_total_method_lines(class_dict):
-    total = 0
-    methods = class_dict["methods"]
-    line_nums = [method[LINE_NUM] for method in methods]
-    for line_num in line_nums:
-        total += line_num
-    return total
+
+def sorted_dictionary(list_d):
+    """Given a list of dictionaries, sort by value and combine into a single sorted dictionary."""
+
+    unsorted_dict = {key: val for name in list_d for key, val in name.items()}
+    sorted_tuple = sorted(unsorted_dict.items(), key=lambda entry: entry[1])
+    sorted_dict = dict((key, val) for key, val in sorted_tuple)
+    return sorted_dict
 
 
-# Remove package and any nesting in a class full name to get the proper name of the class.
+def return_method_name(full_name):
+    """Return the name of a method without the full name + method signature. Additionally return the class it belongs to"""
+
+    index_signature = full_name.index(":")
+    full_method_name = full_name[:index_signature]
+    index = full_method_name.rindex(DOT_SEP)
+    full_method_name = full_method_name.replace(NESTED_SEP, DOT_SEP)
+    method_name = full_method_name[:index] + full_method_name[index:].replace(
+        DOT_SEP, NESTED_SEP
+    )
+    split = method_name.split(DOT_SEP)
+    method_name = [name for name in split if NESTED_SEP in name][0].replace(
+        NESTED_SEP, DOT_SEP
+    )
+    class_name, method_name = (
+        method_name.split(DOT_SEP)[0],
+        method_name.split(DOT_SEP)[1],
+    )
+    return class_name, method_name
+
+
 def return_name_without_package(class_full_name):
+    """Remove package and any nesting in a class full name to get the proper name of the class."""
     name = class_full_name
     if DOT_SEP in class_full_name:
         index = class_full_name.rindex(DOT_SEP)
@@ -61,21 +81,25 @@ def return_name_without_package(class_full_name):
     return name
 
 
-# Determine package name from the joern_json (prior to creation of dictionary)
-def return_package_name(curr_class):
-    class_full_name = curr_class["_2"]
-    replace_str = DOT_SEP + class_full_name
-    return class_full_name.replace(replace_str, "").strip()
+def return_package_name(class_full_name):
+    """Determine package name from the joern_json (prior to creation of dictionary)"""
+
+    package_name = ""
+    if DOT_SEP in class_full_name:
+        index = class_full_name.rindex(".")
+        package_name = class_full_name[:index].strip()
+    return package_name
 
 
-# Return all distinct package names as a set
 def return_all_distinct_package_names(all_classes):
+    """Return all distinct package names as a set"""
+
     package_names = {class_dict["packageName"] for class_dict in all_classes}
     return sorted(package_names, key=str)
 
 
-# Read a file from the file path that Joern gives and return a list of all the lines
 def read_file(file_path):
+    """Read a file from the file path that Joern gives and return a list of all the lines"""
     if os.path.exists(file_path):
         java_file = open(file_path, "r")
         lines = java_file.read().splitlines()
@@ -85,8 +109,9 @@ def read_file(file_path):
         return []
 
 
-# Assign missing class info to each class dictionary
 def assign_missing_class_info(class_dict, file_lines):
+    """Assign missing class info to each class dictionary"""
+
     class_name = class_dict[NAME]
     class_decl_line_number = int(class_dict[LINE_NUM])
 
@@ -158,8 +183,9 @@ def assign_missing_class_info(class_dict, file_lines):
     return class_dict
 
 
-# For every attribute, create a dictionary and return it.
 def create_attribute_dict(curr_attribute):
+    """For every attribute, create a dictionary and return it."""
+
     attribute_name = curr_attribute["_1"]
     attribute_type_full_name = curr_attribute["_2"]
     attribute_line_number = int(curr_attribute["_3"])
@@ -195,8 +221,8 @@ def create_attribute_dict(curr_attribute):
     return curr_attribute_dict
 
 
-# Return all the method modifiers, combining joern and the modifiers obtained from regex
 def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
+    """Return all the method modifiers, combining joern and the modifiers obtained from regex"""
     regex_pattern_modifiers = [mod.strip() for mod in regex_pattern_modifiers]
     joern_modifiers = [mod.strip() for mod in joern_modifiers]
     final_set = set(regex_pattern_modifiers).union(set(joern_modifiers))
@@ -204,8 +230,8 @@ def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
     return final_list
 
 
-# Return a list containing dictionaries for each parameter within the method body
 def get_method_parameters(parameters):
+    """Return a list containing dictionaries for each parameter within the method body"""
     parameters_list = []
     for parameter in parameters:
         code = parameter["_1"]
@@ -221,29 +247,30 @@ def get_method_parameters(parameters):
     return parameters_list
 
 
-# For every method, create a dictionary and return it.
 def create_method_dict(curr_method):
+    """For every method, create a dictionary and return it."""
+
     method_name = curr_method["_1"]
-    method_code = curr_method["_2"]
+    method_full_name = curr_method["_2"]
+    method_code = curr_method["_3"]
 
     # Default values for default constructor
     method_line_number = 0
     method_line_number_end = 0
     total_lines = 0
     method_modifiers = [
-        modifier.lower() for modifier in curr_method["_5"] if modifier != "CONSTRUCTOR"
+        modifier.lower() for modifier in curr_method["_6"] if modifier != "CONSTRUCTOR"
     ]
     method_parameters = []
     method_instructions = []
 
     # Handle normal method cases
-    if len(curr_method) == 7:
-        method_line_number = int(curr_method["_3"])
-        method_line_number_end = int(curr_method["_4"])
+    if len(curr_method) == 6:
+        method_line_number = int(curr_method["_4"])
+        method_line_number_end = int(curr_method["_"])
         total_lines = (method_line_number_end - method_line_number) + 1
         if not method_modifiers and method_name != INIT_METHOD:
             method_modifiers = [PACKAGE_PRIVATE]
-        method_parameters = curr_method["_6"]
         method_instructions = curr_method["_7"]
 
     # Get the modifiers, return type and the method body from the full method body provided by Joern.
@@ -295,12 +322,13 @@ def create_method_dict(curr_method):
     return curr_method_dict
 
 
-# For every method's instruction, create a dictionary and return it.
 def create_instruction_dict(curr_instruction):
+    """For every method's instruction, create a dictionary and return it."""
+
     instruction_label = curr_instruction["_1"]
     instruction_code = curr_instruction["_2"]
     instruction_line_number = curr_instruction["_3"]
-    # instruction_call_full_names = curr_instruction["_4"] #TODO: leave blank for now,
+    instruction_call_full_names = curr_instruction["_4"]
 
     # Get the method call in each line of code, if any.
     method_call_pattern = re.compile(r"([a-zA-Z]*\()")
@@ -363,60 +391,74 @@ def get_name_without_separators(name):
     return name
 
 
-# For every class, create a dictionary and return it.
 def create_class_dict(curr_class):
-    if "_1" in curr_class:
-        class_name = curr_class["_1"]
-        class_full_name = curr_class["_2"]
-        inherits_from_list = curr_class["_3"]
-        class_declaration = curr_class["_4"]
-        line_number = curr_class["_5"]
-        class_attributes = curr_class["_6"]
-        file_name = curr_class["_7"]
-        class_methods = curr_class["_8"]
+    """For every class, create a dictionary and return it."""
 
-        curr_class_dict = {
-            NAME: get_name_without_separators(class_name),
-            CODE: "",
-            LINE_NUM: int(line_number),
-            "importStatements": [],
-            MODIFIERS: [],
-            "classFullName": class_full_name,
-            "inheritsFrom": [],
-            "classType": get_class_type(class_declaration),
-            "filePath": file_name,
-            "fileLength": 0,
-            "emptyLines": 0,
-            "nonEmptyLines": 0,
-            "packageName": "",
-            "attributes": list(map(create_attribute_dict, class_attributes)),
-            "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
-            "outwardRelations": [],
-        }
+    class_name = curr_class["_1"]
+    class_full_name = curr_class["_2"]
+    file_name = curr_class["_3"]
+    inherits_from_list = curr_class["_4"]
+    class_declaration = curr_class["_5"]
+    line_number = curr_class["_6"]
+    class_attributes = curr_class["_7"]
+    class_methods = curr_class["_8"]
 
-        # Assign all missing info
-        curr_class_dict = assign_missing_class_info(
-            curr_class_dict, read_file(curr_class_dict["filePath"])
-        )
+    curr_class_dict = {
+        NAME: get_name_without_separators(class_name),
+        CODE: "",
+        LINE_NUM: int(line_number),
+        "importStatements": [],
+        MODIFIERS: [],
+        "classFullName": class_full_name,
+        "inheritsFrom": [],
+        "classType": get_class_type(class_declaration),
+        "filePath": file_name,
+        "fileLength": 0,
+        "emptyLines": 0,
+        "nonEmptyLines": 0,
+        "packageName": "",
+        "attributes": list(
+            filter(None, list(map(create_attribute_dict, class_attributes)))
+        ),
+        "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
+        "outwardRelations": [],
+    }
 
-        return curr_class_dict
+    # Assign all missing info
+    curr_class_dict = assign_missing_class_info(
+        curr_class_dict, read_file(curr_class_dict["filePath"])
+    )
+
+    return curr_class_dict
 
 
-# Remove all classes that inherit from external packages outside of the source code
 def clean_up_external_classes(source_code_json):
+    """Remove all classes that inherit from external classes outside of the source code"""
+
+    clean_start = timer()
     all_pkgs = return_all_distinct_package_names(source_code_json[CLASSES])
     root_pkg = ""
     if all_pkgs:
         root_pkg = all_pkgs[0]
+
+    # Construct a new dictionary without external classes.
     new_dict = {"relations": [], CLASSES: []}
     for class_dict in source_code_json[CLASSES]:
         filtered_inherits = [
             class_name
-            for class_name in class_dict["_3"]
+            for class_name in class_dict["_4"]
             if class_name.replace(root_pkg, "") == class_name
             and "java" not in class_name
         ]
         if not filtered_inherits:
-            class_dict["_3"] = []
+            class_dict["_4"] = []
             new_dict[CLASSES].append(class_dict)
+
+    clean_end = timer()
+    clean_diff = clean_end - clean_start
+    logging.info(
+        "All external classes (if any) have been excluded from the source code json. Completed in {0} seconds.".format(
+            format(clean_diff, DEC_FORMATTER)
+        )
+    )
     return new_dict
