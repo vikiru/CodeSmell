@@ -41,6 +41,15 @@ public class Common {
         }
     }
 
+    public static CPGClass findClassByName(CodePropertyGraph cpg,
+            String name) {
+        return cpg.getClasses()
+                .stream()
+                .filter(c -> c.classFullName.equals(name))
+                .findAny()
+                .orElse(null);
+    }
+
     public static MethodStat getMethodStats(Method m) {
         for (MethodStat ms : stats.methodStats.values()) {
             if (ms.method == m) {

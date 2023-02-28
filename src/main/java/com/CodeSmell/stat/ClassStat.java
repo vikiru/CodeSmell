@@ -261,8 +261,8 @@ public class ClassStat {
     }
 
     /**
-     * Determine the total number of distinct methods of other classes (including itself) that this class uses throughout its
-     * methods.
+     * Determine the total number of distinct methods of other classes (including itself) 
+     * that this class uses throughout its methods.
      *
      * @param methodStats A list containing the stats of every method present within a given class
      * @return A map representing how many distinct methods of another class were used
@@ -275,7 +275,6 @@ public class ClassStat {
                                 totalClassMethodCalls.getOrDefault(methodKey, 0) + methodValue)));
         return Collections.unmodifiableMap(totalClassMethodCalls);
     }
-
 
     @Override
     public String toString() {
