@@ -6,6 +6,7 @@ from timeit import default_timer as timer
 # Helper constants
 INIT_METHOD = "<init>"
 NESTED_SEP = "$"
+COLON_SEP = ":"
 DOT_SEP = "."
 
 ABSTRACT_CLASS = "abstract class"
@@ -39,19 +40,44 @@ MODIFIERS_PATTERN = re.compile(
 )
 
 
-def sorted_dictionary(list_d):
-    """Given a list of dictionaries, sort by value and combine into a single sorted dictionary."""
+def sort_methods(methods):
+    """Sort the methods of a class in ascending order, based on the total length of the method. This is to ensure that methods
+    are placed in order of smallest method so that requests to Joern can follow a Shortest Task First approach."""
 
-    unsorted_dict = {key: val for name in list_d for key, val in name.items()}
-    sorted_tuple = sorted(unsorted_dict.items(), key=lambda entry: entry[1])
-    sorted_dict = dict((key, val) for key, val in sorted_tuple)
-    return sorted_dict
+    for method in methods:
+        if "_4" and "_5" in method:
+            end = method["_5"]
+            start = method["_4"]
+            method["totalLength"] = (end - start) + 1
+        else:
+            method["totalLength"] = 0
+    new_list = sorted(methods, key=lambda entry: entry["totalLength"])
+    return new_list
+
+
+def clean_method_full_name(method_full_name):
+    """Given the full name of a method consisting of the package, class and signature of the method. Return the name separating
+    the package, class and method name by a dollar sign.
+    """
+
+    str_to_return = method_full_name
+    index_signature = str_to_return.index(COLON_SEP)
+    str_to_return = str_to_return[:index_signature]
+    for _ in range(0, 2):
+        if DOT_SEP in str_to_return:
+            index_sep = str_to_return.rindex(DOT_SEP)
+            str_to_return = """{start}{new_char}{end}""".format(
+                start=str_to_return[:index_sep],
+                new_char=str_to_return[index_sep].replace(DOT_SEP, NESTED_SEP),
+                end=str_to_return[index_sep + 1 : len(str_to_return)],
+            )
+    return str_to_return
 
 
 def return_method_name(full_name):
     """Return the name of a method without the full name + method signature. Additionally return the class it belongs to"""
 
-    index_signature = full_name.index(":")
+    index_signature = full_name.index(COLON_SEP)
     full_method_name = full_name[:index_signature]
     index = full_method_name.rindex(DOT_SEP)
     full_method_name = full_method_name.replace(NESTED_SEP, DOT_SEP)
@@ -71,13 +97,21 @@ def return_method_name(full_name):
 
 def return_name_without_package(class_full_name):
     """Remove package and any nesting in a class full name to get the proper name of the class."""
+
     name = class_full_name
     if DOT_SEP in class_full_name:
         index = class_full_name.rindex(DOT_SEP)
         name = class_full_name[index + 1 :]
+    name = get_name_without_separators(name)
+    return name
+
+
+def get_name_without_separators(name):
+    """Return the name of a class without the separators, this is used mainly for nested classes."""
+
     if NESTED_SEP in name:
         index = name.rindex(NESTED_SEP)
-        name = name[index + 1 :]
+        name = name[index + 1 : len(name)]
     return name
 
 
@@ -92,7 +126,7 @@ def return_package_name(class_full_name):
 
 
 def return_all_distinct_package_names(all_classes):
-    """Return all distinct package names as a set"""
+    """Return all distinct package names as a set, sorted in ascending order"""
 
     package_names = {class_dict["packageName"] for class_dict in all_classes}
     return sorted(package_names, key=str)
@@ -100,87 +134,13 @@ def return_all_distinct_package_names(all_classes):
 
 def read_file(file_path):
     """Read a file from the file path that Joern gives and return a list of all the lines"""
+
+    lines = []
     if os.path.exists(file_path):
         java_file = open(file_path, "r")
         lines = java_file.read().splitlines()
         java_file.close()
-        return lines
-    else:
-        return []
-
-
-def assign_missing_class_info(class_dict, file_lines):
-    """Assign missing class info to each class dictionary"""
-
-    class_name = class_dict[NAME]
-    class_decl_line_number = int(class_dict[LINE_NUM])
-
-    package_name = ""
-    if file_lines[0].startswith("package"):
-        package_name = file_lines[0]
-    package_name = package_name.replace(";", "").replace("package ", "").strip()
-    import_statements = [line for line in file_lines if "import" in line]
-    class_declaration = file_lines[class_decl_line_number - 1]
-    class_declaration = class_declaration.replace("{", "").strip()
-    class_modifiers = [
-        modifier.strip() for modifier in MODIFIERS_PATTERN.findall(class_declaration)
-    ]
-    class_type = class_dict["classType"].strip()
-    if "abstract" in class_modifiers:
-        class_type = ABSTRACT_CLASS
-
-    for attribute in class_dict["attributes"]:
-        existing_type = attribute["attributeType"]
-        line_number = attribute[LINE_NUM]
-        attribute_code = file_lines[line_number - 1].strip()
-        attribute_modifiers = [
-            modifier.strip() for modifier in MODIFIERS_PATTERN.findall(attribute_code)
-        ]
-        attribute_type = re.sub(MODIFIERS_PATTERN, "", attribute_code).strip()
-        # Handle hashmap types
-        attribute_type = attribute_type.replace(", ", "|")
-        attribute_type = attribute_type.split()[0].replace("|", ", ")
-
-        if not attribute_modifiers and ENUM not in class_type:
-            attribute_modifiers = [PACKAGE_PRIVATE]
-        elif ENUM in class_type and existing_type == class_name:
-            if PUBLIC in class_modifiers:
-                attribute_modifiers.append(PUBLIC)
-            elif PRIVATE in class_modifiers:
-                attribute_modifiers.append(PRIVATE)
-            attribute_modifiers.append("final")
-            attribute_modifiers.append("static")
-            attribute_type = existing_type
-
-        attribute[CODE] = attribute_code
-        attribute["attributeType"] = attribute_type
-        attribute[MODIFIERS] = attribute_modifiers
-
-    # Cleanup default constructors
-    for method in class_dict["methods"]:
-        if method[NAME] == "" and method["returnType"] == "<empty>":
-            method[NAME] = class_name
-            method["methodBody"] = class_name + "()"
-            method["returnType"] = ""
-
-    existing_full_name = class_dict["classFullName"].replace(package_name, "")
-    new_full_name = (
-        existing_full_name.replace(DOT_SEP, "").replace(NESTED_SEP, DOT_SEP).strip()
-    )
-    total_file_length = len(file_lines)
-    empty_lines = len([line for line in file_lines if line == ""])
-    non_empty_lines = total_file_length - empty_lines
-    class_dict["classFullName"] = new_full_name
-    class_dict["classType"] = class_type
-    class_dict[CODE] = class_declaration
-    class_dict["fileLength"] = total_file_length
-    class_dict["emptyLines"] = empty_lines
-    class_dict["nonEmptyLines"] = non_empty_lines
-    class_dict["importStatements"] = import_statements
-    class_dict[MODIFIERS] = class_modifiers
-    class_dict["packageName"] = package_name
-
-    return class_dict
+    return lines
 
 
 def create_attribute_dict(curr_attribute):
@@ -209,13 +169,13 @@ def create_attribute_dict(curr_attribute):
 
     curr_attribute_dict = {
         NAME: attribute_name,
-        "parentClass": [{}],
+        "parentClass": [{}],  # Handled within Parser
         "packageName": package_name,
-        CODE: "",
+        CODE: "",  # Handled within assign_missing_class_info
         LINE_NUM: attribute_line_number,
         MODIFIERS: [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": attribute_type,
-        "typeList": [],
+        "typeList": [],  # Handled within Parser
     }
 
     return curr_attribute_dict
@@ -223,6 +183,7 @@ def create_attribute_dict(curr_attribute):
 
 def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
     """Return all the method modifiers, combining joern and the modifiers obtained from regex"""
+
     regex_pattern_modifiers = [mod.strip() for mod in regex_pattern_modifiers]
     joern_modifiers = [mod.strip() for mod in joern_modifiers]
     final_set = set(regex_pattern_modifiers).union(set(joern_modifiers))
@@ -232,19 +193,80 @@ def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
 
 def get_method_parameters(parameters):
     """Return a list containing dictionaries for each parameter within the method body"""
+
     parameters_list = []
     for parameter in parameters:
-        code = parameter["_1"]
-        parameter_type = code.split(" ")[0]
-        name = code.split(" ")[1]
+        splitted_str = parameter.split()
+        parameter_type = splitted_str[0]
+        name = splitted_str[1]
         parameter_dict = {
-            CODE: code,
+            CODE: parameter,
             NAME: name,
             "type": parameter_type,
             "typeList": [],
         }
         parameters_list.append(parameter_dict)
     return parameters_list
+
+
+def assign_method_calls(method_ins, method_calls):
+    """Assign method calls to all instructions which call either an Exception or a method belonging to a class present in the given directory.
+
+    Additionally, ensure that duplicates are cleaned after assignment.
+    """
+
+    method_names = set()
+    for call in method_calls:
+        for key, value in call.items():
+            cleaned_name = clean_method_full_name(key)
+            split_name = cleaned_name.split(NESTED_SEP)
+            package_name = split_name[0] if len(split_name) == 3 else ""
+            class_name = split_name[1] if len(split_name) == 3 else split_name[0]
+            method_name = split_name[2] if len(split_name) == 3 else split_name[1]
+            method_name = method_name.replace(INIT_METHOD, class_name)
+            method_names.add(method_name)
+            filtered_calls = [
+                ins
+                for ins in method_ins
+                if ins["lineNumber"] == value
+                and ins["methodCall"] == method_name
+                and NESTED_SEP not in ins["methodCall"]
+            ]
+            if filtered_calls:
+                first_call = filtered_calls[0]
+                first_call["methodCall"] = cleaned_name.replace(INIT_METHOD, class_name)
+
+    # Clean after assigning method calls
+    for ins in method_ins:
+        call = ins["methodCall"]
+    if call in method_names:
+        ins["methodCall"] = ""
+
+
+def create_instruction_dict(curr_instruction):
+    """For every method's instruction, create a dictionary and return it."""
+
+    instruction_code = curr_instruction["_1"]
+    instruction_label = curr_instruction["_2"]
+    instruction_line_number = curr_instruction["_3"]
+
+    # Get the method call in each line of code, if any.
+    method_call_pattern = re.compile(r"([a-zA-Z]*\()")
+    calls = method_call_pattern.findall(instruction_code)
+    method_call = ""
+    acceptable_labels = ["CALL", "RETURN"]
+    if calls and instruction_label in acceptable_labels:
+        method_call = calls[0].replace("(", "")
+        method_call = method_call.replace("super", INIT_METHOD)
+
+    curr_instruction_dict = {
+        "label": instruction_label,
+        CODE: instruction_code.replace("\r\n", ""),
+        LINE_NUM: int(instruction_line_number),
+        "methodCall": method_call,
+    }
+
+    return curr_instruction_dict
 
 
 def create_method_dict(curr_method):
@@ -263,15 +285,23 @@ def create_method_dict(curr_method):
     ]
     method_parameters = []
     method_instructions = []
+    method_calls = []
+    filtered_ins = []
 
     # Handle normal method cases
-    if len(curr_method) == 6:
+    if len(curr_method) == 8 or len(curr_method) == 9:
         method_line_number = int(curr_method["_4"])
-        method_line_number_end = int(curr_method["_"])
+        method_line_number_end = int(curr_method["_5"])
         total_lines = (method_line_number_end - method_line_number) + 1
         if not method_modifiers and method_name != INIT_METHOD:
             method_modifiers = [PACKAGE_PRIVATE]
-        method_instructions = curr_method["_7"]
+        method_calls = curr_method["_7"]
+        method_instructions = curr_method["_8"]
+        filtered_ins = {
+            ins["_1"]
+            for ins in method_instructions
+            if "METHOD_PARAMETER" in ins["_2"] and ins["_1"] != "this"
+        }
 
     # Get the modifiers, return type and the method body from the full method body provided by Joern.
     regex_pattern_modifiers = MODIFIERS_PATTERN.findall(method_code)
@@ -304,7 +334,7 @@ def create_method_dict(curr_method):
         "parentClass": [{}],
         "methodBody": method_body,
         MODIFIERS: get_method_modifiers(regex_pattern_modifiers, method_modifiers),
-        "parameters": get_method_parameters(method_parameters),
+        "parameters": get_method_parameters(filtered_ins),
         "returnType": return_type,
         "lineNumberStart": method_line_number,
         "lineNumberEnd": method_line_number_end,
@@ -319,76 +349,12 @@ def create_method_dict(curr_method):
         "attributeCalls": [],
     }
 
+    # Assign method calls to all instructions which call either an Exception or a method belonging to a class in the source code
+    # in the following format: <package_name>$<class_name>$<method_name>
+    # (this is to account for same class name, same method name, different package)
+    assign_method_calls(curr_method_dict["instructions"], method_calls)
+
     return curr_method_dict
-
-
-def create_instruction_dict(curr_instruction):
-    """For every method's instruction, create a dictionary and return it."""
-
-    instruction_label = curr_instruction["_1"]
-    instruction_code = curr_instruction["_2"]
-    instruction_line_number = curr_instruction["_3"]
-    instruction_call_full_names = curr_instruction["_4"]
-
-    # Get the method call in each line of code, if any.
-    method_call_pattern = re.compile(r"([a-zA-Z]*\()")
-    calls = method_call_pattern.findall(instruction_code)
-    method_call = ""
-    acceptable_labels = ["CALL", "RETURN"]
-    if calls and instruction_label in acceptable_labels:
-        method_call = calls[0].replace("(", "")
-        method_call = method_call.replace("super", INIT_METHOD)
-        call_list = [
-            item.split(":")[0]
-            for item in instruction_call_full_names
-            if method_call in item
-        ]
-        # Account for cases where two classes could have the same method names (additionally exclude names
-        # matching java): ClassA.getA() and ClassB.getA() so the returned method_call would be able to tell:
-        # "ClassA.getA" was called. instead of just "getA"
-        if call_list and method_call:
-            method_call = call_list[0]
-            index = method_call.rfind(DOT_SEP)
-            method_call = method_call[:index] + method_call[index:].replace(
-                DOT_SEP, NESTED_SEP
-            )
-            method_call = method_call.split(DOT_SEP)[-1].replace(NESTED_SEP, DOT_SEP)
-            class_name, method_name = (
-                method_call.split(DOT_SEP)[0],
-                method_call.split(DOT_SEP)[1],
-            )
-            method_call = method_call.replace(INIT_METHOD, class_name)
-        else:
-            method_call = ""
-
-    curr_instruction_dict = {
-        "label": instruction_label,
-        CODE: instruction_code.replace("\r\n", ""),
-        LINE_NUM: int(instruction_line_number),
-        "methodCall": method_call,
-    }
-
-    return curr_instruction_dict
-
-
-# Get the type of the object, either an interface, class, enum or abstract class.
-def get_class_type(declaration):
-    if ABSTRACT_CLASS in declaration:
-        return ABSTRACT_CLASS
-    elif CLASS in declaration:
-        return CLASS
-    elif ENUM in declaration:
-        return ENUM
-    elif INTERFACE in declaration:
-        return INTERFACE
-
-
-# Return the name of a class without the separators, this is used mainly for nested classes.
-def get_name_without_separators(name):
-    if NESTED_SEP in name:
-        index = name.rindex(NESTED_SEP)
-        name = name[index + 1 : len(name)]
-    return name
 
 
 def create_class_dict(curr_class):
@@ -462,3 +428,99 @@ def clean_up_external_classes(source_code_json):
         )
     )
     return new_dict
+
+
+def get_class_type(declaration):
+    """Get the type of the object, either an interface, class, enum or abstract class."""
+
+    if ABSTRACT_CLASS in declaration:
+        return ABSTRACT_CLASS
+    elif CLASS in declaration:
+        return CLASS
+    elif ENUM in declaration:
+        return ENUM
+    elif INTERFACE in declaration:
+        return INTERFACE
+
+
+def assign_missing_class_info(class_dict, file_lines):
+    """Assign missing class info to each class dictionary. This includes the following:
+    - package name
+    - import statements
+    - class declaration
+    - class modifiers
+    - class type
+    - attribute declaration and type
+    - attribute modifiers
+    - total lines and empty and non-empty lines in class
+    """
+
+    class_name = class_dict[NAME]
+    class_decl_line_number = int(class_dict[LINE_NUM])
+
+    package_name = ""
+    if file_lines[0].startswith("package"):
+        package_name = file_lines[0]
+    package_name = package_name.replace(";", "").replace("package ", "").strip()
+    import_statements = [line for line in file_lines if "import" in line]
+    class_declaration = file_lines[class_decl_line_number - 1]
+    class_declaration = class_declaration.replace("{", "").strip()
+    class_modifiers = [
+        modifier.strip() for modifier in MODIFIERS_PATTERN.findall(class_declaration)
+    ]
+    class_type = class_dict["classType"].strip()
+    if "abstract" in class_modifiers:
+        class_type = ABSTRACT_CLASS
+
+    for attribute in class_dict["attributes"]:
+        existing_type = attribute["attributeType"]
+        line_number = attribute[LINE_NUM]
+        attribute_code = file_lines[line_number - 1].strip()
+        attribute_modifiers = [
+            modifier.strip() for modifier in MODIFIERS_PATTERN.findall(attribute_code)
+        ]
+        attribute_type = re.sub(MODIFIERS_PATTERN, "", attribute_code).strip()
+        # Handle hashmap types
+        attribute_type = attribute_type.replace(", ", "|")
+        attribute_type = attribute_type.split()[0].replace("|", ", ")
+
+        if not attribute_modifiers and ENUM not in class_type:
+            attribute_modifiers = [PACKAGE_PRIVATE]
+        elif ENUM in class_type and existing_type == class_name:
+            if PUBLIC in class_modifiers:
+                attribute_modifiers.append(PUBLIC)
+            elif PRIVATE in class_modifiers:
+                attribute_modifiers.append(PRIVATE)
+            attribute_modifiers.append("final")
+            attribute_modifiers.append("static")
+            attribute_type = existing_type
+
+        attribute[CODE] = attribute_code
+        attribute["attributeType"] = attribute_type
+        attribute[MODIFIERS] = attribute_modifiers
+
+    # Cleanup default constructors
+    for method in class_dict["methods"]:
+        if method[NAME] == "" and method["returnType"] == "<empty>":
+            method[NAME] = class_name
+            method["methodBody"] = class_name + "()"
+            method["returnType"] = ""
+
+    existing_full_name = class_dict["classFullName"].replace(package_name, "")
+    new_full_name = (
+        existing_full_name.replace(DOT_SEP, "").replace(NESTED_SEP, DOT_SEP).strip()
+    )
+    total_file_length = len(file_lines)
+    empty_lines = len([line for line in file_lines if line == ""])
+    non_empty_lines = total_file_length - empty_lines
+    class_dict["classFullName"] = new_full_name
+    class_dict["classType"] = class_type
+    class_dict[CODE] = class_declaration
+    class_dict["fileLength"] = total_file_length
+    class_dict["emptyLines"] = empty_lines
+    class_dict["nonEmptyLines"] = non_empty_lines
+    class_dict["importStatements"] = import_statements
+    class_dict[MODIFIERS] = class_modifiers
+    class_dict["packageName"] = package_name
+
+    return class_dict
