@@ -20,8 +20,8 @@ def clean_json(result):
         try:
             result_obj = json.loads(json.loads(result[index : len(result)]))
         except JSONDecodeError as e:
-            logging.debug("Provided result[stdout]: %s", result)
-            logging.debug("Type should be str: %s", type(result))
+            debug_logger.debug("Provided result[stdout]: %s", result)
+            debug_logger.debug("Type should be str: %s", type(result))
             handle_error(e)
         return result_obj
 
@@ -40,14 +40,14 @@ def handle_query(query, log_dict, is_data_query=True):
         info_message += " Completed in {0} seconds.".format(
             format(total_time, DEC_FORMATTER)
         )
-        logging.info(info_message)
+        main_logger.info(info_message)
         result_obj = result["stdout"]
         if is_data_query:
             result_obj = clean_json(result[STDOUT])
     else:
-        logging.debug("Query used: \n{query}".format(query=query))
+        debug_logger.debug("Query used: \n{query}".format(query=query))
         debug_message += " {result}".format(result=result)
-        logging.debug(debug_message)
+        debug_logger.debug(debug_message)
         handle_error(error_message, result[STDERR])
     return result_obj
 
@@ -56,17 +56,17 @@ def handle_error(error_message, stderr=""):
     """Handle all error situations by logging the error message and joern's error message, if present.
     Followed by deleting the project from /bin/joern-cli/workspace/ and exiting with error code."""
 
-    logging.error(error_message)
+    main_logger.error(error_message)
     if stderr:
-        logging.error(stderr.strip())
+        main_logger.error(stderr.strip())
     result = client.execute(delete_query(project_name))
     if result[SUCCESS] and result[STDOUT]:
-        logging.info(
+        main_logger.info(
             "The source code has been successfully removed from Joern, after the experienced error."
         )
     else:
-        logging.debug("Delete Project Query Result: %s", result)
-        logging.error(
+        debug_logger.debug("Delete Project Query Result: %s", result)
+        main_logger.error(
             "Failed to remove project from Joern, after the experienced error"
         )
     exit(1)
@@ -136,7 +136,7 @@ def retrieve_class_data(full_name, retrieve_ins=False):
         class_dict = class_result[0]
         class_dict["hasInstructions"] = retrieve_ins
     else:
-        logging.debug(class_result)
+        debug_logger.debug(class_result)
     return class_dict
 
 
@@ -214,7 +214,7 @@ def append_all_instructions(source_code_json):
         class_full_name = class_dict["_2"]
         ins_start = timer()
         current += 1
-        logging.info(
+        main_logger.info(
             "Retrieving method instructions for {class_name}, class #{current}/{total} classes needing instructions.".format(
                 class_name=class_name, current=current, total=total
             )
@@ -230,7 +230,7 @@ def append_all_instructions(source_code_json):
                 method_name = method["_1"]
                 method_full_name = method["_2"]
                 if method["totalLength"] != 0 and ABSTRACT or NATIVE not in method:
-                    logging.info(
+                    main_logger.info(
                         "Starting retrieval of method instructions for {name}, method #{current}/{total} methods in class.".format(
                             name=method_name,
                             current=current_method,
@@ -242,7 +242,7 @@ def append_all_instructions(source_code_json):
                     )
             ins_end = timer()
             ins_total = ins_end - ins_start
-            logging.info(
+            main_logger.info(
                 "All method instructions for {class_name} have been retrieved. Completed in {time} seconds".format(
                     class_name=class_name, time=format(format(ins_total, DEC_FORMATTER))
                 )
@@ -251,7 +251,7 @@ def append_all_instructions(source_code_json):
 
 
 def handle_large_project(class_names):
-    """Handle larger projects (total ast size > 1400) by retrieving the data for each class individually (with/without method instructions)
+    """Handle larger projects (total ast size > 2000) by retrieving the data for each class individually (with/without method instructions)
     based on the ast size of the class, following a Shortest Task First approach.
 
     Classes without instructions will have their instructions retrieved either all at once or one by one depending
@@ -268,7 +268,7 @@ def handle_large_project(class_names):
         current += 1
         ast_size = name_ast_dict[name]
         class_name = return_name_without_package(name)
-        logging.info(
+        main_logger.info(
             "Starting retrieval of class data for {name}, class #{current}/{total} classes.".format(
                 name=class_name, current=current, total=total_classes
             )
@@ -283,7 +283,7 @@ def handle_large_project(class_names):
 
     class_data_end = timer()
     class_data_diff = class_data_end - class_data_start
-    logging.info(
+    main_logger.info(
         "The data for all classes has been retrieved. Completed in {0} seconds.".format(
             format(class_data_diff, DEC_FORMATTER)
         )
@@ -297,14 +297,14 @@ def handle_large_project(class_names):
     filtered_classes = append_all_instructions(filtered_classes)
     method_ins_end = timer()
     method_diff = method_ins_end - method_ins_start
-    logging.info(
+    main_logger.info(
         "All method instructions for classes needing instructions have been retrieved. Completed in {0} seconds.".format(
             format(method_diff, DEC_FORMATTER)
         )
     )
 
     total_query_time = import_diff + name_retrieve_diff + class_data_diff + method_diff
-    logging.info(
+    main_logger.info(
         "Total elapsed time performing queries to Joern: {0} seconds.".format(
             format(total_query_time, DEC_FORMATTER)
         )
@@ -321,7 +321,7 @@ def handle_large_project(class_names):
     )
     dict_end = timer()
     dict_diff = dict_end - dict_start
-    logging.info(
+    main_logger.info(
         "The source code json dictionary has been created. Completed in {0} seconds.".format(
             format(dict_diff, DEC_FORMATTER)
         )
@@ -334,7 +334,7 @@ def handle_small_project():
     """
     Retrieve all the info for every class within the source code (including method instructions) for small projects.
 
-    Small Projects can be defined as having a total AST size of < 1400 (AST size is summed up from all the classes within given directory).
+    Small Projects can be defined as having a total AST size of < 2000 (AST size is summed up from all the classes within given directory).
     """
 
     query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).
@@ -363,7 +363,7 @@ def handle_small_project():
     data_diff = data_end - data_start
 
     total_query_time = import_diff + data_diff
-    logging.info(
+    main_logger.info(
         "Total elapsed time performing queries to Joern: {0} seconds.".format(
             format(total_query_time, DEC_FORMATTER)
         )
@@ -389,7 +389,7 @@ def handle_small_project():
     )
     dict_end = timer()
     dict_diff = dict_end - dict_start
-    logging.info(
+    main_logger.info(
         "The source code json dictionary has been created. Completed in {0} seconds.".format(
             format(dict_diff, DEC_FORMATTER)
         )
@@ -398,13 +398,8 @@ def handle_small_project():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S",
-        filename=LOG_FILE,
-        filemode="w",
-    )
+    main_logger, debug_logger = create_loggers()
+
     server_endpoint = "127.0.0.1:" + sys.argv[-1]
     project_dir = sys.argv[-2]
     project_name = "analyzedProject"
@@ -427,10 +422,10 @@ if __name__ == "__main__":
             sleep(1)
 
     if client:
-        logging.info("joern_query is starting and connected to CPGQLSClient.")
+        main_logger.info("joern_query is starting and connected to CPGQLSClient.")
         program_start_time = timer()
 
-    logging.info("Analyzing project_dir " + project_dir)
+    main_logger.info("Analyzing project_dir " + project_dir)
 
     if "Windows" in platform.platform():
         index = project_dir.find(":")
@@ -465,15 +460,15 @@ if __name__ == "__main__":
 
         # Retrieve class data for all classes within the source code, handle projects of
         # different sizes differently.
-        if total_ast_size <= 1400:
-            logging.info(
+        if total_ast_size <= 2000:
+            main_logger.info(
                 "The provided directory is considered small (AST Size = {ast_size}), retrieving data for all classes at once.".format(
                     ast_size=total_ast_size
                 )
             )
             source_code_json = handle_small_project()
         else:
-            logging.info(
+            main_logger.info(
                 "The provided directory is considered large (AST Size = {ast_size}), retrieving data for all classes one by one.".format(
                     ast_size=total_ast_size
                 )
@@ -496,7 +491,7 @@ if __name__ == "__main__":
                 (-1).to_bytes(4, byteorder=sys.byteorder, signed=True)
             )
         else:
-            logging.debug("Source Code JSON Dictionary: %s", source_code_json)
+            debug_logger.debug("Source Code JSON Dictionary: %s", source_code_json)
             handle_error("Source code json creation failure, no classes in dictionary")
 
         # Close and delete the project from user's bin/joern/joern-cli/workspace
@@ -510,7 +505,7 @@ if __name__ == "__main__":
         # Output total joern_query execution time to log file
         program_end_time = timer()
         program_diff = program_end_time - program_start_time
-        logging.info(
+        main_logger.info(
             "Total time taken: {0} seconds.".format(format(program_diff, DEC_FORMATTER))
         )
         # Terminate after everything has been successfully executed
