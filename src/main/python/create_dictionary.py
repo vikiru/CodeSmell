@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import logging.handlers
 from timeit import default_timer as timer
 
 # Helper constants
@@ -26,8 +27,6 @@ SUCCESS = "success"
 STDOUT = "stdout"
 STDERR = "stderr"
 DEC_FORMATTER = ".2f"
-LOG_FORMATTER = "%(asctime)s %(levelname)s %(message)s"
-LOG_FILE = "joern_query.log"
 
 NAME = "name"
 CODE = "code"
@@ -61,16 +60,17 @@ def clean_method_full_name(method_full_name):
     """
 
     str_to_return = method_full_name
-    index_signature = str_to_return.index(COLON_SEP)
-    str_to_return = str_to_return[:index_signature]
-    for _ in range(0, 2):
-        if DOT_SEP in str_to_return:
-            index_sep = str_to_return.rindex(DOT_SEP)
-            str_to_return = """{start}{new_char}{end}""".format(
-                start=str_to_return[:index_sep],
-                new_char=str_to_return[index_sep].replace(DOT_SEP, NESTED_SEP),
-                end=str_to_return[index_sep + 1 : len(str_to_return)],
-            )
+    if ":" in method_full_name:
+        index_signature = str_to_return.index(COLON_SEP)
+        str_to_return = str_to_return[:index_signature]
+        for _ in range(0, 2):
+            if DOT_SEP in str_to_return:
+                index_sep = str_to_return.rindex(DOT_SEP)
+                str_to_return = """{start}{new_char}{end}""".format(
+                    start=str_to_return[:index_sep],
+                    new_char=str_to_return[index_sep].replace(DOT_SEP, NESTED_SEP),
+                    end=str_to_return[index_sep + 1 : len(str_to_return)],
+                )
     return str_to_return
 
 
@@ -221,9 +221,17 @@ def assign_method_calls(method_ins, method_calls):
         for key, value in call.items():
             cleaned_name = clean_method_full_name(key)
             split_name = cleaned_name.split(NESTED_SEP)
-            package_name = split_name[0] if len(split_name) == 3 else ""
-            class_name = split_name[1] if len(split_name) == 3 else split_name[0]
-            method_name = split_name[2] if len(split_name) == 3 else split_name[1]
+            package_name = " "
+            class_name = ""
+            method_name = ""
+            if len(split_name) == 3:
+                package_name = split_name[0]
+                class_name = split_name[1]
+                method_name = split_name[2]
+            elif len(split_name) == 2:
+                class_name = split_name[0]
+                method_name = split_name[1]
+
             method_name = method_name.replace(INIT_METHOD, class_name)
             method_names.add(method_name)
             filtered_calls = [
@@ -541,3 +549,32 @@ def assign_missing_class_info(class_dict, file_lines):
     class_dict["packageName"] = package_name
 
     return class_dict
+
+
+def create_loggers():
+    LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
+    LOG_DATE_FORMAT = "%m/%d/%Y %I:%M:%S"
+    MAIN_LOG_FILE = "joern_query.log"
+
+    DEBUG_LOG_FILE = "debug.log"
+
+    LOG_FORMATTER = logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
+
+    main_logger = logging.getLogger()
+    debug_logger = logging.getLogger()
+
+    main_handler = logging.FileHandler(filename=MAIN_LOG_FILE, mode="w")
+    main_handler.setFormatter(LOG_FORMATTER)
+    main_handler.setLevel(logging.INFO)
+
+    debug_handler = logging.FileHandler(filename=DEBUG_LOG_FILE, mode="w")
+    debug_handler.setFormatter(LOG_FORMATTER)
+    debug_handler.setLevel(logging.DEBUG)
+
+    main_logger.addHandler(main_handler)
+    debug_logger.addHandler(debug_handler)
+
+    main_logger.setLevel(logging.INFO)
+    debug_logger.setLevel(logging.DEBUG)
+
+    return main_logger, debug_logger
