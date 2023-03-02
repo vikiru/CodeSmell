@@ -120,7 +120,7 @@ def return_package_name(class_full_name):
 
     package_name = ""
     if DOT_SEP in class_full_name:
-        index = class_full_name.rindex(".")
+        index = class_full_name.rindex(DOT_SEP)
         package_name = class_full_name[:index].strip()
     return package_name
 
@@ -169,13 +169,13 @@ def create_attribute_dict(curr_attribute):
 
     curr_attribute_dict = {
         NAME: attribute_name,
-        "parentClass": [{}],  # Handled within Parser
+        "parentClass": [{}],  # Handled by Parser
         "packageName": package_name,
         CODE: "",  # Handled within assign_missing_class_info
         LINE_NUM: attribute_line_number,
         MODIFIERS: [modifier.lower() for modifier in attribute_modifiers],
         "attributeType": attribute_type,
-        "typeList": [],  # Handled within Parser
+        "typeList": [],  # Handled by Parser
     }
 
     return curr_attribute_dict
@@ -197,15 +197,16 @@ def get_method_parameters(parameters):
     parameters_list = []
     for parameter in parameters:
         splitted_str = parameter.split()
-        parameter_type = splitted_str[0]
-        name = splitted_str[1]
-        parameter_dict = {
-            CODE: parameter,
-            NAME: name,
-            "type": parameter_type,
-            "typeList": [],
-        }
-        parameters_list.append(parameter_dict)
+        if len(splitted_str) == 2:
+            parameter_type = splitted_str[0]
+            name = splitted_str[1]
+            parameter_dict = {
+                CODE: parameter,
+                NAME: name,
+                "type": parameter_type,
+                "typeList": [],  # Handled by Parser
+            }
+            parameters_list.append(parameter_dict)
     return parameters_list
 
 
@@ -239,8 +240,8 @@ def assign_method_calls(method_ins, method_calls):
     # Clean after assigning method calls
     for ins in method_ins:
         call = ins["methodCall"]
-    if call in method_names:
-        ins["methodCall"] = ""
+        if call in method_names:
+            ins["methodCall"] = ""
 
 
 def create_instruction_dict(curr_instruction):
@@ -286,7 +287,7 @@ def create_method_dict(curr_method):
     method_parameters = []
     method_instructions = []
     method_calls = []
-    filtered_ins = []
+    parameter_codes = set()
 
     # Handle normal method cases
     if len(curr_method) == 8 or len(curr_method) == 9:
@@ -296,12 +297,14 @@ def create_method_dict(curr_method):
         if not method_modifiers and method_name != INIT_METHOD:
             method_modifiers = [PACKAGE_PRIVATE]
         method_calls = curr_method["_7"]
-        method_instructions = curr_method["_8"]
-        filtered_ins = {
-            ins["_1"]
-            for ins in method_instructions
-            if "METHOD_PARAMETER" in ins["_2"] and ins["_1"] != "this"
-        }
+        if "_8" in curr_method and type(curr_method["_8"]) == list:
+            method_instructions = curr_method["_8"]
+            for ins in method_instructions:
+                if len(ins) == 3:
+                    code = ins["_1"]
+                    label = ins["_2"]
+                    if "METHOD_PARAMETER" in label and code != "this":
+                        parameter_codes.add(code)
 
     # Get the modifiers, return type and the method body from the full method body provided by Joern.
     regex_pattern_modifiers = MODIFIERS_PATTERN.findall(method_code)
@@ -329,24 +332,30 @@ def create_method_dict(curr_method):
     # If the method is a constructor, find the name of the class.
     constructor_name = method_name_pattern.findall(method_body)[0]
 
+    # Get method parameters, if any.
+    method_parameters = get_method_parameters(parameter_codes)
+
+    # Get method instructions, if any.
+    method_instructions = list(
+        filter(
+            None,
+            list(map(create_instruction_dict, method_instructions)),
+        )
+    )
+
     curr_method_dict = {
         NAME: method_name.replace(INIT_METHOD, constructor_name),
-        "parentClass": [{}],
+        "parentClass": [{}],  # Handled by Parser
         "methodBody": method_body,
         MODIFIERS: get_method_modifiers(regex_pattern_modifiers, method_modifiers),
-        "parameters": get_method_parameters(filtered_ins),
+        "parameters": method_parameters,
         "returnType": return_type,
         "lineNumberStart": method_line_number,
         "lineNumberEnd": method_line_number_end,
         "totalMethodLength": total_lines,
-        "instructions": list(
-            filter(
-                None,
-                list(map(create_instruction_dict, method_instructions)),
-            )
-        ),
-        "methodCalls": [],
-        "attributeCalls": [],
+        "instructions": method_instructions,
+        "methodCalls": [],  # Handled by Parser
+        "attributeCalls": [],  # Handled by Parser
     }
 
     # Assign method calls to all instructions which call either an Exception or a method belonging to a class in the source code
@@ -371,28 +380,36 @@ def create_class_dict(curr_class):
 
     curr_class_dict = {
         NAME: get_name_without_separators(class_name),
-        CODE: "",
+        CODE: "",  # Handled in assign_missing_class_info
         LINE_NUM: int(line_number),
-        "importStatements": [],
-        MODIFIERS: [],
+        "importStatements": [],  # Handled in assign_missing_class_info
+        MODIFIERS: [],  # Handled in assign_missing_class_info
         "classFullName": class_full_name,
-        "inheritsFrom": [],
+        "inheritsFrom": [],  # Handled in assign_missing_class_info
         "classType": get_class_type(class_declaration),
         "filePath": file_name,
-        "fileLength": 0,
-        "emptyLines": 0,
-        "nonEmptyLines": 0,
-        "packageName": "",
+        "fileLength": 0,  # Handled in assign_missing_class_info
+        "emptyLines": 0,  # Handled in assign_missing_class_info
+        "nonEmptyLines": 0,  # Handled in assign_missing_class_info
+        "packageName": "",  # Handled in assign_missing_class_info
         "attributes": list(
             filter(None, list(map(create_attribute_dict, class_attributes)))
         ),
         "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
-        "outwardRelations": [],
+        "outwardRelations": [],  # Handled in RelationshipManager
     }
 
     # Assign all missing info
     curr_class_dict = assign_missing_class_info(
         curr_class_dict, read_file(curr_class_dict["filePath"])
+    )
+
+    # Sort attributes and methods by line number
+    curr_class_dict["attributes"] = sorted(
+        curr_class_dict["attributes"], key=lambda a: a["lineNumber"]
+    )
+    curr_class_dict["methods"] = sorted(
+        curr_class_dict["methods"], key=lambda m: m["lineNumberStart"]
     )
 
     return curr_class_dict
