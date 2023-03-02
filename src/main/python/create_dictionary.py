@@ -331,8 +331,9 @@ def create_method_dict(curr_method):
     method_body = re.sub(return_type_pattern, "", method_with_return)
     if not return_type:
         # Handle all Collection types (Set, HashMap, ArrayList, etc)
-        index = method_body.find(">")
-        return_type = method_body[0 : index + 1]
+        if ">" in method_body:
+            index = method_body.find(">")
+            return_type = method_body[0 : index + 1]
         if "(" in return_type or not return_type:
             return_type = ""
         if return_type in method_body:
