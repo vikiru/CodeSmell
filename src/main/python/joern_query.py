@@ -45,6 +45,7 @@ def handle_query(query, log_dict, is_data_query=True):
         if is_data_query:
             result_obj = clean_json(result[STDOUT])
     else:
+        logging.debug("Query used: \n{query}".format(query=query))
         debug_message += " {result}".format(result=result)
         logging.debug(debug_message)
         handle_error(error_message, result[STDERR])
@@ -75,7 +76,7 @@ def retrieve_all_class_names():
     """Execute a single query to retrieve all the class names within the source code"""
 
     name_query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).
-    map(node => (node.fullName, node.ast.l.size)).toJson"""
+    map(node => (node.fullName, node.ast.size)).toJson"""
 
     info_msg = "All class names have been retrieved."
     debug_msg = "Class Name Retrieval Result: "
@@ -86,21 +87,25 @@ def retrieve_all_class_names():
     class_names = []
     if class_name_res:
         # Sort by the size of ast of each class (ascending order)
-        name_ast_dict = sorted_dictionary(class_name_res)
+        unsorted_dict = {
+            key: val for name in class_name_res for key, val in name.items()
+        }
+        sorted_tuple = sorted(unsorted_dict.items(), key=lambda entry: entry[1])
+        name_ast_dict = dict((key, val) for key, val in sorted_tuple)
         class_names = [*name_ast_dict]
     return class_names, name_ast_dict
 
 
 def retrieve_class_data(full_name, retrieve_ins=False):
     """Execute a single query to get all the data of a class. If retrieve_ins is True, additionally
-    retrieve the instructions of all methods of the class, if not class data without instructions are retrieved."""
+    retrieve the instructions of all methods of the class, if not class data without instructions is retrieved."""
 
     name_without_sep = full_name.replace(NESTED_SEP, DOT_SEP)
     ins_retrieve = ""
     without_ins = ""
     if retrieve_ins:
         ins_retrieve = """, node.ast.filter(node => node.lineNumber != None).l.
-        map(node => (node.code, node.label, node.lineNumber, node.ast.isCall.methodFullName.l))"""
+        map(node => (node.code, node.label, node.lineNumber))"""
     else:
         without_ins = " (excluding instructions)"
 
@@ -110,7 +115,10 @@ def retrieve_class_data(full_name, retrieve_ins=False):
     node.lineNumber, node.astChildren.isModifier.modifierType.l)), 
     node.astChildren.isMethod.filter(node => !node.code.contains("<lambda>") && 
     !node.name.contains("<clinit>")).l.map(node => (node.name, node.fullName, node.code, node.lineNumber, 
-    node.lineNumberEnd, node.astChildren.isModifier.modifierType.l{ins_retrieve})))).toJson""".format(
+    node.lineNumberEnd, node.astChildren.isModifier.modifierType.l, node.ast.isCall.filter(node => 
+    !node.methodFullName.contains("<operator>") && !node.code.contains("<lambda>") && 
+    !node.code.contains("<empty>") || node.name.contains("Exception")).l.
+    map(node => (node.methodFullName, node.lineNumber)){ins_retrieve})))).toJson""".format(
         full_name=name_without_sep, ins_retrieve=ins_retrieve
     )
     class_name = return_name_without_package(full_name)
@@ -133,6 +141,9 @@ def retrieve_class_data(full_name, retrieve_ins=False):
 
 
 def retrieve_all_method_instruction(class_full_name, class_dict):
+    """Given the full name of a class, retrieve the method instructions for all of its methods."""
+
+    class_name = return_name_without_package(class_full_name)
     all_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").astChildren.isMethod.map(node => (node.fullName, node.ast.
     filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
         class_full_name=class_full_name
@@ -153,7 +164,7 @@ def retrieve_all_method_instruction(class_full_name, class_dict):
         for method in class_dict["_8"]:
             method_full_name = method["_2"]
             if method_full_name in method_ins_dict:
-                method["_7"] = method_ins_dict[method_name]
+                method["_8"] = method_ins_dict[method_full_name]
 
 
 def retrieve_single_method_instruction(full_name):
@@ -200,46 +211,80 @@ def append_all_instructions(source_code_json):
     current = 0
     for class_dict in class_ins_reqs:
         class_name = class_dict["_1"]
+        class_full_name = class_dict["_2"]
         ins_start = timer()
         current += 1
         logging.info(
-            "Retrieving method instructions for {class_name}, class #{current}/{total}".format(
+            "Retrieving method instructions for {class_name}, class #{current}/{total} classes needing instructions.".format(
                 class_name=class_name, current=current, total=total
             )
         )
-        for method in class_dict["_8"]:
-            method_full_name = method["_2"]
-            if len(method) == 6 and ABSTRACT or NATIVE not in method:
-                method["_7"] = retrieve_single_method_instruction(
-                    full_name=method_full_name
+        class_ast_size = name_ast_dict[class_full_name]
+        total_methods = len(class_dict["_8"])
+        if class_ast_size <= 500:
+            retrieve_all_method_instruction(class_full_name, class_dict)
+        else:
+            current_method = 0
+            for method in class_dict["_8"]:
+                current_method += 1
+                method_name = method["_1"]
+                method_full_name = method["_2"]
+                if method["totalLength"] != 0 and ABSTRACT or NATIVE not in method:
+                    logging.info(
+                        "Starting retrieval of method instructions for {name}, method #{current}/{total} methods in class.".format(
+                            name=method_name,
+                            current=current_method,
+                            total=total_methods,
+                        )
+                    )
+                    method["_8"] = retrieve_single_method_instruction(
+                        full_name=method_full_name
+                    )
+            ins_end = timer()
+            ins_total = ins_end - ins_start
+            logging.info(
+                "All method instructions for {class_name} have been retrieved. Completed in {time} seconds".format(
+                    class_name=class_name, time=format(format(ins_total, DEC_FORMATTER))
                 )
-        ins_end = timer()
-        ins_total = ins_end - ins_start
-        logging.info(
-            "All method instructions for {class_name} have been retrieved. Completed in {time} seconds".format(
-                class_name=class_name, time=format(format(ins_total, DEC_FORMATTER))
             )
-        )
     return source_code_json
 
 
 def handle_large_project(class_names):
+    """Handle larger projects (total ast size > 1400) by retrieving the data for each class individually (with/without method instructions)
+    based on the ast size of the class, following a Shortest Task First approach.
+
+    Classes without instructions will have their instructions retrieved either all at once or one by one depending
+    on the ast size of the classs. Methods are additionally sorted in ascending order based on total length prior to instruction retrieval
+    process.
+    """
+
     joern_json = {CLASSES: []}
     # Retrieve the data for all classes (with/without instructions based on their ast size)
     class_data_start = timer()
+    current = 0
+
     for name in class_names:
+        current += 1
         ast_size = name_ast_dict[name]
+        class_name = return_name_without_package(name)
+        logging.info(
+            "Starting retrieval of class data for {name}, class #{current}/{total} classes.".format(
+                name=class_name, current=current, total=total_classes
+            )
+        )
         if ast_size <= 300:
             class_dict = retrieve_class_data(name, True)
         else:
             class_dict = retrieve_class_data(name)
+        class_dict["_8"] = sort_methods(methods=class_dict["_8"])
         class_dict["packageName"] = return_package_name(name)
         joern_json[CLASSES].append(class_dict)
 
     class_data_end = timer()
     class_data_diff = class_data_end - class_data_start
     logging.info(
-        "The data for all classes (excluding method instructions) has been retrieved. Completed in {0} seconds.".format(
+        "The data for all classes has been retrieved. Completed in {0} seconds.".format(
             format(class_data_diff, DEC_FORMATTER)
         )
     )
@@ -253,7 +298,7 @@ def handle_large_project(class_names):
     method_ins_end = timer()
     method_diff = method_ins_end - method_ins_start
     logging.info(
-        "All method instructions for classes needing instructions have been retrieved. Completed in {0} seconds".format(
+        "All method instructions for classes needing instructions have been retrieved. Completed in {0} seconds.".format(
             format(method_diff, DEC_FORMATTER)
         )
     )
@@ -289,7 +334,7 @@ def handle_small_project():
     """
     Retrieve all the info for every class within the source code (including method instructions) for small projects.
 
-    Small Projects can be defined as having a total AST size of < 2000 (AST size is summed up from all the classes within given directory).
+    Small Projects can be defined as having a total AST size of < 1400 (AST size is summed up from all the classes within given directory).
     """
 
     query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).
@@ -300,7 +345,10 @@ def handle_small_project():
     node.astChildren.isMethod.filter(node => !node.code.contains("<lambda>") 
     && !node.name.contains("<clinit>")).l.
     map(node => (node.name, node.fullName, node.code, node.lineNumber, node.lineNumberEnd, 
-    node.astChildren.isModifier.modifierType.l, 
+    node.astChildren.isModifier.modifierType.l, node.ast.isCall.filter(node => 
+    !node.methodFullName.contains("<operator>") && !node.code.contains("<lambda>") && 
+    !node.code.contains("<empty>") || node.name.contains("Exception")).l.
+    map(node => (node.methodFullName, node.lineNumber)),
     node.ast.filter(node => node.lineNumber != None).l.
     map(node => (node.code, node.label, node.lineNumber)))))).toJson"""
 
@@ -331,7 +379,7 @@ def handle_small_project():
 
     source_code_json = {"relations": [], CLASSES: []}
 
-    # Create dictionaries after getting all data from joern
+    # Create class dictionaries after getting all data from joern
     dict_start = timer()
     source_code_json[CLASSES] = list(
         filter(
@@ -417,9 +465,19 @@ if __name__ == "__main__":
 
         # Retrieve class data for all classes within the source code, handle projects of
         # different sizes differently.
-        if total_ast_size <= 2000:
+        if total_ast_size <= 1400:
+            logging.info(
+                "The provided directory is considered small (AST Size = {ast_size}), retrieving data for all classes at once.".format(
+                    ast_size=total_ast_size
+                )
+            )
             source_code_json = handle_small_project()
         else:
+            logging.info(
+                "The provided directory is considered large (AST Size = {ast_size}), retrieving data for all classes one by one.".format(
+                    ast_size=total_ast_size
+                )
+            )
             source_code_json = handle_large_project(class_names)
 
         # Output all class dictionaries
