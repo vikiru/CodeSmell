@@ -70,7 +70,7 @@ public class MethodStat {
     protected static Map<Method, Integer> determineMethodUsage(Method method, Helper helper) {
         Map<Method, Integer> methodsWhichCallMethod = new HashMap<>();
         List<Method> allMethods = helper.allMethods;
-        String toFind = method.getParent().name + "." + method.name;
+        String toFind = method.getParent().packageName + "$" + method.getParent().name + "$" + method.name;
         for (Method methodInCPG : allMethods) {
             Map<String, Set<Integer>> lineCallMap = new HashMap<>();
             lineCallMap.put(toFind, new HashSet<>());
