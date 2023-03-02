@@ -243,7 +243,8 @@ def assign_method_calls(method_ins, method_calls):
             ]
             if filtered_calls:
                 first_call = filtered_calls[0]
-                first_call["methodCall"] = cleaned_name.replace(INIT_METHOD, class_name)
+                method_call = package_name + "$" + class_name + "$" + method_name
+                first_call["methodCall"] = method_call
 
     # Clean after assigning method calls
     for ins in method_ins:
