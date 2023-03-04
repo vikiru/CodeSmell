@@ -113,7 +113,7 @@ def retrieve_class_data(full_name, retrieve_ins=False):
     node.fullName, node.filename, node.inheritsFromTypeFullName.l, node.code, node.lineNumber, 
     node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, 
     node.lineNumber, node.astChildren.isModifier.modifierType.l)), 
-    node.astChildren.isMethod.filter(node => !node.code.contains("<lambda>") && 
+    node.astChildren.isMethod.isExternal(false).filter(node => !node.code.contains("<lambda>") && 
     !node.name.contains("<clinit>")).l.map(node => (node.name, node.fullName, node.code, node.lineNumber, 
     node.lineNumberEnd, node.astChildren.isModifier.modifierType.l, node.ast.isCall.filter(node => 
     !node.methodFullName.contains("<operator>") && !node.code.contains("<lambda>") && 
@@ -204,9 +204,10 @@ def append_all_instructions(source_code_json):
     # Ignore interfaces and classes that already have instructions
     class_ins_reqs = [
         cd
-        for cd in source_code_json[CLASSES]
+        for cd in source_code_json
         if not cd["hasInstructions"] and INTERFACE not in cd["_4"]
     ]
+
     total = len(class_ins_reqs)
     current = 0
     for class_dict in class_ins_reqs:
@@ -220,8 +221,9 @@ def append_all_instructions(source_code_json):
             )
         )
         class_ast_size = name_ast_dict[class_full_name]
+        method_lines = class_dict["methodLines"]
         total_methods = len(class_dict["_8"])
-        if class_ast_size <= 500:
+        if method_lines <= 140:
             retrieve_all_method_instruction(class_full_name, class_dict)
         else:
             current_method = 0
@@ -273,7 +275,7 @@ def handle_large_project(class_names):
                 name=class_name, current=current, total=total_classes
             )
         )
-        if ast_size <= 300:
+        if ast_size <= 1000:
             class_dict = retrieve_class_data(name, True)
         else:
             class_dict = retrieve_class_data(name)
@@ -291,10 +293,11 @@ def handle_large_project(class_names):
 
     # Filter out external classes and add all method instructions
     filtered_classes = clean_up_external_classes(joern_json)
+    sorted_classes = sort_classes(filtered_classes[CLASSES])
 
     # Handle retrieval of method instructions for classes which still need them
     method_ins_start = timer()
-    filtered_classes = append_all_instructions(filtered_classes)
+    joern_json[CLASSES] = append_all_instructions(sorted_classes)
     method_ins_end = timer()
     method_diff = method_ins_end - method_ins_start
     main_logger.info(
@@ -314,10 +317,7 @@ def handle_large_project(class_names):
     source_code_json = {"relations": [], CLASSES: []}
     dict_start = timer()
     source_code_json[CLASSES] = list(
-        filter(
-            None,
-            list(map(create_class_dict, filtered_classes[CLASSES])),
-        )
+        filter(None, list(map(create_class_dict, joern_json[CLASSES]))),
     )
     dict_end = timer()
     dict_diff = dict_end - dict_start
@@ -342,7 +342,7 @@ def handle_small_project():
     node.code, node.lineNumber, 
     node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, 
     node.lineNumber, node.astChildren.isModifier.modifierType.l)), 
-    node.astChildren.isMethod.filter(node => !node.code.contains("<lambda>") 
+    node.astChildren.isMethod.isExternal(false).filter(node => !node.code.contains("<lambda>") 
     && !node.name.contains("<clinit>")).l.
     map(node => (node.name, node.fullName, node.code, node.lineNumber, node.lineNumberEnd, 
     node.astChildren.isModifier.modifierType.l, node.ast.isCall.filter(node => 
