@@ -460,7 +460,7 @@ if __name__ == "__main__":
 
         # Retrieve class data for all classes within the source code, handle projects of
         # different sizes differently.
-        if total_ast_size <= 2000:
+        if total_ast_size <= 1400:
             main_logger.info(
                 "The provided directory is considered small (AST Size = {ast_size}), retrieving data for all classes at once.".format(
                     ast_size=total_ast_size
