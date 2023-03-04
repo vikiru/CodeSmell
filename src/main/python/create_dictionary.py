@@ -39,6 +39,16 @@ MODIFIERS_PATTERN = re.compile(
 )
 
 
+def sort_classes(all_classes):
+    for class_dict in all_classes:
+        class_total = 0
+        for method in class_dict["_8"]:
+            class_total += method["totalLength"]
+        class_dict["methodLines"] = class_total
+    new_list = sorted(all_classes, key=lambda entry: entry["methodLines"])
+    return new_list
+
+
 def sort_methods(methods):
     """Sort the methods of a class in ascending order, based on the total length of the method. This is to ensure that methods
     are placed in order of smallest method so that requests to Joern can follow a Shortest Task First approach."""
