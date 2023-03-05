@@ -39,14 +39,14 @@ MODIFIERS_PATTERN = re.compile(
 )
 
 
-def sort_classes(all_classes):
+def assign_total_method_lines(all_classes):
+    """Iterate through each class and sum up the total number of lines from their methods."""
+
     for class_dict in all_classes:
         class_total = 0
         for method in class_dict["_8"]:
             class_total += method["totalLength"]
         class_dict["methodLines"] = class_total
-    new_list = sorted(all_classes, key=lambda entry: entry["methodLines"])
-    return new_list
 
 
 def sort_methods(methods):
