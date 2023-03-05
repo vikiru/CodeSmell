@@ -168,6 +168,8 @@ def retrieve_all_method_instruction(class_full_name, class_dict):
             method_full_name = method["_2"]
             if method_full_name in method_ins_dict:
                 method["_8"] = method_ins_dict[method_full_name]
+            else:
+                method["_8"] = []
 
 
 def retrieve_single_method_instruction(full_name):
@@ -211,6 +213,9 @@ def append_all_instructions(source_code_json):
         if not cd["hasInstructions"] and INTERFACE not in cd["_4"]
     ]
 
+    # Sort the classes that need instructions according to their class ast size.
+    class_ins_reqs = sorted(class_ins_reqs, key=lambda cd: cd["classAstSize"])
+
     total = len(class_ins_reqs)
     current = 0
     for class_dict in class_ins_reqs:
@@ -223,7 +228,7 @@ def append_all_instructions(source_code_json):
                 class_name=class_name, current=current, total=total
             )
         )
-        class_ast_size = name_ast_dict[class_full_name]
+        class_ast_size = class_dict["classAstSize"]
         method_lines = class_dict["methodLines"]
         total_methods = len(class_dict["_8"])
         if class_ast_size <= 1000 and method_lines <= 160:
@@ -285,6 +290,8 @@ def handle_large_project(class_names):
             class_dict = retrieve_class_data(name)
         class_dict["_8"] = sort_methods(methods=class_dict["_8"])
         class_dict["packageName"] = return_package_name(name)
+        class_dict["classAstSize"] = class_ast_size
+        class_dict["totalMethodAstSize"] = total_method_ast_size
         joern_json[CLASSES].append(class_dict)
 
     class_data_end = timer()
@@ -297,11 +304,11 @@ def handle_large_project(class_names):
 
     # Filter out external classes and add all method instructions
     filtered_classes = clean_up_external_classes(joern_json)
-    sorted_classes = sort_classes(filtered_classes[CLASSES])
+    return_total_method_lines(filtered_classes[CLASSES])
 
     # Handle retrieval of method instructions for classes which still need them
     method_ins_start = timer()
-    joern_json[CLASSES] = append_all_instructions(sorted_classes)
+    joern_json[CLASSES] = append_all_instructions(filtered_classes[CLASSES])
     method_ins_end = timer()
     method_diff = method_ins_end - method_ins_start
     main_logger.info(
