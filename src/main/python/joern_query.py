@@ -304,7 +304,7 @@ def handle_large_project(class_names):
 
     # Filter out external classes and add all method instructions
     filtered_classes = clean_up_external_classes(joern_json)
-    return_total_method_lines(filtered_classes[CLASSES])
+    assign_total_method_lines(filtered_classes[CLASSES])
 
     # Handle retrieval of method instructions for classes which still need them
     method_ins_start = timer()
