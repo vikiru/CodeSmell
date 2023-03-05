@@ -12,16 +12,22 @@ import java.util.ArrayList;
 
 import static com.CodeSmell.smell.Common.initStatTracker;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
-public class FeatureEnvyTest {
+public class FeatureEnvyTest extends SmellTester{
 
-    private Parser p;
-    private CodePropertyGraph cpg;
+    //private Parser p;
+    //private CodePropertyGraph cpg;
+
+    //private FeatureEnvy fe;
+    //ArrayList<Smell.CodeFragment> detections;
 
     @Before
     public void before() {
         this.cpg = ProjectManager.getCPG("testproject");
         initStatTracker(cpg);
+        smell = new FeatureEnvy(this.cpg);
+        detections = getDetections(smell);
     }
 
     public ArrayList<Smell.CodeFragment> getDetections(Smell smell) {
@@ -32,12 +38,36 @@ public class FeatureEnvyTest {
         return arr;
     }
     @Test
-    public void TestFeatureEnvy(){
+    public void testWorksAtAll(){
         System.out.println("Feature Envy Test:");
-        FeatureEnvy fe = new FeatureEnvy(this.cpg);
-        ArrayList<Smell.CodeFragment> detections = getDetections(fe);
         System.out.println("   Number of detections: " + detections.size());
+        assertNotEquals(0, detections.size());
+    }
+
+    @Test
+    public void detectBasicEnvy(){
+        Smell.CodeFragment fragment = this.hasClass("FeatureEnvyer");
+        assertTrue(fragment != null);
+        if(fragment != null){
+            System.out.println(fragment.description);
+        }
+    }
+
+    @Test
+    public void detectOneMethodEnvy(){
+        Smell.CodeFragment fragment = this.hasClass("EnvierOneMethod");
+        assertTrue(fragment != null);
+        if(fragment != null){
+            System.out.println(fragment.description);
+        }
+    }
+
+    /*private boolean hasClass(String name){
+        boolean hasDetection = false;
         for(Smell.CodeFragment f : detections){
+            if(f.classes[0].classFullName.equals(name)){
+                hasDetection = true;
+            }
             if(f.classes.length > 0) {
                 String outLine = f.description + "\n";
                 outLine += "     Methods: {";
@@ -48,10 +78,8 @@ public class FeatureEnvyTest {
                 }
                 outLine += " }";
                 System.out.println(outLine);
-
             }
         }
-        assertNotEquals(0, detections.size());
-
-    }
+        return hasDetection;
+    }*/
 }
