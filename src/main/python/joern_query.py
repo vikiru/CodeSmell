@@ -75,8 +75,11 @@ def handle_error(error_message, stderr=""):
 def retrieve_all_class_names():
     """Execute a single query to retrieve all the class names within the source code"""
 
-    name_query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).
-    map(node => (node.fullName, node.ast.size)).toJson"""
+    name_query = """cpg.typeDecl.isExternal(false).filter(node => 
+    !node.name.contains("lambda$")).
+    map(node => (node.fullName, node.ast.size, node.astChildren.isMethod.isExternal(false).
+    filter(node => !node.code.contains("<lambda>") && !node.name.contains("<clinit>")).
+    l.map(node => node.ast.size).sum)).toJson"""
 
     info_msg = "All class names have been retrieved."
     debug_msg = "Class Name Retrieval Result: "
@@ -85,15 +88,15 @@ def retrieve_all_class_names():
 
     class_name_res = handle_query(name_query, log_dict)
     class_names = []
+    name_ast_dict = {}
+    name_method_ast_dict = {}
     if class_name_res:
         # Sort by the size of ast of each class (ascending order)
-        unsorted_dict = {
-            key: val for name in class_name_res for key, val in name.items()
-        }
-        sorted_tuple = sorted(unsorted_dict.items(), key=lambda entry: entry[1])
-        name_ast_dict = dict((key, val) for key, val in sorted_tuple)
-        class_names = [*name_ast_dict]
-    return class_names, name_ast_dict
+        class_name_res = sorted(class_name_res, key=lambda entry: entry["_3"])
+        class_names = [entry["_1"] for entry in class_name_res]
+        name_ast_dict = {entry["_1"]: entry["_2"] for entry in class_name_res}
+        name_method_ast_dict = {entry["_1"]: entry["_3"] for entry in class_name_res}
+    return class_names, name_ast_dict, name_method_ast_dict
 
 
 def retrieve_class_data(full_name, retrieve_ins=False):
@@ -223,7 +226,7 @@ def append_all_instructions(source_code_json):
         class_ast_size = name_ast_dict[class_full_name]
         method_lines = class_dict["methodLines"]
         total_methods = len(class_dict["_8"])
-        if method_lines <= 140:
+        if class_ast_size <= 1000 and method_lines <= 160:
             retrieve_all_method_instruction(class_full_name, class_dict)
         else:
             current_method = 0
@@ -268,14 +271,15 @@ def handle_large_project(class_names):
 
     for name in class_names:
         current += 1
-        ast_size = name_ast_dict[name]
+        class_ast_size = name_ast_dict[name]
+        total_method_ast_size = name_method_ast_dict[name]
         class_name = return_name_without_package(name)
         main_logger.info(
             "Starting retrieval of class data for {name}, class #{current}/{total} classes.".format(
                 name=class_name, current=current, total=total_classes
             )
         )
-        if ast_size <= 1000:
+        if class_ast_size <= 1100 and total_method_ast_size <= 450:
             class_dict = retrieve_class_data(name, True)
         else:
             class_dict = retrieve_class_data(name)
@@ -405,6 +409,7 @@ if __name__ == "__main__":
     project_name = "analyzedProject"
     program_start_time = 0
 
+    main_logger.info("Server Endpoint: %s", server_endpoint)
     client = None
     index = 1
     sleep(4)
@@ -441,6 +446,9 @@ if __name__ == "__main__":
     error_msg = "Source Code Import Failure for {dir}:".format(dir=project_dir)
     import_log_dict = dict(debug_msg=debug_msg, error_msg=error_msg, info_msg=info_msg)
     import_start = timer()
+    main_logger.info(
+        "Importing source code into Joern (may take a while for larger projects)."
+    )
     import_res = handle_query(import_query, import_log_dict, False)
     import_end = timer()
     import_diff = import_end - import_start
@@ -448,7 +456,7 @@ if __name__ == "__main__":
     try:
         # Retrieve all class names
         name_retrieve_start = timer()
-        class_names, name_ast_dict = retrieve_all_class_names()
+        class_names, name_ast_dict, name_method_ast_dict = retrieve_all_class_names()
         name_retrieve_end = timer()
         name_retrieve_diff = name_retrieve_end - name_retrieve_start
         total_classes = len(class_names)
