@@ -390,6 +390,7 @@ public class CPGClass implements Serializable {
          * All the method {@link Instruction} belonging to a method
          */
         public final List<Instruction> instructions;
+        public String parentClassName;
 
         /**
          * All the methods that this method calls, if any

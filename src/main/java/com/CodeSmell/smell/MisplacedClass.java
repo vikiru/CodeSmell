@@ -2,16 +2,17 @@ package com.CodeSmell.smell;
 
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
+import com.CodeSmell.stat.ClassStat;
+import com.CodeSmell.stat.StatTracker;
 import javafx.util.Pair;
+import static com.CodeSmell.smell.Common.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MisplacedClass extends Smell{
 
     public static StatTracker stats;
-    ArrayList<CPGClass> misplacedClasses = new ArrayList<>();
+    Set<CPGClass> misplacedClasses = new HashSet<>();
     public MisplacedClass(String name, CodePropertyGraph cpg) {
         super(name, cpg);
         stats = new StatTracker(cpg);
@@ -23,7 +24,8 @@ public class MisplacedClass extends Smell{
         CPGClass[] classes = new CPGClass[1];
         if(!misplacedClasses.isEmpty())
         {
-            classes[0] = misplacedClasses.remove(0);
+            classes[0] = misplacedClasses.iterator().next();
+            misplacedClasses.remove(misplacedClasses.iterator().next());
             return new CodeFragment("Misplaced Classes",classes,null,null,null,null,null);
         }
         else
@@ -34,34 +36,25 @@ public class MisplacedClass extends Smell{
     {
 
         HashMap<CPGClass, Pair<Integer,Integer>> packageUsages= new HashMap<>();
-        for(Map.Entry<CPGClass, HashMap<CPGClass, Integer>> classes : stats.totalClassMethodCalls.entrySet())
-        {
+        for (ClassStat classStat : Common.stats.classStats.values()) {
             int classInPackage = 0;
             int classOutPackage = 0;
+            for (Map.Entry<CPGClass, Integer> calledClasses : classStat.totalClassMethodCalls.entrySet()) {
 
-          for(CPGClass calledClass : classes.getValue().keySet())
-          {
-              if(calledClass.packageName.equals(classes.getKey().packageName))
-              {
-                  classInPackage+=classes.getValue().get(calledClass);
-              }
-              else
-              {
-                  classOutPackage+=classes.getValue().get(calledClass);
-              }
-          }
-            packageUsages.put(classes.getKey(),new Pair<>(classInPackage,classOutPackage));
-        }
-        for(Map.Entry<CPGClass, Pair<Integer,Integer>> classesEntry : packageUsages.entrySet())
-        {
-            if(classesEntry.getValue().getKey()<classesEntry.getValue().getValue())
-            {
-                misplacedClasses.add(classesEntry.getKey());
+                    if (calledClasses.getKey().packageName.equals(classStat.cpgClass.packageName)) {
+                        classInPackage += calledClasses.getValue();
+                    } else {
+                        classOutPackage += calledClasses.getValue();
+                    }
+
+                }
+                if (classInPackage < classOutPackage) {
+                    misplacedClasses.add(classStat.cpgClass);
+                }
             }
         }
-    }
 
-    public ArrayList<CPGClass> getMisplacedClasses() {
+    public Set<CPGClass> getMisplacedClasses() {
         return misplacedClasses;
     }
 

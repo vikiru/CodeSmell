@@ -2,11 +2,15 @@ package com.CodeSmell.smell;
 
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CodePropertyGraph;
+import com.CodeSmell.stat.ClassStat;
+import com.CodeSmell.stat.MethodStat;
+import com.CodeSmell.stat.StatTracker;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A Lazy Class is a class that is under used. This simply makes the code base unnecessarily complicated.
@@ -23,6 +27,8 @@ import java.util.Map;
  *    Need to think about a threshold)
  * 3. More importantly, scan all other classes and see how many times the methods in those classes called the methods
  * in the suspected lazy class. If the class does not call, and is not called a lot it may be lazy.
+ * 3.1 Look at similarilty in instrcutions and see if two methods are doing the same thing. (Method stat.unique instruction For every method
+ * compare unique instructions and retain all, see if passes threshold.
  * 4. The user can only ever be offered a suggestion as to if the class is lazy, I.E check this out, may be lazy. Please decide if can be
  * refactored into another class.
  *
@@ -35,9 +41,12 @@ public class LazyClass extends Smell{
 
     public static StatTracker stats;
     ArrayList<CPGClass> lazyClasses = new ArrayList<>();
+    HashMap<CPGClass,CPGClass> lazySharedMethods = new HashMap<>();
     protected LazyClass(String name, CodePropertyGraph cpg) {
         super(name, cpg);
         stats = new StatTracker(cpg);
+        lazyClasses = returnLazyClasses();
+        lazySharedMethods = checkSimilarInstructions();
         System.out.println();
     }
 
@@ -48,7 +57,7 @@ public class LazyClass extends Smell{
             int timesCalling = 0;
             int timeCalled  = 0;
 
-            for(CPGClass.Method method : aClass.methods)
+            for(CPGClass.Method method : aClass.getMethods())
             {
                 for(CPGClass.Method calledMethod : method.getMethodCalls())
                 {
@@ -75,17 +84,18 @@ public class LazyClass extends Smell{
     {
 
         HashMap<CPGClass, Pair<Integer,Integer>> usesAndUsages = new HashMap<>();
-        for(Map.Entry<CPGClass, Integer> classes : stats.classUsage.entrySet())
+
+        //Get the number of times it uses other classes
+        for (ClassStat classStat : Common.stats.classStats.values())
         {
-            usesAndUsages.put(classes.getKey(),new Pair<>(classes.getValue(),0));
+            int uses = 0;
+            for(Map.Entry<CPGClass, Integer> calledClasses : classStat.totalClassMethodCalls.entrySet())
+            {
+                uses += calledClasses.getValue();
+            }
+            usesAndUsages.put(classStat.cpgClass, new Pair<>(uses,classStat.classUsage));
         }
 
-        int index = 0;
-        for(Map.Entry<CPGClass, HashMap<CPGClass, Integer>> classes : stats.totalClassMethodCalls.entrySet())
-        {
-            usesAndUsages.replace(classes.getKey(),new Pair<>(usesAndUsages.get(classes.getKey()).getKey(),(Integer)((classes.getValue().values().size()))));
-            index++;
-        }
         //If the class is not called and is not calling any other class it can be considered lazy as it
         //serves no use and should be considered for a refactor
         for(Map.Entry<CPGClass, Pair<Integer,Integer>> classesEntry : usesAndUsages.entrySet())
@@ -95,35 +105,71 @@ public class LazyClass extends Smell{
                 lazyClasses.add(classesEntry.getKey());
             }
         }
+
+        //Run for loop inside the other with the classes, check to make sure class names aren't same
+        //Then get method intructions and compare agaisnt each other, if a set of instructions are the same add to a set
+        //If the set is large enough then
         return lazyClasses;
     }
-
 
     @Override
     public CodeFragment detectNext() {
         return new CodeFragment(null,(CPGClass[])lazyClasses.toArray(),null,null,null,null,null);
     }
 
+    public CodeFragment detectNextSimilarities()
+    {
+        CPGClass[] classesWithSimilarMethods = {(CPGClass)lazySharedMethods.keySet().toArray()[0],(CPGClass)lazySharedMethods.values().toArray()[0]};
+        lazySharedMethods.remove(lazySharedMethods.keySet().toArray()[0]);
+        return new CodeFragment(null,classesWithSimilarMethods,null,null,null,null,null);
+    }
+
     @Override
     public String description() {
         tallyRelations();
-       /* for(CPGClass aClass : super.cpg.getClasses())
-        {
-            System.out.println(aClass.classFullName+" Times calling:"+aClass.getTimesCalling()+" Times Called"+aClass.getTimesCalled());
-        }*/
         return "";
     }
 
+
+    private HashMap<CPGClass,CPGClass> checkSimilarInstructions()
+    {
+        HashMap<CPGClass,CPGClass> lazySharedMethods = new HashMap<>();
+        for (MethodStat methodStat : Common.stats.methodStats.values())
+        {
+            for(MethodStat otherMethodStat : Common.stats.methodStats.values())
+            {
+
+                if(otherMethodStat.equals(methodStat)){
+                    continue;
+                }
+                else {
+                    for(CPGClass.Method.Instruction instructions: methodStat.method.instructions)
+                    {
+                        int sameLines = 0;
+                        for(CPGClass.Method.Instruction otherInstructions: otherMethodStat.method.instructions)
+                        {
+                            if(otherInstructions.equals(instructions))
+                            {
+                                sameLines++;
+                            }
+                        }
+                        if( ((float)(otherMethodStat.method.instructions.size()/sameLines))>0.75)
+                        {
+                            lazySharedMethods.put(otherMethodStat.method.getParent(),methodStat.method.getParent());
+                        }
+                    }
+                }
+            }
+        }
+
+        return lazySharedMethods;
+    }
     //TODO
     /**
      * no usages and no using of other classes - Done
-     * no methods, and not main or interface/abstract
      * less than 10 lines and is not a main (probably could be refactored)
-     *
-     * Common functionality? -> similar number of lines, calling the same methods and the same classes. Could be instace of lazy class
      *
      * Need to determine the amount of times used - easy usedClass
      * Need to determine amount of times it uses someone else- use totalClassMethodCalls to see how many times a class calls another class.
-     * Also parse through methods via the instructions and see if one of the class names show, not its own shows up.
      */
 }
