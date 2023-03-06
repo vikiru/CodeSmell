@@ -339,6 +339,7 @@ def retrieve_all_class_names():
         class_names = [name.replace("$", ".") for name in all_names]
     else:
         print("joern_query :: Retrieve class names failure", file=sys.stderr)
+        print("joern_query :: ",result, file=sys.stderr)
         exit(1)
     return class_names
 
@@ -463,7 +464,7 @@ if __name__ == "__main__":
     result = client.execute(query)
     end = time.time()
 
-    if result["success"]:
+    if result["success"] and not result["stderr"]:
         logging.info(
             "The source code has been successfully imported. Completed in {0} seconds.".format(
                 format(end - start, ".2f")
@@ -532,5 +533,5 @@ if __name__ == "__main__":
         logging.info("Total time taken: {0} seconds.".format(format(total_time, ".2f")))
         exit(0)
     else:
-        print("joern_query :: Source Code Import Failure", file=sys.stderr)
+        print("joern_query :: Source Code Import Failure", result, file=sys.stderr)
         exit(1)

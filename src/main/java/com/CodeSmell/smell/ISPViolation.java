@@ -45,6 +45,13 @@ public class ISPViolation extends Smell {
     // a set of interfaces along with the classes that implement them
     Iterator<Map.Entry<CPGClass, ArrayList<CPGClass>>> interfaces;
 
+    // maps methods such that isNotImplemented(m) == true for each
+    // Method key object m
+    private HashMap<Method, ArrayList<CPGClass>> segregations;
+
+    private Iterator<CodeFragment> lastBatch;
+
+
     public String description() {
         return "Implementors of an interface selectively fail to realize" +
                 " all defined methods";
@@ -59,11 +66,6 @@ public class ISPViolation extends Smell {
         this.lastBatch = new ArrayList<CodeFragment>().iterator();
     }
 
-    // maps methods such that isNotImplemented(m) == true for each
-    // Method key object m
-    private HashMap<Method, ArrayList<CPGClass>> segregations;
-
-    private Iterator<CodeFragment> lastBatch;
 
     private boolean isNotImplemented(Method m) {
         // returns true if a method is not implemented
@@ -74,10 +76,7 @@ public class ISPViolation extends Smell {
         //   1.) The method is either blank
         //   2.) The method throws an error
         //   declaration unconditionally
-       // System.out.println(m.instructions);
-       // System.out.println(getMethodStats(m).uniqueInstructions);
-       // System.out.println(getMethodStats(m).uniqueInstructions.size());
-       // System.out.println("^^^^^^^^^^^^");
+
         if (getMethodStats(m).uniqueInstructions.size() == 0) {
             return true;
         }
@@ -103,7 +102,6 @@ public class ISPViolation extends Smell {
             CPGClass[] implementors) {
 
         for (CPGClass c : implementors) {
-            System.out.println("Class c " + c);
             Method[] ifaceMethods = Common.interfaceMethods(c);
             for (Method m : ifaceMethods) {
                 if (isNotImplemented(m)) {
@@ -113,13 +111,14 @@ public class ISPViolation extends Smell {
                             .findFirst()
                             .orElseThrow(RuntimeException::new);
                     ArrayList<CPGClass> arr = this.segregations
-                            .getOrDefault(m, new ArrayList<>());
-                    System.out.print(m + " is not implemented");
+                            .getOrDefault(m2, new ArrayList<>());
+                    System.out.print(m2 + " is not implemented in " + c.name);
                     System.out.println(" within " + m.getParent());
                     arr.add(c);
-                    this.segregations.put(m, arr);
+                    this.segregations.put(m2, arr);
+                } else {
+                    System.out.print(m + " is implemented in " + c.name);
                 }
-                System.out.println("?????");
             }
         }
         return this.segregations.size() != 0;
@@ -139,11 +138,12 @@ public class ISPViolation extends Smell {
         this.segregations = new HashMap<>();
         while (this.interfaces.hasNext()) {
             Map.Entry<CPGClass, ArrayList<CPGClass>> iface = this.interfaces.next();
-            System.out.println("Checking interface " + iface);
             CPGClass[] implementors = iface.getValue().toArray(new CPGClass[0]);
             if (containsViolation(iface.getKey(), implementors)) {
                 System.out.println(iface.getKey() + " contains violation");
-                return processDetection(implementors.length);
+                return processDetection(iface.getKey(), implementors.length);
+            } else {
+                System.out.println(iface.getKey() + " does not contain violation");
             }
         }
         return null;
@@ -152,9 +152,15 @@ public class ISPViolation extends Smell {
     private static class Segregation {
         public Set<CPGClass> classSet;
         public Set<Method> methodSet;
+
+        @Override
+        public String toString() {
+            return "Methods " + methodSet.toString() + "\n" +
+                "Classes " + classSet.toString() + "\n"; 
+        }
     }
 
-    private CodeFragment processDetection(int numImplementors) {
+    private CodeFragment processDetection(CPGClass iface, int numImplementors) {
         // processes a batch of detections, using
         // this.segregations to build an iterator of CodeFragments,
         // returning the first element of the iterator and saving
@@ -163,42 +169,63 @@ public class ISPViolation extends Smell {
         // each element comprises one detection.
         ArrayList<Segregation> refinedSegregations = new ArrayList<>();
 
+        Set<CPGClass> allNonImplementingClasses = new HashSet<>();
         for (Method m : this.segregations.keySet()) {
-            System.out.println("Method here " +m);
-            ArrayList<CPGClass> effectedClasses = this.segregations.get(m);
-            if (effectedClasses.size() >= numImplementors) {
-                // if the implementation is ignored for
-                // all implementors then ignore this ISP
-                this.segregations.remove(m);
-                continue;
-            }
+            allNonImplementingClasses.addAll(this.segregations.get(m));
+        }
+
+        // group sets of classes such that
+        // all classes have usable implementations
+        // for the same subset of methods of the interface
+        // which they implement
+
+        // pass 1
+        // map methods to the list of classes which implement them
+
+        for (Method m : this.segregations.keySet()) {
+            ArrayList<CPGClass> nonImplementingClasses = this.segregations.get(m);
+            Set<CPGClass> implementingClasses = new HashSet<>();
+            implementingClasses.addAll(allNonImplementingClasses);
+            implementingClasses.removeAll(nonImplementingClasses);
             Segregation s = new Segregation();
-            s.classSet = new HashSet(effectedClasses);
-            s.methodSet = new HashSet();
+            s.classSet = implementingClasses;
+            s.methodSet = new HashSet<>();
+            s.methodSet.add(m);
             refinedSegregations.add(s);
 
-            // group sets of classes such that
-            // all classes have usable implementations
-            // for the same subset of methods of the interface
-            // which they implement
+        }
 
+        // pass 2
+        // if any sets of classes are the same, group the two Segregations together
+
+        for (Segregation s : refinedSegregations) {
             refinedSegregations.stream()
-                    .filter(seg -> seg.classSet.containsAll(Set.of(effectedClasses)))
+                    .filter(seg -> seg
+                        .classSet
+                        .containsAll(
+                            Set.of(s.classSet)) && seg != s)
                     .findFirst()
-                    .ifPresent(seg -> seg.methodSet.add(m));
+                    .ifPresent(seg -> seg.methodSet.addAll(s.methodSet));
         }
 
 
         ArrayList<CodeFragment> lastBatch = new ArrayList<>();
 
         refinedSegregations.forEach((seg) -> {
-            String description = String.format(
-                    "Move methods %s into new interface with classes %s",
-                    seg.methodSet, seg.classSet);
-            lastBatch.add(CodeFragment.makeFragment(
-                    description,
-                    seg.methodSet.toArray(new Method[0]),
-                    seg.classSet.toArray(new CPGClass[0])));
+
+            // if the method is not implemented by anything
+            // then this should be another smell (i.e, dead code)
+            if (seg.classSet.size() != 0) {
+
+
+                String description = String.format(
+                        "Move methods %s into new interface with classes %s",
+                        seg.methodSet, seg.classSet.toArray(new CPGClass[0]));
+                lastBatch.add(CodeFragment.makeFragment(
+                        description,
+                        seg.methodSet.toArray(new Method[0]),
+                        seg.classSet.toArray(new CPGClass[0])));
+            }
         });
 
         this.lastBatch = lastBatch.iterator();

@@ -79,10 +79,8 @@ public class JoernServer {
         // Get the path to joern
         String joernPath = System.getProperty("user.home") + "/bin/joern/joern-cli";
 
-        String rootDir = String.valueOf(Paths.get("").toAbsolutePath());
-        String dirString = rootDir + File.separator + directory.toString();
-        System.out.println("Starting Joern in directory: " + dirString);
-        String directoryPath = rootDir + "/src/main/python";
+        String cwd = String.valueOf(Paths.get("").toAbsolutePath());
+        String directoryPath = cwd + "/src/main/python";
 
         // Start up a command prompt terminal (no popup) and start the joern server
         ProcessBuilder joernServerBuilder, joernQueryBuilder, windowsPortFinderBuilder;
@@ -100,7 +98,8 @@ public class JoernServer {
                     "--server-port", String.valueOf(serverPort), "--server");
         }
         joernQueryBuilder = new ProcessBuilder("python", "joern_query.py",
-                dirString, String.valueOf(serverPort)).directory(new File(directoryPath));
+                directory.toString(), 
+                String.valueOf(serverPort)).directory(new File(directoryPath));
 
         try {
             // Start the server
