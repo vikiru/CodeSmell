@@ -189,7 +189,7 @@ def retrieve_class_data(class_bundle: dict):
     needs_ins = class_bundle["withoutIns"]
     without_ins = ""
     if needs_ins:
-        without_ins = " (excluding instructions) "
+        without_ins = " (excluding instructions)"
     class_name = return_name_without_package(full_name)
 
     # Handle query and log neccesarry information
