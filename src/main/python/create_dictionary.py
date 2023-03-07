@@ -4,7 +4,7 @@ import logging
 import logging.handlers
 from timeit import default_timer as timer
 
-# Helper constants
+# Helper Constants
 INIT_METHOD = "<init>"
 NESTED_SEP = "$"
 COLON_SEP = ":"
@@ -44,24 +44,18 @@ def assign_total_method_lines(all_classes):
 
     for class_dict in all_classes:
         class_total = 0
-        for method in class_dict["_8"]:
-            class_total += method["totalLength"]
-        class_dict["methodLines"] = class_total
-
-
-def sort_methods(methods):
-    """Sort the methods of a class in ascending order, based on the total length of the method. This is to ensure that methods
-    are placed in order of smallest method so that requests to Joern can follow a Shortest Task First approach."""
-
-    for method in methods:
-        if "_4" and "_5" in method:
-            end = method["_5"]
-            start = method["_4"]
-            method["totalLength"] = (end - start) + 1
-        else:
-            method["totalLength"] = 0
-    new_list = sorted(methods, key=lambda entry: entry["totalLength"])
-    return new_list
+        if "_8" in class_dict:
+            for method in class_dict["_8"]:
+                end = 0
+                start = 0
+                add = 0
+                if "_4" and "_5" in method:
+                    end = method["_5"]
+                    start = method["_4"]
+                    add = 1
+                method["totalLength"] = (end - start) + add
+                class_total += method["totalLength"]
+            class_dict["methodLines"] = class_total
 
 
 def clean_method_full_name(method_full_name):
@@ -70,7 +64,7 @@ def clean_method_full_name(method_full_name):
     """
 
     str_to_return = method_full_name
-    if ":" in method_full_name:
+    if COLON_SEP in method_full_name:
         index_signature = str_to_return.index(COLON_SEP)
         str_to_return = str_to_return[:index_signature]
         for _ in range(0, 2):
@@ -108,25 +102,33 @@ def return_method_name(full_name):
 def return_name_without_package(class_full_name):
     """Remove package and any nesting in a class full name to get the proper name of the class."""
 
-    name = class_full_name
-    if DOT_SEP in class_full_name:
-        index = class_full_name.rindex(DOT_SEP)
-        name = class_full_name[index + 1 :]
-    name = get_name_without_separators(name)
-    return name
+    class_full_name = class_full_name.replace(NESTED_SEP, DOT_SEP)
+    class_full_name = class_full_name.split(DOT_SEP)[-1]
+    return class_full_name
 
 
-def get_name_without_separators(name):
-    """Return the name of a class without the separators, this is used mainly for nested classes."""
+def return_attribute_package_name(attribute_full_name: str):
+    """Given the full name of an attribute, return its package name"""
 
-    if NESTED_SEP in name:
-        index = name.rindex(NESTED_SEP)
-        name = name[index + 1 : len(name)]
-    return name
+    package_name = attribute_full_name
+    if DOT_SEP in package_name:
+        index_sep = package_name.rindex(DOT_SEP)
+        package_name = """{start}{new_char}{end}""".format(
+            start=package_name[:index_sep],
+            new_char=package_name[index_sep].replace(DOT_SEP, NESTED_SEP),
+            end=package_name[index_sep + 1 : len(package_name)],
+        )
+        splitted = package_name.split(NESTED_SEP)
+        if splitted:
+            package_name = splitted[0]
+    else:
+        package_name = ""
+    return package_name
 
 
 def return_package_name(class_full_name):
-    """Determine package name from the joern_json (prior to creation of dictionary)"""
+    """Given the full name of a class, return its package name. Mainly used to filter out
+    external classes prior to appending instructions."""
 
     package_name = ""
     if DOT_SEP in class_full_name:
@@ -180,11 +182,11 @@ def create_attribute_dict(curr_attribute):
     curr_attribute_dict = {
         NAME: attribute_name,
         "parentClass": [{}],  # Handled by Parser
-        "packageName": package_name,
+        "packageName": return_attribute_package_name(attribute_type_full_name),
         CODE: "",  # Handled within assign_missing_class_info
         LINE_NUM: attribute_line_number,
         MODIFIERS: [modifier.lower() for modifier in attribute_modifiers],
-        "attributeType": attribute_type,
+        "attributeType": attribute_type,  # Handled within assign_missing_class_info
         "typeList": [],  # Handled by Parser
     }
 
@@ -201,7 +203,7 @@ def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
     return final_list
 
 
-def get_method_parameters(parameters):
+def create_method_parameters(parameters):
     """Return a list containing dictionaries for each parameter within the method body"""
 
     parameters_list = []
@@ -221,9 +223,8 @@ def get_method_parameters(parameters):
 
 
 def assign_method_calls(method_ins, method_calls):
-    """Assign method calls to all instructions which call either an Exception or a method belonging to a class present in the given directory.
-
-    Additionally, ensure that duplicates are cleaned after assignment.
+    """Assign method calls to all instructions which call either an Exception or a method
+    belonging to a class present in the given directory. Additionally, ensure that duplicates are cleaned after assignment.
     """
 
     method_names = set()
@@ -253,7 +254,9 @@ def assign_method_calls(method_ins, method_calls):
             ]
             if filtered_calls:
                 first_call = filtered_calls[0]
-                method_call = package_name + "$" + class_name + "$" + method_name
+                method_call = (
+                    package_name + NESTED_SEP + class_name + NESTED_SEP + method_name
+                )
                 first_call["methodCall"] = method_call
 
     # Clean after assigning method calls
@@ -353,7 +356,7 @@ def create_method_dict(curr_method):
     constructor_name = method_name_pattern.findall(method_body)[0]
 
     # Get method parameters, if any.
-    method_parameters = get_method_parameters(parameter_codes)
+    method_parameters = create_method_parameters(parameter_codes)
 
     # Get method instructions, if any.
     method_instructions = list(
@@ -386,6 +389,34 @@ def create_method_dict(curr_method):
     return curr_method_dict
 
 
+"""
+# TODO: Add to CPGClass (removes 5 parameters from CPGClass which it does not need)
+# Will most probably be a final 1 element array similar to parent for attr/method.
+def create_file_dict(curr_file_contents):
+
+    curr_file_dict = {
+        "filePath": "",
+        "fileLength": 0,
+        "importStatements": [],
+        "fileLength": 0,
+        "nonEmptyLines": 0,
+        "emptyLines": 0,
+    }
+    return curr_file_dict
+"""
+
+"""
+#TODO: Add to File, imported classes, attrs, methods will be private. importLine can be public final (implementation idea ready)
+def create_import_dict(curr_import_statement):
+    curr_import_dict = {
+        "importLine": "",
+        "importedClasses": [],
+        "importedAttributes": [],
+        "importedMethods": []
+    }
+"""
+
+
 def create_class_dict(curr_class):
     """For every class, create a dictionary and return it."""
 
@@ -395,27 +426,37 @@ def create_class_dict(curr_class):
     inherits_from_list = curr_class["_4"]
     class_declaration = curr_class["_5"]
     line_number = curr_class["_6"]
-    class_attributes = curr_class["_7"]
-    class_methods = curr_class["_8"]
+
+    # Create attribute dictionaries, if present
+    class_attributes = []
+    if "_7" in curr_class:
+        class_attributes = curr_class["_7"]
+        class_attributes = list(
+            filter(None, list(map(create_attribute_dict, class_attributes)))
+        )
+
+    # Create method dictionaries, if present
+    class_methods = []
+    if "_8" in curr_class:
+        class_methods = curr_class["_8"]
+        class_methods = list(filter(None, list(map(create_method_dict, class_methods))))
 
     curr_class_dict = {
-        NAME: get_name_without_separators(class_name),
+        NAME: return_name_without_package(class_full_name),
         CODE: "",  # Handled in assign_missing_class_info
         LINE_NUM: int(line_number),
         "importStatements": [],  # Handled in assign_missing_class_info
         MODIFIERS: [],  # Handled in assign_missing_class_info
         "classFullName": class_full_name,
-        "inheritsFrom": [],  # Handled in assign_missing_class_info
+        "inheritsFrom": [],  # Handled in Parser
         "classType": get_class_type(class_declaration),
         "filePath": file_name,
         "fileLength": 0,  # Handled in assign_missing_class_info
         "emptyLines": 0,  # Handled in assign_missing_class_info
         "nonEmptyLines": 0,  # Handled in assign_missing_class_info
         "packageName": "",  # Handled in assign_missing_class_info
-        "attributes": list(
-            filter(None, list(map(create_attribute_dict, class_attributes)))
-        ),
-        "methods": list(filter(None, list(map(create_method_dict, class_methods)))),
+        "attributes": class_attributes,
+        "methods": class_methods,
         "outwardRelations": [],  # Handled in RelationshipManager
     }
 
@@ -433,38 +474,6 @@ def create_class_dict(curr_class):
     )
 
     return curr_class_dict
-
-
-def clean_up_external_classes(source_code_json):
-    """Remove all classes that inherit from external classes outside of the source code"""
-
-    clean_start = timer()
-    all_pkgs = return_all_distinct_package_names(source_code_json[CLASSES])
-    root_pkg = ""
-    if all_pkgs:
-        root_pkg = all_pkgs[0]
-
-    # Construct a new dictionary without external classes.
-    new_dict = {"relations": [], CLASSES: []}
-    for class_dict in source_code_json[CLASSES]:
-        filtered_inherits = [
-            class_name
-            for class_name in class_dict["_4"]
-            if class_name.replace(root_pkg, "") == class_name
-            and "java" not in class_name
-        ]
-        if not filtered_inherits:
-            class_dict["_4"] = []
-            new_dict[CLASSES].append(class_dict)
-
-    clean_end = timer()
-    clean_diff = clean_end - clean_start
-    logging.info(
-        "All external classes (if any) have been excluded from the source code json. Completed in {0} seconds.".format(
-            format(clean_diff, DEC_FORMATTER)
-        )
-    )
-    return new_dict
 
 
 def get_class_type(declaration):
@@ -499,7 +508,7 @@ def assign_missing_class_info(class_dict, file_lines):
     if file_lines[0].startswith("package"):
         package_name = file_lines[0]
     package_name = package_name.replace(";", "").replace("package ", "").strip()
-    import_statements = [line for line in file_lines if "import" in line]
+    import_statements = [line for line in file_lines if line.startswith("import")]
     class_declaration = file_lines[class_decl_line_number - 1]
     class_declaration = class_declaration.replace("{", "").strip()
     class_modifiers = [
@@ -563,30 +572,102 @@ def assign_missing_class_info(class_dict, file_lines):
     return class_dict
 
 
+def clean_up_external_classes(source_code_json):
+    """Remove all classes that inherit from external classes outside of the source code"""
+
+    clean_start = timer()
+    all_pkgs = return_all_distinct_package_names(source_code_json[CLASSES])
+    root_pkg = ""
+    if all_pkgs:
+        root_pkg = all_pkgs[0]
+
+    # Construct a new dictionary without external classes.
+    new_dict = {"relations": [], CLASSES: []}
+    for class_dict in source_code_json[CLASSES]:
+        filtered_inherits = [
+            class_name
+            for class_name in class_dict["_4"]
+            if class_name.replace(root_pkg, "") == class_name
+            and "java" not in class_name
+        ]
+        if not filtered_inherits:
+            class_dict["_4"] = []
+            new_dict[CLASSES].append(class_dict)
+
+    clean_end = timer()
+    clean_diff = clean_end - clean_start
+    logging.info(
+        "All external classes (if any) have been excluded from the source code json. Completed in {0} seconds.".format(
+            format(clean_diff, DEC_FORMATTER)
+        )
+    )
+    return new_dict
+
+
+def create_log_dictionary(info_msg="", debug_msg="", error_msg=""):
+    return dict(info_msg=info_msg, debug_msg=debug_msg, error_msg=error_msg)
+
+
 def create_loggers():
+    """Create two loggers, one for handling info and error messages and will be read by JoernServer (main_logger) which outputs
+    logs to `joern_query.log` and another logger for debug information outputted to `debug.log`"""
+
     LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
     LOG_DATE_FORMAT = "%m/%d/%Y %I:%M:%S"
     MAIN_LOG_FILE = "joern_query.log"
-
     DEBUG_LOG_FILE = "debug.log"
-
     LOG_FORMATTER = logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
 
+    # Configure main logger
     main_logger = logging.getLogger()
-    debug_logger = logging.getLogger()
-
     main_handler = logging.FileHandler(filename=MAIN_LOG_FILE, mode="w")
     main_handler.setFormatter(LOG_FORMATTER)
     main_handler.setLevel(logging.INFO)
+    main_logger.addHandler(main_handler)
+    main_logger.setLevel(logging.INFO)
 
+    # Configure debug logger
+    debug_logger = logging.getLogger()
     debug_handler = logging.FileHandler(filename=DEBUG_LOG_FILE, mode="w")
     debug_handler.setFormatter(LOG_FORMATTER)
     debug_handler.setLevel(logging.DEBUG)
-
-    main_logger.addHandler(main_handler)
     debug_logger.addHandler(debug_handler)
-
-    main_logger.setLevel(logging.INFO)
     debug_logger.setLevel(logging.DEBUG)
 
     return main_logger, debug_logger
+
+
+def create_class_bundles(name_ast_size_res):
+    """Create class bundles for every class within the provided directory.
+
+    These class bundles contain the class's full name, total ast size given by Joern,
+    attribute ast size, method ast size and the real ast size which is a combination of attribute and method ast size.
+    """
+
+    all_classes = []
+    for entry in name_ast_size_res:
+        full_name = entry["_1"]
+        class_ast_size = entry["_2"]
+        attribute_ast_size = entry["_3"]
+        method_ast_sizes = entry["_4"]
+        total_methods = len(method_ast_sizes)
+        total_method_size = sum(method_ast_sizes)
+        real_ast_size = attribute_ast_size + total_method_size
+        class_bundle = {
+            "classFullName": full_name,
+            "totalAstSize": class_ast_size,
+            "attributeAstSize": attribute_ast_size,
+            "totalMethods": total_methods,
+            "methodAstSize": total_method_size,
+            "realAstTotal": real_ast_size,
+        }
+        all_classes.append(class_bundle)
+    all_classes.sort(
+        key=lambda entry: (
+            entry["methodAstSize"],
+            entry["totalAstSize"],
+            entry["totalMethods"],
+            entry["attributeAstSize"],
+        )
+    )
+    return all_classes
