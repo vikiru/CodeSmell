@@ -102,8 +102,8 @@ def retrieve_all_class_names():
     of each class."""
 
     name_query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda$")).
-    map(node => (node.fullName, node.ast.size, node.astChildren.size, 
-    node.ast.isMethod.isExternal(false).filter(node => node.lineNumber != None).
+    map(node => (node.fullName, node.ast.size, node.astChildren.isMember.size, 
+    node.astChildren.isMethod.isExternal(false).filter(node => node.lineNumber != None).
     l.map(node => (node.ast.size)))).toJson"""
 
     info_msg = "All class name and class sizes have been retrieved."
