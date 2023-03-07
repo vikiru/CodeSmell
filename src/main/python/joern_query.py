@@ -137,6 +137,9 @@ def construct_query(class_bundle: dict):
     if attribute_ast_size:
         attribute_retrieve = """, node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, node.lineNumber, 
         node.astChildren.isModifier.modifierType.l))"""
+        class_bundle["hasAttributes"] = True
+    else:
+        class_bundle["hasAttributes"] = False
 
     # Determine if method instructions should be retrieved or not
     method_ins_retrieve = ""
@@ -156,6 +159,9 @@ def construct_query(class_bundle: dict):
         node.astChildren.isModifier.modifierType.l{method_ins_retrieve}))""".format(
             method_ins_retrieve=method_ins_retrieve
         )
+        class_bundle["hasMethods"] = True
+    else:
+        class_bundle["hasMethods"] = False
 
     # Construct the query, combining everything together
     class_query = """cpg.typeDecl.fullName("{full_name}").map(node => (node.name, 
@@ -200,6 +206,9 @@ def retrieve_class_data(class_bundle: dict):
     class_dict = []
     if class_result:
         class_dict = class_result[0]
+        if not class_bundle["hasAttributes"] and class_bundle["hasMethods"]:
+            class_dict["_8"] = class_dict["_7"]
+            class_dict["_7"] = []
         class_dict["needsInstructions"] = needs_ins
     else:
         debug_logger.debug(class_result)
@@ -333,15 +342,17 @@ def append_all_instructions(source_code_json):
         )
         class_ast_size = class_dict["classAstSize"]
         method_lines = class_dict["methodLines"]
-        class_methods = class_dict["_8"]
-        if (
-            class_ast_size <= CLASS_AST_SIZE_THRESHOLD
-            and method_lines <= METHOD_LINES_THRESHOLD
-        ):
-            retrieve_all_method_instruction(class_full_name, class_dict)
-        else:
-            class_methods.sort(key=lambda entry: entry["totalLength"])
-            handle_multiple_instructions(class_full_name, class_methods)
+
+        if "_8" in class_dict:
+            class_methods = class_dict["_8"]
+            if (
+                class_ast_size <= CLASS_AST_SIZE_THRESHOLD
+                and method_lines <= METHOD_LINES_THRESHOLD
+            ):
+                retrieve_all_method_instruction(class_full_name, class_dict)
+            else:
+                class_methods.sort(key=lambda entry: entry["totalLength"])
+                handle_multiple_instructions(class_full_name, class_methods)
     return source_code_json
 
 
