@@ -55,7 +55,7 @@ def assign_total_method_lines(all_classes):
                     add = 1
                 method["totalLength"] = (end - start) + add
                 class_total += method["totalLength"]
-            class_dict["methodLines"] = class_total
+        class_dict["methodLines"] = class_total
 
 
 def clean_method_full_name(method_full_name):
