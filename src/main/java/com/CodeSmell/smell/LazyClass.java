@@ -153,7 +153,7 @@ public class LazyClass extends Smell{
                                 sameLines++;
                             }
                         }
-                        if( ((float)(otherMethodStat.method.instructions.size()/sameLines))>0.75)
+                        if(((float)(sameLines/otherMethodStat.method.instructions.size()))>0.75)
                         {
                             lazySharedMethods.put(otherMethodStat.method.getParent(),methodStat.method.getParent());
                         }
