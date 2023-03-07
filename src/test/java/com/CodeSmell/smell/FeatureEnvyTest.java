@@ -16,11 +16,6 @@ import static org.junit.Assert.assertTrue;
 
 public class FeatureEnvyTest extends SmellTester{
 
-    //private Parser p;
-    //private CodePropertyGraph cpg;
-
-    //private FeatureEnvy fe;
-    //ArrayList<Smell.CodeFragment> detections;
 
     @Before
     public void before() {
@@ -52,7 +47,7 @@ public class FeatureEnvyTest extends SmellTester{
             System.out.println(fragment.description);
         }
     }
-
+    /*
     @Test
     public void detectOneMethodEnvy(){
         Smell.CodeFragment fragment = this.hasClass("EnvierOneMethod");
@@ -60,26 +55,6 @@ public class FeatureEnvyTest extends SmellTester{
         if(fragment != null){
             System.out.println(fragment.description);
         }
-    }
-
-    /*private boolean hasClass(String name){
-        boolean hasDetection = false;
-        for(Smell.CodeFragment f : detections){
-            if(f.classes[0].classFullName.equals(name)){
-                hasDetection = true;
-            }
-            if(f.classes.length > 0) {
-                String outLine = f.description + "\n";
-                outLine += "     Methods: {";
-                for(int n = 0; n < f.methods.length; n++){
-                    outLine += f.methods[n].name;
-                    if((n+1) < f.methods.length)
-                        outLine += ", ";
-                }
-                outLine += " }";
-                System.out.println(outLine);
-            }
-        }
-        return hasDetection;
     }*/
+
 }

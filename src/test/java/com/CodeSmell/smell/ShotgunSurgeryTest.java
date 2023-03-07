@@ -15,8 +15,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 public class ShotgunSurgeryTest extends SmellTester{
 
-
-
     @Before
     public void before() {
         this.cpg = ProjectManager.getCPG("testproject");
