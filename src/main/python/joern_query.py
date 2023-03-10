@@ -241,12 +241,11 @@ def retrieve_all_method_instruction(class_full_name: str, class_dict: dict):
     all_method_ins = handle_query(all_instruction_query, log_dict)
 
     if all_method_ins:
-        method_ins_dict = all_method_ins[0]
         for method in class_dict["_8"]:
             method_full_name = method["_2"]
             method_getter = [
                 method_dict
-                for method_dict in method_ins_dict
+                for method_dict in all_method_ins
                 if method_dict["_1"] == method_full_name
             ]
             if method_getter:
