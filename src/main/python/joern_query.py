@@ -244,9 +244,15 @@ def retrieve_all_method_instruction(class_full_name: str, class_dict: dict):
         method_ins_dict = all_method_ins[0]
         for method in class_dict["_8"]:
             method_full_name = method["_2"]
-            if method_full_name in method_ins_dict:
-                method["_7"] = method_ins_dict["_2"]
-                method["_8"] = method_ins_dict["_3"]
+            method_getter = [
+                method_dict
+                for method_dict in method_ins_dict
+                if method_dict["_1"] == method_full_name
+            ]
+            if method_getter:
+                method_getter = method_getter[0]
+                method["_7"] = method_getter["_2"]
+                method["_8"] = method_getter["_3"]
             else:
                 method["_7"] = []
                 method["_8"] = []
