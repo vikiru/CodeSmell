@@ -16,21 +16,6 @@ import java.lang.Math;
  * should point to a set of classes which all
  * implement the same subset of methods of an interface.
  * 
- * The following segregations are expected:
- * 
- * Segregation 1:
- * classes
- * 		ISPClass
- * methods
- * 		methodWithError() 
- * 		blankMethod() 
- * 
- * Segregation 2:
- * classes
- * 		ISPClassTwo, ISPClassThree
- * methods
- *	    methodWithError()
- * 	
  */
 
 public class ISPClass implements ISPViolationTestInterface {
@@ -48,6 +33,8 @@ public class ISPClass implements ISPViolationTestInterface {
 		// it counts as implementing the method  
 		if (blackBox()) { throw new RuntimeException("Test"); };
 	}
+
+	public void method3() {}
 
 
 	public static boolean blackBox() {
@@ -88,6 +75,9 @@ public class ISPClass implements ISPViolationTestInterface {
 			return ISPClass.blackBox();
 		}
 
+		public  void method3() {
+		}
+
 		public void conditionalError() {
 			// this is a conditional error
 			// it counts as implementing the method  
@@ -118,12 +108,18 @@ public class ISPClass implements ISPViolationTestInterface {
 			return !ISPClass.blackBox();
 		}
 
+		public  void method3() {
+			System.out.println("implements");
+		}
+
 		public void conditionalError() {
 			// this is a conditional error
 			// it counts as implementing the method  
 			if (blackBox()) { throw new RuntimeException("Test"); };
 		}
 	}
+
+	
 
 	// finally, there is one more class
 	// for which ALL methods are properly
@@ -146,6 +142,10 @@ public class ISPClass implements ISPViolationTestInterface {
 
 		public static boolean blackBox() {
 			return NoneISPClass.f < 0.25 && !ISPClass.blackBox();
+		}
+
+		public  void method3() {
+			System.out.println("implements");
 		}
 
 		public void conditionalError() {
