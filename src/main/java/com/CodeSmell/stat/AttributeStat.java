@@ -27,7 +27,7 @@ public class AttributeStat {
     public AttributeStat(Attribute attribute, Helper helper) {
         this.attribute = attribute;
         this.methodsWhichCallAttr = determineAttributeUsage(attribute, helper);
-        this.classesWhichCallAttr = determineClassAttributeUsage(methodsWhichCallAttr);
+        this.classesWhichCallAttr = determineClassAttributeUsage(methodsWhichCallAttr, attribute);
         this.attributeUsage = returnTotalUsage(methodsWhichCallAttr);
     }
 
@@ -61,11 +61,12 @@ public class AttributeStat {
      * @param methodsWhichCallAttr A map representing how many times each method within cpg has called this attribute
      * @return A map representing how many times each class has called this attribute
      */
-    private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<Method, Integer> methodsWhichCallAttr) {
+    private static Map<CPGClass, Integer> determineClassAttributeUsage(Map<Method, Integer> methodsWhichCallAttr, Attribute attribute) {
         Map<CPGClass, Integer> classWhichCallAttr = new HashMap<>();
         methodsWhichCallAttr
                 .forEach((key, value) -> classWhichCallAttr.put(key.getParent(),
                         classWhichCallAttr.getOrDefault(key.getParent(), 0) + value));
+        classWhichCallAttr.putIfAbsent(attribute.getParent(), 0);
         return Collections.unmodifiableMap(classWhichCallAttr);
     }
 
