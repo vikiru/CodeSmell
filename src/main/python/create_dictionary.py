@@ -243,8 +243,6 @@ def assign_method_calls(method_ins, method_calls):
                 class_name = split_name[0]
                 method_name = split_name[1]
 
-            method_name = method_name.replace(INIT_METHOD, class_name)
-            method_names.add(method_name)
             filtered_calls = [
                 ins
                 for ins in method_ins
@@ -252,6 +250,8 @@ def assign_method_calls(method_ins, method_calls):
                 and ins["methodCall"] == method_name
                 and NESTED_SEP not in ins["methodCall"]
             ]
+            method_name = method_name.replace(INIT_METHOD, class_name)
+            method_names.add(method_name)
             if filtered_calls:
                 first_call = filtered_calls[0]
                 method_call = (
