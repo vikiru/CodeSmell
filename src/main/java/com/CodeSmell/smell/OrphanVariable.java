@@ -29,7 +29,7 @@ public class OrphanVariable extends Smell {
     public OrphanVariable(CodePropertyGraph cpg) {
         super("Orphan Variable", cpg);
         this.detections = new LinkedList<>();
-        detectAll(Common.stats, detections);
+        detectAll(detections);
     }
 
     @Override
@@ -54,11 +54,10 @@ public class OrphanVariable extends Smell {
      * other classes
      * </p>
      *
-     * @param statTracker The StatTracker containing useful stats about a given codebase
-     * @param detections  The list of detections for the OrphanVariable smell
+     * @param detections The list of detections for the OrphanVariable smell
      */
-    protected static void detectAll(StatTracker statTracker, LinkedList<CodeFragment> detections) {
-        List<ClassStat> filteredStats = returnFilteredClassStat(new ArrayList<>(statTracker.classStats.values()));
+    protected static void detectAll(LinkedList<CodeFragment> detections) {
+        List<ClassStat> filteredStats = returnFilteredClassStat();
         Modifier[] affectedModifiers = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL};
         StringBuilder sb = new StringBuilder();
         for (ClassStat classStat : filteredStats) {
@@ -102,10 +101,10 @@ public class OrphanVariable extends Smell {
      * Return a list of filtered ClassStats, this list contains ClassStat objects where the CPGClass contains constants
      * as attributes.
      *
-     * @param classStats All the ClassStats within the given code base
      * @return A list of filtered ClassStats with constants
      */
-    private static List<ClassStat> returnFilteredClassStat(List<ClassStat> classStats) {
+    private static List<ClassStat> returnFilteredClassStat() {
+        List<ClassStat> classStats = new ArrayList<>(Common.stats.classStats.values());
         List<ClassStat> filteredClassStats = new ArrayList<>();
         classStats.stream().filter(classStat -> OrphanVariable.hasConstants(classStat.cpgClass)).forEach(filteredClassStats::add);
         return filteredClassStats;
