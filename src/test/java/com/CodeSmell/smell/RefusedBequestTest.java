@@ -73,6 +73,7 @@ public class RefusedBequestTest {
             subClassMethods.forEach(method -> method.getMethodCalls()
                     .stream()
                     .filter(methodCall -> methodCall.getParent().equals(superClass))
+                    .distinct()
                     .forEach(allMethods::add));
             assertFalse("Subclass should not have affected methods within its method calls",
                     allMethods.containsAll(List.of(affectedMethods)));
