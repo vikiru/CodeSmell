@@ -79,8 +79,17 @@ public class OrphanVariable extends Smell {
         }
     }
 
-    private static boolean hasConstants(ClassStat classStat) {
-        var constantCheck = classStat.cpgClass.getAttributes()
+    /**
+     * Determine if a given class has constants within its attributes. Constants are
+     * attributes which possess static, final modifiers. However, it is additionally necessary
+     * that these attributes are public as private attributes with these modifiers can only be
+     * accessed within that class itself.
+     *
+     * @param cpgClass The class being analyzed
+     * @return A boolean indicating if the class has constants or not
+     */
+    protected static boolean hasConstants(CPGClass cpgClass) {
+        var constantCheck = cpgClass.getAttributes()
                 .stream()
                 .filter(attribute -> attribute.modifiers.contains(Modifier.PUBLIC) &&
                         attribute.modifiers.contains(Modifier.STATIC) &&
@@ -89,26 +98,51 @@ public class OrphanVariable extends Smell {
         return !constantCheck.isEmpty();
     }
 
+    /**
+     * Return a list of filtered ClassStats, this list contains ClassStat objects where the CPGClass contains constants
+     * as attributes.
+     *
+     * @param classStats All the ClassStats within the given code base
+     * @return A list of filtered ClassStats with constants
+     */
     private static List<ClassStat> returnFilteredClassStat(List<ClassStat> classStats) {
         List<ClassStat> filteredClassStats = new ArrayList<>();
-        classStats.stream().filter(OrphanVariable::hasConstants).forEach(filteredClassStats::add);
+        classStats.stream().filter(classStat -> OrphanVariable.hasConstants(classStat.cpgClass)).forEach(filteredClassStats::add);
         return filteredClassStats;
     }
 
+    /**
+     * Return a list of filtered AttributeStats, this list contains AttributeStat objects which are of primitive type,
+     * has the necessary modifiers to be a constant, the attribute is used within cpg and the parentClass of the attribute
+     * does not use the attribute.
+     *
+     * @param attributeStats All the AttributeStats of a given ClassStat
+     * @param parentClass    The class that the ClassStat is referencing
+     * @return A list of filtered AttributeStats for all the class constants
+     */
     private static List<AttributeStat> returnFilteredAttributeStat(List<AttributeStat> attributeStats, CPGClass parentClass) {
         List<String> primitiveTypeList = List.of(new String[]{"boolean", "byte", "char", "double",
                 "float", "int", "long", "short"});
         List<AttributeStat> filteredAttrStats = new ArrayList<>();
-        attributeStats
-                .stream()
-                .filter(attributeStat -> primitiveTypeList.contains(attributeStat.attribute.attributeType)
-                        && attributeStat.attributeUsage > 0 && attributeStat.classesWhichCallAttr.get(parentClass) == 0)
-                .forEach(filteredAttrStats::add);
+        List<Modifier> requiredModifiers = List.of(new Modifier[]{Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL});
+
+        attributeStats.stream().filter(attributeStat -> primitiveTypeList.contains(attributeStat.attribute.attributeType) &&
+                        new HashSet<>(attributeStat.attribute.modifiers).containsAll(requiredModifiers) &&
+                        attributeStat.attributeUsage > 0 && attributeStat.classesWhichCallAttr.get(parentClass) == 0).
+                forEach(filteredAttrStats::add);
         return filteredAttrStats;
     }
 
+    /**
+     * Iterate through all the AttributeStats and add all classes which call each reference Attribute within
+     * each AttributeStat along with the parent CPGClass and return an array of CPGClass.
+     *
+     * @param filteredStats A list of filtered AttributeStats for the constants of a given CPGClass
+     * @param parentClass   The parentClass which owns these constants
+     * @return An array consisting of all classes related to the constants
+     */
     private static CPGClass[] returnAffectedClasses(List<AttributeStat> filteredStats, CPGClass parentClass) {
-        Set<CPGClass> affectedClasses = new HashSet<>();
+        Set<CPGClass> affectedClasses = new LinkedHashSet<>();
         affectedClasses.add(parentClass);
         filteredStats.forEach(attributeStat -> attributeStat.classesWhichCallAttr
                 .entrySet()
@@ -118,12 +152,26 @@ public class OrphanVariable extends Smell {
         return affectedClasses.toArray(CPGClass[]::new);
     }
 
+    /**
+     * Return an array consisting of all the constants, given a list of filtered AttributeStats containing references
+     * to the constants of a given class.
+     *
+     * @param filteredStats A list of filtered AttributeStats for the constants of a given class
+     * @return An array of all the attributes that are constants
+     */
     private static Attribute[] returnAffectedAttributes(List<AttributeStat> filteredStats) {
-        Set<Attribute> affectedAttributes = new HashSet<Attribute>();
+        Set<Attribute> affectedAttributes = new HashSet<>();
         filteredStats.forEach(attributeStat -> affectedAttributes.add(attributeStat.attribute));
         return affectedAttributes.toArray(Attribute[]::new);
     }
 
+    /**
+     * Iterate through the filtered AttributeStats and return an array consisting of all the methods
+     * which call each Attribute.
+     *
+     * @param filteredStats A list of filtered AttributeStats for the constants of a given class
+     * @return An array of all the methods which call the constants of a given class
+     */
     private static Method[] returnAffectedMethods(List<AttributeStat> filteredStats) {
         Set<Method> affectedMethods = new HashSet<>();
         filteredStats.forEach(attributeStat -> attributeStat.methodsWhichCallAttr
