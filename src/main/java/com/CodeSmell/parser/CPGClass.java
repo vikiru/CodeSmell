@@ -1,5 +1,7 @@
 package com.CodeSmell.parser;
 
+import com.CodeSmell.smell.Smell;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,6 +94,8 @@ public class CPGClass implements Serializable {
      */
     private List<CodePropertyGraph.Relation> outwardRelations;
 
+    private List<Smell> smells = new ArrayList<Smell>();
+
     public CPGClass(String name,
                     String classFullName,
                     String packageName,
@@ -146,6 +150,11 @@ public class CPGClass implements Serializable {
 
     protected void setInheritsFrom(List<CPGClass> inheritsFrom) {
         this.inheritsFrom = Collections.unmodifiableList(inheritsFrom);
+    }
+
+    public void addSmell(Smell smell)
+    {
+        smells.add(smell);
     }
 
     /**

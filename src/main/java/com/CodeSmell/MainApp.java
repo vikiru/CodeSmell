@@ -78,9 +78,24 @@ public class MainApp extends Application {
          *
          * */
 
+        //NEEDS TO TAKE IN A LIST OF CODE SMELLS
+        //NEED TO ADD PROPERTY TO UMLCLASS FOR CODE SMELL (LIST OF SMELLS)
         // Build the UMLClass objects from the CPGClass objects
         // Get a hashmap to associate the latter with the former.
+        //Comapre with ==
         HashMap<CPGClass, UMLClass> classMap = new HashMap<CPGClass, UMLClass>();
+
+        /*
+        Method m
+        for(Class class : classes)
+        {
+         for(Method m2: in class)
+         {
+            m2 == m
+            return the class
+         }
+        }
+         */
 
         for (CPGClass graphClass : cpg.getClasses()) {
             UMLClass c = new UMLClass(graphClass.name);
@@ -92,11 +107,6 @@ public class MainApp extends Application {
                 c.addAttribute(a);
             }
 
-            //for (Smell s : SmellDetector.getSmells(cpg)) {
-            //    c.addSmell(s);
-            //}
-            // Render the class at (0, 0) so that it can be sized.
-            // Will be moved later when lm.positionClasses() is called.
             c.render();
         }
 
@@ -133,8 +143,25 @@ public class MainApp extends Application {
                 }
                 CodePropertyGraph cpg = Parser.initializeCPG(cpgStream, skipJoern);
                 initStatTracker(cpg); // todo: run this on another thread and join before
-                              // smells are started
+                // smells are started
                 Stream<Smell> smells = buildSmellStream(cpg);
+                //Convert smells into array that can be parsed
+                Smell smellsArray[] = (Smell[]) smells.toArray();
+
+                //Go through each smell
+                for (int i = 0; i < smellsArray.length; i++)
+                {
+                    //Detect all the smells and add them to their respective classes
+                    while(smellsArray[i].detectNext()!=null)
+                    {
+                        Smell.CodeFragment smellFragment = smellsArray[i].detectNext();
+                        //if()
+                    }
+                }
+                //get the class from the smell and add to the class object
+                //If not class level smell call the helper (statTracker)
+                //Make fragment from non code level smells
+                //smells.
                 smells.forEach(s -> printSmellDetections(s));
                 initializeMainView(cpg);
             } catch (IOException e) {

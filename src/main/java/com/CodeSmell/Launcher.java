@@ -32,7 +32,7 @@ public class Launcher {
 
     public static File chooseDirectory()
     {   
-        //return new File("src/main/java/com/CodeSmell");
-        return new File("/home/sabin/Downloads/sysc3110-risk/");
+        return new File("src/main/java/com/CodeSmell");
+        //return new File("/home/sabin/Downloads/sysc3110-risk/");
     }
 }

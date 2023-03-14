@@ -47,6 +47,7 @@ public class UMLClass extends RenderObject {
 		dispatchToRenderEventListeners(re);
 	}
 
+	//BEHAVIOR FOR CODE SMELLS NEEDED
 	public void render() {
 		/**
 		 * Draws the class rectangle to the webView 

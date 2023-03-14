@@ -30,6 +30,8 @@ public class WebBridge implements RenderEventListener {
         // renders a class box at the origin and return its id
 
         // draw the box
+        //JS formats for a js method call, this calls engine on line 35
+        //engine return the result of the html form, as a result of the js function in the markup file
         String js = String.format("renderClassBox('%s');", c.name);
         Integer id = (Integer) this.engine.executeScript(js);
         ArrayList<String> modStrings = new ArrayList<String>();
@@ -127,7 +129,7 @@ public class WebBridge implements RenderEventListener {
             this.engine.executeScript(js);
         }
     }
-
+//THINK ABOUT HOW SMELLS DEFINE IN HERE, POTENTIALLY SEPERATE METHOD TO ADD SMELL TO CLASS
     public void renderEventPerformed(RenderEvent e) {
         Object source = e.source;
         if ((source instanceof RenderObject) == false) {
@@ -135,6 +137,9 @@ public class WebBridge implements RenderEventListener {
         }
         if (e.type == RenderEvent.Type.RENDER) {
             if (source instanceof UMLClass) {
+                //FOR LOOP THAT INTERATES THROUH ALL SMELLS IN UMLCLASS
+                //LOCAL METHOD ON EACH SMELL
+                //LOOK at the ren
                 Integer id = renderClass((UMLClass) source);
                 Pair<Double, Double> size = getClassDimensions(id);
                 Pair<Integer, Pair<Double, Double>> p = new Pair(id, size);
