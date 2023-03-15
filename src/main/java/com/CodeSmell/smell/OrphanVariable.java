@@ -42,6 +42,11 @@ public class OrphanVariable extends Smell {
         return "A collection of constants that belong in a different class than the class they are defined within";
     }
 
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return this.detections;
+    }
+
     /**
      * <p>
      * In order for a class to be labeled as having an Orphan Variable code smell, the following conditions must be

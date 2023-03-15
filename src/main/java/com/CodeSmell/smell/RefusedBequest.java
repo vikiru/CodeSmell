@@ -35,6 +35,11 @@ public class RefusedBequest extends Smell {
         return "A class that does not use all of its inherited properties from its superclass.";
     }
 
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return this.detections;
+    }
+
     /**
      * @param detections
      */

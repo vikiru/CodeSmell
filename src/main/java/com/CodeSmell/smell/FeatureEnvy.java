@@ -21,6 +21,11 @@ public class FeatureEnvy extends Smell {
         return detections.poll();
     }
 
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return this.detections;
+    }
+
     /**
      * Fills out a list of classes that 'envy' (meaning: access other classes' methods more than their own) other classes
      */

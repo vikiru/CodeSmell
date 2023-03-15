@@ -66,6 +66,10 @@ public class ISPViolation extends Smell {
         this.lastBatch = new ArrayList<CodeFragment>().iterator();
     }
 
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return this.detections;
+    }
 
     private boolean isNotImplemented(Method m) {
         // returns true if a method is not implemented

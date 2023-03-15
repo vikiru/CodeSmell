@@ -458,6 +458,7 @@ def create_class_dict(curr_class):
         "attributes": class_attributes,
         "methods": class_methods,
         "outwardRelations": [],  # Handled in RelationshipManager
+        "smells": []
     }
 
     # Assign all missing info
