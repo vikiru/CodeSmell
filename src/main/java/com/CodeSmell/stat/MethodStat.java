@@ -33,11 +33,11 @@ public class MethodStat {
      */
     public final Map<CPGClass, Integer> classesWhichCallMethod;
     /**
-     * A map containing the list of attributes of other CPG classes that thi method calls
+     * A map containing the list of attributes of other CPG classes that this method calls
      */
     public final Map<CPGClass, List<Attribute>> distinctAttributeCalls;
     /**
-     * A map containing the list of methods of other CPG classes that thi method calls
+     * A map containing the list of methods of other CPG classes that this method calls
      */
     public final Map<CPGClass, List<Method>> distinctMethodCalls;
     /**
@@ -160,7 +160,7 @@ public class MethodStat {
         cpg.getClasses().forEach(cpgClass -> totalAttributeClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
         return Collections.unmodifiableMap(totalAttributeClassCalls);
     }
-    
+
     /**
      * Determine the total number of times methods of classes (including the method's parentClass) were called
      * within the method's instructions.
