@@ -94,7 +94,7 @@ public class StatTrackerTest {
                                 "the methods that call this method combined",
                         expected, methodCheck[0]);
                 methodStat.classesWhichCallMethod.forEach((key, value) -> classCheck[0] += value);
-                assertEquals("Attribute usage should be equal to the total counts of " +
+                assertEquals("Method usage should be equal to the total counts of " +
                                 "the classes that call this method combined",
                         expected, classCheck[0]);
             }
