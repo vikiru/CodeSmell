@@ -17,12 +17,34 @@ import java.util.Set;
 import java.util.List;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 public class Common {
 
     public static StatTracker stats;
 
     protected static HashMap<CPGClass, ArrayList<CPGClass>> interfaces;
+
+    // temporary function to simplify running smell test routine
+    public static Stream<Smell> buildSmellStream(CodePropertyGraph cpg) {
+        OrphanVariable s1  = new OrphanVariable(cpg);
+        FeatureEnvy s2  = new FeatureEnvy(cpg);
+        GodClass s3 = new GodClass(cpg);
+        InappropriateIntimacy s4 = new InappropriateIntimacy(cpg);
+        ISPViolation s5 = new ISPViolation(cpg);
+        OrphanVariable s6 = new OrphanVariable(cpg);
+        RefusedBequest s7 = new RefusedBequest(cpg);
+        Stream.Builder<Smell> sb = Stream.builder();
+        sb.add(s1);
+        sb.add(s2);
+        sb.add(s3);
+        sb.add(s4);
+        sb.add(s5);
+        sb.add(s6);
+        sb.add(s7);
+        return sb.build();
+    }
 
     public static void initStatTracker(CodePropertyGraph cpg) {
         stats = new StatTracker(cpg);
@@ -39,6 +61,15 @@ public class Common {
                     .collect(Collectors.toCollection(ArrayList::new));
             Common.interfaces.put(iface, realizors);
         }
+    }
+
+    public static CPGClass findClassByName(CodePropertyGraph cpg,
+            String name) {
+        return cpg.getClasses()
+                .stream()
+                .filter(c -> c.classFullName.equals(name))
+                .findAny()
+                .orElse(null);
     }
 
     public static MethodStat getMethodStats(Method m) {
@@ -64,6 +95,12 @@ public class Common {
                 .filter(m -> ifaceMethods.contains(m.name))
                 .collect(Collectors.toCollection(ArrayList::new))
                 .toArray(new Method[0]);
+    }
+
+    // returns the method objects for the interface of a classifier
+    public static Method[] originalInterfaceMethods(CPGClass c) {
+        CPGClass iface = c.getInheritsFrom().get(0);
+        return iface.getMethods().toArray(new Method[0]);
     }
 
     // returns true if c2 is a nested class (within the same file) of c

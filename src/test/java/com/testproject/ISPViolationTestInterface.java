@@ -17,4 +17,7 @@ public interface ISPViolationTestInterface {
     // behaviour instead of bypassing the function
     // 
     public void conditionalError(); 
+    
+
+    public void method3();
 }

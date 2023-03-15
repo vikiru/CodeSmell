@@ -23,7 +23,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import static com.CodeSmell.smell.Common.initStatTracker;
-
+import static com.CodeSmell.smell.Common.buildSmellStream;
+import com.CodeSmell.smell.Smell;
 
 import java.io.InvalidClassException;
 import java.io.File;
@@ -36,10 +37,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.stream.Stream;
+
 
 public class MainApp extends Application {
 
     public static InputStream cpgStream;
+
+    public void printSmellDetections(Smell smell) {
+        System.out.println("\n=============================");
+        System.out.println("smell " + smell.name);
+        System.out.println("=============================\n");
+        while (smell.detect()) {
+            System.out.println("Detection: ");
+            System.out.println(smell.lastDetection);
+        }
+    }
 
     static {
         cpgStream = getBackupStream();
@@ -68,8 +81,7 @@ public class MainApp extends Application {
         // Build the UMLClass objects from the CPGClass objects
         // Get a hashmap to associate the latter with the former.
         HashMap<CPGClass, UMLClass> classMap = new HashMap<CPGClass, UMLClass>();
-        initStatTracker(cpg); // todo: run this on another thread and join before
-                              // smells are started
+
         for (CPGClass graphClass : cpg.getClasses()) {
             UMLClass c = new UMLClass(graphClass.name);
             classMap.put(graphClass, c);
@@ -120,6 +132,10 @@ public class MainApp extends Application {
                     cpgStream = getBackupStream();
                 }
                 CodePropertyGraph cpg = Parser.initializeCPG(cpgStream, skipJoern);
+                initStatTracker(cpg); // todo: run this on another thread and join before
+                              // smells are started
+                Stream<Smell> smells = buildSmellStream(cpg);
+                smells.forEach(s -> printSmellDetections(s));
                 initializeMainView(cpg);
             } catch (IOException e) {
                 e.printStackTrace();

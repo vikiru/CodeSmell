@@ -5,6 +5,7 @@ class EntryPoint {
         ClassA a1 = new ClassA();
         ClassA a2 = new ClassA();
         GodClass gc = new GodClass(a1, a2);
+        
 
     }
 }

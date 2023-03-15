@@ -171,6 +171,11 @@ public class CPGClass implements Serializable {
         return this.name;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this;
+    }
+
     /**
      * The type belonging to a given CPGClass.
      */
@@ -305,6 +310,11 @@ public class CPGClass implements Serializable {
         @Override
         public String toString() {
             return this.name + " : " + this.attributeType;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this;
         }
     }
 
@@ -450,6 +460,11 @@ public class CPGClass implements Serializable {
             } else return this.methodBody;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this;
+        }
+
         /**
          * A parameter which belongs to a method
          */
@@ -494,6 +509,11 @@ public class CPGClass implements Serializable {
             public String toString() {
                 return this.type + " : " + this.name;
             }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj == this;
+            }
         }
 
         /**
@@ -535,6 +555,11 @@ public class CPGClass implements Serializable {
                                 "code: %s\n" +
                                 "methodCall: %s",
                         label, code, methodCall);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj == this;
             }
         }
     }
