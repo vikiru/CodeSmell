@@ -94,7 +94,7 @@ public class CPGClass implements Serializable {
      */
     private List<CodePropertyGraph.Relation> outwardRelations;
 
-    private List<Smell> smells = new ArrayList<Smell>();
+    private ArrayList<Smell> smells = new ArrayList<Smell>();
 
     public CPGClass(String name,
                     String classFullName,
@@ -155,6 +155,10 @@ public class CPGClass implements Serializable {
     public void addSmell(Smell smell)
     {
         smells.add(smell);
+    }
+
+    public ArrayList<Smell> getSmells() {
+       return smells;
     }
 
     /**

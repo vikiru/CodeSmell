@@ -77,7 +77,6 @@ public class MainApp extends Application {
          *  Renders the UML diagram
          *
          * */
-
         //NEEDS TO TAKE IN A LIST OF CODE SMELLS
         //NEED TO ADD PROPERTY TO UMLCLASS FOR CODE SMELL (LIST OF SMELLS)
         // Build the UMLClass objects from the CPGClass objects
@@ -98,7 +97,7 @@ public class MainApp extends Application {
          */
 
         for (CPGClass graphClass : cpg.getClasses()) {
-            UMLClass c = new UMLClass(graphClass.name);
+            UMLClass c = new UMLClass(graphClass.name, graphClass.getSmells());
             classMap.put(graphClass, c);
             for (CPGClass.Method m : graphClass.getMethods()) {
                 c.addMethod(m);
@@ -154,8 +153,37 @@ public class MainApp extends Application {
                     //Detect all the smells and add them to their respective classes
                     while(smellsArray[i].detectNext()!=null)
                     {
+
                         Smell.CodeFragment smellFragment = smellsArray[i].detectNext();
-                        //if()
+                        //If the codeFragment i.e. the smell has a class attribute, it can
+                        //just be added to the class object itself.
+                        if(smellFragment.classes.length>0)
+                        {
+                            for (CPGClass classes : smellFragment.classes)
+                            {
+                                cpg.getClasses().get(
+                                        cpg.getClasses().indexOf(classes)).addSmell(smellsArray[i]);
+                            }
+                        }
+                        else if(smellFragment.methods.length>0)
+                        {
+                            for(CPGClass.Method methods : smellFragment.methods)
+                            {
+                                cpg.getClasses().get(
+                                        cpg.getClasses().indexOf(methods.getParent())).addSmell(smellsArray[i]);
+                            }
+                        }
+                        else if(smellFragment.attributes.length>0) {
+                            for (CPGClass.Attribute smellAttribute : smellFragment.attributes)
+                                for (CPGClass aClass : cpg.getClasses()) {
+                                    for (CPGClass.Attribute attribute : aClass.getAttributes()) {
+                                        if (smellAttribute == attribute) {
+                                            cpg.getClasses().get(
+                                                    cpg.getClasses().indexOf(aClass)).addSmell(smellsArray[i]);
+                                        }
+                                    }
+                                }
+                        }
                     }
                 }
                 //get the class from the smell and add to the class object

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.CodeSmell.*;
 import com.CodeSmell.parser.CPGClass.Method;
 import com.CodeSmell.parser.CPGClass.Attribute;
+import com.CodeSmell.smell.Smell;
 
 public class UMLClass extends RenderObject {
 	
@@ -13,12 +14,13 @@ public class UMLClass extends RenderObject {
 	private ArrayList<Method> methods;
 	private ArrayList<Attribute> attributes;
 	private ArrayList<ClassRelation> relations;
-	// private ArrayList<Smell> smells;
+
+	private ArrayList<Smell> smells;
 	private Position position;
 	private double width;
 	private double height;
   
-	public UMLClass(String name) {
+	public UMLClass(String name, ArrayList<Smell> smells) {
 		this.name = name;
 		this.id = -1; // id is set on render
 		this.methods = new ArrayList<Method>();
@@ -27,6 +29,7 @@ public class UMLClass extends RenderObject {
 		this.position = new Position(0, 0);
 		this.width = 0.0;
 		this.height = 0.0;
+		this.smells = smells;
 	}
 
 	public void addMethod(Method m) {
