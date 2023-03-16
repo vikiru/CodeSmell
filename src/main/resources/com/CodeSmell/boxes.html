@@ -11,35 +11,16 @@ function renderClassBox(name) {
     // create a box to represent the class
     // and assign its ID sequentially
     let classBox = document.createElement('div');
-    classBox.className = 'classBox tooltip';
+    classBox.className = 'classBox';
     classBox.id = 'class' + classCount;
     mainPanel.appendChild(classBox);
     
     // add class name to classBox
-    let h = document.createElement('h2');
+    let h = document.createElement('div');
+    h.className = 'tooltip';
     h.innerHTML = name;
+    h.id = 'class' + classCount + 'h';
     classBox.appendChild(h);
-  
-    if (name == "GodClass") {
-        let p = document.createElement('p');
-        p.style.color = "red";
-        p.innerHTML = "God Class";
-        classBox.appendChild(p);
-    }
-
-    if (name == "ClassA") {
-        let p = document.createElement('p');
-        p.style.color = "orange";
-        p.innerHTML = "Feature Envy";
-        classBox.appendChild(p);
-    }
-
-    if (name == "ClassE") {
-        let p = document.createElement('p');
-        p.style.color = "yellow";
-        p.innerHTML = "Dead Code";
-        classBox.appendChild(p);
-    }
 
 
     // add attributes divider to classBox
@@ -114,16 +95,12 @@ function addField(isAttribute, classId, name, modifier, fieldId) {
 
 function addClassSmell(classId,smellName,smellDescription, smellId)
 {
-    let classBox = document.getElementById('class' + classId);
-    let p = document.createElement('p');
-    //let text1 = " tooltiptext";
-    //p.className = smellName;
-    //p.className = p.className.concat(text1);
-    p.className = "tooltiptext";
-    p.innerHTML = smellDescription;
-    p.id = smellId;
-
-   classBox.appendChild(p);
+    let header = document.getElementById('class' + classId + 'h');
+    let span = document.createElement('span');
+    span.innerHTML = smellDescription;
+    span.className = "tooltiptext";
+    span.id = smellId + 'classHeaderTooltip';
+    header.appendChild(span);
 }
 
 function drawDot(x, y, color) {
@@ -387,7 +364,7 @@ h2:hover {
   border-radius: 6px;
   padding: 5px 0;
   position: absolute;
-  z-index: 1;
+  z-index: 1000;
   bottom: 125%;
   left: 50%;
   margin-left: -60px;

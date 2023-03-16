@@ -163,7 +163,15 @@ public class LayoutManager  {
 		graphVizOut.flush();
 		graphVizOut.close();
 		try {
-			graphVizProcess.waitFor();
+			if(!System.getProperty("os.name").contains("Windows"))
+			{
+				graphVizProcess.waitFor();
+			}
+			else {
+				Thread.sleep(500);
+			}
+
+
 		} catch (InterruptedException e) {}
 		return graphVizReader;
 	}
