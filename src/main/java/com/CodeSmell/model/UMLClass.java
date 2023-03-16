@@ -96,4 +96,8 @@ public class UMLClass extends RenderObject {
 	public ArrayList<ClassRelation> getRelations() {
 		return this.relations;
 	}
+
+	public ArrayList<Smell> getSmells() {
+		return smells;
+	}
 }

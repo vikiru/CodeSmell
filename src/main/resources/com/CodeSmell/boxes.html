@@ -86,7 +86,7 @@ function getClassHeight(id) {
     return '0px';
 }
 
-function addField(isAttribute, classId, name, modifier) {
+function addField(isAttribute, classId, name, modifier, fieldId) {
     let fieldType = ((isAttribute) ? 'attributeContainer' :  'methodContainer');
     let fieldBox = document.getElementById(fieldType + classId);
     let p = document.createElement('p');
@@ -107,9 +107,20 @@ function addField(isAttribute, classId, name, modifier) {
     if (modifier.includes('private')) {
         p.style.color = '#E95F65';
     }
-
+    p.id = fieldId;
     p.innerHTML = name;
     fieldBox.appendChild(p);
+}
+
+function addClassSmell(classId,smellName,smellDescription, smellId)
+{
+    let classBox = document.getElementById('class' + classId);
+    let p = document.createElement('p');
+    p.className = smellName;
+    p.innerHTML = smellDescription;
+    p.id = smellId;
+
+   classBox.appendChild(p);
 }
 
 function drawDot(x, y, color) {

@@ -115,6 +115,6 @@ public class FeatureEnvy extends Smell {
 
     @Override
     public String description() {
-        return "A class that accesses other class' data more often than its own.";
+        return "A class that accesses other class data more often than its own.";
     }
 }

@@ -152,22 +152,25 @@ public class MainApp extends Application {
                 {
                     Smell currentSmell =  smellsArray[i];
 
-                    while(currentSmell.getDetections()!=null && !currentSmell.getDetections().isEmpty()) {
-                        Smell.CodeFragment smellFragment = currentSmell.detectNext();
+                    if(currentSmell.getDetections()!=null) {
+                        //Smell.CodeFragment smellFragment = currentSmell.detectNext();
                         //Detect all the smells and add them to their respective classes
-                        if (smellFragment != null) {
-                            if (smellFragment.classes != null && smellFragment.classes.length > 0) {
-                                for (CPGClass classes : smellFragment.classes) {
-                                    classes.addSmell(currentSmell);
+                        for (int j = 0; j < currentSmell.getDetections().size(); j++){
+                            if (currentSmell != null) {
+                                if (currentSmell.getDetections().get(j).classes != null && currentSmell.getDetections().get(j).classes.length > 0) {
+                                    for (CPGClass classes : currentSmell.getDetections().get(j).classes) {
+                                        classes.addSmell(currentSmell);
+                                    }
+                                } else if (currentSmell.getDetections().get(j).methods != null && currentSmell.getDetections().get(j).methods.length > 0) {
+                                    for (CPGClass.Method methods : currentSmell.getDetections().get(j).methods) {
+                                        methods.getParent().addSmell(currentSmell);
+                                    }
                                 }
-                            } else if (smellFragment.methods != null && smellFragment.methods.length > 0) {
-                                for (CPGClass.Method methods : smellFragment.methods) {
-                                    methods.getParent().addSmell(currentSmell);
-                                }
-                            } else if (smellFragment.attributes != null && smellFragment.attributes.length > 0) {
-                                for (CPGClass.Attribute smellAttribute : smellFragment.attributes) {
-                                    smellAttribute.getParent().addSmell(currentSmell);
+                                else if (currentSmell.getDetections().get(j).attributes != null && currentSmell.getDetections().get(j).attributes.length > 0) {
+                                    for (CPGClass.Attribute smellAttribute : currentSmell.getDetections().get(j).attributes) {
+                                        smellAttribute.getParent().addSmell(currentSmell);
 
+                                    }
                                 }
                             }
                         }

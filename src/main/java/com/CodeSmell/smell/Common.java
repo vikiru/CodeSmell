@@ -33,8 +33,7 @@ public class Common {
         GodClass s3 = new GodClass(cpg);
         InappropriateIntimacy s4 = new InappropriateIntimacy(cpg);
         ISPViolation s5 = new ISPViolation(cpg);
-        OrphanVariable s6 = new OrphanVariable(cpg);
-        RefusedBequest s7 = new RefusedBequest(cpg);
+        RefusedBequest s6 = new RefusedBequest(cpg);
         Stream.Builder<Smell> sb = Stream.builder();
         sb.add(s1);
         sb.add(s2);
@@ -42,7 +41,6 @@ public class Common {
         sb.add(s4);
         sb.add(s5);
         sb.add(s6);
-        sb.add(s7);
         return sb.build();
     }
 
