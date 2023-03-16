@@ -11,7 +11,7 @@ function renderClassBox(name) {
     // create a box to represent the class
     // and assign its ID sequentially
     let classBox = document.createElement('div');
-    classBox.className = 'classBox';
+    classBox.className = 'classBox tooltip';
     classBox.id = 'class' + classCount;
     mainPanel.appendChild(classBox);
     
@@ -116,7 +116,10 @@ function addClassSmell(classId,smellName,smellDescription, smellId)
 {
     let classBox = document.getElementById('class' + classId);
     let p = document.createElement('p');
-    p.className = smellName;
+    //let text1 = " tooltiptext";
+    //p.className = smellName;
+    //p.className = p.className.concat(text1);
+    p.className = "tooltiptext";
     p.innerHTML = smellDescription;
     p.id = smellId;
 
@@ -364,6 +367,48 @@ h2:hover {
     z-index: 100;
     shape-rendering: geometricPrecision; 
     filter: url(#blurFilter);
+}
+
+<!DOCTYPE html>
+<html>
+<style>
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
 
 </style>
