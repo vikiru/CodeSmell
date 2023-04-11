@@ -75,16 +75,6 @@ public class CPGClass implements Serializable {
     public final int nonEmptyLines;
 
     /**
-     *
-     */
-    private int timesCalled;
-
-    /**
-     *
-     */
-    private int timesCalling;
-
-    /**
      * The list of classes that the class inherits from in some way (can include interfaces as well)
      */
     private List<CPGClass> inheritsFrom;
@@ -218,22 +208,6 @@ public class CPGClass implements Serializable {
         public String toString() {
             return this.typeString;
         }
-    }
-
-    public int getTimesCalled() {
-        return timesCalled;
-    }
-
-    public void setTimesCalled(int timesCalled) {
-        this.timesCalled = timesCalled;
-    }
-
-    public int getTimesCalling() {
-        return timesCalling;
-    }
-
-    public void setTimesCalling(int timesCalling) {
-        this.timesCalling = timesCalling;
     }
 
     /**
@@ -413,7 +387,6 @@ public class CPGClass implements Serializable {
          * All the method {@link Instruction} belonging to a method
          */
         public final List<Instruction> instructions;
-        public String parentClassName;
 
         /**
          * All the methods that this method calls, if any

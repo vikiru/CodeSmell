@@ -88,12 +88,4 @@ public class SmellTest {
             .collect(Collectors.toList());
         assertEquals(1, detection1.size());
     }
-
-    @Test
-    public void TestLazyClass()
-    {
-        LazyClass lc = new LazyClass("lazyClass", this.cpg);
-        lc.description();
-        lc.returnLazyClasses();
-    }
 }
