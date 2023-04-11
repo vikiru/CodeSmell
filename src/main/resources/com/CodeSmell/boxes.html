@@ -93,14 +93,24 @@ function addField(isAttribute, classId, name, modifier, fieldId) {
     fieldBox.appendChild(p);
 }
 
+//function addClassSmell(classId,smellName,smellDescription, smellId)
+//{
+    //let header = document.getElementById('class' + classId + 'h');
+    //let span = document.createElement('span');
+     //pan.innerHTML = smellDescription;
+    //span.className = "tooltiptext";
+    //span.id = smellId + 'classHeaderTooltip';
+    //header.appendChild(span);
+//}
 function addClassSmell(classId,smellName,smellDescription, smellId)
 {
-    let header = document.getElementById('class' + classId + 'h');
-    let span = document.createElement('span');
-    span.innerHTML = smellDescription;
-    span.className = "tooltiptext";
-    span.id = smellId + 'classHeaderTooltip';
-    header.appendChild(span);
+    let classBox = document.getElementById('class' + classId);
+    let p = document.createElement('span');
+    p.className = 'tooltip tooltiptext';
+    p.innerHTML = smellDescription;
+    p.id = smellId;
+
+   classBox.appendChild(p);
 }
 
 function drawDot(x, y, color) {
@@ -345,10 +355,6 @@ h2:hover {
     shape-rendering: geometricPrecision; 
     filter: url(#blurFilter);
 }
-
-<!DOCTYPE html>
-<html>
-<style>
 .tooltip {
   position: relative;
   display: inline-block;

@@ -82,6 +82,7 @@ public class WebBridge implements RenderEventListener {
                 }
             }
         }
+
         return id;
     }
 
@@ -164,6 +165,10 @@ public class WebBridge implements RenderEventListener {
                 //LOOK at the ren
                 //ID represents the front end obejct
                 Integer id = renderClass((UMLClass) source);
+                /*if(((UMLClass) source).name.equals("ConstantClass"))
+                {
+                    ((UMLClass) source).setPosition(100,100);
+                }*/
                 Pair<Double, Double> size = getClassDimensions(id);
                 Pair<Integer, Pair<Double, Double>> p = new Pair(id, size);
                 // add id and size to response

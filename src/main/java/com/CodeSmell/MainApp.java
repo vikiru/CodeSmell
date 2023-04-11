@@ -107,6 +107,7 @@ public class MainApp extends Application {
             }
 
             c.render();
+            c.setPosition(0,0);
         }
 
         // Build the ClassRelation objects from the CPGClass.Relation objects
@@ -125,7 +126,7 @@ public class MainApp extends Application {
 
         ArrayList<UMLClass> umlClasses = new ArrayList<UMLClass>(classMap.values());
 
-        try {   
+       try {
             LayoutManager.setLayout(umlClasses, relations);
         } catch (IOException e) {
             throw new RuntimeException(
