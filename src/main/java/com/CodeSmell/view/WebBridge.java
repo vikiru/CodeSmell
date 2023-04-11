@@ -10,6 +10,7 @@ import com.CodeSmell.model.UMLClass;
 import com.CodeSmell.parser.CPGClass.Attribute;
 import com.CodeSmell.parser.CPGClass.Method;
 import com.CodeSmell.parser.CPGClass.Modifier;
+import com.CodeSmell.smell.Smell;
 import javafx.scene.web.WebEngine;
 
 import java.util.ArrayList;
@@ -30,8 +31,12 @@ public class WebBridge implements RenderEventListener {
         // renders a class box at the origin and return its id
 
         // draw the box
+        //JS formats for a js method call, this calls engine on line 35
+        //engine return the result of the html form, as a result of the js function in the markup file
         String js = String.format("renderClassBox('%s');", c.name);
         Integer id = (Integer) this.engine.executeScript(js);
+        Integer fieldId = 0;
+        Integer smellId = 0;
         ArrayList<String> modStrings = new ArrayList<String>();
 
         // add the methods
@@ -40,10 +45,11 @@ public class WebBridge implements RenderEventListener {
                 modStrings.add(methodModifier.modString);
             }
             String modifiers = String.join(" ", modStrings).toLowerCase();
-            js = String.format("addField(false, %d, '%s', '%s');",
-                    id, m.name, modifiers);
+            js = String.format("addField(false, %d, '%s', '%s', '%s');",
+                    id, m.name, modifiers, c.name+":"+id+","+m.name+":"+fieldId);
             this.engine.executeScript(js);
             modStrings.clear();
+            fieldId++;
         }
 
         // add the attributes
@@ -51,11 +57,30 @@ public class WebBridge implements RenderEventListener {
             for (Modifier attributeModifier : a.modifiers) {
                 modStrings.add(attributeModifier.modString);
             }
+            //Check for equality between a and the class smells list, if they are
+            //the same and have a hashmap that maps id(field) to smell, similar for method
+            //Add child to the field (smells container -> need to be id
+            //field.id = class + classIdNumber + field + fieldIdNumber +
             String modifiers = String.join(" ", modStrings).toLowerCase();
-            js = String.format("addField(true, %d, '%s', '%s');",
-                    id, a.name, modifiers);
+            js = String.format("addField(true, %d, '%s', '%s', '%s');",
+                    id, a.name, modifiers, c.name+":"+id+","+a.name+":"+fieldId);
             this.engine.executeScript(js);
             modStrings.clear();
+            fieldId++;
+        }
+
+        for(Smell smell : c.getSmells())
+        {
+            for(int i = 0 ; i <smell.getDetections().size(); i++)
+            {
+                if(smell.getDetections().get(i).classes!=null)
+                {
+                    js = String.format("addClassSmell(%d, '%s', '%s', '%s');",
+                            id, smell.name, smell.description(),  c.name+":"+id+","+smell.name+":"+smellId);
+                    this.engine.executeScript(js);
+                    smellId++;
+                }
+            }
         }
 
         return id;
@@ -127,7 +152,7 @@ public class WebBridge implements RenderEventListener {
             this.engine.executeScript(js);
         }
     }
-
+//THINK ABOUT HOW SMELLS DEFINE IN HERE, POTENTIALLY SEPERATE METHOD TO ADD SMELL TO CLASS
     public void renderEventPerformed(RenderEvent e) {
         Object source = e.source;
         if ((source instanceof RenderObject) == false) {
@@ -135,7 +160,15 @@ public class WebBridge implements RenderEventListener {
         }
         if (e.type == RenderEvent.Type.RENDER) {
             if (source instanceof UMLClass) {
+                //FOR LOOP THAT INTERATES THROUH ALL SMELLS IN UMLCLASS
+                //LOCAL METHOD ON EACH SMELL
+                //LOOK at the ren
+                //ID represents the front end obejct
                 Integer id = renderClass((UMLClass) source);
+                /*if(((UMLClass) source).name.equals("ConstantClass"))
+                {
+                    ((UMLClass) source).setPosition(100,100);
+                }*/
                 Pair<Double, Double> size = getClassDimensions(id);
                 Pair<Integer, Pair<Double, Double>> p = new Pair(id, size);
                 // add id and size to response
@@ -151,4 +184,5 @@ public class WebBridge implements RenderEventListener {
             repositionClass(c.getId(), c.getPosition().x, c.getPosition().y);
         }
     }
+
 }

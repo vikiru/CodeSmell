@@ -28,6 +28,11 @@ public class InappropriateIntimacy extends Smell {
         return "One classes use the internal fields and methods of another class";
     }
 
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return this.detections;
+    }
+
     protected static void detectAll(StatTracker statTracker,
                                     LinkedList<CodeFragment> detections) {
         for (ClassStat classStat : statTracker.classStats.values()) {

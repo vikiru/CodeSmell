@@ -34,8 +34,13 @@ public class GodClass extends Smell {
 	// regardless of overall project size
 	private final int maxLineCount; 
 
-	public LinkedList<CodeFragment> detections; 
+	public LinkedList<CodeFragment> detections;
 
+
+	@Override
+	public LinkedList<CodeFragment> getDetections() {
+		return this.detections;
+	}
 	/**
 	 * Create a new GodClass object with the given parameters.
 	 * For all parameters, negative number will result in using

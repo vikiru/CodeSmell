@@ -36,11 +36,12 @@ public class LayoutManager  {
 			ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) 
 		throws IOException {
-		
+
 		BufferedReader graphVizReader = callGraphViz(classes, relations);
 
 		String line;
 		while ((line = graphVizReader.readLine()) != null) {
+			System.out.println("printing setlayout"+line);
 			parseDotLine(classes, relations, line);
 		}
 	}
@@ -55,7 +56,7 @@ public class LayoutManager  {
 			ArrayList<UMLClass> classes, 
 			ArrayList<ClassRelation> relations,
 			String line) throws IOException {
-
+		System.out.println("printing line:"+line);
 		String numbers = "((((\\d+[.]\\d+)|(\\d+)) ){2,})";
 
 		if (line.startsWith("graph") || line.startsWith("stop")) return;
@@ -121,6 +122,7 @@ public class LayoutManager  {
 					"with an incorrect size:\n" + pathString);
 			}
 			yCord = pathIter.next();
+			System.out.println("Printing xcord"+xCord+ "and ycord"+yCord);
 			pathNodes.add(new Position(Double.parseDouble(xCord),
 				Double.parseDouble(yCord)));
 		}
@@ -130,6 +132,7 @@ public class LayoutManager  {
 	private static BufferedReader callGraphViz(ArrayList<UMLClass> classes,
 			ArrayList<ClassRelation> relations) throws IOException {
 		String graphVizIn = compileGraphVizInvokeCommand(classes, relations);
+		graphVizIn += "\n";
 		//File inFile = createTempFile("graphViz-gen-codesmell", "-tmp");
 		System.out.println("Calling graphViz with command\n" + graphVizIn);
 
@@ -139,7 +142,7 @@ public class LayoutManager  {
 			//fdp, dot, sfdp, neato are all provided by
 			// graphViz. Some use flipped y coordinates, 
 			// some don't. -y controls flipped y.
-			"fdp", "-Tplain").start();
+			"dot", "-Tplain").start();
 		
 		// std in buffer
 		OutputStream graphVizOut = graphVizProcess.getOutputStream();
@@ -163,7 +166,15 @@ public class LayoutManager  {
 		graphVizOut.flush();
 		graphVizOut.close();
 		try {
-			graphVizProcess.waitFor();
+			if(!System.getProperty("os.name").contains("Windows"))
+			{
+				graphVizProcess.waitFor();
+			}
+			else {
+				Thread.sleep(500);
+			}
+
+
 		} catch (InterruptedException e) {}
 		return graphVizReader;
 	}

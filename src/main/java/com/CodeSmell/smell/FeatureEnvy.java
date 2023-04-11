@@ -21,6 +21,11 @@ public class FeatureEnvy extends Smell {
         return detections.poll();
     }
 
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return this.detections;
+    }
+
     /**
      * Fills out a list of classes that 'envy' (meaning: access other classes' methods more than their own) other classes
      */
@@ -110,6 +115,6 @@ public class FeatureEnvy extends Smell {
 
     @Override
     public String description() {
-        return "A class that accesses other class' data more often than its own.";
+        return "A class that accesses other class data more often than its own.";
     }
 }

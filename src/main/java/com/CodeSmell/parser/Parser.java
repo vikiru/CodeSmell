@@ -230,14 +230,16 @@ public class Parser {
                 .forEach(ins -> allDistinctCalls.add(ins.methodCall));
         // Add all the method calls.
         for (String call : allDistinctCalls) {
-            String[] splitted = call.split("\\.");
-            if (splitted.length == 2) {
-                String className = splitted[0].trim();
-                String methodName = splitted[1].trim();
+            String[] splitted = call.split("\\$");
+            if (splitted.length == 3) {
+                String packageName = splitted[0].trim();
+                String className = splitted[1].trim();
+                String methodName = splitted[2].trim();
                 CPGClass cpgClass;
                 var classResult = cpg.getClasses()
                         .stream()
-                        .filter(cpgToFind -> cpgToFind.name.equals(className))
+                        .filter(cpgToFind -> cpgToFind.packageName.equals(packageName) &&
+                                cpgToFind.name.equals(className))
                         .limit(2)
                         .collect(Collectors.toList());
                 if (!classResult.isEmpty()) {

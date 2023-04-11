@@ -1,6 +1,7 @@
 package com.CodeSmell.smell;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import com.CodeSmell.parser.CodePropertyGraph;
 import com.CodeSmell.parser.CPGClass;
@@ -11,10 +12,11 @@ public abstract class Smell {
 	public final String name;
 	public final CodePropertyGraph cpg;
 	public CodeFragment lastDetection; // the last detected instance of this smell in CPG
-	
+	 final LinkedList<CodeFragment> detections;
 	protected Smell(String name, CodePropertyGraph cpg) {
 		this.name = name;
 		this.cpg = cpg;
+		this.detections = new LinkedList<>();
 	}
 	
 	public abstract CodeFragment detectNext();
@@ -30,6 +32,9 @@ public abstract class Smell {
 
 	// a description of the smell
 	public abstract String description();
+
+
+	public abstract LinkedList<CodeFragment> getDetections();
 
 	/**
 	 * Each detection is represented by a code

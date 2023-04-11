@@ -33,6 +33,14 @@ public class MethodStat {
      */
     public final Map<CPGClass, Integer> classesWhichCallMethod;
     /**
+     * A map containing the list of attributes of other CPG classes that this method calls
+     */
+    public final Map<CPGClass, List<Attribute>> distinctAttributeCalls;
+    /**
+     * A map containing the list of methods of other CPG classes that this method calls
+     */
+    public final Map<CPGClass, List<Method>> distinctMethodCalls;
+    /**
      * A map containing a count of how many times the attributes of another class were used within this method
      */
     public final Map<CPGClass, Integer> totalAttributeCalls;
@@ -53,6 +61,8 @@ public class MethodStat {
         this.method = method;
         this.methodsWhichCallMethod = determineMethodUsage(method, helper);
         this.classesWhichCallMethod = determineClassMethodUsage(methodsWhichCallMethod);
+        this.distinctAttributeCalls = determineDistinctAttributeCalls(method, cpg);
+        this.distinctMethodCalls = determineDistinctMethodCalls(method, cpg);
         this.totalAttributeCalls = determineTotalAttributeCalls(method, cpg, helper);
         this.totalMethodCalls = determineTotalMethodCalls(method, cpg, helper);
         this.methodUsage = returnTotalUsage(methodsWhichCallMethod);
@@ -70,7 +80,7 @@ public class MethodStat {
     protected static Map<Method, Integer> determineMethodUsage(Method method, Helper helper) {
         Map<Method, Integer> methodsWhichCallMethod = new HashMap<>();
         List<Method> allMethods = helper.allMethods;
-        String toFind = method.getParent().name + "." + method.name;
+        String toFind = method.getParent().packageName + "$" + method.getParent().name + "$" + method.name;
         for (Method methodInCPG : allMethods) {
             Map<String, Set<Integer>> lineCallMap = new HashMap<>();
             lineCallMap.put(toFind, new HashSet<>());
@@ -113,6 +123,42 @@ public class MethodStat {
         final int[] count = {0};
         methodsWhichCallMethod.forEach((key, value) -> count[0] += value);
         return count[0];
+    }
+
+    /**
+     * Group the method calls of this method to its parentClass.
+     *
+     * @param method The method being analyzed
+     * @param cpg    The CodePropertyGraph containing existing classes and relations
+     * @return A map indicating which methods of each class were used within this method's instructions
+     */
+    private static Map<CPGClass, List<Method>> determineDistinctMethodCalls(Method method,
+                                                                            CodePropertyGraph cpg) {
+        Map<CPGClass, List<Method>> totalMethodClassCalls = new HashMap<>();
+        for (Method methodCall : method.getMethodCalls()) {
+            totalMethodClassCalls.putIfAbsent(methodCall.getParent(), new ArrayList<>());
+            totalMethodClassCalls.get(methodCall.getParent()).add(methodCall);
+        }
+        cpg.getClasses().forEach(cpgClass -> totalMethodClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
+        return Collections.unmodifiableMap(totalMethodClassCalls);
+    }
+
+    /**
+     * Group the attribute calls of this method to its parentClass.
+     *
+     * @param method The method being analyzed
+     * @param cpg    The CodePropertyGraph containing existing classes and relations
+     * @return A map indicating which attributes of each class were used within this method's instructions
+     */
+    private static Map<CPGClass, List<Attribute>> determineDistinctAttributeCalls(Method method,
+                                                                                  CodePropertyGraph cpg) {
+        Map<CPGClass, List<Attribute>> totalAttributeClassCalls = new HashMap<>();
+        for (Attribute attributeCall : method.getAttributeCalls()) {
+            totalAttributeClassCalls.putIfAbsent(attributeCall.getParent(), new ArrayList<>());
+            totalAttributeClassCalls.get(attributeCall.getParent()).add(attributeCall);
+        }
+        cpg.getClasses().forEach(cpgClass -> totalAttributeClassCalls.putIfAbsent(cpgClass, new ArrayList<>()));
+        return Collections.unmodifiableMap(totalAttributeClassCalls);
     }
 
     /**

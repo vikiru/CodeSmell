@@ -16,30 +16,11 @@ function renderClassBox(name) {
     mainPanel.appendChild(classBox);
     
     // add class name to classBox
-    let h = document.createElement('h2');
+    let h = document.createElement('div');
+    h.className = 'tooltip';
     h.innerHTML = name;
+    h.id = 'class' + classCount + 'h';
     classBox.appendChild(h);
-  
-    if (name == "GodClass") {
-        let p = document.createElement('p');
-        p.style.color = "red";
-        p.innerHTML = "God Class";
-        classBox.appendChild(p);
-    }
-
-    if (name == "ClassA") {
-        let p = document.createElement('p');
-        p.style.color = "orange";
-        p.innerHTML = "Feature Envy";
-        classBox.appendChild(p);
-    }
-
-    if (name == "ClassE") {
-        let p = document.createElement('p');
-        p.style.color = "yellow";
-        p.innerHTML = "Dead Code";
-        classBox.appendChild(p);
-    }
 
 
     // add attributes divider to classBox
@@ -86,7 +67,7 @@ function getClassHeight(id) {
     return '0px';
 }
 
-function addField(isAttribute, classId, name, modifier) {
+function addField(isAttribute, classId, name, modifier, fieldId) {
     let fieldType = ((isAttribute) ? 'attributeContainer' :  'methodContainer');
     let fieldBox = document.getElementById(fieldType + classId);
     let p = document.createElement('p');
@@ -107,9 +88,29 @@ function addField(isAttribute, classId, name, modifier) {
     if (modifier.includes('private')) {
         p.style.color = '#E95F65';
     }
-
+    p.id = fieldId;
     p.innerHTML = name;
     fieldBox.appendChild(p);
+}
+
+//function addClassSmell(classId,smellName,smellDescription, smellId)
+//{
+    //let header = document.getElementById('class' + classId + 'h');
+    //let span = document.createElement('span');
+     //pan.innerHTML = smellDescription;
+    //span.className = "tooltiptext";
+    //span.id = smellId + 'classHeaderTooltip';
+    //header.appendChild(span);
+//}
+function addClassSmell(classId,smellName,smellDescription, smellId)
+{
+    let classBox = document.getElementById('class' + classId);
+    let p = document.createElement('span');
+    p.className = 'tooltip tooltiptext';
+    p.innerHTML = smellDescription;
+    p.id = smellId;
+
+   classBox.appendChild(p);
 }
 
 function drawDot(x, y, color) {
@@ -353,6 +354,44 @@ h2:hover {
     z-index: 100;
     shape-rendering: geometricPrecision; 
     filter: url(#blurFilter);
+}
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
 
 </style>
