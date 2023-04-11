@@ -7,10 +7,7 @@ import com.CodeSmell.stat.MethodStat;
 import com.CodeSmell.stat.StatTracker;
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A Lazy Class is a class that is under used. This simply makes the code base unnecessarily complicated.
@@ -42,6 +39,7 @@ public class LazyClass extends Smell{
     public static StatTracker stats;
     ArrayList<CPGClass> lazyClasses = new ArrayList<>();
     HashMap<CPGClass,CPGClass> lazySharedMethods = new HashMap<>();
+    public LinkedList<CodeFragment> detections = new LinkedList<>();
     protected LazyClass(String name, CodePropertyGraph cpg) {
         super(name, cpg);
         stats = new StatTracker(cpg);
@@ -71,8 +69,8 @@ public class LazyClass extends Smell{
                             break;
                         }
                     }
-                    timeCalled = super.cpg.getClasses().get(index).getTimesCalled()+1;
-                    super.cpg.getClasses().get(index).setTimesCalled(timeCalled);
+                    timeCalled = super.cpg.getClasses().get(index-1).getTimesCalled()+1;
+                    super.cpg.getClasses().get(index-1).setTimesCalled(timeCalled);
                 }
 
             }
@@ -114,6 +112,7 @@ public class LazyClass extends Smell{
 
     @Override
     public CodeFragment detectNext() {
+        detections.add(new CodeFragment(null,(CPGClass[])lazyClasses.toArray(),null,null,null,null,null));
         return new CodeFragment(null,(CPGClass[])lazyClasses.toArray(),null,null,null,null,null);
     }
 
@@ -128,6 +127,11 @@ public class LazyClass extends Smell{
     public String description() {
         tallyRelations();
         return "";
+    }
+
+    @Override
+    public LinkedList<CodeFragment> getDetections() {
+        return detections;
     }
 
 
@@ -153,9 +157,12 @@ public class LazyClass extends Smell{
                                 sameLines++;
                             }
                         }
-                        if(((float)(sameLines/otherMethodStat.method.instructions.size()))>0.75)
+                        if(otherMethodStat.method.instructions.size()>0)
                         {
-                            lazySharedMethods.put(otherMethodStat.method.getParent(),methodStat.method.getParent());
+                            if(((float)(sameLines/otherMethodStat.method.instructions.size()))>0.75)
+                            {
+                                lazySharedMethods.put(otherMethodStat.method.getParent(),methodStat.method.getParent());
+                            }
                         }
                     }
                 }
@@ -164,12 +171,5 @@ public class LazyClass extends Smell{
 
         return lazySharedMethods;
     }
-    //TODO
-    /**
-     * no usages and no using of other classes - Done
-     * less than 10 lines and is not a main (probably could be refactored)
-     *
-     * Need to determine the amount of times used - easy usedClass
-     * Need to determine amount of times it uses someone else- use totalClassMethodCalls to see how many times a class calls another class.
-     */
+
 }
