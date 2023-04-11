@@ -1,6 +1,6 @@
 package com.CodeSmell.model;
 
-import com.CodeSmell.Position;
+import com.CodeSmell.model.Position;
 import com.CodeSmell.model.RenderEvent;
 import com.CodeSmell.model.RenderObject;
 import com.CodeSmell.model.UMLClass;

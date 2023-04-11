@@ -1,17 +1,23 @@
 package com.testproject;
 
-import com.testproject.ClassB;
-
 public class ClassA {
 
-	private ClassB[] compositionField;
+    private ClassB[] compositionField;
 
-	ClassA() {
-		this.compositionField = new ClassB[] {
-			new ClassB(1), new ClassB(2)};
-	}
+    public ClassA() {
+        this.compositionField = new ClassB[4];
 
-	public ClassB getB() {
-		return compositionField[0];
-	}
+    }
+
+    public ClassB getB() {
+        return compositionField[0];
+    }
+
+    public ClassB addB(ClassB b) {
+        return compositionField[0];
+    }
+
+    public ClassB bDotProduct() {
+        return compositionField[0];
+    }
 }

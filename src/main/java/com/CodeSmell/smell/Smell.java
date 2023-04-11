@@ -1,5 +1,8 @@
 package com.CodeSmell.smell;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+
 import com.CodeSmell.parser.CodePropertyGraph;
 import com.CodeSmell.parser.CPGClass;
 import com.CodeSmell.parser.CPGClass.*;
@@ -9,10 +12,11 @@ public abstract class Smell {
 	public final String name;
 	public final CodePropertyGraph cpg;
 	public CodeFragment lastDetection; // the last detected instance of this smell in CPG
-	
+	 final LinkedList<CodeFragment> detections;
 	protected Smell(String name, CodePropertyGraph cpg) {
 		this.name = name;
 		this.cpg = cpg;
+		this.detections = new LinkedList<>();
 	}
 	
 	public abstract CodeFragment detectNext();
@@ -28,6 +32,9 @@ public abstract class Smell {
 
 	// a description of the smell
 	public abstract String description();
+
+
+	public abstract LinkedList<CodeFragment> getDetections();
 
 	/**
 	 * Each detection is represented by a code
@@ -62,6 +69,33 @@ public abstract class Smell {
 				throw new IllegalArgumentException(
 					"CodeFragment description cannot be empty");
 			}
+		}
+
+
+
+		@Override
+		public String toString() {
+			String s = description;
+
+			if (this.classes != null) {
+				s += "classes: " + Arrays.toString(this.classes) + "\n";
+			}
+			if (this.methods != null) {
+				s += "methods: " + Arrays.toString(this.methods) + "\n";
+			}
+			if (this.modifiers != null) {
+				s += "modifiers: " + Arrays.toString(this.modifiers) + "\n";
+			}
+			if (this.attributes != null) {
+				s += "attributes: " + Arrays.toString(this.attributes) + "\n";
+			}
+			if (this.parameters != null) {
+				s += "parameters: " + Arrays.toString(this.parameters) + "\n";
+			}
+			if (this.instructions != null) {
+				s += "instructions: " + Arrays.toString(this.instructions) + "\n";
+			}
+			return s;
 		}
 
 		public static CodeFragment makeFragment(String description, Object... args) {

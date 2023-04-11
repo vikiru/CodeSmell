@@ -28,6 +28,9 @@ Make sure that the following prerequisites are successfully installed on your ma
 - Maven - [Download & Install Maven.](https://maven.apache.org/download.cgi) Choosing the latest version will suffice.
 - Python - [Download & Install Python.](https://www.python.org/downloads/) Python 3.7+ is required.
 - Joern - Please see the [joern](https://github.com/joernio/joern) repository for more details on installing joern.
+- GraphViz - ([graphviz.org](https://graphviz.org/download/source/)) Used to generate layout program
+
+`dot`, `joern`, `python` must be part of your system PATH variable to use this program.
 
 ## Build and Run Instructions
 
@@ -76,4 +79,9 @@ Run the following command to execute all of the tests:
 
 ```bash
 mvn test
+```
+
+In order to skip invoking joern (which can take a sagnificant amount of time on older hardware), pass the command line argument to skip joern through maven like so
+```bash
+mvn -Dskip=true javafx:run
 ```

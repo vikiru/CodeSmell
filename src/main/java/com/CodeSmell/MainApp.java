@@ -22,20 +22,52 @@ import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import static com.CodeSmell.smell.Common.initStatTracker;
+import static com.CodeSmell.smell.Common.buildSmellStream;
+import com.CodeSmell.smell.Smell;
 
 import java.io.InvalidClassException;
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.stream.Stream;
+
 
 public class MainApp extends Application {
 
-    public static InputStream joernStream;
+    public static InputStream cpgStream;
+
+    public void printSmellDetections(Smell smell) {
+        System.out.println("\n=============================");
+        System.out.println("smell " + smell.name);
+        System.out.println("=============================\n");
+        while (smell.detect()) {
+            System.out.println("Detection: ");
+            System.out.println(smell.lastDetection);
+        }
+    }
+
+    static {
+        cpgStream = getBackupStream();
+    }
+
+    private static FileInputStream getBackupStream() {
+        try {
+            return new FileInputStream(Parser.CPG_BACKUP_JSON);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
     public static boolean skipJoern;
-    
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -45,27 +77,37 @@ public class MainApp extends Application {
          *  Renders the UML diagram
          *
          * */
-
+        //NEEDS TO TAKE IN A LIST OF CODE SMELLS
+        //NEED TO ADD PROPERTY TO UMLCLASS FOR CODE SMELL (LIST OF SMELLS)
         // Build the UMLClass objects from the CPGClass objects
         // Get a hashmap to associate the latter with the former.
+        //Comapre with ==
         HashMap<CPGClass, UMLClass> classMap = new HashMap<CPGClass, UMLClass>();
 
+        /*
+        Method m
+        for(Class class : classes)
+        {
+         for(Method m2: in class)
+         {
+            m2 == m
+            return the class
+         }
+        }
+         */
+
         for (CPGClass graphClass : cpg.getClasses()) {
-            UMLClass c = new UMLClass(graphClass.name);
+            UMLClass c = new UMLClass(graphClass.name, graphClass.getSmells());
             classMap.put(graphClass, c);
-            for (CPGClass.Method m : graphClass.methods) {
+            for (CPGClass.Method m : graphClass.getMethods()) {
                 c.addMethod(m);
             }
-            for (CPGClass.Attribute a : graphClass.attributes) {
+            for (CPGClass.Attribute a : graphClass.getAttributes()) {
                 c.addAttribute(a);
             }
 
-            //for (Smell s : SmellDetector.getSmells(cpg)) {
-            //    c.addSmell(s);
-            //}
-            // Render the class at (0, 0) so that it can be sized.
-            // Will be moved later when lm.positionClasses() is called.
             c.render();
+            c.setPosition(0,0);
         }
 
         // Build the ClassRelation objects from the CPGClass.Relation objects
@@ -79,16 +121,71 @@ public class MainApp extends Application {
             source.addRelationship(cr);
             target.addRelationship(cr);
             relations.add(cr);
+            System.out.println(cr);
         }
-	LayoutManager lm = new LayoutManager(new ArrayList<UMLClass>(classMap.values()), relations);
+
+        ArrayList<UMLClass> umlClasses = new ArrayList<UMLClass>(classMap.values());
+
+       try {
+            LayoutManager.setLayout(umlClasses, relations);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Error invoking graphviz binary (dot)\n" + e);
+        }
+
     }
 
-    private void removeWhenParserLambdaLimitationFixed(Worker.State newState)  {
+    private void removeWhenParserLambdaLimitationFixed(Worker.State newState) {
         if (newState == Worker.State.SUCCEEDED) {
             try {
-                CodePropertyGraph cpg = Parser.initializeCPG(joernStream, skipJoern);
+                if (cpgStream.available() == 0 && skipJoern) {
+                    cpgStream = getBackupStream();
+                }
+                CodePropertyGraph cpg = Parser.initializeCPG(cpgStream, skipJoern);
+                initStatTracker(cpg); // todo: run this on another thread and join before
+                // smells are started
+                Stream<Smell> smells = buildSmellStream(cpg);
+                //Convert smells into array that can be parsed
+                Smell[] smellsArray = smells.toArray(Smell[]::new);
+
+                //Go through each smell
+                for (int i = 0; i < smellsArray.length; i++)
+                {
+                    Smell currentSmell =  smellsArray[i];
+
+                    if(currentSmell.getDetections()!=null) {
+                        //Smell.CodeFragment smellFragment = currentSmell.detectNext();
+                        //Detect all the smells and add them to their respective classes
+                        for (int j = 0; j < currentSmell.getDetections().size(); j++){
+                            if (currentSmell != null) {
+                                if (currentSmell.getDetections().get(j).classes != null && currentSmell.getDetections().get(j).classes.length > 0) {
+                                    for (CPGClass classes : currentSmell.getDetections().get(j).classes) {
+                                        classes.addSmell(currentSmell);
+                                    }
+                                } else if (currentSmell.getDetections().get(j).methods != null && currentSmell.getDetections().get(j).methods.length > 0) {
+                                    for (CPGClass.Method methods : currentSmell.getDetections().get(j).methods) {
+                                        methods.getParent().addSmell(currentSmell);
+                                    }
+                                }
+                                else if (currentSmell.getDetections().get(j).attributes != null && currentSmell.getDetections().get(j).attributes.length > 0) {
+                                    for (CPGClass.Attribute smellAttribute : currentSmell.getDetections().get(j).attributes) {
+                                        smellAttribute.getParent().addSmell(currentSmell);
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                        //If the codeFragment i.e. the smell has a class attribute, it can
+                        //just be added to the class object itself.
+                //get the class from the smell and add to the class object
+                //If not class level smell call the helper (statTracker)
+                //Make fragment from non code level smells
+                //smells.
+                //smells.forEach(s -> printSmellDetections(s));
                 initializeMainView(cpg);
-            } catch (InvalidClassException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
@@ -105,7 +202,7 @@ public class MainApp extends Application {
         double startWidth = screenBounds.getWidth() / 2;
         double startHeight = screenBounds.getHeight() * 0.8;
         WebView webView = new WebView();
-        webView.setMaxSize(screenBounds.getWidth() ,screenBounds.getHeight());
+        webView.setMaxSize(screenBounds.getWidth(), screenBounds.getHeight());
         webView.prefHeightProperty().bind(primaryStage.heightProperty());
         webView.prefWidthProperty().bind(primaryStage.heightProperty());
         webView.getEngine().load(location);
@@ -122,10 +219,10 @@ public class MainApp extends Application {
         engine.load(url.toExternalForm());
         engine.getLoadWorker().stateProperty().addListener(
                 (ov, oldState, newState) -> {
-            removeWhenParserLambdaLimitationFixed(newState);
-        });
+                    removeWhenParserLambdaLimitationFixed(newState);
+                });
 
-  
+
         // hide scroll bars from the webview. source:
         // https://stackoverflow.com/questions/11206942/how-to-hide-scrollbars-in-the-javafx-webview
         webView.getChildrenUnmodifiable().addListener(new ListChangeListener<Node>() {

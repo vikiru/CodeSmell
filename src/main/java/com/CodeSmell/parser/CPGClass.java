@@ -1,117 +1,234 @@
 package com.CodeSmell.parser;
 
-import com.CodeSmell.parser.CodePropertyGraph;
-import com.google.gson.annotations.Expose;
+import com.CodeSmell.smell.Smell;
 
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
- * A class within the source code.
+ * A class within the {@link CodePropertyGraph}.
  */
 public class CPGClass implements Serializable {
 
-    // The name of the class
-    @Expose(serialize = true, deserialize = true)
+    /**
+     * The name of the class
+     */
     public final String name;
 
-    @Expose(serialize = true, deserialize = true)
-    public final String code;
-
-    // The line number which the class was declared within the file
-    @Expose(serialize = true, deserialize = true)
-    public final int lineNumber;
-
-    @Expose(serialize = true, deserialize = true)
-    public final String[] importStatements;
-
-    @Expose(serialize = true, deserialize = true)
-    public final Modifier[] modifiers;
-
-    // The full name of the class (either the same as name or if the class is a nested class, will be "CPGClass$Attribute" for example)
-    @Expose(serialize = true, deserialize = true)
+    /**
+     * The full name of the class (either the same as name or
+     * if the class is a nested class, will be "CPGClass.Attribute" for example)
+     */
     public final String classFullName;
 
-    @Expose(serialize = true, deserialize = true)
-    public final String[] inheritsFrom;
-
-    // the type of the object (class, enum, abstract class, interface)
-    @Expose(serialize = true, deserialize = true)
-    public final String classType;
-
-    // the filePath of the class (full path)
-    @Expose(serialize = true, deserialize = true)
-    public final String filePath;
-
-    // the package name of the class
-    @Expose(serialize = true, deserialize = true)
+    /**
+     * The package that the class belongs to, if any
+     */
     public final String packageName;
 
-    // the list of fields within the class
-    @Expose(serialize = true, deserialize = true)
-    public final Attribute[] attributes;
+    /**
+     * The import statements imported from the file where the class is defined
+     */
+    public final String[] importStatements;
 
-    // the list of methods within the class
-    @Expose(serialize = true, deserialize = true)
-    public final Method[] methods;
+    /**
+     * The class declaration (i.e. "public abstract class Smell")
+     */
+    public final String code;
 
-    // a list of outward relations of the class
-    @Expose(serialize = true, deserialize = true)
-    private ArrayList<CodePropertyGraph.Relation> outwardRelations;
+    /**
+     * The line number in which the class is declared
+     */
+    public final int lineNumber;
 
-    CPGClass(String name, String code, int lineNumber, String[] importStatements, Modifier[] modifiers, String classFullName, String[] inheritsFrom, String classType, String filePath, String packageName, Attribute[] attributes, Method[] methods) {
+    /**
+     * The list containing all the {@link Modifier} of the class
+     */
+    public final List<Modifier> modifiers;
+
+    /**
+     * The type of the class ("abstract class", "class", "enum", "interface")
+     */
+    public final ClassType classType;
+
+    /**
+     * The full filepath pointing to where the class is stored
+     */
+    public final String filePath;
+
+    /**
+     * The total length of the file where the class exists
+     */
+    public final int fileLength;
+
+    /**
+     * The total number of empty lines within a class
+     */
+    public final int emptyLines;
+
+    /**
+     * The total number of non-empty lines within a class (includes comments)
+     */
+    public final int nonEmptyLines;
+
+    /**
+     * The list of classes that the class inherits from in some way (can include interfaces as well)
+     */
+    private List<CPGClass> inheritsFrom;
+
+    /**
+     * An array of all of the {@link Attribute} that a class has
+     */
+    private List<Attribute> attributes;
+
+    /**
+     * All the {@link Method} that a class has
+     */
+    private List<Method> methods;
+
+    /**
+     * All the outward {@link CodePropertyGraph.Relation} that a class has.
+     */
+    private List<CodePropertyGraph.Relation> outwardRelations;
+
+    private ArrayList<Smell> smells = new ArrayList<Smell>();
+
+    public CPGClass(String name,
+                    String classFullName,
+                    String packageName,
+                    String[] importStatements,
+                    String code,
+                    int lineNumber,
+                    ArrayList<Modifier> modifiers,
+                    ClassType classType,
+                    String filePath,
+                    int fileLength,
+                    int emptyLines,
+                    int nonEmptyLines,
+                    ArrayList<Attribute> attributes,
+                    ArrayList<Method> methods) {
         this.name = name;
+        this.classFullName = classFullName;
+        this.packageName = packageName;
+        this.importStatements = importStatements;
         this.code = code;
         this.lineNumber = lineNumber;
-        this.importStatements = importStatements;
-        this.modifiers = modifiers;
-        this.classFullName = classFullName;
-        this.inheritsFrom = inheritsFrom;
+        this.modifiers = Collections.unmodifiableList(modifiers);
         this.classType = classType;
         this.filePath = filePath;
-        this.packageName = packageName;
+        this.fileLength = fileLength;
+        this.emptyLines = emptyLines;
+        this.nonEmptyLines = nonEmptyLines;
         this.attributes = attributes;
         this.methods = methods;
-        this.outwardRelations = new ArrayList<CodePropertyGraph.Relation>();
+        this.inheritsFrom = new ArrayList<>();
+        this.outwardRelations = new ArrayList<>();
     }
 
+    public List<Attribute> getAttributes() {
+        return new ArrayList<>(attributes);
+    }
+
+    protected void setAttributes(List<Attribute> attributes) {
+        this.attributes = Collections.unmodifiableList(attributes);
+    }
+
+    public List<Method> getMethods() {
+        return new ArrayList<>(methods);
+    }
+
+    protected void setMethods(List<Method> methods) {
+        this.methods = Collections.unmodifiableList(methods);
+    }
+
+    public List<CPGClass> getInheritsFrom() {
+        return new ArrayList<>(inheritsFrom);
+    }
+
+    protected void setInheritsFrom(List<CPGClass> inheritsFrom) {
+        this.inheritsFrom = Collections.unmodifiableList(inheritsFrom);
+    }
+
+    public void addSmell(Smell smell)
+    {
+        smells.add(smell);
+    }
+
+    public ArrayList<Smell> getSmells() {
+       return smells;
+    }
+
+    /**
+     * Add an outward relation to the existing outwardRelations of a given class
+     *
+     * @param r - The relation to add
+     */
     public void addOutwardRelation(CodePropertyGraph.Relation r) {
         this.outwardRelations.add(r);
     }
 
-    public ArrayList<CodePropertyGraph.Relation> getOutwardRelations() {
+    /**
+     * Returns all the outward relations of a given class
+     *
+     * @return - The outward relations of a given class
+     */
+    public List<CodePropertyGraph.Relation> getOutwardRelations() {
         return new ArrayList<>(this.outwardRelations);
     }
 
-
     @Override
     public String toString() {
-        return this.code;
+        return this.name;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this;
+    }
+
+    /**
+     * The type belonging to a given CPGClass.
+     */
+    public enum ClassType {
+        ABSTRACT_CLASS("abstract class"),
+        CLASS("class"),
+        ENUM("enum"),
+        INTERFACE("interface");
+
+        public final String typeString;
+
+        ClassType(String typeString) {
+            this.typeString = typeString;
+        }
+
+        @Override
+        public String toString() {
+            return this.typeString;
+        }
+    }
+
+    /**
+     * All the potential modifiers that can exist on a class, attribute or method
+     */
     public enum Modifier {
-        @Expose(serialize = true, deserialize = true)
+        PACKAGE_PRIVATE("package private"),
         PUBLIC("public"),
-        @Expose(serialize = true, deserialize = true)
         PRIVATE("private"),
-        @Expose(serialize = true, deserialize = true)
         PROTECTED("protected"),
-        @Expose(serialize = true, deserialize = true)
         STATIC("static"),
-        @Expose(serialize = true, deserialize = true)
         SYNCHRONIZED("synchronized"),
-        @Expose(serialize = true, deserialize = true)
         VIRTUAL("virtual"),
-        @Expose(serialize = true, deserialize = true)
         VOLATILE("volatile"),
-        @Expose(serialize = true, deserialize = true)
         ABSTRACT("abstract"),
-        @Expose(serialize = true, deserialize = true)
         NATIVE("native"),
-        @Expose(serialize = true, deserialize = true)
         FINAL("final");
 
-        @Expose(serialize = true, deserialize = true)
+        /**
+         * The string representation of a given enum of type, Modifier
+         */
         public final String modString;
 
         Modifier(String modString) {
@@ -128,45 +245,89 @@ public class CPGClass implements Serializable {
      * An attribute belonging to a class
      */
     public static class Attribute implements Serializable {
-        // the name of the attribute
-        @Expose(serialize = true, deserialize = true)
+        /**
+         * The name of the attribute
+         */
         public final String name;
 
-        // line number where the field was declared within the file
-        public final int lineNumber;
-
-        @Expose(serialize = true, deserialize = true)
-        public final String code;
-
-        // the package name of the field
-        @Expose(serialize = true, deserialize = true)
+        /**
+         * The name of the package in which the type of the Attribute originates from
+         * (i.e. "java.util.List")
+         */
         public final String packageName;
 
-        // list of modifiers the attribute has (0 or more)
-        @Expose(serialize = true, deserialize = true)
-        public final Modifier[] modifiers;
+        /**
+         * The parent class which owns this attribute
+         */
+        private final CPGClass[] parentClass;
 
-        // the type of the attribute
-        @Expose(serialize = true, deserialize = true)
+        /**
+         * The full line of code in which the attribute is declared
+         */
+        public final String code;
+
+        /**
+         * The line number in which the attribute was declared
+         */
+        public final int lineNumber;
+
+        /**
+         * All the modifiers that the attribute has
+         * {@link Modifier}
+         */
+        public final List<Modifier> modifiers;
+
+        /**
+         * The full type of the attribute
+         */
         public final String attributeType;
 
-        // the full type decl obtained from Joern (Without modification)
-        @Expose(serialize = true, deserialize = true)
-        public final String typeFullName;
+        /**
+         * All the types that can be extracted from the attributeType
+         * (i.e. "HashMap < CPGClass, List< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
+         */
+        private List<CPGClass> typeList;
 
-        protected Attribute(String name, int lineNumber, String code, String packageName, String attributeType, Modifier[] modifiers, String typeFullName) {
+        public Attribute(String name,
+                         String packageName,
+                         String code,
+                         int lineNumber,
+                         ArrayList<Modifier> modifiers,
+                         String attributeType) {
             this.name = name;
-            this.lineNumber = lineNumber;
-            this.code = code;
+            this.parentClass = new CPGClass[1];
             this.packageName = packageName;
+            this.code = code;
+            this.lineNumber = lineNumber;
+            this.modifiers = Collections.unmodifiableList(modifiers);
             this.attributeType = attributeType;
-            this.modifiers = modifiers;
-            this.typeFullName = typeFullName;
+            this.typeList = new ArrayList<>();
+        }
+
+        public CPGClass getParent() {
+            return parentClass[0];
+        }
+
+        protected void setParent(CPGClass parent) {
+            parentClass[0] = parent;
+        }
+
+        public List<CPGClass> getTypeList() {
+            return new ArrayList<>(typeList);
+        }
+
+        protected void setTypeList(List<CPGClass> typeList) {
+            this.typeList = Collections.unmodifiableList(typeList);
         }
 
         @Override
         public String toString() {
             return this.name + " : " + this.attributeType;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this;
         }
     }
 
@@ -175,72 +336,134 @@ public class CPGClass implements Serializable {
      */
     public static class Method implements Serializable {
 
-        // the parent class of the method (used to differentiate between methods within
-        // methodCalls)
-        @Expose(serialize = true, deserialize = true)
-        public final String parentClassName;
-
-        @Expose(serialize = true, deserialize = true)
-        public final String code;
-
-        // line numbers where the method starts and ends
-        @Expose(serialize = true, deserialize = true)
-        public final int lineNumberStart;
-
-        @Expose(serialize = true, deserialize = true)
-        public final int lineNumberEnd;
-
-        // the name of the method
-        @Expose(serialize = true, deserialize = true)
+        /**
+         * The name of the method
+         */
         public final String name;
 
-        // list of modifiers the method has (0 or more)
-        @Expose(serialize = true, deserialize = true)
-        public final Modifier[] modifiers;
+        /**
+         * The class which owns the method
+         */
+        private final CPGClass[] parentClass;
 
-        // the return type of the method
-        @Expose(serialize = true, deserialize = true)
-        public final String returnType;
-
-        // the method body of the method with parameters excluding the modifiers and
-        // return type i.e. "CPGClass(String name, String filePath, String type)"
-        @Expose(serialize = true, deserialize = true)
+        /**
+         * The method body containing the name of the method along with all of its parameters, if any
+         * (i.e. "CPGClass(String name, String filePath, String type)" )
+         */
         public final String methodBody;
 
-        // an array containing all the method parameters
-        @Expose(serialize = true, deserialize = true)
-        public final Parameter[] parameters;
+        /**
+         * All the {@link Modifier} that a method has
+         */
+        public final List<Modifier> modifiers;
 
-        // a print out of the method instructions
-        @Expose(serialize = true, deserialize = true)
-        public final Instruction[] instructions;
+        /**
+         * All the method {@link Parameter} belonging to a method
+         */
+        public final List<Parameter> parameters;
 
-        // a list of methods which this calls
-        private ArrayList<Method> methodCalls;
+        /**
+         * The return type of the method, if any
+         */
+        public final String returnType;
 
-        protected Method(String parentClassName, String code, int lineNumberStart, 
-            int lineNumberEnd, String name, Modifier[] modifiers, 
-            String returnType, String methodBody, Parameter[] parameters, Instruction[] instructions) {
+        /**
+         * The line number where the method starts
+         */
+        public final int lineNumberStart;
 
-            this.parentClassName = parentClassName;
-            this.code = code;
+        /**
+         * The line number where the method ends
+         */
+        public final int lineNumberEnd;
+
+        /**
+         * The total length of the method (lineNumberEnd - lineNumberStart)
+         */
+        public final int totalMethodLength;
+
+
+        /**
+         * All the method {@link Instruction} belonging to a method
+         */
+        public final List<Instruction> instructions;
+
+        /**
+         * All the methods that this method calls, if any
+         */
+        private List<Method> methodCalls;
+
+        /**
+         * All the attributes that this method uses, if any
+         */
+        private List<Attribute> attributeCalls;
+
+        public Method(String name,
+                      String methodBody,
+                      ArrayList<Modifier> modifiers,
+                      ArrayList<Parameter> parameters,
+                      String returnType,
+                      int lineNumberStart,
+                      int lineNumberEnd,
+                      int totalMethodLength,
+                      ArrayList<Instruction> instructions) {
+            this.name = name;
+            this.parentClass = new CPGClass[1];
+            this.methodBody = methodBody;
+            this.modifiers = Collections.unmodifiableList(modifiers);
+            this.parameters = Collections.unmodifiableList(parameters);
+            this.returnType = returnType;
             this.lineNumberStart = lineNumberStart;
             this.lineNumberEnd = lineNumberEnd;
-            this.name = name;
-            this.modifiers = modifiers;
-            this.returnType = returnType;
-            this.methodBody = methodBody;
-            this.parameters = parameters;
-            this.instructions = instructions;
+            this.totalMethodLength = totalMethodLength;
+            this.instructions = Collections.unmodifiableList(instructions);
+            this.attributeCalls = new ArrayList<>();
             this.methodCalls = new ArrayList<>();
         }
 
-        public ArrayList<Method> getMethodCalls() {
+
+        /**
+         * Return all the method calls of a method, if any
+         *
+         * @return - All the method calls of the method
+         */
+        public List<Method> getMethodCalls() {
             return new ArrayList<>(methodCalls);
         }
 
-        protected void setMethodCalls(ArrayList<Method> methodCalls) {
-            this.methodCalls = methodCalls;
+        /**
+         * Set the methodCalls field of a method to be equal to the provided methodCalls list
+         *
+         * @param methodCalls - The methodCalls belonging to the method
+         */
+        protected void setMethodCalls(List<Method> methodCalls) {
+            this.methodCalls = Collections.unmodifiableList(methodCalls);
+        }
+
+        /**
+         * Return all the attribute calls of a method, if any
+         *
+         * @return - All the attribute calls of the method
+         */
+        public List<Attribute> getAttributeCalls() {
+            return new ArrayList<>(attributeCalls);
+        }
+
+        /**
+         * Set the attributeCalls field of a method to be equal to the provided attributeCalls list
+         *
+         * @param attributeCalls - The attributeCalls belonging to the method
+         */
+        protected void setAttributeCalls(List<Attribute> attributeCalls) {
+            this.attributeCalls = Collections.unmodifiableList(attributeCalls);
+        }
+
+        public CPGClass getParent() {
+            return parentClass[0];
+        }
+
+        protected void setParent(CPGClass parent) {
+            parentClass[0] = parent;
         }
 
         @Override
@@ -250,47 +473,85 @@ public class CPGClass implements Serializable {
             } else return this.methodBody;
         }
 
-        public static class Parameter implements Serializable {
-            @Expose(serialize = true, deserialize = true)
-            public final String evaluationStrategy;
+        @Override
+        public boolean equals(Object obj) {
+            return obj == this;
+        }
 
-            @Expose(serialize = true, deserialize = true)
+        /**
+         * A parameter which belongs to a method
+         */
+        public static class Parameter implements Serializable {
+            /**
+             * The full line of code belonging to a method parameter
+             */
             public final String code;
 
-            // the name of the method parameter
-            @Expose(serialize = true, deserialize = true)
+            /**
+             * The name of the method parameter
+             */
             public final String name;
 
-            // the type of the method parameter
-            @Expose(serialize = true, deserialize = true)
+            /**
+             * The full type of the method parameter
+             */
             public final String type;
 
-            public Parameter(String evaluationStrategy, String code, String name, String type) {
-                this.evaluationStrategy = evaluationStrategy;
+            /**
+             * All the types that can be extracted from the parameter type
+             * (i.e. "HashMap < CPGClass, List< CPGClass.Method > >" will give ["CPGClass", "CPGClass.Method"]
+             */
+            private List<CPGClass> typeList;
+
+            public Parameter(String code, String name, String type) {
                 this.code = code;
                 this.name = name;
                 this.type = type;
+                this.typeList = new ArrayList<>();
+            }
+
+            public List<CPGClass> getTypeList() {
+                return new ArrayList<>(typeList);
+            }
+
+            protected void setTypeList(List<CPGClass> typeList) {
+                this.typeList = Collections.unmodifiableList(typeList);
             }
 
             @Override
             public String toString() {
                 return this.type + " : " + this.name;
             }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj == this;
+            }
         }
 
-        // The instructions (lines of code) within each method body
+        /**
+         * Each individual line of code that exists within a method body
+         */
         public static class Instruction implements Serializable {
-            // The label associated with each line of code (i.e. METHOD_RETURN, CALL, etc)
-            @Expose(serialize = true, deserialize = true)
+
+            /**
+             * The label associated with each line of code (i.e. METHOD_RETURN, CALL, FIELD_IDENTIFIER, LOCAL, etc)
+             */
             public final String label;
-            // The line of code
-            @Expose(serialize = true, deserialize = true)
+
+            /**
+             * The line of code
+             */
             public final String code;
-            // The line number of where the line of code occurs within the method body.
-            @Expose(serialize = true, deserialize = true)
+
+            /**
+             * The line number of where the line of code occurs within the method body
+             */
             public final int lineNumber;
-            // The name of the method that the instruction is calling, if any
-            @Expose(serialize = true, deserialize = true)
+
+            /**
+             * The name of the method that the instruction is calling, if any
+             */
             public final String methodCall;
 
             public Instruction(String label, String code, int lineNumber, String methodCall) {
@@ -302,7 +563,16 @@ public class CPGClass implements Serializable {
 
             @Override
             public String toString() {
-                return this.code;
+                return String.format(
+                        "label: %s\n" +
+                                "code: %s\n" +
+                                "methodCall: %s",
+                        label, code, methodCall);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj == this;
             }
         }
     }

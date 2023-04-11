@@ -2,12 +2,21 @@ package com.CodeSmell;
 
 import com.CodeSmell.parser.JoernServer;
 import com.CodeSmell.parser.Parser;
+
+import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
+import javax.swing.*;
+import java.awt.event.*;
+import java.awt.*;
+import java.util.*;
 
 public class Launcher {
+
     public static void main(String[] args) {
         // Run a local joern server instance and execute queries against the imported source code's cpg using joern and create a .json
         // representation of the source code.
@@ -17,20 +26,19 @@ public class Launcher {
                 skipJoern = true;
             }
         }
-
         if (!skipJoern) {
             JoernServer server = new JoernServer();
-            server.start(Launcher.chooseDirectory());
-            MainApp.joernStream = server.getStream();
-            MainApp.skipJoern = false;
-            MainApp.main(args);
-        } else {
-            try {
-                MainApp.joernStream = new FileInputStream(new File
-                    (Parser.CPG_BACKUP_JSON));
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException("-Dskip=true, but CPG JSON not found on drive");
+            File directory = Launcher.chooseDirectory();
+            if (directory!=null) {
+                server.start(directory);
+                MainApp.cpgStream = server.getStream();
+                MainApp.skipJoern = false;
+                MainApp.main(args);
             }
+            else {
+                System.out.println("No Selection ");
+            }
+        } else {
             MainApp.skipJoern = true;
             MainApp.main(args);
         }
@@ -38,6 +46,30 @@ public class Launcher {
 
     public static File chooseDirectory()
     {
-        return new File("src/test/java/com/testproject");
+
+        JFileChooser chooser;
+        File choosertitle;
+        chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.showOpenDialog(null);
+        //
+        // disable the "All files" option.
+        //
+        chooser.setAcceptAllFileFilterUsed(false);
+        choosertitle = chooser.getSelectedFile();
+        //
+        if (choosertitle!=null) {
+            System.out.println("getCurrentDirectory(): "
+                    +  chooser.getCurrentDirectory());
+            System.out.println("getSelectedFile() : "
+                    +  chooser.getSelectedFile());
+        }
+        else {
+            System.out.println("No Selection ");
+        }
+        //return new File("D:/Git/4907Project/src/test/java\\com\\testproject");
+        //return new File("/home/sabin/Downloads/sysc3110-risk/");
+        return choosertitle;
     }
 }

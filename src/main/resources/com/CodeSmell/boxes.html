@@ -1,7 +1,9 @@
 <head>
 
 <script>
+
 let classCount = 0;
+let check = 0; // remove later
 
 function renderClassBox(name) {
     let mainPanel = document.getElementById("main");
@@ -14,9 +16,12 @@ function renderClassBox(name) {
     mainPanel.appendChild(classBox);
     
     // add class name to classBox
-    let h = document.createElement('h2');
+    let h = document.createElement('div');
+    h.className = 'tooltip';
     h.innerHTML = name;
+    h.id = 'class' + classCount + 'h';
     classBox.appendChild(h);
+
 
     // add attributes divider to classBox
     let attributeContainer = document.createElement('div');
@@ -62,7 +67,7 @@ function getClassHeight(id) {
     return '0px';
 }
 
-function addField(isAttribute, classId, name, modifier) {
+function addField(isAttribute, classId, name, modifier, fieldId) {
     let fieldType = ((isAttribute) ? 'attributeContainer' :  'methodContainer');
     let fieldBox = document.getElementById(fieldType + classId);
     let p = document.createElement('p');
@@ -83,9 +88,29 @@ function addField(isAttribute, classId, name, modifier) {
     if (modifier.includes('private')) {
         p.style.color = '#E95F65';
     }
-
+    p.id = fieldId;
     p.innerHTML = name;
     fieldBox.appendChild(p);
+}
+
+//function addClassSmell(classId,smellName,smellDescription, smellId)
+//{
+    //let header = document.getElementById('class' + classId + 'h');
+    //let span = document.createElement('span');
+     //pan.innerHTML = smellDescription;
+    //span.className = "tooltiptext";
+    //span.id = smellId + 'classHeaderTooltip';
+    //header.appendChild(span);
+//}
+function addClassSmell(classId,smellName,smellDescription, smellId)
+{
+    let classBox = document.getElementById('class' + classId);
+    let p = document.createElement('span');
+    p.className = 'tooltip tooltiptext';
+    p.innerHTML = smellDescription;
+    p.id = smellId;
+
+   classBox.appendChild(p);
 }
 
 function drawDot(x, y, color) {
@@ -130,50 +155,137 @@ function appendPathNode(classId, pathNumber, x, y) {
     pathContainer.appendChild(node);
 }
 
+let scale = 1.0;
+
+function init_main_panel() {
+    let mainPanel = document.getElementById("main");
+    let lineContainer = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    lineContainer.id = "lines";
+    // TODO: Increase they dynamically if needed
+    lineContainer.setAttribute("height", 5000 + 'px'); 
+    lineContainer.setAttribute("width",  5000 + 'px');
+    mainPanel.appendChild(lineContainer);
+    mainPanel.addEventListener('click', (event) => {
+        let t = {};
+        scale = scale * 1.1;
+        t.scale = scale;
+        t.y = -50;
+        t.x = -50;
+        applyTransform(mainPanel, t);
+    });
+}
+
+function applyTransform(elem, transform) {
+    elem.style.transformOrigin = '0 0 0';
+    elem.style.transform = 'matrix(' +
+    transform.scale + ', 0, 0, ' +
+    transform.scale + ', ' +
+    transform.x + ', ' + transform.y + ')';
+}
+
 function renderPath(classId, pathNumber, type) {   
     let lineContainer = document.getElementById("lines");
+    let arrowContainer = document.getElementById("arrows");
     let relationsContainer = document.getElementById('relationContainer' + classId);
     let nodes = relationsContainer.children.item(pathNumber).children;
 
-    function rotateLine(line, angle) {
-      //line.setAttribute("style", "transform: rotate(" + angle + ")");
-        line.style.transform = 'rotate(' + angle + 'rad)';
-        line.style.transformOrigin = "0 0"; 
+    function rotateArrow(arrow, angle, origin) {
+        arrow.style.transformOrigin = origin;
+        arrow.style.transform = 'rotate(' + angle + 'rad)'; 
+    }  
+
+    function getAngle(startX, startY, endX, endY) {
+        let magnitude = ((startX - endX)**2 + 
+            (startY - endY)**2)**0.5;
+        let angle = Math.acos((endX - startX) / magnitude);
+        if (!(endY >= startY)) {
+            angle = angle * -1;
+        }
+        return angle
     }
+
+    let arrow = document.createElement('img');
+    arrow.className = "arrow";
+    if (type == "COMPOSITION") {
+        arrow.src = "composition.svg";
+        // remove the white filter that's 
+        // present on all other arrows
+        arrow.style.filter = "";
+    } else if (type == "AGGREGATION") {
+        arrow.src = "aggregation.svg";
+    } else if (type == "DEPENDENCY") {
+        arrow.src = "association.svg";
+    } else if (type == "INHERITANCE") {
+        arrow.src = "inheritance.svg"
+    } else if (type == "REALIZATION") {
+        arrow.src = "inheritance.svg";
+    } else if (type.includes("ASSOCIATION")) {
+        // todo: special cases
+        // REFLEXIVE_ASSOCIATION
+        // BIDRECTIONAL_ASSOCIATION
+        // UNDIRECTIONAL_ASSOCIATION
+        arrow.src = "association.svg";
+    } 
     
     for (let i = 0; i < nodes.length - 1; i++) { 
         let startX = nodes[i].x;
         let endX = nodes[i+1].x;
         let startY = nodes[i].y;
         let endY = nodes[i+1].y;
-        let magnitude = ((startX - endX)**2 + (startY - endY)**2)**0.5;
+        let intLine = document.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'line');
 
-        // find angle to rotate a line by taking the dot product
-        // with the unit vector for horizontal direction 
-        // i = (1, 0)
-        // v =  (endX - startX, endY - startY))
-        // i・v = |i||v|cos0
-        let angle = Math.acos((endX - startX) / magnitude);
-        if (endX <= startX && endY <= startY) {
-            angle *= -1;
-        }  
-
-        let line = document.createElement('div');
-        line.className = 'line';
-        line.style.left = startX + 'px';
-        line.style.top = startY + 'px';
-        line.style.width = magnitude - 7 + 'px';
-        line.id = nodes[i].id;
-        rotateLine(line, angle);
-
-        if (type == "DEPENDENCY" || type == "REALIZATION") {
-            line.style.borderStyle = 'dashed';
-        } else{
-            line.style.borderStyle = 'solid';
+        // set the arrow head (for arrow types starting at 
+        // the source)
+        if (i==0 && (type == "AGGREGATION" || 
+                type == "COMPOSITION")) {
+            let angle = getAngle(startX, startY, endX, endY);
+            let x = startX;
+            let y = startY - 10;
+            rotateArrow(arrow, angle, "0px 10px");
+            //rotateArrow(arrow, Math.PI, "10px 5px");
+            //arrow.style.left = x + 10 * Math.cos(angle);
+            //arrow.style.top = y + 10 * Math.cos(angle);
+            arrow.style.left = x;
+            arrow.style.top = y;
+            arrowContainer.appendChild(arrow);
         }
 
-        lineContainer.appendChild(line);
+        intLine.setAttribute("x1", startX + 'px');
+        intLine.setAttribute("y1", startY + 'px');
+        intLine.setAttribute("x2", endX + 'px');
+        intLine.setAttribute("y2", endY + 'px');
+        intLine.setAttribute("stroke", "white");
+
+        if (type == "DEPENDENCY" || type == "REALIZATION") {
+            intLine.setAttribute("stroke-dasharray", "5,5,5,5");
+        }
+        intLine.id = nodes[i].id + "-line";
+        lineContainer.appendChild(intLine);
     }
+
+    // arrow head has already been set in above for
+    if (type == "COMPOSITION" || type == "AGGREGATION") {
+        return;
+    }
+
+    // set the arrow head (for arrow types ending at target)
+    let i = nodes.length - 2 
+    let startX = nodes[i].x;
+    let endX = nodes[i+1].x;
+    let startY = nodes[i].y;
+    let endY = nodes[i+1].y;
+
+    // try and move the arrows so that they just point to the box
+    let x =  endX - 10
+    let y = endY - 10
+    let angle = getAngle(startX, startY, endX, endY);
+    rotateArrow(arrow, angle, "10px 10px");
+    arrow.style.left = x - 10 * Math.cos(angle);
+    arrow.style.top = y - 10 * Math.sin(angle);
+    arrow.id = nodes[i].id + "-arrow";
+    arrowContainer.appendChild(arrow);
 }
 
 </script>
@@ -191,15 +303,22 @@ body {
     background: #22262A;
 }
 
+.arrow {
+    /* https://stackoverflow.com/questions/22252472/how-can-i-change-the-color-of-an-svg-element */
+    filter: invert(100%) sepia(100%) 
+    saturate(0%) hue-rotate(125deg) 
+    brightness(103%) contrast(103%);
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    z-index: 200;
+}
+
 .attributeContainer {
     background: #22262A;
     padding: 2px;
 }
 
-.classBox:hover {
-    border: 2px dashed grey;
-    #5662F6
-}
 
 .classBox {
     border: 2px solid grey;
@@ -209,7 +328,7 @@ body {
     color: white;
     max-width: 20em;
     min-height: 10em;
-    overflow:  hidden;
+    overflow: hidden;
     white-space:nowrap;
     padding: 0em 1em 0em 1em;
     background: #303841;
@@ -231,21 +350,58 @@ h2:hover {
 
 
 .line {
-    height: 0px;
-    border: 1px dashed #C4BEB7;
     position: absolute;
+    z-index: 100;
+    shape-rendering: geometricPrecision; 
+    filter: url(#blurFilter);
+}
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
 }
 
-.line:hover {
-    border: 1px dashed #5662F6;
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
 </style>
+
 </head>
 
 
-<body>
-    <div id="main">
-        <div id="lines">
+<body onload="init_main_panel()">
+    <div id="main" style="position: absolute;">
+        <div id="arrows" style="position: absolute;">
         </div>
     </div>
 </body>

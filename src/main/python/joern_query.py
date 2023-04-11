@@ -1,413 +1,629 @@
-import json
-import os
-import platform
-import re
 import sys
-import time
+import json
+from json.decoder import JSONDecodeError
+import platform
+from timeit import default_timer as timer
+import os
 from pathlib import Path
-from cpgqls_client import CPGQLSClient, import_code_query
+from time import sleep
+from cpgqls_client import CPGQLSClient, import_code_query, delete_query
+from create_dictionary import *
 import logging
+import traceback
+
+# Threshold Constants (current config allows each class to have its lowest time for class data + method ins)
+PROJECT_AST_SIZE_THRESHOLD = 1000
+CLASS_AST_SIZE_THRESHOLD = 1100
+METHOD_AST_SIZE_THRESHOLD = 460  # Potential Numbers: 100, 300, 460, 900 (lower threshold means more classes need to retrieve ins separately)
+METHOD_LINES_THRESHOLD = 160
+
+# Error types
+DELETE_ERROR = "[DELETE ERROR]"
+EMPTY_DIRECTORY_ERROR = "[EMPTY DIR ERROR]"
+IMPORT_QUERY_ERROR = "[IMPORT ERROR]"
+PORT_ERROR = "[PORT ERROR]"
+PYTHON_ERROR = "[PYTHON ERROR]"
+QUERY_ERROR = "[QUERY ERROR]"
 
 
-# For every attribute, create a dictionary and return it.
-def create_attribute_dict(curr_field):
-	field_name = curr_field["_1"]
-	field_type_full_name = curr_field["_2"]
-	field_code = curr_field["_3"]
-	field_line_number = curr_field["_4"]
-	field_modifiers = curr_field["_5"]
+def clean_json(result: str):
+    """Given a result["stdout"], return the resulting object with data from Joern"""
 
-	index = field_type_full_name.rfind(".")
-	type = field_type_full_name
-	package_name = ""
-	if index != -1:
-		package_name = field_type_full_name[0:index].replace(
-			"<unresolvedNamespace>", ""
-		)
-		type = field_type_full_name[index + 1: len(field_type_full_name)]
-	index_nested = type.rfind("$")
-	if index_nested != -1:
-		type = type[index_nested + 1: len(type)]
-
-	curr_field_dict = {
-		"name": field_name,
-		"code": "",
-		"lineNumber": int(field_line_number),
-		"packageName": package_name,
-		"modifiers": [modifier.lower() for modifier in field_modifiers],
-		"attributeType": type,
-		"typeFullName": field_type_full_name,
-	}
-	return curr_field_dict
+    if '"' in result:
+        index = result.index('"')
+        try:
+            result_obj = json.loads(json.loads(result[index : len(result)]))
+        except JSONDecodeError as e:
+            debug_logger.debug("Provided result[stdout]: %s", result)
+            debug_logger.debug("Type should be str: %s", type(result))
+            handle_error(PYTHON_ERROR, e)
+        return result_obj
 
 
-# For every method, create a dictionary and return it.
-def create_method_dict(curr_method):
-	method_name = curr_method["_1"]
-	method_code = curr_method["_2"]
-	method_line_number = curr_method["_3"]
-	method_line_number_end = curr_method["_4"]
-	method_signature = curr_method["_5"]
-	method_modifiers = [modifier.lower() for modifier in curr_method["_6"]]
-	method_parameters = curr_method["_7"]
-	method_instructions = curr_method["_8"]
+def handle_query(query: str, log_dict: dict, is_data_query: bool = True):
+    """Handle a query and output neccessary info to log file then return a final result object"""
 
-	if "<empty>" in method_code or "<lambda>" in method_name:
-		return
-	else:
-		# Get the modifiers, return type and the method body from the full method body provided by Joern.
-		modifiers_pattern = re.compile(
-			"(private|public|protected|static|final|synchronized|virtual|volatile|abstract|native)"
-		)
-		regex_pattern_modifiers = modifiers_pattern.findall(method_code)
+    start = timer()
+    result = client.execute(query)
+    end = timer()
+    total_time = end - start
 
-		method_with_return = re.sub(modifiers_pattern, "", method_code).strip()
+    info_message = log_dict["info_msg"]
+    debug_message = log_dict["debug_msg"]
+    error_message = log_dict["error_msg"]
 
-		method_name_pattern = re.compile(r"(^[a-zA-z]*)")
+    if result[SUCCESS] and result[STDOUT] != "":
+        info_message += " Completed in {0} seconds.".format(
+            format(total_time, DEC_FORMATTER)
+        )
+        main_logger.info(info_message)
 
-		# Get the return type of the method, if any.
-		return_type_pattern = re.compile(r"(^[a-zA-z]*\s)")
-		method_return_type = return_type_pattern.findall(method_with_return)
-		return_type = ""
-		if method_return_type:
-			return_type = method_return_type[0].strip()
-
-		# Get the method body with any method parameters.
-		method_body = re.sub(return_type_pattern, "", method_with_return)
-		if not return_type:
-			# Handle all Collection types (Set, HashMap, ArrayList, etc)
-			index = method_body.find(">")
-			return_type = method_body[0: index + 1]
-			if "(" in return_type or not return_type:
-				return_type = ""
-			if return_type in method_body:
-				method_body = method_body.replace(return_type, "").strip()
-
-		# If the method is a constructor, find the name of the class.
-		constructor_name = method_name_pattern.findall(method_body)[0]
-
-		# Return a list containing dictionaries for each parameter within the method body
-		def get_method_parameters(parameters):
-			parameters_list = []
-			for parameter in parameters:
-				evaluation_strategy = parameter["_1"]
-				code = parameter["_2"]
-				type = code.split(" ")[0]
-				name = code.split(" ")[1]
-				parameter_dict = {
-					"code": code,
-					"evaluationStrategy": evaluation_strategy,
-					"name": name,
-					"type": type,
-				}
-				parameters_list.append(parameter_dict)
-			return parameters_list
-
-		def get_method_modifiers(regex_pattern_modifiers, joern_modifiers):
-			set_regex = set(regex_pattern_modifiers)
-			set_joern = set(joern_modifiers)
-			difference = set_regex - set_joern
-			return regex_pattern_modifiers + list(difference)
-
-		curr_method_dict = {
-			"parentClassName": "",
-			"code": method_code,
-			"lineNumberStart": int(method_line_number),
-			"lineNumberEnd": int(method_line_number_end),
-			"name": method_name.replace("<init>", constructor_name),
-			"modifiers": get_method_modifiers(
-				regex_pattern_modifiers, method_modifiers
-			),
-			"signature": method_signature,
-			"returnType": return_type,
-			"methodBody": method_body,
-			"parameters": get_method_parameters(method_parameters),
-			"instructions": list(
-				filter(
-					None,
-					list(map(create_instruction_dict, method_instructions)),
-				)
-			),
-		}
-		return curr_method_dict
+        result_obj = result["stdout"]
+        if is_data_query:
+            result_obj = clean_json(result[STDOUT])
+    else:
+        debug_logger.debug("Query used: \n{query}".format(query=query))
+        debug_message += " {result}".format(result=result)
+        debug_logger.debug(debug_message)
+        if not is_data_query and "import" in query:
+            handle_error(IMPORT_QUERY_ERROR, error_message, result[STDERR])
+        if not is_data_query and "delete" in query:
+            handle_error(DELETE_ERROR, error_message, result[STDERR])
+        else:
+            handle_error(QUERY_ERROR, error_message, result[STDERR])
+    return result_obj
 
 
-# For every method's instruction, create a dictionary and return it.
-def create_instruction_dict(curr_instruction):
-	instruction_line_number = ""
-	instruction_label = curr_instruction["_1"]
-	instruction_code = curr_instruction["_2"]
+def handle_error(error_type: str, error_message: str, stderr: str = ""):
+    """Handle all error situations by logging the error message and joern's error message, if present.
+    Followed by deleting the project from /bin/joern-cli/workspace/ and exiting with error code."""
 
-	if len(curr_instruction) == 3:
-		instruction_line_number = curr_instruction["_3"]
-	else:
-		instruction_line_number = "0"
+    final_error_msg = error_type + ": " + error_message
+    main_logger.error(final_error_msg)
+    if stderr:
+        main_logger.error(stderr.strip())
 
-	if "<empty>" in instruction_code:
-		return
-	else:
-		# Get the method call in each line of code, if any.
-		method_call_pattern = re.compile(r"([a-zA-Z]*\()")
-		calls = method_call_pattern.findall(instruction_code)
-		method_call = ""
-		if calls and instruction_label == "CALL":
-			method_call = calls[0].replace("(", "")
-
-		curr_instruction_dict = {
-			"label": instruction_label,
-			"code": instruction_code.replace("\r\n", ""),
-			"lineNumber": int(instruction_line_number),
-			"methodCall": method_call,
-		}
-		return curr_instruction_dict
+    result = client.execute(delete_query(project_name))
+    if result[SUCCESS] and result[STDOUT]:
+        main_logger.info(
+            "The source code has been successfully removed from Joern, after the experienced error."
+        )
+    else:
+        debug_logger.debug("Delete Project Query Result: %s", result)
+        error_msg = "Failed to remove project from Joern, after the experienced error"
+        final_error_msg = DELETE_ERROR + ": " + error_msg
+        main_logger.error(final_error_msg)
+    exit(1)
 
 
-# For every class, create a dictionary and return it.
-def create_class_dict(curr_class):
-	class_name = curr_class["_1"]
-	class_full_name = curr_class["_2"]
-	inherits_from_list = curr_class["_3"]
-	class_declaration = curr_class["_4"]
-	line_number = curr_class["_5"]
-	class_modifiers = curr_class["_6"]
-	class_attributes = curr_class["_7"]
-	class_methods = curr_class["_8"]
-	file_name = curr_class["_9"]
-
-	# Get the type of the object, either a interface, class, enum or abstract class.
-	def get_type(declaration, class_dictionary):
-		if "interface" in declaration:
-			return "interface"
-		else:
-			# Get all the modifiers of a class's methods and combine them into a single list.
-			list_method_modifiers = [
-				methods["modifiers"] for methods in class_dictionary["methods"]
-			]
-			single_list_method_modifiers = []
-			for list in list_method_modifiers:
-				single_list_method_modifiers.extend(list)
-
-			# Get all the modifiers and types of each attribute and combine each into a single list.
-			list_field_modifiers = [
-				attribute["modifiers"]
-				for attribute in class_dictionary["attributes"]
-				if not attribute["modifiers"]
-			]
-			list_field_types = [
-				attribute["attributeType"]
-				for attribute in class_dictionary["attributes"]
-				if attribute["attributeType"] == class_name
-			]
-			single_list_field_modifiers = []
-			single_list_field_types = []
-			for list in list_field_modifiers:
-				single_list_field_modifiers.extend(list)
-			for list in list_field_types:
-				single_list_field_types.extend(list)
-
-			set_field_types = set(list_field_types)
-			if (
-					"class" in declaration
-					and not single_list_field_modifiers
-					and (len(set_field_types) == 1 and class_name in set_field_types)
-			):
-				return "enum"
-			elif "class" in declaration and "abstract" in single_list_method_modifiers:
-				return "abstract class"
-			else:
-				return "class"
-
-	def get_package_name(file_path):
-		path_without_separators = file_path.replace(os.sep, " ").split(" ")
-		index_of_src = path_without_separators.index("src")
-		if index_of_src < 0:
-			index_of_src = path_without_separators.index("test")
-		if index_of_src < 0:
-			raise Exception("joern_query could not parse folder structure. No src/test")
-		full_package_name = ".".join(
-			path_without_separators[index_of_src: len(path_without_separators)]
-		)
-		file_name_index = full_package_name.rindex(".java")
-		package_name = full_package_name[0:file_name_index]
-		package_name = package_name[0: package_name.rindex(".")]
-		return package_name
-
-	def get_name_without_separators(name):
-		if "$" in name:
-			index = name.rindex("$")
-			name = name[index + 1: len(name)]
-		return name
-
-	curr_class_dict = {
-		"name": get_name_without_separators(class_name),
-		"code": "",  # keep empty for now
-		"lineNumber": int(line_number),
-		"importStatements": [],  # keep empty for now
-		"modifiers": [],  # keep these empty for now
-		"classFullName": class_full_name,
-		"inheritsFrom": inherits_from_list,
-		"classType": "",
-		"filePath": file_name,
-		"packageName": get_package_name(file_name),
-		"attributes": list(map(create_attribute_dict, class_attributes)),
-		"methods": list(filter(None, list(map(create_method_dict, class_methods)))),
-		"outwardRelations": []
-	}
-	curr_class_dict["classType"] = get_type(class_declaration, curr_class_dict)
-	for method in curr_class_dict["methods"]:
-		method["parentClassName"] = curr_class["_1"]
-	return curr_class_dict
-
-# Execute a single query to retrieve all the class names within the source code
 def retrieve_all_class_names():
-	query = 'cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda")).name.toJson'
-	result = client.execute(query)
-	class_names = []
-	if result["success"]:
-		index = result["stdout"].index('"')
-		all_names = json.loads(
-			json.loads(result["stdout"][index: len(result["stdout"])])
-		)
-		class_names = [name.replace("$", ".") for name in all_names]
-	return class_names
+    """Execute a single query to retrieve all the class names within the source code. Additionally, retrieve
+    the total number of attributes, the total ast size of the class and the total method ast size
+    of each class."""
+
+    name_query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda$")).
+    map(node => (node.fullName, node.ast.size, node.astChildren.isMember.size, 
+    node.astChildren.isMethod.isExternal(false).filter(node => node.lineNumber != None).
+    l.map(node => (node.ast.size)))).toJson"""
+
+    info_msg = "All class name and class sizes have been retrieved."
+    debug_msg = "Class Name Retrieval Result: "
+    error_msg = "Retrieve class names failure for {dir}".format(dir=project_dir)
+    log_dict = create_log_dictionary(info_msg, debug_msg, error_msg)
+
+    class_name_res = handle_query(name_query, log_dict)
+    class_bundles = []
+    if class_name_res:
+        # Create class bundles for every class present in the directory (full name, class ast size, attribute ast size, method ast size,
+        # real ast size (attribute + method ast size))
+        class_bundles = create_class_bundles(class_name_res)
+    return class_bundles
 
 
-# Execute a single query to get all the data of a class
-def retrieve_class_data(name):
-	class_query = (
-			'cpg.typeDecl.name("' + name + '").map(node => (node.name, node.fullName, '
-			"node.inheritsFromTypeFullName.l, node.code, node.lineNumber, "
-			"node.astChildren.isModifier.modifierType.l, "
-			"node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, "
-			"node.code, node.lineNumber, node.astChildren.isModifier.modifierType.l)), "
-			"node.astChildren.isMethod.filter(node => node.lineNumber != None "
-			"&& node.lineNumberEnd != None).l.map(node => (node.name, node.code, "
-			"node.lineNumber, node.lineNumberEnd, node.signature, "
-			"node.astChildren.isModifier.modifierType.l, "
-			"node.astChildren.isParameter.filter(node => !node.name.contains("
-			'"this")).l.map(node => (node.evaluationStrategy, node.code, node.name, '
-			"node.typeFullName)), node.ast.l.map(node => (node.label, node.code, "
-			"node.lineNumber)))), node.filename)).toJson"
-	)
-	start = time.time()
-	result = client.execute(class_query)
-	end = time.time()
-	if result["success"]:
-		logging.info(
-			"The class data for "
-			+ name.replace(".", "$")
-			+ " has been retrieved. Completed in {0} seconds.".format(
-				format(end - start, ".2f")
-			)
-		)
-		index = result["stdout"].index('"')
-		# Returns a list of dictionaries, extract first element of that list
-		joern_class_data = json.loads(
-			json.loads(result["stdout"][index: len(result["stdout"])])
-		)
-		class_dict = create_class_dict(joern_class_data[0])
-	else:
-		print("joern_query :: Retrieve class data failure for " + name, file=sys.stderr)
-		exit(1)
-	return class_dict
+def construct_query(class_bundle: dict):
+    """Construct a class data retrieval query, determining if attributes, methods
+    and additionally method instructions should be queried for, if a class posesses
+    attributes and methods and if the ast size and method ast size of a class is
+    within a threshold."""
 
-def source_code_json_creation(class_names):
-	source_code_json = {"relations": [], "classes": []}
-	for class_name in class_names:
-		source_code_json["classes"].append(retrieve_class_data(class_name))
-	return source_code_json
+    full_name = class_bundle["classFullName"].replace(NESTED_SEP, DOT_SEP)
+    class_ast_size = class_bundle["totalAstSize"]
+    attribute_ast_size = class_bundle["attributeAstSize"]
+    method_ast_size = class_bundle["methodAstSize"]
+    total_methods = class_bundle["totalMethods"]
+
+    # Determine if attributes should be retrieved or not
+    attribute_retrieve = ""
+    if attribute_ast_size:
+        attribute_retrieve = """, node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, node.lineNumber, 
+        node.astChildren.isModifier.modifierType.l))"""
+        class_bundle["hasAttributes"] = True
+    else:
+        class_bundle["hasAttributes"] = False
+
+    # Determine if method instructions should be retrieved or not
+    method_ins_retrieve = ""
+    if (
+        class_ast_size < CLASS_AST_SIZE_THRESHOLD
+        and method_ast_size < METHOD_AST_SIZE_THRESHOLD
+    ):
+        method_ins_retrieve = """, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") && 
+        !node.code.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, 
+        node.lineNumber)), node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber))"""
+
+    # Determine if methods should be retrieved or not
+    method_retrieve = ""
+    if total_methods:
+        method_retrieve = """, node.astChildren.isMethod.isExternal(false).filter(node => !node.code.contains("<lambda>") && 
+        !node.name.contains("<clinit>")).l.map(node => (node.name, node.fullName, node.code, node.lineNumber, node.lineNumberEnd, 
+        node.astChildren.isModifier.modifierType.l{method_ins_retrieve}))""".format(
+            method_ins_retrieve=method_ins_retrieve
+        )
+        class_bundle["hasMethods"] = True
+    else:
+        class_bundle["hasMethods"] = False
+
+    # Construct the query, combining everything together
+    class_query = """cpg.typeDecl.fullName("{full_name}").map(node => (node.name, 
+    node.fullName, node.filename, node.inheritsFromTypeFullName.l, node.code, node.lineNumber{attribute_retrieve}{method_retrieve})).
+    toJson""".format(
+        full_name=full_name,
+        attribute_retrieve=attribute_retrieve,
+        method_retrieve=method_retrieve,
+    )
+
+    if method_retrieve and not method_ins_retrieve:
+        class_bundle["withoutIns"] = True
+    else:
+        class_bundle["withoutIns"] = False
+
+    return class_query
+
+
+def retrieve_class_data(class_bundle: dict):
+    """Execute a single query to get all the data of a class. If retrieve_ins is True, additionally
+    retrieve the instructions of all methods of the class, if not class data without instructions is retrieved."""
+
+    class_query = construct_query(class_bundle)
+    full_name = class_bundle["classFullName"].replace(NESTED_SEP, DOT_SEP)
+    needs_ins = class_bundle["withoutIns"]
+    without_ins = ""
+    if needs_ins:
+        without_ins = " (excluding instructions)"
+    class_name = return_name_without_package(full_name)
+
+    # Handle query and log neccesarry information
+    info_msg = "The class data for {name}{without_ins} has been retrieved.".format(
+        name=class_name, without_ins=without_ins
+    )
+    debug_msg = "Class Data Retrieval Result for {name}:".format(name=class_name)
+    error_msg = "Retrieve class data failure for {class_name}.".format(
+        class_name=class_name
+    )
+    log_dict = create_log_dictionary(info_msg, debug_msg, error_msg)
+    class_result = handle_query(class_query, log_dict)
+
+    class_dict = []
+    if class_result:
+        class_dict = class_result[0]
+        if not class_bundle["hasAttributes"] and class_bundle["hasMethods"]:
+            class_dict["_8"] = class_dict["_7"]
+            class_dict["_7"] = []
+        class_dict["needsInstructions"] = needs_ins
+    else:
+        debug_logger.debug(class_result)
+    return class_dict
+
+
+def retrieve_all_method_instruction(class_full_name: str, class_dict: dict):
+    """Given the full name of a class, retrieve the method instructions for all of its methods."""
+
+    class_full_name = class_full_name.replace(NESTED_SEP, DOT_SEP)
+    class_name = return_name_without_package(class_full_name)
+    all_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").
+    astChildren.isMethod.isExternal(false).filter(node => node.lineNumber != None).map(node => 
+    (node.fullName, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
+    && !node.name.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)), 
+    node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
+        class_full_name=class_full_name
+    )
+
+    info_msg = "All method instructions for {class_name} have been retrieved.".format(
+        class_name=class_name
+    )
+    debug_msg = "All Method Instruction Retrieval Result for {class_full_name}:".format(
+        class_full_name=class_full_name
+    )
+    error_msg = "All method instruction retrieve failure for {class_full_name}".format(
+        class_full_name=class_full_name
+    )
+    log_dict = create_log_dictionary(info_msg, debug_msg, error_msg)
+    all_method_ins = handle_query(all_instruction_query, log_dict)
+
+    if all_method_ins:
+        for method in class_dict["_8"]:
+            method_full_name = method["_2"]
+            method_getter = [
+                method_dict
+                for method_dict in all_method_ins
+                if method_dict["_1"] == method_full_name
+            ]
+            if method_getter:
+                method_getter = method_getter[0]
+                method["_7"] = method_getter["_2"]
+                method["_8"] = method_getter["_3"]
+            else:
+                method["_7"] = []
+                method["_8"] = []
+
+
+def retrieve_single_method_instruction(
+    class_full_name: str, method_name: str, method: dict
+):
+    """Given the full name of a class and the name of a method, retrieve all of its method instructions."""
+
+    class_full_name = class_full_name.replace(NESTED_SEP, DOT_SEP)
+    class_name = return_name_without_package(class_full_name)
+
+    method_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").astChildren.isMethod.name("{method_name}").map(node => 
+    (node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
+    && !node.name.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)),  
+    node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
+        class_full_name=class_full_name, method_name=method_name
+    )
+
+    info_msg = "The method instructions for {class_name}.{method_name}() have been retrieved.".format(
+        class_name=class_name,
+        method_name=method_name,
+    )
+    debug_msg = (
+        "Method Instruction Retrieval Result for {class_name}.{method_name}():".format(
+            class_name=class_name, method_name=method_name
+        )
+    )
+    error_msg = "Retrieve method instruction data failure for {method_name}().".format(
+        method_name=method_name
+    )
+    log_dict = create_log_dictionary(info_msg, debug_msg, error_msg)
+    method_ins_result = handle_query(method_instruction_query, log_dict)
+
+    method_ins = []
+    if method_ins_result:
+        method_ins = method_ins_result[0]
+        method["_7"] = method_ins["_1"]
+        method["_8"] = method_ins["_2"]
+
+
+def handle_multiple_instructions(class_full_name: str, class_methods: list):
+    """Retrieve instructions for every method present within a class one by one and append
+    these instructions to the appropriate method."""
+
+    class_name = return_name_without_package(class_full_name)
+    current_method = 0
+    total_methods = len(class_methods)
+    ins_start = timer()
+    for method in class_methods:
+        current_method += 1
+        method_name = method["_1"]
+        if method["totalLength"] != 0 and ABSTRACT or NATIVE not in method:
+            main_logger.info(
+                "Starting retrieval of method instructions for {name}, method #{current}/{total} methods in class.".format(
+                    name=method_name,
+                    current=current_method,
+                    total=total_methods,
+                )
+            )
+            retrieve_single_method_instruction(class_full_name, method_name, method)
+    ins_end = timer()
+    ins_total = ins_end - ins_start
+    main_logger.info(
+        "All method instructions for {class_name} have been retrieved. Completed in {time} seconds".format(
+            class_name=class_name, time=format(format(ins_total, DEC_FORMATTER))
+        )
+    )
+
+
+def append_all_instructions(source_code_json):
+    """Iterate through all classes within the directory that still need instructions and append
+    the approriate instructions to the appropriate methods."""
+
+    # Ignore interfaces and classes that already have instructions
+    class_ins_reqs = [
+        cd
+        for cd in source_code_json
+        if cd["needsInstructions"] and INTERFACE not in cd["_4"]
+    ]
+
+    total = len(class_ins_reqs)
+    current = 0
+    for class_dict in class_ins_reqs:
+        class_full_name = class_dict["_2"]
+        class_name = return_name_without_package(class_full_name)
+        current += 1
+        main_logger.info(
+            "Retrieving method instructions for {class_name}, class #{current}/{total} classes needing instructions.".format(
+                class_name=class_name, current=current, total=total
+            )
+        )
+        class_ast_size = class_dict["classAstSize"]
+        method_lines = class_dict["methodLines"]
+
+        if "_8" in class_dict:
+            class_methods = class_dict["_8"]
+            if (
+                class_ast_size <= CLASS_AST_SIZE_THRESHOLD
+                and method_lines <= METHOD_LINES_THRESHOLD
+            ):
+                retrieve_all_method_instruction(class_full_name, class_dict)
+            else:
+                class_methods.sort(key=lambda entry: entry["totalLength"])
+                handle_multiple_instructions(class_full_name, class_methods)
+    return source_code_json
+
+
+def handle_large_project(class_bundles: list):
+    """Handle larger projects (total ast size > 1000) by retrieving the data for each class
+    individually (with/without method instructions) based on the ast size of the class,
+    following a Shortest Task First approach.
+
+    Classes without instructions will have their instructions retrieved either all at once or one by one depending
+    on the ast size of the classs. Methods are additionally sorted in ascending order based on total length prior to instruction retrieval
+    process.
+    """
+
+    joern_json = {CLASSES: []}
+    # Retrieve the data for all classes (with/without instructions based on their ast size)
+    class_data_start = timer()
+    current = 0
+    for class_bundle in class_bundles:
+        current += 1
+        class_ast_size = class_bundle["totalAstSize"]
+        total_attribute_ast_size = class_bundle["attributeAstSize"]
+        total_method_ast_size = class_bundle["methodAstSize"]
+        full_name = class_bundle["classFullName"]
+        class_name = return_name_without_package(full_name)
+        main_logger.info(
+            "Starting retrieval of class data for {name}, class #{current}/{total} classes.".format(
+                name=class_name, current=current, total=total_classes
+            )
+        )
+        class_dict = retrieve_class_data(class_bundle)
+        class_dict["packageName"] = return_package_name(full_name)
+        class_dict["classAstSize"] = class_ast_size
+        class_dict["attributeAstSize"] = total_attribute_ast_size
+        class_dict["methodAstSize"] = total_method_ast_size
+        joern_json[CLASSES].append(class_dict)
+    class_data_end = timer()
+    class_data_diff = class_data_end - class_data_start
+    main_logger.info(
+        "The data for all classes has been retrieved. Completed in {0} seconds.".format(
+            format(class_data_diff, DEC_FORMATTER)
+        )
+    )
+
+    # Filter out external classes and add all method instructions
+    filtered_classes = clean_up_external_classes(joern_json)
+    assign_total_method_lines(filtered_classes[CLASSES])
+
+    # Handle retrieval of method instructions for classes which still need them
+    method_ins_start = timer()
+    joern_json[CLASSES] = append_all_instructions(filtered_classes[CLASSES])
+    method_ins_end = timer()
+    method_diff = method_ins_end - method_ins_start
+    main_logger.info(
+        "All method instructions for classes needing instructions have been retrieved. Completed in {0} seconds.".format(
+            format(method_diff, DEC_FORMATTER)
+        )
+    )
+
+    total_query_time = import_diff + name_retrieve_diff + class_data_diff + method_diff
+    main_logger.info(
+        "Total elapsed time performing queries to Joern: {0} seconds.".format(
+            format(total_query_time, DEC_FORMATTER)
+        )
+    )
+
+    # Create the source code json
+    source_code_json = {"relations": [], CLASSES: []}
+    dict_start = timer()
+    source_code_json[CLASSES] = list(
+        filter(None, list(map(create_class_dict, joern_json[CLASSES]))),
+    )
+    dict_end = timer()
+    dict_diff = dict_end - dict_start
+    main_logger.info(
+        "The source code json dictionary has been created. Completed in {0} seconds.".format(
+            format(dict_diff, DEC_FORMATTER)
+        )
+    )
+    return source_code_json
+
+
+def handle_small_project():
+    """
+    Retrieve all the info for every class within the source code (including method instructions) for small projects.
+
+    Small Projects can be defined as having a total AST size of < 1000 (AST size is summed up from all the classes within given directory).
+    """
+
+    query = """cpg.typeDecl.isExternal(false).filter(node => !node.name.contains("lambda$")).
+    map(node => (node.name, node.fullName, node.filename, node.inheritsFromTypeFullName.l, 
+    node.code, node.lineNumber, 
+    node.astChildren.isMember.l.map(node => (node.name, node.typeFullName, 
+    node.lineNumber, node.astChildren.isModifier.modifierType.l)), 
+    node.astChildren.isMethod.isExternal(false).filter(node => !node.code.contains("<lambda>") 
+    && !node.name.contains("<clinit>")).l.
+    map(node => (node.name, node.fullName, node.code, node.lineNumber, node.lineNumberEnd, 
+    node.astChildren.isModifier.modifierType.l, node.ast.isCall.filter(node => 
+    !node.methodFullName.contains("<operator>") && !node.code.contains("<lambda>") && 
+    !node.code.contains("<empty>") || node.name.contains("Exception")).l.
+    map(node => (node.methodFullName, node.lineNumber)),
+    node.ast.filter(node => node.lineNumber != None).l.
+    map(node => (node.code, node.label, node.lineNumber)))))).toJson"""
+
+    # Retrieve the data for all classes
+    info_msg = "The data for every class has been retrieved."
+    debug_msg = "All class data result:"
+    error_msg = "All class data retrieve fail"
+    log_dict = dict(debug_msg=debug_msg, error_msg=error_msg, info_msg=info_msg)
+    data_start = timer()
+    class_result = handle_query(query, log_dict)
+    data_end = timer()
+    data_diff = data_end - data_start
+
+    total_query_time = import_diff + data_diff
+    main_logger.info(
+        "Total elapsed time performing queries to Joern: {0} seconds.".format(
+            format(total_query_time, DEC_FORMATTER)
+        )
+    )
+
+    # Filter out external classes
+    joern_json = {CLASSES: []}
+    for class_dict in class_result:
+        class_full_name = class_dict["_2"]
+        class_dict["packageName"] = return_package_name(class_full_name)
+        joern_json[CLASSES].append(class_dict)
+    filtered_classes = clean_up_external_classes(joern_json)
+
+    source_code_json = {"relations": [], CLASSES: []}
+
+    # Create class dictionaries after getting all data from joern
+    dict_start = timer()
+    source_code_json[CLASSES] = list(
+        filter(
+            None,
+            list(map(create_class_dict, filtered_classes[CLASSES])),
+        )
+    )
+    dict_end = timer()
+    dict_diff = dict_end - dict_start
+    main_logger.info(
+        "The source code json dictionary has been created. Completed in {0} seconds.".format(
+            format(dict_diff, DEC_FORMATTER)
+        )
+    )
+    return source_code_json
 
 
 if __name__ == "__main__":
-	logging.basicConfig(
-		level=logging.INFO,
-		format="%(asctime)s :: %(levelname)s :: %(message)s",
-		datefmt="%m/%d/%Y %I:%M:%S",
-		filename="joern_query.log",
-		filemode="w",
-	)
-	total_time = 0
+    main_logger, debug_logger = create_loggers()
 
-	server_endpoint = "localhost:8080"
-	client = CPGQLSClient(server_endpoint)
-	if client:
-		logging.info("joern_query is starting and connected to CPGQLSClient.")
-	project_dir = sys.argv[-1]
+    server_endpoint = "127.0.0.1:" + sys.argv[-1]
+    project_dir = sys.argv[-2]
+    project_name = "analyzedProject"
+    program_start_time = 0
 
-	if "Windows" in platform.platform():
-		index = project_dir.find(":")
-		win_drive = project_dir[0: index + 1]
-		project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
-			"\\", "//"
-		)
-	project_name = "analyzedProject"
+    main_logger.info("Server Endpoint: %s", server_endpoint)
+    client = None
+    index = 1
+    sleep(4)
+    while True:
+        try:
+            client = CPGQLSClient(server_endpoint)
+            break
+        except OSError:
+            print(
+                "joern_query :: failed to connect to port "
+                + str(sys.argv[-1])
+                + "retrying",
+                file=sys.stderr,
+            )
+            sleep(1)
 
-	# Import the source code to Joern for analyzing.
-	start = time.time()
-	query = import_code_query(project_dir, project_name)
-	result = client.execute(query)
-	end = time.time()
+    if client:
+        main_logger.info("joern_query is starting and connected to CPGQLSClient.")
+        program_start_time = timer()
 
-	if result["success"]:
-		logging.info(
-			"The source code has been successfully imported. Completed in {0} seconds.".format(
-				format(end - start, ".2f")
-			)
-		)
-		import_time = end - start
-		total_time += import_time
+    main_logger.info("Analyzing project_dir " + project_dir)
 
-		# Retrieve all the class names within the source code
-		start = time.time()
-		class_names = retrieve_all_class_names()
-		end = time.time()
-		if class_names:
-			logging.info(
-				"The class names within the source code have been retrieved. Completed in {0} seconds.".format(
-					format(end - start, ".2f")
-				)
-			)
-			class_name_retrieval_time = end - start
-			total_time += class_name_retrieval_time
-		else:
-			print("joern_query :: Retrieve class names failure", file=sys.stderr)
-			exit(1)
+    if "Windows" in platform.platform():
+        index = project_dir.find(COLON_SEP)
+        win_drive = project_dir[0 : index + 1]
+        project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
+            "\\", "//"
+        )
 
-		# Create the source code json representation
-		start = time.time()
-		source_code_json = source_code_json_creation(class_names)
-		end = time.time()
+    # Import the source code to Joern for analyzing.
+    import_query = import_code_query(project_dir, project_name)
+    info_msg = "The source code has been successfully imported."
+    debug_msg = "Source Code Import Result for {dir}:".format(dir=project_dir)
+    error_msg = "Source Code Import Failure for {dir}:".format(dir=project_dir)
+    log_dict = create_log_dictionary(info_msg, debug_msg, error_msg)
+    import_start = timer()
+    main_logger.info(
+        "Importing source code into Joern (may take a while for larger projects)."
+    )
+    import_res = handle_query(import_query, log_dict, False)
+    import_end = timer()
+    import_diff = import_end - import_start
 
-		if source_code_json["classes"]:
-			logging.info(
-				"A .json representation of the source code has been created. Completed in {0} seconds.".format(
-					format(end - start, ".2f")
-				)
-			)
-			source_code_json_creation_time = end - start
-			total_time += source_code_json_creation_time
+    try:
+        # Retrieve all class names
+        name_retrieve_start = timer()
+        class_bundles = retrieve_all_class_names()
+        name_retrieve_end = timer()
+        name_retrieve_diff = name_retrieve_end - name_retrieve_start
+        total_classes = len(class_bundles)
 
-			for class_dict in source_code_json["classes"]:
-				str_dict = str(class_dict)
-				bytes_length = len(bytes(str_dict, 'utf-8'))
-				bytes_length += len(str(bytes_length))
-				print(str(bytes_length) + str_dict)
-		else:
-			print("joern_query :: Source code json creation failure", file=sys.stderr)
+        # Determine the total AST size of the given directory (used to determine how data retrieval should perform)
+        total_ast_size = 0
+        for class_bundle in class_bundles:
+            total_ast_size += class_bundle["totalAstSize"]
 
-		# Close and delete the project from user's bin/joern/joern-cli/workspace
-		start = time.time()
-		query = 'delete ("' + project_name + '")'
-		result = client.execute(query)
-		end = time.time()
-		if result["success"]:
-			logging.info(
-				"The source code has been successfully removed. Completed in {0} seconds.".format(
-					format(end - start, ".2f")
-				)
-			)
-		logging.info("Total time taken: {0} seconds.".format(format(total_time, ".2f")))
-		exit(0)
-	else:
-		print("joern_query :: Source Code Import Failure", file=sys.stderr)
-		exit(1)
+        # Retrieve class data for all classes within the source code, handle projects of
+        # different sizes differently.
+        if total_ast_size <= PROJECT_AST_SIZE_THRESHOLD:
+            main_logger.info(
+                "The provided directory is considered small (AST Size = {ast_size}), retrieving data for all classes at once.".format(
+                    ast_size=total_ast_size
+                )
+            )
+            source_code_json = handle_small_project()
+        else:
+            main_logger.info(
+                "The provided directory is considered large (AST Size = {ast_size}), retrieving data for all classes one by one.".format(
+                    ast_size=total_ast_size
+                )
+            )
+            source_code_json = handle_large_project(class_bundles)
+
+        # Output all class dictionaries
+        if source_code_json[CLASSES]:
+            for class_dict in source_code_json[CLASSES]:
+                class_contents = bytes(str(class_dict), "utf-8")
+                size_bytes = len(class_contents).to_bytes(
+                    4, byteorder=sys.byteorder, signed=True
+                )
+                print("class content size: ", len(class_contents), file=sys.stderr)
+                print("size bytes size: ", file=sys.stderr)
+                sys.stdout.buffer.write(size_bytes)
+                sys.stdout.buffer.write(class_contents)
+
+            sys.stdout.buffer.write(
+                (-1).to_bytes(4, byteorder=sys.byteorder, signed=True)
+            )
+        else:
+            debug_logger.debug("Source Code JSON Dictionary: %s", source_code_json)
+            error_msg = "Source code json creation failure, no classes in dictionary"
+            handle_error(EMPTY_DIRECTORY_ERROR, error_msg)
+
+        # Close and delete the project from user's bin/joern/joern-cli/workspace
+        delete_query = delete_query(project_name)
+        info_msg = "The source code has been successfully removed from Joern."
+        debug_msg = "Source Code Delete Result:"
+        error_msg = "Source code deletion failure, could not remove from joern"
+        log_dict = create_log_dictionary(info_msg, debug_msg, error_msg)
+        del_result = handle_query(delete_query, log_dict, False)
+
+        # Output total joern_query execution time to log file
+        program_end_time = timer()
+        program_diff = program_end_time - program_start_time
+        main_logger.info(
+            "Total time taken: {0} seconds.".format(format(program_diff, DEC_FORMATTER))
+        )
+        # Terminate after everything has been successfully executed
+        exit(0)
+    except Exception as e:
+        full_trace = str(traceback.format_exc())
+        handle_error(PYTHON_ERROR, full_trace)
