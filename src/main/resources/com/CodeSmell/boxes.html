@@ -107,7 +107,7 @@ function addClassSmell(classId,smellName,smellDescription, smellId)
     let classBox = document.getElementById('class' + classId);
     let p = document.createElement('span');
     p.className = 'tooltip tooltiptext';
-    p.innerHTML = smellDescription;
+    p.innerHTML = 'The code smell is:' + smellName;
     p.id = smellId;
 
    classBox.appendChild(p);
