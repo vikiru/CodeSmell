@@ -3,6 +3,7 @@ package com.CodeSmell.smell;
 import com.CodeSmell.parser.*;
 import com.CodeSmell.stat.Helper;
 import com.CodeSmell.stat.MethodStat;
+import com.CodeSmell.stat.StatTracker;
 
 import java.util.*;
 
@@ -25,13 +26,19 @@ public class ShotgunSurgery extends Smell {
 
     private void detectAll() {
         ArrayList<CPGClass> classes = cpg.getClasses();
+        StatTracker stats = Common.stats;
 
         //first, build the dictionaries
         for (CPGClass curClass : classes) {
             for (CPGClass.Method curMethod : curClass.getMethods()) {
 
-                MethodStat mStat = new MethodStat(curMethod, cpg, new Helper(cpg));
-                ArrayList<CPGClass> classCalls = new ArrayList<>();
+                MethodStat mStat = stats.methodStats.get(curMethod);
+                Set<CPGClass> distintClassCalls = new HashSet<>();
+                curMethod.getMethodCalls().forEach(method -> distintClassCalls.add(method.getParent()));
+
+                ArrayList<CPGClass> classCalls = new ArrayList<>(distintClassCalls);
+
+
                 ArrayList<CPGClass.Method> methodCalls = new ArrayList<>();
                 //build lists of classes this method calls, and number of methods this calls
                 for (Map.Entry<CPGClass, List<CPGClass.Method>> entry : mStat.distinctMethodCalls.entrySet()) {
