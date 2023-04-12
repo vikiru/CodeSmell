@@ -148,7 +148,7 @@ def construct_query(class_bundle: dict):
             and method_ast_size < METHOD_AST_SIZE_THRESHOLD
     ):
         method_ins_retrieve = """, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") && 
-        !node.code.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, 
+        || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, 
         node.lineNumber)), node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber))"""
 
     # Determine if methods should be retrieved or not
@@ -223,7 +223,7 @@ def retrieve_all_method_instruction(class_full_name: str, class_dict: dict):
     all_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").
     astChildren.isMethod.isExternal(false).filter(node => node.lineNumber != None).map(node => 
     (node.fullName, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
-    && !node.name.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)), 
+     || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)), 
     node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
         class_full_name=class_full_name
     )
@@ -267,7 +267,7 @@ def retrieve_single_method_instruction(
 
     method_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").astChildren.isMethod.name("{method_name}").map(node => 
     (node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
-    && !node.name.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)),  
+     || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)),  
     node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
         class_full_name=class_full_name, method_name=method_name
     )
