@@ -53,10 +53,10 @@ public class SmellTest {
     @Test
     public void TestGodClass() {
         System.out.println("GodClass Test:");
-        GodClass gc = new GodClass(this.cpg, -1, -1, 0, -1);
+        GodClass gc = new GodClass(cpg, -1, -1, 0, -1);
         ArrayList<CodeFragment> detections = getDetections(gc);
         assertEquals(0, detections.size());
-        gc = new GodClass(this.cpg, -1, 0.3, 0, -1);
+        gc = new GodClass(cpg, -1, 0.3, 0, -1);
         detections = getDetections(gc);
         assertEquals(1, detections.size());
     }
