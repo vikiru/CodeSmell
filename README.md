@@ -10,7 +10,6 @@ A tool for detection and visualization of code smells for object-oriented langua
 - Visakan Kirubakaran
 - Sabin Plaiasu
 - Martin Rivard
-- Kshitij Sawhney
 
 ## Relevant Links
 
@@ -23,14 +22,13 @@ A tool for detection and visualization of code smells for object-oriented langua
 
 Make sure that the following prerequisites are successfully installed on your machine:
 
-- Java - [Download & Install Java.](https://www.java.com/en/download/manual.jsp) Download Java based on
-  your operating system.
-- Maven - [Download & Install Maven.](https://maven.apache.org/download.cgi) Choosing the latest version will suffice.
-- Python - [Download & Install Python.](https://www.python.org/downloads/) Python 3.7+ is required.
+- Java - [Download & Install Java](https://www.java.com/en/download/manual.jsp). Download Java based on
+  your operating system (JDK 11, 17 and 19 are fine to use).
+- Maven - [Download & Install Maven](https://maven.apache.org/download.cgi). Choosing the latest version will suffice.
+- Python - [Download & Install Python](https://www.python.org/downloads/). Python 3.7+ is required.
 - Joern - Please see the [joern](https://github.com/joernio/joern) repository for more details on installing joern.
-- GraphViz - ([graphviz.org](https://graphviz.org/download/source/)) Used to generate layout program
+- GraphViz - [Download & Install GraphViz](https://graphviz.org/download/source/). Used to generate layout program
 
-`dot`, `joern`, `python` must be part of your system PATH variable to use this program.
 
 ## Build and Run Instructions
 
@@ -38,8 +36,11 @@ Make sure that the following prerequisites are successfully installed on your ma
 
 Ensure the relevant environment variables are set properly:
 
-- `export JAVA_HOME=/usr/lib/jvm/default-java/`
+- `JAVA_HOME`
 - `MAVEN_HOME`
+- `joern`
+
+`dot`, `joern`, `maven`, `java` and `python` must also be part of your system PATH variable to use this program.
 
 ### Build Instructions
 
@@ -69,10 +70,6 @@ In order to run the program through the executable jar via the terminal, the fol
 java -jar ./target/CodeSmell-1.0-SNAPSHOT-shaded.jar
 ```
 
-To do this, the dependencies (JavaFX) must be copied into the ./target/dist/lib folder.
-
-## Usage
-
 ## Testing Instructions
 
 Run the following command to execute all of the tests:
@@ -81,7 +78,10 @@ Run the following command to execute all of the tests:
 mvn test
 ```
 
-In order to skip invoking joern (which can take a sagnificant amount of time on older hardware), pass the command line argument to skip joern through maven like so
+In order to skip invoking Joern (which can take a significant amount of time on older hardware), pass the command line argument to skip joern through maven like so:
 ```bash
 mvn -Dskip=true javafx:run
 ```
+
+## License
+[MIT](https://github.com/vikiru/CodeSmell/blob/main/LICENSE) © 2023 Golan Hassin, Visakan Kirubakaran, Sabin Plaiasu, Martin Rivard.
