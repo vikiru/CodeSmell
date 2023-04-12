@@ -13,26 +13,27 @@ import java.util.*;
 public class MisplacedClass extends Smell {
 
     public static StatTracker stats;
-    Set<CPGClass> misplacedClasses = new HashSet<>();
+    public Set<CPGClass> misplacedClasses = new HashSet<>();
     public LinkedList<CodeFragment> detections = new LinkedList<>();
 
     public MisplacedClass(CodePropertyGraph cpg) {
         super("Misplaced Class", cpg);
         stats = Common.stats;
         returnMisplacedClasses();
+        detectAll();
     }
 
     @Override
     public CodeFragment detectNext() {
-        CPGClass[] classes = new CPGClass[1];
-        if (!misplacedClasses.isEmpty()) {
-            classes[0] = misplacedClasses.iterator().next();
-            misplacedClasses.remove(misplacedClasses.iterator().next());
+        return detections.poll();
+    }
 
-            detections.add(new CodeFragment("Misplaced Classes", classes, null, null, null, null, null));
-            return new CodeFragment("Misplaced Classes", classes, null, null, null, null, null);
-        } else
-            return null;
+    private void detectAll() {
+        for (CPGClass cpgClass : misplacedClasses) {
+            String description = cpgClass.name + " is a misplaced class.";
+            CodeFragment cf = CodeFragment.makeFragment(description, cpgClass);
+            detections.add(cf);
+        }
     }
 
     public void returnMisplacedClasses() {

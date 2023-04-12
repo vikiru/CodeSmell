@@ -35,8 +35,8 @@ import java.util.*;
 public class LazyClass extends Smell {
 
     public static StatTracker stats;
-    ArrayList<CPGClass> lazyClasses = new ArrayList<>();
-    HashMap<CPGClass, CPGClass> lazySharedMethods = new HashMap<>();
+    public ArrayList<CPGClass> lazyClasses = new ArrayList<>();
+    public static HashMap<CPGClass, CPGClass> lazySharedMethods = new HashMap<>();
     public LinkedList<CodeFragment> detections = new LinkedList<>();
 
     protected LazyClass(CodePropertyGraph cpg) {
@@ -44,7 +44,7 @@ public class LazyClass extends Smell {
         stats = Common.stats;
         lazyClasses = returnLazyClasses();
         lazySharedMethods = checkSimilarInstructions();
-        System.out.println();
+        detectAll();
     }
 
     private void tallyRelations() {
@@ -100,8 +100,15 @@ public class LazyClass extends Smell {
 
     @Override
     public CodeFragment detectNext() {
-        detections.add(new CodeFragment(null, (CPGClass[]) lazyClasses.toArray(), null, null, null, null, null));
-        return new CodeFragment(null, (CPGClass[]) lazyClasses.toArray(), null, null, null, null, null);
+        return detections.poll();
+    }
+
+    private void detectAll() {
+        for (CPGClass cpgClass : lazyClasses) {
+            String description = cpgClass.name + " is a lazy class.";
+            CodeFragment cf = CodeFragment.makeFragment(description, cpgClass);
+            detections.add(cf);
+        }
     }
 
     public CodeFragment detectNextSimilarities() {
