@@ -16,7 +16,7 @@ public class MisplacedClass extends Smell {
     Set<CPGClass> misplacedClasses = new HashSet<>();
     public LinkedList<CodeFragment> detections = new LinkedList<>();
 
-    public MisplacedClass(String name, CodePropertyGraph cpg) {
+    public MisplacedClass(CodePropertyGraph cpg) {
         super("Misplaced Class", cpg);
         stats = Common.stats;
         returnMisplacedClasses();

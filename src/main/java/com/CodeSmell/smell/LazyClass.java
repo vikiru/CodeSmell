@@ -39,7 +39,7 @@ public class LazyClass extends Smell {
     HashMap<CPGClass, CPGClass> lazySharedMethods = new HashMap<>();
     public LinkedList<CodeFragment> detections = new LinkedList<>();
 
-    protected LazyClass(String name, CodePropertyGraph cpg) {
+    protected LazyClass(CodePropertyGraph cpg) {
         super("Lazy Class", cpg);
         stats = Common.stats;
         lazyClasses = returnLazyClasses();

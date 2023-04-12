@@ -15,12 +15,14 @@ import com.CodeSmell.ProjectManager;
 
 import com.CodeSmell.smell.Smell.CodeFragment;
 import com.CodeSmell.parser.CPGClass.*;
+
 import static org.junit.Assert.*;
 import static com.CodeSmell.smell.Common.initStatTracker;
 import static com.CodeSmell.smell.Common.interfaceMethods;
 import static com.CodeSmell.smell.Common.stats;
 import static com.CodeSmell.smell.Common.findClassByName;
 import static com.CodeSmell.smell.Common.originalInterfaceMethods;
+
 import com.CodeSmell.stat.StatTracker;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +64,7 @@ public class SmellTest {
     @Test
     public void TestISPViolation() {
         System.out.println("ISP Violation Test:");
-        ISPViolation  smell = new ISPViolation(this.cpg);
+        ISPViolation smell = new ISPViolation(this.cpg);
         ArrayList<CodeFragment> detections = getDetections(smell);
         assertEquals(2, detections.size());
 
@@ -72,27 +74,26 @@ public class SmellTest {
         assertNotNull(c3);
 
         ArrayList<Method> ifaceMethods = new ArrayList<Method>(
-            Arrays.asList(interfaceMethods(c2)));
+                Arrays.asList(interfaceMethods(c2)));
         Method blankMethod = Arrays.stream(originalInterfaceMethods(c2))
-            .filter(m -> m.toString().equals("blankMethod() : void")).findFirst().get();
+                .filter(m -> m.toString().equals("blankMethod() : void")).findFirst().get();
         assertNotNull(blankMethod);
 
-        CPGClass[] classes = new CPGClass[] {c3, c2};
+        CPGClass[] classes = new CPGClass[]{c3, c2};
 
         Collection<CodeFragment> detection1 = detections
-            .stream()
-            .filter(codeFrag -> 
-                Set.of(codeFrag.classes).equals(Set.of(classes))
-                    && 
-                Set.of(codeFrag.methods).equals(Set.of(blankMethod)))
-            .collect(Collectors.toList());
+                .stream()
+                .filter(codeFrag ->
+                        Set.of(codeFrag.classes).equals(Set.of(classes))
+                                &&
+                                Set.of(codeFrag.methods).equals(Set.of(blankMethod)))
+                .collect(Collectors.toList());
         assertEquals(1, detection1.size());
     }
 
     @Test
-    public void TestLazyClass()
-    {
-        LazyClass lc = new LazyClass("lazyClass", this.cpg);
+    public void TestLazyClass() {
+        LazyClass lc = new LazyClass(this.cpg);
         lc.description();
         lc.returnLazyClasses();
     }
