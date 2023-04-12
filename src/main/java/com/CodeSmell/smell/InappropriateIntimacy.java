@@ -63,7 +63,7 @@ public class InappropriateIntimacy extends Smell {
         return cpgClass.getMethods().stream().
                 filter(method -> method.parameters.size() == 0 && attributeTypes.contains(method.returnType) &&
                         method.getMethodCalls().size() == 0 && method.getAttributeCalls().size() == 1
-                        && filteredAttributes.contains(method.getAttributeCalls().get(0))).
+                        && filteredAttributes.contains(method.getAttributeCalls().get(0)) && !method.name.equals("toString")).
                 collect(Collectors.toList());
     }
 
@@ -78,7 +78,7 @@ public class InappropriateIntimacy extends Smell {
         Set<CPGClass.Method> affectedMethods = new HashSet<>();
         filteredMethodStat.
                 forEach(methodStat -> methodStat.methodsWhichCallMethod.entrySet().stream().
-                        filter(entry -> entry.getKey().getParent() != cpgClass
+                        filter(entry -> entry.getKey().getParent() != cpgClass && !entry.getKey().name.equals("toString")
                                 && methodStat.methodsWhichCallMethod.get(entry.getKey()) > 0).
                         forEach(entry -> affectedMethods.add(entry.getKey())));
         return affectedMethods.toArray(new CPGClass.Method[0]);
