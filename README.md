@@ -16,6 +16,7 @@ A tool for detection and visualization of code smells for object-oriented langua
 - [Chart of Each Member's Progress](https://github.com/users/vikiru/projects/2/insights/1)
 - [Chart of Each Milestone's Progress](https://github.com/users/vikiru/projects/2/insights/4)
 - [Documentation](#)
+- [3-min Demo Video of Project](https://youtu.be/jmKbGEKAe0I)
 - [Kanban Board](https://github.com/users/vikiru/projects/2)
 
 ## Prerequisites
