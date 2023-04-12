@@ -76,9 +76,11 @@ public class OrphanVariable extends Smell {
 
             String description = parentClass.name + " has a collection of unused constants that belong elsewhere.";
 
-            CodeFragment codeFragment = CodeFragment.makeFragment(description, affectedClasses, affectedMethods,
-                    affectedModifiers, affectedAttributes, new Parameter[0], affectedInstructions);
-            detections.add(codeFragment);
+            if (affectedClasses.length > 1 && affectedAttributes.length > 0 && affectedMethods.length > 0) {
+                CodeFragment codeFragment = CodeFragment.makeFragment(description, affectedClasses, affectedMethods,
+                        affectedModifiers, affectedAttributes, new Parameter[0], affectedInstructions);
+                detections.add(codeFragment);
+            }
         }
     }
 
