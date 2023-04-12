@@ -381,8 +381,8 @@ def create_method_dict(curr_method):
         "attributeCalls": [],  # Handled by Parser
     }
 
-    # Assign method calls to all instructions which call either an Exception or a method belonging to a class in the source code
-    # in the following format: <package_name>$<class_name>$<method_name>
+    # Assign method calls to all instructions which call either an Exception or a method
+    # belonging to a class in the source code in the following format: <package_name>$<class_name>$<method_name>
     # (this is to account for same class name, same method name, different package)
     assign_method_calls(curr_method_dict["instructions"], method_calls)
 
