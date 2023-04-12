@@ -1,4 +1,4 @@
-package com.CodeSmell.smell.MisplacedClassTest;
+package com.CodeSmell.smell;
 
 import com.CodeSmell.ProjectManager;
 import com.CodeSmell.parser.CodePropertyGraph;
@@ -22,11 +22,9 @@ public class MisplacedClassTest {
     }
 
     @Test
-    public void testMisplacedClass()
-    {
-        MisplacedClass mc =  new MisplacedClass("Misplaced Class", this.cpg);
-        while(!mc.getMisplacedClasses().isEmpty())
-        {
+    public void testMisplacedClass() {
+        MisplacedClass mc = new MisplacedClass("Misplaced Class", this.cpg);
+        while (!mc.getMisplacedClasses().isEmpty()) {
             System.out.println(mc.detectNext().classes[0] + " is Misplaced");
         }
 
