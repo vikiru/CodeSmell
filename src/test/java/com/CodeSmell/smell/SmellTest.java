@@ -25,17 +25,17 @@ import static com.CodeSmell.smell.Common.originalInterfaceMethods;
 
 import com.CodeSmell.stat.StatTracker;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SmellTest {
 
     private Parser p;
-    private CodePropertyGraph cpg;
-    private StatTracker stats;
+    private static CodePropertyGraph cpg;
 
-    @Before
-    public void before() {
-        this.cpg = ProjectManager.getCPG("testproject");
+    @BeforeClass
+    public static void before() {
+        cpg = ProjectManager.getCPG("testproject");
         initStatTracker(cpg);
     }
 
@@ -64,12 +64,12 @@ public class SmellTest {
     @Test
     public void TestISPViolation() {
         System.out.println("ISP Violation Test:");
-        ISPViolation smell = new ISPViolation(this.cpg);
+        ISPViolation smell = new ISPViolation(cpg);
         ArrayList<CodeFragment> detections = getDetections(smell);
         assertEquals(2, detections.size());
 
-        CPGClass c2 = findClassByName(this.cpg, "ISPClass.ISPClassTwo");
-        CPGClass c3 = findClassByName(this.cpg, "ISPClass.ISPClassThree");
+        CPGClass c2 = findClassByName(cpg, "ISPClass.ISPClassTwo");
+        CPGClass c3 = findClassByName(cpg, "ISPClass.ISPClassThree");
         assertNotNull(c2);
         assertNotNull(c3);
 
@@ -93,8 +93,9 @@ public class SmellTest {
 
     @Test
     public void TestLazyClass() {
-        LazyClass lc = new LazyClass(this.cpg);
-        lc.description();
-        lc.returnLazyClasses();
+        LazyClass lc = new LazyClass(cpg);
+        for (Smell.CodeFragment cf : lc.detections) {
+            System.out.println(cf.classes[0] + " is Lazy");
+        }
     }
 }
