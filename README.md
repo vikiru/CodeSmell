@@ -4,6 +4,12 @@
 
 A tool for detection and visualization of code smells for object-oriented languages.
 
+<p align="center">
+   <img src="https://user-images.githubusercontent.com/72267229/231621285-a35836f1-3135-45a5-b78f-f59e95df7a89.png">
+   <p align="center"> Fig. 1 System Diagram of the CodeSmell tool </p>
+   <p align="justify"> A diagram of the most important architectural components of the tool is shown above. In this package view, many components are omitted in order to keep the diagram readable and emphasize the important components. Java classes are shown in blue to differentiate them from components written in other languages. </p>
+</p>
+
 ## Authors
 
 - Golan Hassin
@@ -16,6 +22,7 @@ A tool for detection and visualization of code smells for object-oriented langua
 - [Chart of Each Member's Progress](https://github.com/users/vikiru/projects/2/insights/1)
 - [Chart of Each Milestone's Progress](https://github.com/users/vikiru/projects/2/insights/4)
 - [Documentation](#)
+- [3-min Demo Video of Project](https://youtu.be/jmKbGEKAe0I)
 - [Kanban Board](https://github.com/users/vikiru/projects/2)
 
 ## Prerequisites

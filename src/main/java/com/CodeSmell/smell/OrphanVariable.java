@@ -64,7 +64,6 @@ public class OrphanVariable extends Smell {
     protected static void detectAll(LinkedList<CodeFragment> detections) {
         List<ClassStat> filteredStats = returnFilteredClassStat();
         Modifier[] affectedModifiers = new Modifier[]{Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL};
-        StringBuilder sb = new StringBuilder();
         for (ClassStat classStat : filteredStats) {
             CPGClass parentClass = classStat.cpgClass;
             List<AttributeStat> attributeStats = new ArrayList<>(classStat.attributeStats.values());
@@ -74,12 +73,14 @@ public class OrphanVariable extends Smell {
             Attribute[] affectedAttributes = returnAffectedAttributes(filteredAttrStats);
             Method[] affectedMethods = returnAffectedMethods(filteredAttrStats);
             Instruction[] affectedInstructions = returnAffectedInstructions(affectedAttributes, affectedMethods);
-            sb.append(parentClass.name).append(" has a collection of unused constants that belong elsewhere.");
-            String description = sb.toString();
 
-            CodeFragment codeFragment = CodeFragment.makeFragment(description, affectedClasses, affectedMethods,
-                    affectedModifiers, affectedAttributes, new Parameter[0], affectedInstructions);
-            detections.add(codeFragment);
+            String description = parentClass.name + " has a collection of unused constants that belong elsewhere.";
+
+            if (affectedClasses.length > 1 && affectedAttributes.length > 0 && affectedMethods.length > 0) {
+                CodeFragment codeFragment = CodeFragment.makeFragment(description, affectedClasses, affectedMethods,
+                        affectedModifiers, affectedAttributes, new Parameter[0], affectedInstructions);
+                detections.add(codeFragment);
+            }
         }
     }
 
@@ -93,11 +94,14 @@ public class OrphanVariable extends Smell {
      * @return A boolean indicating if the class has constants or not
      */
     protected static boolean hasConstants(CPGClass cpgClass) {
+        List<String> primitiveTypeList = List.of(new String[]{"boolean", "byte", "char", "double",
+                "float", "int", "long", "short"});
         var constantCheck = cpgClass.getAttributes()
                 .stream()
                 .filter(attribute -> attribute.modifiers.contains(Modifier.PUBLIC) &&
                         attribute.modifiers.contains(Modifier.STATIC) &&
-                        attribute.modifiers.contains(Modifier.FINAL))
+                        attribute.modifiers.contains(Modifier.FINAL)
+                        && primitiveTypeList.contains(attribute.attributeType))
                 .collect(Collectors.toList());
         return !constantCheck.isEmpty();
     }

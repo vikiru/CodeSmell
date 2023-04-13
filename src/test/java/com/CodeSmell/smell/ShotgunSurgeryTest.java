@@ -13,15 +13,13 @@ import java.util.ArrayList;
 import static com.CodeSmell.smell.Common.initStatTracker;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-
-public class FeatureEnvyTest extends SmellTester{
-
+public class ShotgunSurgeryTest extends SmellTester{
 
     @Before
     public void before() {
         this.cpg = ProjectManager.getCPG("testproject");
         initStatTracker(cpg);
-        smell = new FeatureEnvy(this.cpg);
+        smell = new ShotgunSurgery(this.cpg);
         detections = getDetections(smell);
     }
 
@@ -34,27 +32,24 @@ public class FeatureEnvyTest extends SmellTester{
     }
     @Test
     public void testWorksAtAll(){
-        System.out.println("Feature Envy Test:");
+        System.out.println("Shotgun Surgery Test: ");
         System.out.println("   Number of detections: " + detections.size());
         assertNotEquals(0, detections.size());
     }
 
+    /**
+     * Detect if a basic shotgun surgery case is present.
+     *
+     * The basic case is a method that refers to the minimum number of other classes,
+     * and the minimum number of other methods, required to count as shotgun surgery.
+     */
     @Test
-    public void detectBasicEnvy(){
-        Smell.CodeFragment fragment = this.hasClass("FeatureEnvyer");
+    public void detectBasicShotgunSurgery(){
+        Smell.CodeFragment fragment = this.hasMethod("ShotgunSurgeryClass", "basicShotgunMethod");
         assertTrue(fragment != null);
         if(fragment != null){
             System.out.println(fragment.description);
         }
     }
-    /*
-    @Test
-    public void detectOneMethodEnvy(){
-        Smell.CodeFragment fragment = this.hasClass("EnvierOneMethod");
-        assertTrue(fragment != null);
-        if(fragment != null){
-            System.out.println(fragment.description);
-        }
-    }*/
 
 }

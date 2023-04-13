@@ -44,7 +44,6 @@ public class RefusedBequest extends Smell {
      * @param detections
      */
     protected static void detectAll(LinkedList<CodeFragment> detections) {
-        StringBuilder sb = new StringBuilder();
         Map<CPGClass, List<CPGClass>> superToSubClasses = returnSuperToSubClasses(Common.stats.distinctRelations.get(ClassRelation.RelationshipType.INHERITANCE));
         for (Map.Entry<CPGClass, List<CPGClass>> entry : superToSubClasses.entrySet()) {
             CPGClass superClass = entry.getKey();
@@ -53,8 +52,7 @@ public class RefusedBequest extends Smell {
                 CPGClass[] affectedClasses = new CPGClass[]{subClass, superClass};
                 Method[] affectedMethods = returnAffectedMethods(subClass, superClass);
                 Attribute[] affectedAttributes = returnAffectedAttributes(subClass, superClass);
-                sb.append(subClass.name).append(" does not make full use of its inherited properties from: ").append(superClass.name);
-                String description = sb.toString();
+                String description = subClass.name + " does not make full use of its inherited properties from: " + superClass.name;
                 CodeFragment codeFragment = CodeFragment.makeFragment(description, affectedClasses, affectedMethods,
                         new Modifier[0], affectedAttributes, new Parameter[0], new Instruction[0]);
                 detections.add(codeFragment);
@@ -129,11 +127,16 @@ public class RefusedBequest extends Smell {
 
     private static Method[] returnAffectedMethods(CPGClass subClass, CPGClass superClass) {
         List<Method> affectedMethods = new ArrayList<>();
+        List<Method> subMethods = subClass.getMethods();
         List<Method> superMethods = superClass.getMethods();
         Map<Method, MethodStat> methodStats = Common.stats.methodStats;
         for (Method method : superMethods) {
             MethodStat methodStat = methodStats.get(method);
-            if (methodStat.classesWhichCallMethod.get(subClass) == 0) {
+            String methodName = method.name;
+            var subHasMethod = subMethods.stream()
+                    .filter(m -> m.getParent().equals(subClass) && m.name.equals(methodName))
+                    .collect(Collectors.toList());
+            if (methodStat.classesWhichCallMethod.get(subClass) == 0 && subHasMethod.isEmpty()) {
                 affectedMethods.add(method);
             }
         }

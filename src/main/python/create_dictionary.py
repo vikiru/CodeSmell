@@ -73,7 +73,7 @@ def clean_method_full_name(method_full_name):
                 str_to_return = """{start}{new_char}{end}""".format(
                     start=str_to_return[:index_sep],
                     new_char=str_to_return[index_sep].replace(DOT_SEP, NESTED_SEP),
-                    end=str_to_return[index_sep + 1 : len(str_to_return)],
+                    end=str_to_return[index_sep + 1: len(str_to_return)],
                 )
     return str_to_return
 
@@ -116,7 +116,7 @@ def return_attribute_package_name(attribute_full_name: str):
         package_name = """{start}{new_char}{end}""".format(
             start=package_name[:index_sep],
             new_char=package_name[index_sep].replace(DOT_SEP, NESTED_SEP),
-            end=package_name[index_sep + 1 : len(package_name)],
+            end=package_name[index_sep + 1: len(package_name)],
         )
         splitted = package_name.split(NESTED_SEP)
         if splitted:
@@ -173,11 +173,11 @@ def create_attribute_dict(curr_attribute):
             NESTED_SEP, DOT_SEP
         )
         attribute_type = attribute_type_full_name[
-            index + 1 : len(attribute_type_full_name)
-        ]
+                         index + 1: len(attribute_type_full_name)
+                         ]
     index_nested = attribute_type.rfind(NESTED_SEP)
     if index_nested != -1:
-        attribute_type = attribute_type[index_nested + 1 : len(attribute_type)]
+        attribute_type = attribute_type[index_nested + 1: len(attribute_type)]
 
     curr_attribute_dict = {
         NAME: attribute_name,
@@ -243,19 +243,19 @@ def assign_method_calls(method_ins, method_calls):
                 class_name = split_name[0]
                 method_name = split_name[1]
 
+            method_name = method_name.replace(INIT_METHOD, class_name)
             filtered_calls = [
                 ins
                 for ins in method_ins
                 if ins["lineNumber"] == value
-                and ins["methodCall"] == method_name
-                and NESTED_SEP not in ins["methodCall"]
+                   and ins["methodCall"] == method_name
+                   and NESTED_SEP not in ins["methodCall"]
             ]
-            method_name = method_name.replace(INIT_METHOD, class_name)
             method_names.add(method_name)
             if filtered_calls:
                 first_call = filtered_calls[0]
                 method_call = (
-                    package_name + NESTED_SEP + class_name + NESTED_SEP + method_name
+                        package_name + NESTED_SEP + class_name + NESTED_SEP + method_name
                 )
                 first_call["methodCall"] = method_call
 
@@ -346,7 +346,7 @@ def create_method_dict(curr_method):
         # Handle all Collection types (Set, HashMap, ArrayList, etc)
         if ">" in method_body:
             index = method_body.find(">")
-            return_type = method_body[0 : index + 1]
+            return_type = method_body[0: index + 1]
         if "(" in return_type or not return_type:
             return_type = ""
         if return_type in method_body:
@@ -381,40 +381,12 @@ def create_method_dict(curr_method):
         "attributeCalls": [],  # Handled by Parser
     }
 
-    # Assign method calls to all instructions which call either an Exception or a method belonging to a class in the source code
-    # in the following format: <package_name>$<class_name>$<method_name>
+    # Assign method calls to all instructions which call either an Exception or a method
+    # belonging to a class in the source code in the following format: <package_name>$<class_name>$<method_name>
     # (this is to account for same class name, same method name, different package)
     assign_method_calls(curr_method_dict["instructions"], method_calls)
 
     return curr_method_dict
-
-
-"""
-# TODO: Add to CPGClass (removes 5 parameters from CPGClass which it does not need)
-# Will most probably be a final 1 element array similar to parent for attr/method.
-def create_file_dict(curr_file_contents):
-
-    curr_file_dict = {
-        "filePath": "",
-        "fileLength": 0,
-        "importStatements": [],
-        "fileLength": 0,
-        "nonEmptyLines": 0,
-        "emptyLines": 0,
-    }
-    return curr_file_dict
-"""
-
-"""
-#TODO: Add to File, imported classes, attrs, methods will be private. importLine can be public final (implementation idea ready)
-def create_import_dict(curr_import_statement):
-    curr_import_dict = {
-        "importLine": "",
-        "importedClasses": [],
-        "importedAttributes": [],
-        "importedMethods": []
-    }
-"""
 
 
 def create_class_dict(curr_class):
@@ -589,7 +561,7 @@ def clean_up_external_classes(source_code_json):
             class_name
             for class_name in class_dict["_4"]
             if class_name.replace(root_pkg, "") == class_name
-            and "java" not in class_name
+               and "java" not in class_name
         ]
         if not filtered_inherits:
             class_dict["_4"] = []

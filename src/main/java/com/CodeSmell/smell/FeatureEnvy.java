@@ -1,14 +1,14 @@
 package com.CodeSmell.smell;
 
 import com.CodeSmell.parser.*;
+import com.CodeSmell.stat.Helper;
+import com.CodeSmell.stat.MethodStat;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class FeatureEnvy extends Smell {
+
+    private static final int ENVY_THRESHOLD = 3;
     public LinkedList<CodeFragment> detections;
     protected FeatureEnvy( CodePropertyGraph cpg) {
         super("Feature Envy", cpg);
@@ -47,47 +47,66 @@ public class FeatureEnvy extends Smell {
                     attrList.add(a);
                 }
                 for(CPGClass.Method m : method.getMethodCalls()){
-                    if(!m.returnType.equals("")) //void methods do not count
+
+                    if(!m.returnType.equals("") && !m.name.equals("main")) //void and main methods do not count
                         accessList.add(m);
                 }
             }
         }
-
 
         /* For each CPGClass, tally up a list of how many times it accesses:
         - any attribute from a given class, or
         - any method that returns something from a given class
         Then compare the tally for an external class for the tally for the class itself.
          */
-        for(Map.Entry<CPGClass, ArrayList<CPGClass.Method>> classEntry : methodAccesses.entrySet()){
-            Map<CPGClass, Integer> classCallCount = new HashMap<>();
-            for(CPGClass.Method methodEntry : classEntry.getValue()){
-                if(classCallCount.containsKey(methodEntry.getParent())){
-                    classCallCount.put(methodEntry.getParent(), classCallCount.get(methodEntry.getParent()) + 1);
-                }else{
-                    classCallCount.put(methodEntry.getParent(), 1);
+        for(Map.Entry<CPGClass, ArrayList<CPGClass.Method>> classEntry : methodAccesses.entrySet()) {
+
+            if (!classEntry.getKey().classType.equals("interface")){
+                Map<String, Integer> classCallCount = new HashMap<>();
+
+            for (CPGClass.Method methodEntry : classEntry.getValue()) {
+
+                int methodCallCount = 1;
+
+                if (classCallCount.containsKey(methodEntry.getParent().classFullName)) {
+                    classCallCount.put(methodEntry.getParent().classFullName, classCallCount.get(methodEntry.getParent().classFullName) + methodCallCount);
+                } else {
+                    classCallCount.put(methodEntry.getParent().classFullName, methodCallCount);
                 }
             }
-            for(CPGClass.Attribute attrEntry : attrAccesses.get(classEntry.getKey())){
-                if(classCallCount.containsKey(attrEntry.getParent())){
-                    classCallCount.put(attrEntry.getParent(), classCallCount.get(attrEntry.getParent()) + 1);
+            for (CPGClass.Attribute attrEntry : attrAccesses.get(classEntry.getKey())) {
+                int attrCallCount = 1;
+                String targetClass;
+                if(classCallCount.containsKey(attrEntry.attributeType)){
+                    targetClass = attrEntry.attributeType;
                 }else{
-                    classCallCount.put(attrEntry.getParent(), 1);
+                    targetClass = attrEntry.getParent().classFullName;
+                }
+
+                if (classCallCount.containsKey(targetClass)){
+                    classCallCount.put(targetClass, classCallCount.get(targetClass) + attrCallCount);
+                } else {
+                    classCallCount.put(targetClass, attrCallCount);
                 }
             }
             //figure out how many calls of its own fields the class has
             int ownCallCount;
-            if(classCallCount.containsKey(classEntry.getKey()))
-                ownCallCount = classCallCount.get(classEntry.getKey());
+            if (classCallCount.containsKey(classEntry.getKey().classFullName))
+                ownCallCount = classCallCount.get(classEntry.getKey().classFullName);
             else
                 ownCallCount = 0;
-
-            for(Map.Entry<CPGClass, Integer> countEntry : classCallCount.entrySet()){
-                if(countEntry.getValue() > ownCallCount){
-                    this.addSmell(classEntry.getKey(), countEntry.getKey(), countEntry.getValue(), ownCallCount);
+            for (Map.Entry<String, Integer> countEntry : classCallCount.entrySet()) {
+                if (countEntry.getValue() > ownCallCount && countEntry.getValue() > ENVY_THRESHOLD) {
+                    CPGClass theClass = null;
+                    for(CPGClass c : cpg.getClasses()){
+                        if(c.classFullName == countEntry.getKey())
+                            theClass = c;
+                    }
+                    this.addSmell(classEntry.getKey(), theClass, countEntry.getValue(), ownCallCount);
                 }
             }
 
+        }
         }
 
     }

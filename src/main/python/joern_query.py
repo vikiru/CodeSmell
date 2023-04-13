@@ -32,7 +32,7 @@ def clean_json(result: str):
     if '"' in result:
         index = result.index('"')
         try:
-            result_obj = json.loads(json.loads(result[index : len(result)]))
+            result_obj = json.loads(json.loads(result[index: len(result)]))
         except JSONDecodeError as e:
             debug_logger.debug("Provided result[stdout]: %s", result)
             debug_logger.debug("Type should be str: %s", type(result))
@@ -144,11 +144,11 @@ def construct_query(class_bundle: dict):
     # Determine if method instructions should be retrieved or not
     method_ins_retrieve = ""
     if (
-        class_ast_size < CLASS_AST_SIZE_THRESHOLD
-        and method_ast_size < METHOD_AST_SIZE_THRESHOLD
+            class_ast_size < CLASS_AST_SIZE_THRESHOLD
+            and method_ast_size < METHOD_AST_SIZE_THRESHOLD
     ):
-        method_ins_retrieve = """, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") && 
-        !node.code.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, 
+        method_ins_retrieve = """, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
+        || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, 
         node.lineNumber)), node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber))"""
 
     # Determine if methods should be retrieved or not
@@ -222,8 +222,7 @@ def retrieve_all_method_instruction(class_full_name: str, class_dict: dict):
     class_name = return_name_without_package(class_full_name)
     all_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").
     astChildren.isMethod.isExternal(false).filter(node => node.lineNumber != None).map(node => 
-    (node.fullName, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
-    && !node.name.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)), 
+    (node.fullName, node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)), 
     node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
         class_full_name=class_full_name
     )
@@ -258,7 +257,7 @@ def retrieve_all_method_instruction(class_full_name: str, class_dict: dict):
 
 
 def retrieve_single_method_instruction(
-    class_full_name: str, method_name: str, method: dict
+        class_full_name: str, method_name: str, method: dict
 ):
     """Given the full name of a class and the name of a method, retrieve all of its method instructions."""
 
@@ -266,8 +265,7 @@ def retrieve_single_method_instruction(
     class_name = return_name_without_package(class_full_name)
 
     method_instruction_query = """cpg.typeDecl.fullName("{class_full_name}").astChildren.isMethod.name("{method_name}").map(node => 
-    (node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") 
-    && !node.name.contains("<") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)),  
+    (node.ast.isCall.filter(node => !node.methodFullName.contains("<operator>") || node.methodFullName.contains("Exception")).l.map(node => (node.methodFullName, node.lineNumber)),  
     node.ast.filter(node => node.lineNumber != None).l.map(node => (node.code, node.label, node.lineNumber)))).toJson""".format(
         class_full_name=class_full_name, method_name=method_name
     )
@@ -325,7 +323,7 @@ def handle_multiple_instructions(class_full_name: str, class_methods: list):
 
 def append_all_instructions(source_code_json):
     """Iterate through all classes within the directory that still need instructions and append
-    the approriate instructions to the appropriate methods."""
+    the appropriate instructions to the appropriate methods."""
 
     # Ignore interfaces and classes that already have instructions
     class_ins_reqs = [
@@ -351,8 +349,8 @@ def append_all_instructions(source_code_json):
         if "_8" in class_dict:
             class_methods = class_dict["_8"]
             if (
-                class_ast_size <= CLASS_AST_SIZE_THRESHOLD
-                and method_lines <= METHOD_LINES_THRESHOLD
+                    class_ast_size <= CLASS_AST_SIZE_THRESHOLD
+                    and method_lines <= METHOD_LINES_THRESHOLD
             ):
                 retrieve_all_method_instruction(class_full_name, class_dict)
             else:
@@ -367,8 +365,8 @@ def handle_large_project(class_bundles: list):
     following a Shortest Task First approach.
 
     Classes without instructions will have their instructions retrieved either all at once or one by one depending
-    on the ast size of the classs. Methods are additionally sorted in ascending order based on total length prior to instruction retrieval
-    process.
+    on the ast size of the class. Methods are additionally sorted in ascending order based on total length prior to
+    instruction retrieval process.
     """
 
     joern_json = {CLASSES: []}
@@ -539,7 +537,7 @@ if __name__ == "__main__":
 
     if "Windows" in platform.platform():
         index = project_dir.find(COLON_SEP)
-        win_drive = project_dir[0 : index + 1]
+        win_drive = project_dir[0: index + 1]
         project_dir = project_dir.replace(win_drive, win_drive.upper()).replace(
             "\\", "//"
         )
