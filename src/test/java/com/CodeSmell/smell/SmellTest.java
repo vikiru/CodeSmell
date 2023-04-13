@@ -56,7 +56,7 @@ public class SmellTest {
         GodClass gc = new GodClass(cpg, -1, -1, 0, -1);
         ArrayList<CodeFragment> detections = getDetections(gc);
         assertEquals(0, detections.size());
-        gc = new GodClass(cpg, -1, 0.3, 0, -1);
+        gc = new GodClass(cpg, -1, 0.2, 0, -1);
         detections = getDetections(gc);
         assertEquals(1, detections.size());
     }
