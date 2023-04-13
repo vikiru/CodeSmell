@@ -18,12 +18,11 @@ A tool for detection and visualization of code smells for object-oriented langua
 - Martin Rivard
 
 ## Relevant Links
-
-- [Chart of Each Member's Progress](https://github.com/users/vikiru/projects/2/insights/1)
-- [Chart of Each Milestone's Progress](https://github.com/users/vikiru/projects/2/insights/4)
+- [Wiki](https://github.com/vikiru/CodeSmell/wiki)
 - [Documentation](#)
 - [3-min Demo Video of Project](https://youtu.be/jmKbGEKAe0I)
 - [Kanban Board](https://github.com/users/vikiru/projects/2)
+- [Table of Tasks](https://github.com/users/vikiru/projects/2/views/5)
 
 ## Prerequisites
 
