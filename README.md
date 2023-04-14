@@ -19,7 +19,7 @@ A tool for detection and visualization of code smells for object-oriented langua
 
 ## Relevant Links
 - [Wiki](https://github.com/vikiru/CodeSmell/wiki)
-- [Documentation](#)
+- [Documentation](https://vikiru.github.io/CodeSmell/jfx/module-summary.html)
 - [3-min Demo Video of Project](https://youtu.be/jmKbGEKAe0I)
 - [Kanban Board](https://github.com/users/vikiru/projects/2)
 - [Table of Tasks](https://github.com/users/vikiru/projects/2/views/5)
