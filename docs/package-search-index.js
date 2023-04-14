@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"jfx","l":"com.CodeSmell"},{"m":"jfx","l":"com.CodeSmell.model"},{"m":"jfx","l":"com.CodeSmell.parser"},{"m":"jfx","l":"com.CodeSmell.smell"},{"m":"jfx","l":"com.CodeSmell.stat"},{"m":"jfx","l":"com.CodeSmell.view"}];updateSearchResults();
